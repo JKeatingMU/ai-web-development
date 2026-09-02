@@ -205,9 +205,68 @@
   body.light-theme #lo-pop-close:hover { color: #2d2520; border-color: #2d2520; }
   body.light-theme .lo-pop-item { color: #4a4540; border-bottom-color: #e8e1d8; }
   body.light-theme .quick-links a { background: #faf8f4; }
+
+  /* ── Accessibility ── */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 600;
+    background: var(--accent);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 0 0 6px 0;
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  a:focus-visible, button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Page-level text scaling — shares the svl_textsize preference with the decks */
+  body.text-lg { zoom: 1.15; }
+  body.text-xl { zoom: 1.30; }
+
+  #a11y-controls { position: fixed; top: 18px; right: 22px; display: flex; align-items: center; gap: 8px; z-index: 500; }
+  #a11y-controls #theme-toggle { position: static; }
+  #textsize-ctrl {
+    display: flex; align-items: center; gap: 4px; height: 36px; padding: 0 8px;
+    background: #21262d; border: 1px solid #58a6ff; border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  #textsize-ctrl button {
+    background: none; border: none; color: #c9d1d9; font: 700 13px inherit;
+    cursor: pointer; padding: 2px 4px; min-width: 22px; line-height: 1;
+  }
+  #textsize-ctrl button:hover:not(:disabled) { color: #58a6ff; }
+  #textsize-ctrl button:disabled { opacity: .35; cursor: default; }
+  #textsize-label { font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; color: #8b949e; min-width: 30px; text-align: center; }
+  body.light-theme #textsize-ctrl { background: #faf8f4; border-color: #1d6fe8; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  body.light-theme #textsize-ctrl button { color: #2d2520; }
+  body.light-theme #textsize-ctrl button:hover:not(:disabled) { color: #1d6fe8; }
+  body.light-theme #textsize-label { color: #6e6660; }
+
+  .sr-only {
+    position: absolute !important; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
+    white-space: nowrap; border: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      transition-duration: .001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#maincontent">Skip to course content</a>
 <div class="page">
 
   <header class="site-header">
@@ -216,7 +275,7 @@
     <p class="tagline">Build real things. Read what the AI wrote. Understand every line.</p>
   </header>
 
-  <nav class="quick-links">
+  <nav class="quick-links" aria-label="Course pages">
     <a href="setup-guide.html">Setup Guide</a>
     <a href="resources.html">Resources</a>
     <a href="crud-demo/">Demo App</a>
@@ -265,7 +324,7 @@
       <div class="guide-col">
         <h3>Accessibility &amp; adaptability</h3>
         <ul>
-          <li><strong>Adjustable text size</strong> <span>— <kbd>A&minus;</kbd> / <kbd>A+</kbd> in the toolbar scales every slide up to 150%, and the layout reflows so nothing is cut off</span></li>
+          <li><strong>Adjustable text size</strong> <span>— <kbd>A&minus;</kbd> / <kbd>A+</kbd> (top-right, on this page and in every deck) enlarges the text and the layout reflows so nothing is cut off; your choice is remembered</span></li>
           <li><strong>Light and dark themes</strong></li>
           <li><strong>Full keyboard control</strong> <span>— <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>Space</kbd> to move, <kbd>Home</kbd> / <kbd>End</kbd> to jump, <kbd>F</kbd> for fullscreen, <kbd>Tab</kbd> to every control</span></li>
           <li><strong>Screen-reader support</strong> <span>— each slide is announced with its position and heading, with a skip link straight to the content</span></li>
@@ -276,6 +335,8 @@
       </div>
     </div>
   </section>
+
+  <main id="maincontent">
 
   <div class="legend">
     <span class="legend-item"><span class="badge-avail">&#10003;</span> Deck available</span>
@@ -578,6 +639,8 @@
     </div>
   </div>
 
+  </main>
+
   <footer class="site-footer">
     Built with AI &middot; Maynooth University
   </footer>
@@ -586,21 +649,23 @@
 
 <!-- LO Popover -->
 <div id="lo-backdrop" onclick="closeLOPopover()"></div>
-<div id="lo-popover">
+<div id="lo-popover" role="dialog" aria-modal="true">
   <div id="lo-pop-header">
     <div id="lo-pop-meta">
       <span id="lo-pop-code"></span>
       <span id="lo-pop-title"></span>
     </div>
-    <button id="lo-pop-close" onclick="closeLOPopover()" title="Close">&times;</button>
+    <button id="lo-pop-close" onclick="closeLOPopover()" aria-label="Close learning objectives">&times;</button>
   </div>
   <div id="lo-pop-intro">By the end of this module, you will be able to:</div>
   <div id="lo-pop-body"></div>
 </div>
 
 <script>
-  // Apply saved theme immediately before first paint
+  // Apply saved theme + text size immediately before first paint
   if (localStorage.getItem('svl_theme') === 'light') document.body.classList.add('light-theme');
+  var _ts = localStorage.getItem('svl_textsize');
+  if (_ts === 'lg' || _ts === 'xl') document.body.classList.add('text-' + _ts);
 var MODULE_LOS = {
   'S0': { title: 'Start Here', color: '#56d4e4', file: 'start-here', los: [
     'Describe the AI-assisted development loop and identify where reading and understanding fit within it',
@@ -805,9 +870,12 @@ var MODULE_LOS = {
   ]}
 };
 
+var _loTrigger = null;
+
 function showLOPopover(code) {
   var mod = MODULE_LOS[code];
   if (!mod) return;
+  _loTrigger = document.activeElement;
   document.getElementById('lo-pop-code').textContent = code;
   document.getElementById('lo-pop-code').style.color = mod.color;
   document.getElementById('lo-pop-title').textContent = mod.title;
@@ -815,16 +883,24 @@ function showLOPopover(code) {
     return '<div class="lo-pop-item"><span class="lo-pop-num">' +
       String(i + 1).padStart(2, '0') + '</span><span>' + lo + '</span></div>';
   }).join('');
-  document.getElementById('lo-popover').classList.add('active');
+  var pop = document.getElementById('lo-popover');
+  pop.classList.add('active');
   document.getElementById('lo-backdrop').classList.add('active');
+  pop.setAttribute('aria-label', code + ' — ' + mod.title + ': learning objectives');
+  document.getElementById('lo-pop-close').focus();
 }
 
 function closeLOPopover() {
   document.getElementById('lo-popover').classList.remove('active');
   document.getElementById('lo-backdrop').classList.remove('active');
+  if (_loTrigger && typeof _loTrigger.focus === 'function') _loTrigger.focus();
+  _loTrigger = null;
 }
 
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLOPopover(); });
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('lo-popover').classList.contains('active')) closeLOPopover();
+});
 
 // Auto-inject progress bars + ⓘ buttons into all available module cards
 document.addEventListener('DOMContentLoaded', function() {
@@ -873,6 +949,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var loBtn = document.createElement('button');
     loBtn.className = 'card-lo-btn';
     loBtn.title = 'View learning objectives';
+    loBtn.setAttribute('aria-label', 'Learning objectives for ' + code + ' ' + mod.title);
+    loBtn.setAttribute('aria-haspopup', 'dialog');
     loBtn.textContent = '\u24d8';
     loBtn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -894,20 +972,68 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
-  // ── Theme toggle button ────────────────────────────────────
+  // ── Accessibility controls: text size + theme ──────────────
+  var a11yBar = document.createElement('div');
+  a11yBar.id = 'a11y-controls';
+
+  // Text size \u2014 shares the svl_textsize preference with the decks
+  var LEVELS = ['', 'lg', 'xl'];
+  var PCT = { '': '100%', 'lg': '115%', 'xl': '130%' };
+  function tsIndex() {
+    if (document.body.classList.contains('text-xl')) return 2;
+    if (document.body.classList.contains('text-lg')) return 1;
+    return 0;
+  }
+  var tsWrap = document.createElement('div');
+  tsWrap.id = 'textsize-ctrl';
+  tsWrap.setAttribute('role', 'group');
+  tsWrap.setAttribute('aria-label', 'Text size');
+  var tsMinus = document.createElement('button');
+  tsMinus.type = 'button'; tsMinus.textContent = 'A\u2212';
+  tsMinus.setAttribute('aria-label', 'Decrease text size');
+  var tsLabel = document.createElement('span');
+  tsLabel.id = 'textsize-label'; tsLabel.setAttribute('aria-hidden', 'true');
+  var tsPlus = document.createElement('button');
+  tsPlus.type = 'button'; tsPlus.textContent = 'A+';
+  tsPlus.setAttribute('aria-label', 'Increase text size');
+  var tsLive = document.createElement('span');
+  tsLive.className = 'sr-only'; tsLive.setAttribute('aria-live', 'polite');
+  function tsApply(i) {
+    i = Math.max(0, Math.min(2, i));
+    document.body.classList.remove('text-lg', 'text-xl');
+    if (LEVELS[i]) document.body.classList.add('text-' + LEVELS[i]);
+    try { localStorage.setItem('svl_textsize', LEVELS[i]); } catch (e) {}
+    tsMinus.disabled = (i === 0);
+    tsPlus.disabled = (i === 2);
+    tsLabel.textContent = PCT[LEVELS[i]];
+    tsLive.textContent = 'Text size ' + PCT[LEVELS[i]];
+  }
+  tsMinus.addEventListener('click', function() { tsApply(tsIndex() - 1); });
+  tsPlus.addEventListener('click', function() { tsApply(tsIndex() + 1); });
+  tsWrap.appendChild(tsMinus); tsWrap.appendChild(tsLabel);
+  tsWrap.appendChild(tsPlus); tsWrap.appendChild(tsLive);
+
+  // Theme toggle
   var themeBtn = document.createElement('button');
   themeBtn.id = 'theme-toggle';
   themeBtn.title = 'Toggle light / dark theme';
   function syncThemeBtn() {
-    themeBtn.textContent = document.body.classList.contains('light-theme') ? '\u263D' : '\u2600';
+    var light = document.body.classList.contains('light-theme');
+    themeBtn.textContent = light ? '\u263D' : '\u2600';
+    themeBtn.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+    themeBtn.setAttribute('aria-pressed', String(light));
   }
-  syncThemeBtn();
   themeBtn.addEventListener('click', function() {
     var isLight = document.body.classList.toggle('light-theme');
     localStorage.setItem('svl_theme', isLight ? 'light' : 'dark');
     syncThemeBtn();
   });
-  document.body.appendChild(themeBtn);
+
+  a11yBar.appendChild(tsWrap);
+  a11yBar.appendChild(themeBtn);
+  document.body.appendChild(a11yBar);
+  tsApply(tsIndex());
+  syncThemeBtn();
 </script>
 </body>
 </html>

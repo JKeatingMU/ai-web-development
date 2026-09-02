@@ -1572,14 +1572,16 @@ body.text-xl .slide.active {
 }
 body.text-xl .slide .cols { flex-direction: column; }
 
+/* text-lg ≈ 115%, text-xl ≈ 130% of the standard deck sizes;
+   labels in initTextSize() and on index.html match these ratios. */
 body.text-lg .slide-label   { font-size: 13px; }
-body.text-lg .slide h1      { font-size: 48px; }
-body.text-lg .slide h2      { font-size: 35px; }
-body.text-lg .slide h3      { font-size: 22px; }
-body.text-lg .slide .subtitle { font-size: 23px; }
+body.text-lg .slide h1      { font-size: 46px; }
+body.text-lg .slide h2      { font-size: 33px; }
+body.text-lg .slide h3      { font-size: 21px; }
+body.text-lg .slide .subtitle { font-size: 22px; }
 body.text-lg .slide p,
-body.text-lg .slide li      { font-size: 18px; }
-body.text-lg .slide .callout { font-size: 17px; }
+body.text-lg .slide li      { font-size: 17px; }
+body.text-lg .slide .callout { font-size: 16px; }
 body.text-lg .slide table,
 body.text-lg .slide th,
 body.text-lg .slide td      { font-size: 15px; }
@@ -1587,18 +1589,18 @@ body.text-lg .slide code    { font-size: 13px; }
 body.text-lg .slide .terminal-body { font-size: 14px; }
 
 body.text-xl .slide-label   { font-size: 14px; }
-body.text-xl .slide h1      { font-size: 56px; }
-body.text-xl .slide h2      { font-size: 41px; }
-body.text-xl .slide h3      { font-size: 25px; }
-body.text-xl .slide .subtitle { font-size: 27px; }
+body.text-xl .slide h1      { font-size: 52px; }
+body.text-xl .slide h2      { font-size: 38px; }
+body.text-xl .slide h3      { font-size: 23px; }
+body.text-xl .slide .subtitle { font-size: 25px; }
 body.text-xl .slide p,
-body.text-xl .slide li      { font-size: 21px; }
-body.text-xl .slide .callout { font-size: 20px; }
+body.text-xl .slide li      { font-size: 20px; }
+body.text-xl .slide .callout { font-size: 18px; }
 body.text-xl .slide table,
 body.text-xl .slide th,
 body.text-xl .slide td      { font-size: 17px; }
-body.text-xl .slide code    { font-size: 14px; }
-body.text-xl .slide .terminal-body { font-size: 15px; }
+body.text-xl .slide code    { font-size: 15px; }
+body.text-xl .slide .terminal-body { font-size: 16px; }
 
 /* ── Reduced motion ───────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

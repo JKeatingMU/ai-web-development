@@ -2103,7 +2103,7 @@
      enlarges the shared slide selectors and lets slides scroll.   */
   function initTextSize() {
     var LEVELS = ['', 'lg', 'xl'];
-    var LABELS = { '': '100%', 'lg': '125%', 'xl': '150%' };
+    var LABELS = { '': '100%', 'lg': '115%', 'xl': '130%' };
 
     function current() {
       if (document.body.classList.contains('text-xl')) return 2;
