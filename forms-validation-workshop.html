@@ -113,7 +113,6 @@
   #index-link:hover { color: var(--accent); border-color: var(--accent); }
 </style>
 <link rel="stylesheet" href="deck-extras.css">
-<script src="forms-validation-workshop.scripts.js"></script>
 </head>
 <body>
 <div id="deck">
@@ -403,6 +402,9 @@
 </div>
 
 <!-- Slide 8 — TypeScript Form Types -->
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track C · Frontend</div>
   <h2>TypeScript Form Event Types</h2>
@@ -555,6 +557,9 @@
 </div>
 
 <!-- Slide 13 — Using the Form in a Page -->
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track C · Frontend</div>
   <h2>Using the Form in a Page Component</h2>
@@ -645,7 +650,7 @@
 </div><!-- #deck -->
 
 <div id="nav">
-  <span id="counter">1 / 15</span>
+  <span id="counter">1 / 17</span>
   <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
   <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
 </div>
@@ -687,63 +692,55 @@ window.DECK_ASSESSMENTS = [
   }
 ];
 window.DECK_QUESTIONS = [
-  {
-    id: 'q1', type: 'mcq',
-    question: 'What is the key difference between a controlled and an uncontrolled input in React?',
+  { checkpoint: 1, type: 'mcq',
+    q: 'What is the key difference between a controlled and an uncontrolled input in React?',
     options: [
       'Controlled inputs use a ref; uncontrolled inputs use state',
       'Controlled inputs have their value managed by React state; uncontrolled inputs have their value managed by the DOM',
       'Controlled inputs require TypeScript; uncontrolled inputs do not',
       'Controlled inputs cannot be used inside a form element'
     ],
-    answer: 1
-  },
-  {
-    id: 'q2', type: 'mcq',
-    question: 'In the generic onChange handler pattern, what attribute on each input element determines which state field gets updated?',
+    correct: 1,
+    explanation: 'A controlled input renders value={state} and updates that state in onChange, so React is the single source of truth. An uncontrolled input lets the DOM hold the value and you read it with a ref.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'In the generic onChange handler pattern, which attribute on each input decides which state field gets updated?',
     options: ['id', 'value', 'name', 'type'],
-    answer: 2
-  },
-  {
-    id: 'q3', type: 'mcq',
-    question: 'Why must setLoading(false) be placed in a finally block rather than at the end of the try block?',
+    correct: 2,
+    explanation: 'The handler reads e.target.name and uses it as the key: setForm(f => ({ ...f, [e.target.name]: e.target.value })). One handler serves every field.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'Why must setLoading(false) go in a finally block rather than at the end of the try block?',
     options: [
       'finally runs before catch, ensuring faster re-enabling',
       'try blocks do not execute when an async function is used',
       'If the API call throws, the try block exits early and setLoading(false) would never run',
       'React requires finally for all async state updates'
     ],
-    answer: 2
-  },
-  {
-    id: 'q4', type: 'mcq',
-    question: 'Which HTML attribute links an input to its associated error message for screen readers?',
+    correct: 2,
+    explanation: 'On a thrown error control jumps straight to catch, skipping the rest of try. finally always runs, so the button is always re-enabled — success or failure.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'Which HTML attribute links an input to its associated error message for screen readers?',
     options: ['aria-label', 'aria-describedby', 'aria-live', 'aria-required'],
-    answer: 1
-  },
-  {
-    id: 'q5', type: 'self',
-    question: 'A checkbox input uses e.target.checked instead of e.target.value. Why? What would happen if you used e.target.value for a checkbox?'
-  },
-  {
-    id: 'q6', type: 'self',
-    question: 'Explain the validate-on-submit-first, then-on-change hybrid pattern. Why is this preferable to validating on onChange from the start?'
-  },
-  {
-    id: 'q7', type: 'mcq',
-    question: 'What does the useDebounce hook\'s cleanup function (returning clearTimeout) actually prevent?',
+    correct: 1,
+    explanation: 'aria-describedby points at the id of the element holding the error text, so a screen reader announces the error when the field gets focus.' },
+  { checkpoint: 2, type: 'mcq',
+    q: "What does the useDebounce hook's cleanup function (returning clearTimeout) actually prevent?",
     options: [
       'It prevents the state from being set after the component unmounts',
       'It cancels the pending timer when the value changes again before the delay expires, so only the final timer fires',
       'It clears the input field when the user stops typing',
       'It resets the debounced value to an empty string on unmount'
     ],
-    answer: 1
-  },
-  {
-    id: 'q8', type: 'self',
-    question: 'The key={refresh} trick on the BookList component causes it to remount when refresh increments. What is the downside of this approach compared to lifting the book list state up to the parent?'
-  }
+    correct: 1,
+    explanation: 'Every keystroke re-runs the effect; the cleanup cancels the previous timer before starting a new one, so only the last keystroke after the quiet period actually fires.' },
+  { checkpoint: 1, type: 'self',
+    q: 'A checkbox uses e.target.checked instead of e.target.value. Why? What breaks if you use e.target.value for a checkbox?',
+    model: 'A checkbox represents a boolean, and checked is that boolean; value is a fixed string ("on" by default) that does not change when you tick or untick. Reading value would store the same string in both states, so the box would never reflect or toggle correctly.' },
+  { checkpoint: 2, type: 'self',
+    q: 'Explain the validate-on-submit-first, then-on-change hybrid pattern, and why it beats validating on onChange from the start.',
+    model: 'Do not show errors while the user is still typing a field for the first time — that is noisy and punishing. Validate everything on submit; from then on, re-validate a field on each change so the user sees the error clear as they fix it.' },
+  { checkpoint: 2, type: 'self',
+    q: 'The key={refresh} trick remounts BookList when refresh increments. What is the downside versus lifting the list state to the parent?',
+    model: 'Remounting throws away all of the child state and refetches from scratch every time — losing scroll position, any local UI state, and adding a full network round-trip. Lifting the state up lets the parent update the list in place after a create or delete.' }
 ];
 
 (function() {
@@ -762,6 +759,8 @@ window.DECK_QUESTIONS = [
     if (idx > parseInt(localStorage.getItem('svl_forms-validation-workshop_max') || '0'))
       localStorage.setItem('svl_forms-validation-workshop_max', idx);
   }
+  window.deckShow = show;
+
 
   document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
   document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });

@@ -866,6 +866,15 @@ HTTP <span class="num">400</span>
 window.DECK_NAME = 'validation-workshop';
 </script>
 <script>
+window.DECK_OBJECTIVES = [
+  'Identify the four validation layers in a web application and explain why route-handler validation is essential',
+  'Write manual validation checks for required fields, type, length, and allowed values in an Express route',
+  'Create a centralised error-handling middleware and an AppError class that carries an HTTP status code',
+  'Wrap async route handlers with asyncHandler to eliminate try/catch boilerplate',
+  'Apply Zod schema validation with safeParse to parse and type-check request bodies in Express routes'
+];
+</script>
+<script>
 window.DECK_ASSESSMENTS = [
   { id: 'b6-1', type: 'practical', title: 'Add manual validation to POST /api/books',
     desc: 'Add checks for required fields (title, author), type and length, and allowed status values. Return 400 with a descriptive error message if anything fails. Test with curl using missing fields, empty strings, and invalid status values.',

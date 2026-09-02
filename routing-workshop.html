@@ -112,7 +112,6 @@
   #index-link:hover { color: var(--accent); border-color: var(--accent); }
 </style>
 <link rel="stylesheet" href="deck-extras.css">
-<script src="routing-workshop.scripts.js"></script>
 </head>
 <body>
 <div id="deck">
@@ -430,6 +429,9 @@
 </div>
 
 <!-- Slide 9 — The Auth Problem -->
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track C · Frontend</div>
   <h2>The Auth Problem</h2>
@@ -559,6 +561,9 @@
 </div>
 
 <!-- Slide 13 — Common Pitfalls -->
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track C · Frontend</div>
   <h2>Common Pitfalls</h2>
@@ -644,7 +649,7 @@
 </div><!-- #deck -->
 
 <div id="nav">
-  <span id="counter">1 / 15</span>
+  <span id="counter">1 / 17</span>
   <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
   <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
 </div>
@@ -686,75 +691,67 @@ window.DECK_ASSESSMENTS = [
   }
 ];
 window.DECK_QUESTIONS = [
-  {
-    id: 'q1', type: 'mcq',
-    question: 'Why should you never use <a href="/books"> for internal navigation in a React Router app?',
+  { checkpoint: 1, type: 'mcq',
+    q: 'Why should you never use a plain <a href="/books"> for internal navigation in a React Router app?',
     options: [
       'React Router does not support standard anchor elements',
       'It triggers a full page reload, discarding all React state',
       'It sends the request to the Express server instead of the React app',
       'It only works in development, not in production builds'
     ],
-    answer: 1
-  },
-  {
-    id: 'q2', type: 'mcq',
-    question: 'Which React Router v6 hook reads a value like the :id segment from the current URL?',
+    correct: 1,
+    explanation: 'A plain <a> makes the browser fetch a new document, so React unmounts and every piece of in-memory state is lost. <Link> intercepts the click and updates the URL with no reload.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'Which React Router v6 hook reads a value like the :id segment from the current URL?',
     options: ['useLocation', 'useSearchParams', 'useParams', 'useRouteMatch'],
-    answer: 2
-  },
-  {
-    id: 'q3', type: 'mcq',
-    question: 'You navigate to /books/1, the BookDetail component mounts and fetches data. You then navigate to /books/2. What must you do to ensure new data is fetched?',
+    correct: 2,
+    explanation: 'useParams() returns an object of the matched dynamic segments, e.g. { id } for a route path of /books/:id. useRouteMatch was removed in v6.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'You navigate to /books/1, BookDetail mounts and fetches data. You then navigate to /books/2. What must you do to fetch the new data?',
     options: [
       'Unmount and remount the component by adding a key prop to the Route',
       'Include the id param in the useEffect dependency array',
       'Use useNavigate to force a re-render',
       'Nothing — React Router remounts the component automatically on param change'
     ],
-    answer: 1
-  },
-  {
-    id: 'q4', type: 'mcq',
-    question: 'After a successful login, you call navigate("/books"). The user presses Back. What happens, and how would you prevent it?',
+    correct: 1,
+    explanation: 'React Router keeps the same component instance across param changes, so it does not remount. The fetch effect only re-runs when a value in its dependency array changes — so id must be in that array.' },
+  { checkpoint: 2, type: 'mcq',
+    q: 'After a successful login you call navigate("/books"). The user presses Back. What happens, and how do you prevent it?',
     options: [
       'The user returns to the login page; use navigate("/books", { replace: true }) to replace the history entry',
-      'The user goes to the previous page they visited before login; this is always the correct behaviour',
+      'The user goes to the page they visited before login; this is always correct',
       'React Router blocks Back navigation automatically after login',
       'The user is redirected to / by the ProtectedRoute'
     ],
-    answer: 0
-  },
-  {
-    id: 'q5', type: 'mcq',
-    question: 'In a layout route, what does <Outlet /> render?',
+    correct: 0,
+    explanation: 'Without replace, the login route stays on the history stack, so Back lands there. replace: true swaps the current entry instead of pushing a new one.' },
+  { checkpoint: 2, type: 'mcq',
+    q: 'In a layout route, what does <Outlet /> render?',
     options: [
       'The layout component itself, recursively',
       'A loading spinner while the child route fetches data',
-      'The matched child route\'s element',
-      'The nearest parent route\'s element'
+      "The matched child route's element",
+      "The nearest parent route's element"
     ],
-    answer: 2
-  },
-  {
-    id: 'q6', type: 'self',
-    question: 'A ProtectedRoute checks localStorage for a token. Give two specific examples of how a user could bypass this check without changing your source code. Does bypassing the check give them access to real data?'
-  },
-  {
-    id: 'q7', type: 'mcq',
-    question: 'You refresh a page at /books/42 in production and get a 404 from the server. What is the cause and the fix?',
+    correct: 2,
+    explanation: '<Outlet /> is the placeholder inside a layout route where React Router renders whichever nested route currently matches.' },
+  { checkpoint: 2, type: 'mcq',
+    q: 'You refresh a page at /books/42 in production and get a 404 from the server. What is the cause and the fix?',
     options: [
       'The React Router catch-all route is missing; add path="*" to your Routes',
       'The server has no route for /books/42; configure it to serve index.html for all non-API paths',
       'You must use HashRouter instead of BrowserRouter in production',
       'The API returned 404 for the book; add a loading state to the component'
     ],
-    answer: 1
-  },
-  {
-    id: 'q8', type: 'self',
-    question: 'Describe the nesting order required to have a Layout (navbar + footer) that wraps only authenticated pages, with Login and Register outside the layout. Sketch the Routes tree structure.'
-  }
+    correct: 1,
+    explanation: 'On a hard refresh the browser asks the server directly for /books/42. The server must fall back to index.html so the React app boots and its own router handles the path.' },
+  { checkpoint: 1, type: 'self',
+    q: 'A ProtectedRoute checks localStorage for a token. Give two ways a user could bypass this check without touching your source, and say whether bypassing it exposes real data.',
+    model: '1. Open DevTools and paste any string into localStorage under the token key. 2. Load the cached app offline. Bypassing only reveals the UI shell — every real request still carries a JWT the server verifies, so no protected data is exposed. ProtectedRoute is a UX guard, not a security boundary.' },
+  { checkpoint: 2, type: 'self',
+    q: 'Describe the Routes nesting needed for a Layout (navbar + footer) that wraps only authenticated pages, with Login and Register outside the layout. Sketch the tree.',
+    model: '<Routes>\n  <Route element={<Layout/>}>\n    <Route path="/" .../>\n    <Route path="/books" .../>\n  </Route>\n  <Route path="/login" .../>\n  <Route path="/register" .../>\n</Routes>\nThe Layout route wraps only the protected pages; Login and Register are siblings outside it and render with no navbar/footer.' }
 ];
 
 (function() {
@@ -773,6 +770,8 @@ window.DECK_QUESTIONS = [
     if (idx > parseInt(localStorage.getItem('svl_routing-workshop_max') || '0'))
       localStorage.setItem('svl_routing-workshop_max', idx);
   }
+  window.deckShow = show;
+
 
   document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
   document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });

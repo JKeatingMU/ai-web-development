@@ -109,7 +109,6 @@
   #index-link:hover { color: var(--accent); border-color: var(--accent); }
 </style>
 <link rel="stylesheet" href="deck-extras.css">
-<script src="deploy-workshop.scripts.js"></script>
 </head>
 <body>
 <div id="deck">
@@ -250,6 +249,9 @@ dist/assets/index-DiwrgTda.css    2.14 kB │ gzip: 0.62 kB
 </div>
 
 <!-- Slide 7 — Environment Variables in Production -->
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track D · Fullstack</div>
   <h2>Environment Variables in Production</h2>
@@ -383,6 +385,9 @@ dist/assets/index-DiwrgTda.css    2.14 kB │ gzip: 0.62 kB
 </div>
 
 <!-- Slide 10 — Prompt Reflection -->
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track D · Fullstack</div>
   <h2>Prompt Reflection</h2>
@@ -430,7 +435,7 @@ dist/assets/index-DiwrgTda.css    2.14 kB │ gzip: 0.62 kB
 </div><!-- #deck -->
 
 <div id="nav">
-  <span id="counter">1 / 11</span>
+  <span id="counter">1 / 13</span>
   <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
   <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
 </div>
@@ -471,58 +476,52 @@ window.DECK_ASSESSMENTS = [
   }
 ];
 window.DECK_QUESTIONS = [
-  {
-    id: 'q1', type: 'mcq',
-    question: 'VITE_API_URL is set to https://api.example.com in your .env file. You run npm run build. Six months later you move to a new API URL. What must you do to update the frontend?',
+  { checkpoint: 1, type: 'mcq',
+    q: 'VITE_API_URL is set in .env and you run npm run build. Months later the API URL changes. What must you do to update the frontend?',
     options: [
       'Update the Railway env var — the frontend reads it at runtime',
-      'Update the .env file and rebuild — the URL is baked into the JS bundle at build time',
-      'Update the .env file and restart the server — Vite reloads env vars on server restart',
-      'Nothing — the frontend always falls back to the base URL on 404'
+      'Update .env and rebuild — the URL is baked into the JS bundle at build time',
+      'Update .env and restart the server — Vite reloads env vars on restart',
+      'Nothing — the frontend falls back to the base URL on 404'
     ],
-    answer: 1
-  },
-  {
-    id: 'q2', type: 'mcq',
-    question: 'Your Express server hardcodes port 3001: app.listen(3001). The app deploys to Railway but every request returns 502. What is the cause?',
+    correct: 1,
+    explanation: 'Vite replaces import.meta.env.VITE_* with literal strings during the build. Changing the value means producing a new bundle.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'Your server hardcodes app.listen(3001). It deploys to Railway but every request returns 502. Cause?',
     options: [
-      'Railway blocks port 3001 for security reasons',
-      'Railway assigns a different PORT via environment variable; listening on 3001 means no traffic reaches the server',
+      'Railway blocks port 3001 for security',
+      'Railway assigns a PORT via environment variable; listening on 3001 means no traffic reaches the server',
       'Port 3001 conflicts with the Railway PostgreSQL port',
       'Express requires app.listen() to use process.env.PORT in production'
     ],
-    answer: 1
-  },
-  {
-    id: 'q3', type: 'mcq',
-    question: 'You deploy successfully but GET /api/books returns "relation books does not exist". What is the most likely cause?',
+    correct: 1,
+    explanation: "Railway routes traffic to the port it injects as process.env.PORT. Always listen on process.env.PORT || 3001." },
+  { checkpoint: 1, type: 'mcq',
+    q: 'You deploy successfully but GET /api/books returns "relation books does not exist". Most likely cause?',
     options: [
       'The DATABASE_URL environment variable is not set',
-      'The schema.sql file was not run against the Railway PostgreSQL database after the first deploy',
-      'Railway PostgreSQL uses a different SQL dialect than local PostgreSQL',
-      'The books table was created in devDependencies and is not available in production'
+      'schema.sql was never run against the Railway PostgreSQL database',
+      'Railway PostgreSQL uses a different SQL dialect',
+      'The books table was created in devDependencies'
     ],
-    answer: 1
-  },
-  {
-    id: 'q4', type: 'self',
-    question: 'Explain the difference between VITE_API_URL (a build-time variable) and PORT (a runtime variable). Why is PORT read at runtime but VITE_API_URL is not?'
-  },
-  {
-    id: 'q5', type: 'mcq',
-    question: 'After setting CLIENT_ORIGIN in Railway, the React app still shows CORS errors when making API calls. What should you do first?',
+    correct: 1,
+    explanation: 'Deploying ships your code, not your schema. You have to run schema.sql once against the Railway database (e.g. via the Railway CLI or a connection string).' },
+  { checkpoint: 2, type: 'mcq',
+    q: 'After setting CLIENT_ORIGIN in Railway, the app still shows CORS errors. What do you do first?',
     options: [
       'Clear the browser cache and try again',
-      'Redeploy the service — Railway does not restart automatically when environment variables change',
-      'Change CLIENT_ORIGIN to * temporarily to confirm CORS is the issue',
-      'Uninstall and reinstall the cors npm package'
+      'Redeploy the service — Railway does not restart automatically on an env var change',
+      'Set CLIENT_ORIGIN to * temporarily',
+      'Reinstall the cors npm package'
     ],
-    answer: 1
-  },
-  {
-    id: 'q6', type: 'self',
-    question: 'You have a working Railway deployment. A teammate clones the repo and wants to run it locally. List exactly which files and steps they need — starting from git clone — to get the app running with a local database.'
-  }
+    correct: 1,
+    explanation: 'Environment variable changes only take effect on the next deploy/restart. The running process still holds the old value until then.' },
+  { checkpoint: 2, type: 'self',
+    q: 'Explain the difference between VITE_API_URL (build-time) and PORT (runtime). Why is PORT read at runtime but VITE_API_URL is not?',
+    model: 'PORT is read by Node when the server process starts, so the same build runs anywhere by picking up whatever PORT the host provides. VITE_API_URL is consumed by the Vite build, which inlines it into static files the browser downloads — there is no Node process on the client to read an env var later.' },
+  { checkpoint: 2, type: 'self',
+    q: 'A teammate clones the repo and wants to run it locally. List the files and steps from git clone to a running app with a local database.',
+    model: '1. git clone, then npm install in the project (and client, if separate). 2. Create a local PostgreSQL database and run schema.sql against it. 3. Copy .env.example to .env and fill DATABASE_URL, JWT_SECRET, PORT, CLIENT_ORIGIN. 4. Build the client if the server serves it (npm run build), or run both dev servers. 5. npm start and hit /api/health.' }
 ];
 
 (function() {
@@ -541,6 +540,7 @@ window.DECK_QUESTIONS = [
     if (idx > parseInt(localStorage.getItem('svl_deploy-workshop_max') || '0'))
       localStorage.setItem('svl_deploy-workshop_max', idx);
   }
+  window.deckShow = show;
 
   document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
   document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });

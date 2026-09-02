@@ -108,7 +108,6 @@
   #index-link:hover { color: var(--accent); border-color: var(--accent); }
 </style>
 <link rel="stylesheet" href="deck-extras.css">
-<script src="auth-end-to-end-workshop.scripts.js"></script>
 </head>
 <body>
 <div id="deck">
@@ -362,6 +361,9 @@
 </div>
 
 <!-- Slide 7 — NavBar Auth State -->
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track D · Fullstack</div>
   <h2>NavBar Auth State</h2>
@@ -532,6 +534,9 @@
 </div>
 
 <!-- Slide 12 — Prompt Reflection -->
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track D · Fullstack</div>
   <h2>Prompt Reflection</h2>
@@ -578,7 +583,7 @@
 </div><!-- #deck -->
 
 <div id="nav">
-  <span id="counter">1 / 13</span>
+  <span id="counter">1 / 15</span>
   <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
   <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
 </div>
@@ -619,58 +624,52 @@ window.DECK_ASSESSMENTS = [
   }
 ];
 window.DECK_QUESTIONS = [
-  {
-    id: 'q1', type: 'mcq',
-    question: 'A user registers successfully. What should the frontend do immediately after receiving the 201 response?',
+  { checkpoint: 1, type: 'mcq',
+    q: 'A user registers successfully. What should the frontend do immediately after the 201 response?',
     options: [
       'Store the returned token in localStorage and navigate to /',
       'Navigate to /login without storing any token',
-      'Store the returned token and display a success message on the same page',
-      'Make an immediate POST /auth/login request to log the user in automatically'
+      'Store the returned token and show a success message on the same page',
+      'Make an immediate POST /auth/login to log the user in automatically'
     ],
-    answer: 1
-  },
-  {
-    id: 'q2', type: 'mcq',
-    question: 'The backend authenticate middleware uses req.headers["authorization"] (lowercase). The frontend sends the header as "Authorization" (capitalised). What happens?',
+    correct: 1,
+    explanation: 'This course keeps register and login separate: registration confirms the account, then the user logs in. Auto-login is a valid product choice but is not what this API contract does.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'The backend reads req.headers["authorization"] (lowercase); the frontend sends "Authorization". What happens?',
     options: [
       'The request fails — header names are case-sensitive in Node.js',
-      'The request succeeds — HTTP headers are case-insensitive and Express normalises them to lowercase',
+      'The request succeeds — HTTP headers are case-insensitive and Node lowercases them',
       'The middleware receives undefined and returns 500',
-      'Only the OPTIONS preflight passes; the actual request is blocked'
+      'Only the OPTIONS preflight passes; the real request is blocked'
     ],
-    answer: 1
-  },
-  {
-    id: 'q3', type: 'mcq',
-    question: 'After login, the NavBar still shows the logged-out state (Login / Register links). What is the most likely cause?',
+    correct: 1,
+    explanation: 'HTTP header names are case-insensitive, and Node normalises every incoming header key to lowercase, so req.headers.authorization always works regardless of how the client cased it.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'After login the NavBar still shows Login / Register links. Most likely cause?',
     options: [
       'The navigate call happened before localStorage.setItem',
-      'The token was stored in localStorage but React state was not updated, so NavBar re-rendered with stale data',
+      'The token was stored but React state was not updated, so NavBar re-rendered with stale data',
       'NavLink caches the active state for 30 seconds',
       'The ProtectedRoute is blocking the re-render'
     ],
-    answer: 1
-  },
-  {
-    id: 'q4', type: 'self',
-    question: 'A JWT token expires mid-session. Describe the chain of events from the moment an API call returns 401 to the moment the user sees the login page, including what api.ts does and why window.location.href is used instead of navigate.'
-  },
-  {
-    id: 'q5', type: 'mcq',
-    question: 'Why does the logout handler use navigate("/login", { replace: true }) rather than navigate("/login")?',
+    correct: 1,
+    explanation: 'Writing to localStorage does not trigger a re-render. The auth state React reads from must also be updated (e.g. via the useAuth hook) so components depending on it re-render.' },
+  { checkpoint: 2, type: 'mcq',
+    q: 'Why does logout use navigate("/login", { replace: true }) rather than navigate("/login")?',
     options: [
-      'replace: true is required for navigate to work outside of a Route component',
-      'Without replace, pressing Back after logout could return the user to a protected page that ProtectedRoute would then redirect back from, creating a confusing loop',
+      'replace: true is required for navigate to work outside a Route component',
+      'Without replace, pressing Back after logout can land on a protected page that ProtectedRoute then bounces back from, creating a loop',
       'replace: true clears localStorage automatically',
-      'The ProtectedRoute requires replace navigation to detect the logout event'
+      'ProtectedRoute needs replace navigation to detect the logout'
     ],
-    answer: 1
-  },
-  {
-    id: 'q6', type: 'self',
-    question: 'Your backend returns { error: "Email already registered" } for duplicate emails on registration. Why is this a security issue? What should the backend return instead, and what does this prevent?'
-  }
+    correct: 1,
+    explanation: 'replace swaps the current history entry so the protected page the user just left is not sitting one Back-press away.' },
+  { checkpoint: 2, type: 'self',
+    q: 'A JWT expires mid-session. Trace events from the 401 to the login page appearing, including what api.ts does and why it uses window.location.href instead of navigate.',
+    model: 'api.ts sees the 401 in its shared response handler, clears the stored token, and redirects. It uses window.location.href because it is a plain module, not a React component, so it has no access to the useNavigate hook; a hard location change also guarantees all stale React state is discarded.' },
+  { checkpoint: 2, type: 'self',
+    q: 'The backend returns { error: "Email already registered" } for duplicate emails on registration. Why is that a problem, what should it return instead, and what does that prevent?',
+    model: 'It confirms which emails have accounts — an enumeration oracle an attacker can use to build a list of your users. Return a generic failure ("Registration failed, please try again") with the same status and timing for both the duplicate and the success-blocked case, so the response reveals nothing.' }
 ];
 
 (function() {
@@ -689,6 +688,8 @@ window.DECK_QUESTIONS = [
     if (idx > parseInt(localStorage.getItem('svl_auth-end-to-end-workshop_max') || '0'))
       localStorage.setItem('svl_auth-end-to-end-workshop_max', idx);
   }
+  window.deckShow = show;
+
 
   document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
   document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });

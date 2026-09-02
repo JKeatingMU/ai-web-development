@@ -109,7 +109,6 @@
   #index-link:hover { color: var(--accent); border-color: var(--accent); }
 </style>
 <link rel="stylesheet" href="deck-extras.css">
-<script src="fullstack-contracts-workshop.scripts.js"></script>
 </head>
 <body>
 <div id="deck">
@@ -331,6 +330,9 @@ app.<span class="fn">use</span>(<span class="fn">cors</span>({
 </div>
 
 <!-- Slide 7 — The /api Prefix Convention -->
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track D · Fullstack</div>
   <h2>The <code>/api</code> Prefix Convention</h2>
@@ -460,6 +462,9 @@ Also create a <em>shared/types.ts</em> file with TypeScript interfaces matching 
 </div>
 
 <!-- Slide 12 — Common Integration Bugs -->
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
 <div class="slide">
   <div class="slide-label">Track D · Fullstack</div>
   <h2>Common Integration Bugs</h2>
@@ -548,7 +553,7 @@ Also create a <em>shared/types.ts</em> file with TypeScript interfaces matching 
 </div><!-- #deck -->
 
 <div id="nav">
-  <span id="counter">1 / 14</span>
+  <span id="counter">1 / 16</span>
   <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
   <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
 </div>
@@ -589,58 +594,52 @@ window.DECK_ASSESSMENTS = [
   }
 ];
 window.DECK_QUESTIONS = [
-  {
-    id: 'q1', type: 'mcq',
-    question: 'In production, why does serving React from Express eliminate the need for CORS on your own frontend?',
+  { checkpoint: 1, type: 'mcq',
+    q: 'In production, why does serving React from Express remove the need for CORS on your own frontend?',
     options: [
       'Express automatically disables CORS for known clients',
-      'Both the frontend and API share the same origin, so the browser does not apply CORS restrictions',
+      'Frontend and API share the same origin, so the browser does not apply CORS restrictions',
       'Railway provides a CORS proxy between the two services',
-      'The React build process removes all fetch calls that would trigger CORS'
+      'The React build removes all fetch calls that would trigger CORS'
     ],
-    answer: 1
-  },
-  {
-    id: 'q2', type: 'mcq',
-    question: 'Your Express server returns { message: "Not found" } for 404s but api.ts reads body.error. What do users see when a book is not found?',
+    correct: 1,
+    explanation: 'CORS only applies to cross-origin requests. When Express serves both the HTML and the API from one domain and port, every fetch is same-origin.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'Express returns { message: "Not found" } for 404s but api.ts reads body.error. What do users see when a book is not found?',
     options: [
       'The text "Not found"',
       'The text "HTTP 404"',
       'An empty error message or undefined',
       'A JavaScript exception with the full response body'
     ],
-    answer: 2
-  },
-  {
-    id: 'q3', type: 'mcq',
-    question: 'The catch-all GET * route is registered before the /api/books route. What happens when the frontend calls GET /api/books?',
+    correct: 2,
+    explanation: 'body.error is undefined because the field is called message. This is a contract mismatch — the two sides must agree on the error key. A shared types file prevents it.' },
+  { checkpoint: 1, type: 'mcq',
+    q: 'The catch-all GET * route is registered before the /api/books route. What happens on GET /api/books?',
     options: [
-      'Express still matches /api/books correctly because it is more specific',
+      'Express matches /api/books correctly because it is more specific',
       'The catch-all intercepts the request and returns index.html instead of JSON',
-      'Express throws a routing conflict error at startup',
-      'The request is rejected with a 405 Method Not Allowed'
+      'Express throws a routing conflict at startup',
+      'The request is rejected with 405 Method Not Allowed'
     ],
-    answer: 1
-  },
-  {
-    id: 'q4', type: 'self',
-    question: 'Your database column is created_at (snake_case) but your TypeScript interface has createdAt (camelCase). The app compiles with no errors. Describe two runtime symptoms you would see — one in the UI and one in the browser DevTools.'
-  },
-  {
-    id: 'q5', type: 'mcq',
-    question: 'You see ReferenceError: __dirname is not defined when starting the server. What is the cause?',
+    correct: 1,
+    explanation: 'Express matches routes in registration order, not by specificity. The catch-all must be registered last, after every API route.' },
+  { checkpoint: 2, type: 'mcq',
+    q: 'You see ReferenceError: __dirname is not defined when starting the server. Cause?',
     options: [
       'The path module is not imported',
-      'The project uses ES modules ("type": "module") where __dirname does not exist',
+      'The project uses ES modules ("type": "module"), where __dirname does not exist',
       'Express 5 removed support for __dirname',
-      'The server/index.js file is not in the project root'
+      'server/index.js is not in the project root'
     ],
-    answer: 1
-  },
-  {
-    id: 'q6', type: 'self',
-    question: 'You build the React app, start Express, and open localhost:3001/books in the browser — you see a blank white page. List three things you would check, in order, to diagnose the problem.'
-  }
+    correct: 1,
+    explanation: '__dirname is a CommonJS global. Under ES modules you reconstruct it with fileURLToPath(import.meta.url) and path.dirname().' },
+  { checkpoint: 1, type: 'self',
+    q: 'Your DB column is created_at but the TypeScript interface has createdAt. It compiles fine. Give one UI symptom and one DevTools symptom you would see at runtime.',
+    model: 'UI: the "added" date shows as blank, "Invalid Date", or undefined. DevTools: the Network tab shows the JSON response contains created_at, not createdAt — TypeScript never checks the shape of data that crosses the network, so the mismatch only surfaces at runtime.' },
+  { checkpoint: 2, type: 'self',
+    q: 'You build React, start Express, open localhost:3001/books and get a blank white page. List three things to check, in order.',
+    model: '1. DevTools Console for a JS error (often a bad asset path or a crash on load). 2. Network tab — is index.html served for /books, and do the JS/CSS bundles return 200 not 404? 3. Express route order — is express.static and the catch-all registered after the API routes and pointing at the real build folder (dist)?' }
 ];
 
 (function() {
@@ -659,6 +658,8 @@ window.DECK_QUESTIONS = [
     if (idx > parseInt(localStorage.getItem('svl_fullstack-contracts-workshop_max') || '0'))
       localStorage.setItem('svl_fullstack-contracts-workshop_max', idx);
   }
+  window.deckShow = show;
+
 
   document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
   document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });
