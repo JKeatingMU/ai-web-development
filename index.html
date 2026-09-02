@@ -128,6 +128,22 @@
   .course-lo-list li:last-child { border-bottom: none; }
   .course-lo-num { font-family: 'SF Mono','Fira Code',monospace; font-size: 10px; font-weight: 700; color: var(--accent); background: rgba(88,166,255,.1); border: 1px solid rgba(88,166,255,.2); border-radius: 4px; padding: 2px 5px; flex-shrink: 0; margin-top: 2px; min-width: 22px; text-align: center; }
 
+  /* ── How the decks work / accessibility ── */
+  .deck-guide { margin-bottom: 40px; border: 1px solid var(--border); border-left: 4px solid var(--green); border-radius: 8px; background: var(--surface); padding: 22px 26px; }
+  .deck-guide h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+  .deck-guide > p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 18px; }
+  .deck-guide .guide-cols { display: flex; gap: 32px; flex-wrap: wrap; }
+  .deck-guide .guide-col { flex: 1; min-width: 260px; }
+  .deck-guide .guide-col h3 { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green); margin-bottom: 10px; font-family: 'SF Mono','Fira Code',monospace; }
+  .deck-guide ul { list-style: none; padding: 0; }
+  .deck-guide li { font-size: 13px; color: var(--text); line-height: 1.55; padding: 6px 0 6px 20px; position: relative; }
+  .deck-guide li::before { content: '→'; position: absolute; left: 0; color: var(--muted); }
+  .deck-guide li strong { color: var(--text); }
+  .deck-guide li span { color: var(--muted); }
+  .deck-guide kbd { font-family: 'SF Mono','Fira Code',monospace; font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--text); }
+  .deck-guide .guide-link { color: var(--accent); text-decoration: none; }
+  .deck-guide .guide-link:hover { text-decoration: underline; }
+
   /* ── Card progress + LO button ── */
   .card.available .card-badge { display: none; }         /* replaced by progress bar */
   .card-reflect { font-size: 0; justify-content: flex-end; margin-top: 8px; }
@@ -231,6 +247,35 @@
       </ol>
     </div>
   </div>
+
+  <section class="deck-guide" aria-labelledby="deck-guide-h">
+    <h2 id="deck-guide-h">How these decks work</h2>
+    <p>Each module is an interactive HTML deck, not a slideshow export or a PDF. That is deliberate: it lets the material respond to you, remember where you are, and adapt to how you need to read it.</p>
+    <div class="guide-cols">
+      <div class="guide-col">
+        <h3>Built for learning</h3>
+        <ul>
+          <li><strong>Checkpoint quizzes</strong> <span>— short questions mid-deck that surface what has not landed yet, with a jump back to the relevant slide</span></li>
+          <li><strong>Notes on any slide</strong> <span>— saved in your browser and kept as you move through the deck</span></li>
+          <li><strong>Narrated walkthroughs</strong> <span>— optional audio with the relevant part of each slide highlighted as it is discussed</span></li>
+          <li><strong>Hands-on tasks and a prompt-reflection exercise</strong> <span>— built into every module</span></li>
+          <li><strong>Progress is saved</strong> <span>— close the tab and pick up where you left off; works offline once loaded</span></li>
+        </ul>
+      </div>
+      <div class="guide-col">
+        <h3>Accessibility &amp; adaptability</h3>
+        <ul>
+          <li><strong>Adjustable text size</strong> <span>— <kbd>A&minus;</kbd> / <kbd>A+</kbd> in the toolbar scales every slide up to 150%, and the layout reflows so nothing is cut off</span></li>
+          <li><strong>Light and dark themes</strong></li>
+          <li><strong>Full keyboard control</strong> <span>— <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>Space</kbd> to move, <kbd>Home</kbd> / <kbd>End</kbd> to jump, <kbd>F</kbd> for fullscreen, <kbd>Tab</kbd> to every control</span></li>
+          <li><strong>Screen-reader support</strong> <span>— each slide is announced with its position and heading, with a skip link straight to the content</span></li>
+          <li><strong>Respects reduced-motion</strong> <span>— animation is dropped when your system asks for it</span></li>
+          <li><strong>No meaning carried by colour alone</strong> <span>— and a high-contrast palette in both themes</span></li>
+          <li><strong>Accessible long-form version</strong> <span>— a plain, linear page that works with full browser zoom and screen readers;</span> <a class="guide-link" href="accessible/web-fundamentals-workshop.html">example: How the Web Works &#8594;</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
   <div class="legend">
     <span class="legend-item"><span class="badge-avail">&#10003;</span> Deck available</span>

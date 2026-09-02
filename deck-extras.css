@@ -1612,6 +1612,11 @@ body.text-xl .slide .terminal-body { font-size: 15px; }
   #progress { transition: none; }
 }
 
+/* "Accessible version" link in the hint bar */
+#a11y-longform { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+#a11y-longform:hover,
+#a11y-longform:focus-visible { color: #58a6ff; }
+
 /* Light-theme variants for a11y controls */
 body.light-theme #textsize-ctrl { background: #faf8f4; border-color: #d8cfc0; }
 body.light-theme #textsize-ctrl button { color: #6e6660; }

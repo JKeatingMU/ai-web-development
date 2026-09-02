@@ -2226,6 +2226,27 @@
     // Announce whichever slide is active now
     var act = document.querySelector('.slide.active');
     if (act) window._announceSlide(Array.prototype.indexOf.call(slides, act));
+
+    // Offer the accessible long-form version when one exists for this deck
+    var deckFile = window.location.pathname.split('/').pop().replace('.html', '');
+    if (deckFile) {
+      var accPath = 'accessible/' + deckFile + '.html';
+      fetch(accPath, { method: 'HEAD' }).then(function (r) {
+        if (!r.ok) return;
+        var hint = document.getElementById('hint');
+        var a = document.createElement('a');
+        a.href = accPath;
+        a.id = 'a11y-longform';
+        a.textContent = 'Accessible version';
+        if (hint) {
+          hint.appendChild(document.createTextNode(' · '));
+          hint.appendChild(a);
+        } else {
+          a.style.cssText = 'position:fixed;top:18px;right:38px;font-size:11px;';
+          document.body.appendChild(a);
+        }
+      }).catch(function () {});
+    }
   }
 
   /* ── Initialise on DOMContentLoaded ───────────────────────── */
