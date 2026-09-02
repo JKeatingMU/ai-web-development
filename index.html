@@ -146,8 +146,11 @@
 
   /* ── Card progress + LO button ── */
   .card.available .card-badge { display: none; }         /* replaced by progress bar */
-  .card-reflect { font-size: 0; justify-content: flex-end; margin-top: 8px; }
+  .card-reflect { font-size: 0; justify-content: flex-end; flex-wrap: wrap; row-gap: 6px; margin-top: 8px; }
   .card-reflect::before { display: none; }               /* remove person icon */
+  .card-a11y-link { width: 100%; text-align: left; background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: inherit; font-size: 11px; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  .card-a11y-link:hover { color: var(--text); }
   .card-progress { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 8px; }
   .card-progress-bar { flex: 1; height: 3px; background: #21262d; border-radius: 2px; overflow: hidden; }
   .card-progress-fill { height: 100%; border-radius: 2px; transition: width .4s; }
@@ -279,6 +282,7 @@
     <a href="setup-guide.html">Setup Guide</a>
     <a href="resources.html">Resources</a>
     <a href="crud-demo/">Demo App</a>
+    <a href="accessible/">Accessible versions</a>
     <a href="certificate.html" id="cert-link">My Certificate &#8594;</a>
   </nav>
 
@@ -330,7 +334,7 @@
           <li><strong>Screen-reader support</strong> <span>— each slide is announced with its position and heading, with a skip link straight to the content</span></li>
           <li><strong>Respects reduced-motion</strong> <span>— animation is dropped when your system asks for it</span></li>
           <li><strong>No meaning carried by colour alone</strong> <span>— and a high-contrast palette in both themes</span></li>
-          <li><strong>Accessible long-form version</strong> <span>— a plain, linear page that works with full browser zoom and screen readers;</span> <a class="guide-link" href="accessible/web-fundamentals-workshop.html">example: How the Web Works &#8594;</a></li>
+          <li><strong>Accessible long-form versions</strong> <span>— plain, linear pages that work with full browser zoom and screen readers;</span> <a class="guide-link" href="accessible/">see what's available &#8594;</a></li>
         </ul>
       </div>
     </div>
@@ -666,6 +670,13 @@
   if (localStorage.getItem('svl_theme') === 'light') document.body.classList.add('light-theme');
   var _ts = localStorage.getItem('svl_textsize');
   if (_ts === 'lg' || _ts === 'xl') document.body.classList.add('text-' + _ts);
+
+// Modules that have an accessible long-form version (keyed by MODULE_LOS file).
+// Add an entry here when a new accessible/<file>.html is published.
+var ACCESSIBLE_VERSIONS = {
+  'web-fundamentals-workshop': 'accessible/web-fundamentals-workshop.html'
+};
+
 var MODULE_LOS = {
   'S0': { title: 'Start Here', color: '#56d4e4', file: 'start-here', los: [
     'Describe the AI-assisted development loop and identify where reading and understanding fit within it',
@@ -969,6 +980,22 @@ document.addEventListener('DOMContentLoaded', function() {
       reflectEl.appendChild(prog);
     } else {
       card.appendChild(prog);
+    }
+
+    // Accessible text version, when one exists for this module
+    var accHref = ACCESSIBLE_VERSIONS[mod.file];
+    if (accHref && reflectEl) {
+      var accBtn = document.createElement('button');
+      accBtn.className = 'card-a11y-link';
+      accBtn.type = 'button';
+      accBtn.textContent = 'Accessible text version';
+      accBtn.setAttribute('aria-label', 'Open the accessible text version of ' + code + ' ' + mod.title);
+      accBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href = accHref;
+      });
+      reflectEl.appendChild(accBtn);
     }
   });
 });
