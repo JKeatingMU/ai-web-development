@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Production Patterns — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">E6 &middot; AI Agents & Automation</p>
+  <h1>Production Patterns</h1>
+  <p class="lede">Error workflows, approval gates, monitoring, cost</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../n8n-production-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#what-production-means-for-n8n-workflows">What "Production" Means for n8n Workflows</a></li>
+    <li><a href="#error-workflows-what-happens-when-a-node-fails">Error Workflows: What Happens When a Node Fails</a></li>
+    <li><a href="#what-the-error-trigger-receives">What the Error Trigger Receives</a></li>
+    <li><a href="#retry-logic-handling-transient-failures">Retry Logic: Handling Transient Failures</a></li>
+    <li><a href="#human-in-the-loop-approval-workflows-in-n8n">Human-in-the-Loop: Approval Workflows in n8n</a></li>
+    <li><a href="#the-wait-node-pause-until-human-approves">The Wait Node: Pause Until Human Approves</a></li>
+    <li><a href="#execution-history-your-audit-trail">Execution History: Your Audit Trail</a></li>
+    <li><a href="#alerting-know-before-your-users-do">Alerting: Know Before Your Users Do</a></li>
+    <li><a href="#managing-llm-cost-in-production">Managing LLM Cost in Production</a></li>
+    <li><a href="#when-n8n-outgrows-itself">When n8n Outgrows Itself</a></li>
+    <li><a href="#track-e-what-you-have-built">Track E: What You Have Built</a></li>
+    <li><a href="#what-you-built-with-vs-what-you-learned">What You Built With vs What You Learned</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Set up an n8n Error Workflow that alerts on any execution failure with structured error context</li>
+    <li>Configure retry logic appropriately for transient failures while avoiding retries on permanent errors</li>
+    <li>Implement the Wait node approval pattern to pause a workflow pending human review of an irreversible action</li>
+    <li>Use the execution history panel to audit workflow runs and diagnose silent or partial failures</li>
+    <li>Apply at least two cost management strategies to reduce LLM token consumption in a production workflow</li>
+  </ul>
+</section>
+
+<section id="what-production-means-for-n8n-workflows" aria-labelledby="what-production-means-for-n8n-workflows-h">
+  <h2 id="what-production-means-for-n8n-workflows-h">What "Production" Means for n8n Workflows</h2>
+<p>A workflow that works once in the editor is not a production workflow. Production means: it runs reliably when you are not watching, it fails gracefully, it tells you when something goes wrong, and it does not cost unpredictably.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Concern</th><th scope="col">The question to answer</th><th scope="col">Covered in</th></tr></thead><tbody><tr><th scope="row"><strong>Error handling</strong></th><td>What happens when a node fails? Does the workflow stop silently?</td><td>Slides 3–4</td></tr><tr><th scope="row"><strong>Retry logic</strong></th><td>For transient failures (rate limits, timeouts) — does it retry?</td><td>Slide 5</td></tr><tr><th scope="row"><strong>Human gates</strong></th><td>Before irreversible actions — does a human have to approve?</td><td>Slides 6–7</td></tr><tr><th scope="row"><strong>Monitoring</strong></th><td>How do you know a workflow ran, succeeded, or failed?</td><td>Slides 8–9</td></tr><tr><th scope="row"><strong>Cost</strong></th><td>How many tokens does each run consume? What does it cost per month?</td><td>Slide 10</td></tr><tr><th scope="row"><strong>n8n vs code</strong></th><td>When does the workflow outgrow n8n and need to move to code?</td><td>Slide 11</td></tr></tbody></table></div>
+</section>
+
+<section id="error-workflows-what-happens-when-a-node-fails" aria-labelledby="error-workflows-what-happens-when-a-node-fails-h">
+  <h2 id="error-workflows-what-happens-when-a-node-fails-h">Error Workflows: What Happens When a Node Fails</h2>
+<p>By default, when a node fails, n8n marks the execution as failed and stops. Nothing else happens — no alert, no retry. For a scheduled workflow, you will not notice until you check the execution history.</p>
+<aside class="note"><span class="note-label">Warning</span><p>Default behaviour (bad for production)</p></aside>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Schedule (Daily) → API Call (Fails ✗) → Silent fail (No alert)</p></figure>
+<aside class="note"><p>With an Error Workflow (correct)</p></aside>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Schedule (Daily) → API Call (Fails ✗) → Error Trigger (Catches failure) → Alert (Email / Slack)</p></figure>
+<aside class="note"><p>How to set up: Create a separate workflow with an Error Trigger node as its trigger. In your main workflow settings (⚙ → Error Workflow), select this error workflow. When any node in the main workflow fails, n8n triggers the error workflow automatically, passing error details.</p></aside>
+</section>
+
+<section id="what-the-error-trigger-receives" aria-labelledby="what-the-error-trigger-receives-h">
+  <h2 id="what-the-error-trigger-receives-h">What the Error Trigger Receives</h2>
+<p>The Error Trigger node passes structured error context. Use it to build a useful alert — not just "something failed".</p>
+<aside class="note"><p>Fields available in the error workflow</p></aside>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row"><code>$json.workflow.name</code></th><td>Name of the workflow that failed</td></tr><tr><th scope="row"><code>$json.execution.id</code></th><td>Execution ID (link to log)</td></tr><tr><th scope="row"><code>$json.execution.error.message</code></th><td>The error message from the failing node</td></tr><tr><th scope="row"><code>$json.execution.error.node.name</code></th><td>Which node failed</td></tr><tr><th scope="row"><code>$json.execution.startedAt</code></th><td>When the execution started</td></tr></tbody></table></div>
+<blockquote class="prompt"><span class="note-label">Example alert message</span><p>Subject: n8n workflow failed Workflow: {{ $json.workflow.name }} Failed node: {{ $json.execution.error.node.name }} Error: {{ $json.execution.error.message }} Execution ID: {{ $json.execution.id }} Check execution history in n8n for details.</p></blockquote>
+<aside class="note"><p>One shared error workflow can serve multiple main workflows. Each main workflow points to it in settings. The alert includes the workflow name, so you always know which one failed.</p></aside>
+</section>
+
+<section id="retry-logic-handling-transient-failures" aria-labelledby="retry-logic-handling-transient-failures-h">
+  <h2 id="retry-logic-handling-transient-failures-h">Retry Logic: Handling Transient Failures</h2>
+<p>Some failures are transient: rate limits, temporary API unavailability, network timeouts. Retrying immediately usually works. Permanent failures (wrong URL, invalid auth) should not be retried.</p>
+<aside class="note"><p>n8n built-in retry</p></aside>
+<p>In any node settings (⚙ → Retry On Fail): set <strong>Retry On Fail</strong> to on, max retries to 3, wait between retries to 5s. n8n will retry the node automatically before marking the execution as failed.</p>
+<aside class="note"><p>Use for: HTTP Request nodes calling external APIs, especially those with rate limits or occasional timeouts.</p></aside>
+<aside class="note"><p>When not to retry</p></aside>
+<ul>
+<li><strong>✗</strong> &mdash; <strong>401 Unauthorized</strong>: retrying will not fix bad credentials — alert immediately</li>
+<li><strong>✗</strong> &mdash; <strong>400 Bad Request</strong>: the input data is wrong — a retry sends the same bad data</li>
+<li><strong>✗</strong> &mdash; <strong>Write operations</strong>: retrying a POST may create duplicate records if the first attempt partially succeeded</li>
+</ul>
+<aside class="note"><p>For writes: implement idempotency at the API level (UPSERT logic) before enabling retry.</p></aside>
+</section>
+
+<section id="human-in-the-loop-approval-workflows-in-n8n" aria-labelledby="human-in-the-loop-approval-workflows-in-n8n-h">
+  <h2 id="human-in-the-loop-approval-workflows-in-n8n-h">Human-in-the-Loop: Approval Workflows in n8n</h2>
+<p class="lede">The Wait node and the approval pattern — pausing a workflow until a human decides.</p>
+</section>
+
+<section id="the-wait-node-pause-until-human-approves" aria-labelledby="the-wait-node-pause-until-human-approves-h">
+  <h2 id="the-wait-node-pause-until-human-approves-h">The Wait Node: Pause Until Human Approves</h2>
+<p>The Wait node pauses the workflow execution. It generates a unique resume URL. When a human clicks that URL (via an email link, Slack button, or web form), the workflow resumes from the Wait node.</p>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Agent (Drafts email) → Send Draft (Email to human) → Wait (For approval) → IF approved (Check response) → Send Email (Real send)</p></figure>
+<aside class="note"><p>Wait node config: Resume type → "On webhook call". n8n generates a URL like https://n8n.example.com/webhook/resume/abc123. Include this URL in the draft email with [Approve] and [Reject] links. The human clicks one — the workflow resumes with the response.</p></aside>
+<aside class="note"><p>Timeout: Set a maximum wait time (e.g., 24h). If the human does not respond, the workflow continues on the timeout branch — send a reminder or mark as cancelled.</p></aside>
+</section>
+
+<section id="execution-history-your-audit-trail" aria-labelledby="execution-history-your-audit-trail-h">
+  <h2 id="execution-history-your-audit-trail-h">Execution History: Your Audit Trail</h2>
+<p>Every workflow execution is recorded in n8n's <strong>Executions</strong> panel. This is your primary debugging and audit tool — use it to verify that workflows ran, inspect what data flowed, and diagnose failures.</p>
+<aside class="note"><p>What to check in executions</p></aside>
+<ul>
+<li><strong>→</strong> &mdash; <strong>Status</strong>: green (success), red (failed), grey (waiting). Any red needs investigation.</li>
+<li><strong>→</strong> &mdash; <strong>Duration</strong>: if a scheduled workflow usually takes 3s and today took 45s, something is slow — likely the LLM call or an API timeout.</li>
+<li><strong>→</strong> &mdash; <strong>Node output</strong>: click any node in a past execution to see exactly what data it received and what it produced.</li>
+<li><strong>→</strong> &mdash; <strong>Item count</strong>: if Split Out usually produces 10 items and today produced 0, the API returned no data.</li>
+</ul>
+<aside class="note"><p>Retention settings</p></aside>
+<p>By default n8n retains all executions. For high-frequency workflows (every minute, large payloads), this fills disk rapidly. Set execution retention in Settings → Executions to keep only the last N executions or last N days.</p>
+<aside class="note"><p>Recommended: keep the last 50 executions for scheduled workflows. Keep 200 for agent workflows where debugging trace is more important.</p></aside>
+</section>
+
+<section id="alerting-know-before-your-users-do" aria-labelledby="alerting-know-before-your-users-do-h">
+  <h2 id="alerting-know-before-your-users-do-h">Alerting: Know Before Your Users Do</h2>
+<p>The error workflow (slide 3) handles per-execution failures. For broader health monitoring — "has this workflow not run in 6 hours when it should run every hour?" — you need a watchdog.</p>
+<aside class="note"><p>Pattern: heartbeat workflow</p></aside>
+<ul>
+<li><strong>1</strong> &mdash; Add a final node to each critical workflow: HTTP Request to a monitoring service (e.g., Uptime Robot, Better Stack, or a simple webhook you control)</li>
+<li><strong>2</strong> &mdash; The monitoring service expects a ping on a schedule. If it misses two pings → alert</li>
+<li><strong>3</strong> &mdash; This catches "workflow didn't run at all" failures — not just node errors</li>
+</ul>
+<aside class="note"><p>Minimum viable monitoring for coursework</p></aside>
+<ul>
+<li><strong>→</strong> &mdash; Error Workflow set for every production workflow</li>
+<li><strong>→</strong> &mdash; Check Executions panel manually each morning for any red entries</li>
+<li><strong>→</strong> &mdash; Add a Slack or email notification at the end of each workflow: "✓ Completed: processed N books at HH:MM"</li>
+</ul>
+<aside class="note"><p>The success notification doubles as a health check: if you expected a notification and didn't get one, the workflow failed silently or didn't run.</p></aside>
+</section>
+
+<section id="managing-llm-cost-in-production" aria-labelledby="managing-llm-cost-in-production-h">
+  <h2 id="managing-llm-cost-in-production-h">Managing LLM Cost in Production</h2>
+<p>LLM API calls cost per token. An agentic workflow that runs 100 times a day on 50 books each time can accumulate real cost quickly if not designed carefully.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Lever</th><th scope="col">How to apply it</th><th scope="col">Trade-off</th></tr></thead><tbody><tr><th scope="row"><strong>Right-size the model</strong></th><td>Use Haiku for simple summarisation; use Sonnet/Opus only for complex reasoning</td><td>Haiku is ~10–20× cheaper; adequate for structured extraction</td></tr><tr><th scope="row"><strong>Constrain output length</strong></th><td>Set <code>max_tokens</code> on the LLM node — one sentence summaries don't need 4096 tokens</td><td>Output tokens cost more than input; cap at 256 for short structured outputs</td></tr><tr><th scope="row"><strong>Filter before LLM calls</strong></th><td>IF node before the LLM — only call the LLM on items that need it (slide 5's idempotency pattern)</td><td>Reduces calls proportionally to how many items already have results</td></tr><tr><th scope="row"><strong>Cache results</strong></th><td>Store LLM output in the database. On next run, skip items already in the DB.</td><td>Works for stable data; not for tasks that need fresh reasoning each time</td></tr><tr><th scope="row"><strong>Set usage alerts</strong></th><td>Anthropic and OpenAI both offer spend alerts — set a monthly budget alert</td><td>No performance impact; early warning before costs escalate</td></tr></tbody></table></div>
+</section>
+
+<section id="when-n8n-outgrows-itself" aria-labelledby="when-n8n-outgrows-itself-h">
+  <h2 id="when-n8n-outgrows-itself-h">When n8n Outgrows Itself</h2>
+<p>n8n is excellent for orchestration. It has real limits. Know when a workflow has grown beyond what n8n handles well.</p>
+<aside class="note"><p>Stay in n8n when</p></aside>
+<ul>
+<li><strong>✓</strong> &mdash; The workflow is primarily orchestration — connecting existing services</li>
+<li><strong>✓</strong> &mdash; Business stakeholders need to read or modify the workflow logic</li>
+<li><strong>✓</strong> &mdash; Human-in-the-loop approval is central to the design</li>
+<li><strong>✓</strong> &mdash; The team does not want to deploy and maintain custom code infrastructure</li>
+</ul>
+<aside class="note"><p>Move to code when</p></aside>
+<ul>
+<li><strong>→</strong> &mdash; The workflow has more than 3 Code nodes — at that point you are writing a program in a visual IDE with extra friction</li>
+<li><strong>→</strong> &mdash; You need unit tests — n8n workflows are not unit-testable</li>
+<li><strong>→</strong> &mdash; Performance matters — n8n adds latency per node; code runs in-process</li>
+<li><strong>→</strong> &mdash; The agent logic is complex enough that the execution log is insufficient for debugging — you need a proper debugger</li>
+</ul>
+<aside class="note"><p>The hybrid pattern: use n8n for orchestration (triggers, approvals, notifications) and call your own Node.js microservice for the complex agent logic. Best of both worlds.</p></aside>
+</section>
+
+<section id="track-e-what-you-have-built" aria-labelledby="track-e-what-you-have-built-h">
+  <h2 id="track-e-what-you-have-built-h">Track E: What You Have Built</h2>
+<p>Six decks from the theory of agents to the operational discipline of running them in production.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Deck</th><th scope="col">Key concept</th><th scope="col">The skill you have now</th></tr></thead><tbody><tr><th scope="row"><strong>E1</strong></th><td>ReAct loop, tools, failure modes</td><td>Read any agent code and narrate what it does</td></tr><tr><th scope="row"><strong>E2</strong></th><td>n8n node model, item model, AI Agent node</td><td>Understand any n8n workflow's structure at a glance</td></tr><tr><th scope="row"><strong>E3</strong></th><td>Full CRUD via HTTP Request, data mapping</td><td>Connect n8n to any JWT-protected REST API</td></tr><tr><th scope="row"><strong>E4</strong></th><td>Tool nodes, system prompts, memory</td><td>Build and tune a conversational AI assistant</td></tr><tr><th scope="row"><strong>E5</strong></th><td>Three agent patterns, chaining, testing</td><td>Design and build from scratch for a new domain</td></tr><tr><th scope="row"><strong>E6</strong></th><td>Error handling, approval, monitoring, cost</td><td>Deploy with confidence, debug quickly, manage cost</td></tr></tbody></table></div>
+<aside class="note"><p>The course builds to this. You have gone from HTTP requests in curl (B4) to autonomous agents running on a schedule, calling your own API, making decisions, and notifying you on failure — with a human gate before anything irreversible happens.</p></aside>
+</section>
+
+<section id="what-you-built-with-vs-what-you-learned" aria-labelledby="what-you-built-with-vs-what-you-learned-h">
+  <h2 id="what-you-built-with-vs-what-you-learned-h">What You Built With vs What You Learned</h2>
+<p>Final reflection for Track E. Look back at everything you built across E3–E6.</p>
+<blockquote class="prompt"><span class="note-label">Questions to answer without re-reading notes or AI output</span><ul>
+<li>Name the five things you check to assess whether a workflow is production-ready (from slide 2). For each: is your E5 workflow from the previous deck production-ready on that dimension?</li>
+<li>Your Summarise &amp; Tag workflow fails at 2am. You wake up and check at 9am. How do you know it failed? What would you see in the executions panel, and what alert should have fired?</li>
+<li>The error workflow you set up receives a failing execution from a PATCH node. The error message is "Cannot read property id of undefined". What does this tell you? What would you check first?</li>
+<li>Your agent makes 3 API calls to Claude Haiku per book. You have 200 books. The workflow runs daily. Estimate the monthly token cost. (Haiku: ~$0.00025/1K input tokens, ~$0.00125/1K output tokens. Assume 500 input + 100 output tokens per call.)</li>
+<li>List two improvements you would make to a workflow you built in this track if you were deploying it for real users rather than for yourself.</li>
+</ul></blockquote>
+<aside class="note"><p>Track E complete. You built the full stack — from understanding why agents exist to deploying them responsibly. The patterns here apply beyond the Reading List API to any domain: customer data, content pipelines, support automation, research workflows.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../n8n-production-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Add an error workflow <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Create a dedicated error workflow with an Error Trigger node. Set it as the error handler for at least two of your E5 workflows. The error workflow should send an email or log to Slack with: workflow name, failing node, error message, and execution ID. Test it by deliberately breaking a node (wrong URL) and verifying the alert fires.
+      <ul><li>The error workflow is connected to at least two main workflows via Settings → Error Workflow</li><li>The alert message includes workflow name, failing node name, and the error message</li><li>You tested by deliberately causing a failure and confirmed the alert arrived</li></ul></dd></div>
+    <div><dt>Add a Wait node approval to the research agent <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Extend your E5 research agent: after the agent generates recommendations, email them to yourself with [Approve to Add] and [Reject] links using the Wait node's resume URL. If approved, call POST /api/books for each recommendation. If rejected or timeout (24h), log "Recommendations rejected" and stop.
+      <ul><li>The Wait node is configured with webhook resume type and a 24h timeout</li><li>The approval email contains the recommendations and both Approve/Reject links</li><li>The IF node after Wait correctly routes to the add-books path or the reject path</li></ul></dd></div>
+    <div><dt>Production readiness audit <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Take the complete workflow you are most proud of from Track E. Audit it against the five production dimensions from slide 2 (error handling, retry, human gates, monitoring, cost). Rate each dimension: not started / partial / complete. For any "partial" or "not started", describe what you would need to do to reach "complete".
+      <ul><li>You assessed all five dimensions honestly, not just the ones you implemented</li><li>For each gap, you described a concrete action (not just "add error handling")</li><li>Your cost estimate is based on actual numbers (tokens, model, frequency) not just "it's probably fine"</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

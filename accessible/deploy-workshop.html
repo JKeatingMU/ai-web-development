@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build &amp; Deploy — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">D3 &middot; Fullstack</p>
+  <h1>Build &amp; Deploy</h1>
+  <p class="lede">npm run build, Railway, schema setup, env vars, live testing</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../deploy-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#build-deploy">Build &amp; Deploy</a></li>
+    <li><a href="#what-npm-run-build-does">What npm run build Does</a></li>
+    <li><a href="#pre-deploy-checklist">Pre-Deploy Checklist</a></li>
+    <li><a href="#part-2-railway-deploying-to-railway">Part 2 — Railway: Deploying to Railway</a></li>
+    <li><a href="#railway-setup-step-by-step">Railway Setup — Step by Step</a></li>
+    <li><a href="#running-your-schema-on-railway-postgresql">Running Your Schema on Railway PostgreSQL</a></li>
+    <li><a href="#environment-variables-in-production">Environment Variables in Production</a></li>
+    <li><a href="#testing-the-live-deployment">Testing the Live Deployment</a></li>
+    <li><a href="#common-deploy-failures">Common Deploy Failures</a></li>
+    <li><a href="#prompt-reflection">Prompt Reflection</a></li>
+    <li><a href="#wrap-up">Wrap-up</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain what npm run build produces and why VITE_ variables are baked in at build time rather than read at runtime</li>
+    <li>Apply the six-point pre-deploy checklist to identify common issues before pushing to Railway</li>
+    <li>Set up a Railway project with a PostgreSQL plugin, configure environment variables, and trigger a deploy via GitHub push</li>
+    <li>Run schema.sql against a Railway PostgreSQL database using the Railway CLI</li>
+    <li>Test a live deployment in layers using curl — health, register, login, protected request — before testing in the browser</li>
+    <li>Diagnose the six most common Railway deploy failures from logs and error responses</li>
+  </ul>
+</section>
+
+<section id="build-deploy" aria-labelledby="build-deploy-h">
+  <h2 id="build-deploy-h">Build &amp; Deploy</h2>
+<aside class="note"><p>A working app on localhost is a prototype. A deployed app with a live database, environment-managed secrets, and a public URL is a product. This deck walks through every step — from npm run build to testing your first live API call.</p></aside>
+<aside class="note"><p>Prerequisites: This deck deploys a complete fullstack application. You need a working API (B2–B3), a React frontend (C1–C4), the stack connected (D1), and auth wired end-to-end (D2). If any of those are not working locally, fix them before deploying — a broken app becomes a harder-to-debug broken app once it is running on a server you cannot see.</p></aside>
+</section>
+
+<section id="what-npm-run-build-does" aria-labelledby="what-npm-run-build-does-h">
+  <h2 id="what-npm-run-build-does-h">What npm run build Does</h2>
+<p>Vite transforms your React source — TypeScript, JSX, imports, env vars — into a handful of optimised static files that any web server can serve.</p>
+<figure><figcaption>terminal</figcaption><pre><code>$ cd client &amp;&amp; npm run build
+
+vite v5.x building for production...
+✓ 42 modules transformed.
+dist/index.html                   0.46 kB
+dist/assets/index-Bk9mTfgD.js  148.32 kB │ gzip: 48.21 kB
+dist/assets/index-DiwrgTda.css    2.14 kB │ gzip: 0.62 kB
+✓ built in 1.24s
+
+# client/dist/ is now ready to be served</code></pre></figure>
+<figure><figcaption>client/dist/ structure</figcaption><pre><code>client/dist/
+├── index.html          ← entry point for all routes
+└── assets/
+    ├── index-Bk9m.js  ← all JS bundled + minified
+    └── index-Diwg.css ← all CSS bundled + minified</code></pre></figure>
+<aside class="note"><p>VITE_ variables are baked in at build time. import.meta.env.VITE_API_URL becomes a literal string in the bundle. If your API URL changes after building, you must rebuild.</p></aside>
+<aside class="note"><p>In production, VITE_API_URL should be empty or omitted — Express serves the API from the same origin, so all /api/... paths resolve without a hostname prefix. Check api.ts : const BASE = import.meta.env.VITE_API_URL ?? ''.</p></aside>
+<aside class="note"><p>The hashed filenames (e.g. index-Bk9m.js ) change on every build — Vite adds a content hash so browsers don't serve stale cached files after a deploy. This is automatic.</p></aside>
+<aside class="note"><p>Do not commit <code>client/dist/</code> to Git. Railway builds it from source. Add client/dist to .gitignore. Committing it bloats the repo and causes confusion about which version is deployed.</p></aside>
+</section>
+
+<section id="pre-deploy-checklist" aria-labelledby="pre-deploy-checklist-h">
+  <h2 id="pre-deploy-checklist-h">Pre-Deploy Checklist</h2>
+<p>Fix these before pushing to Railway. Most deployment failures trace back to one item on this list.</p>
+<ol>
+<li><strong><code>.gitignore</code> covers secrets:</strong> confirm <code>.env</code> is listed. Run <code>git status</code> and verify no <code>.env</code> file appears in the staged or untracked list. A leaked JWT_SECRET or DATABASE_URL is a serious incident.</li>
+<li><strong><code>.env.example</code> is up to date:</strong> every environment variable your server reads must appear in <code>.env.example</code> with a placeholder value. This is your deployment reference — Railway config comes from here.</li>
+<li><strong><code>package.json</code> start script:</strong> Railway runs <code>npm start</code>. Confirm <code>"start": "node server/index.js"</code> exists in the root or server <code>package.json</code>. Missing this produces "no start script found" deploy errors.</li>
+<li><strong>Port is dynamic:</strong> <code>const PORT = process.env.PORT || 3001</code>. Railway assigns a random port via the <code>PORT</code> env var. Hardcoding 3001 causes the health check to fail on Railway.</li>
+<li><strong>Build command set:</strong> Railway needs to build the React app. Either add a root-level build script (<code>"build": "cd client &amp;&amp; npm install &amp;&amp; npm run build"</code>) or configure it in the Railway dashboard settings.</li>
+<li><strong>No hardcoded localhost URLs:</strong> search the codebase for <code>localhost:3001</code> and <code>localhost:5173</code> in non-test files. Any that appear in server code or shared types will break in production.</li>
+</ol>
+</section>
+
+<section id="part-2-railway-deploying-to-railway" aria-labelledby="part-2-railway-deploying-to-railway-h">
+  <h2 id="part-2-railway-deploying-to-railway-h">Part 2 — Railway: Deploying to Railway</h2>
+<p class="lede">Web service · PostgreSQL plugin · Environment variables · Schema setup</p>
+</section>
+
+<section id="railway-setup-step-by-step" aria-labelledby="railway-setup-step-by-step-h">
+  <h2 id="railway-setup-step-by-step-h">Railway Setup — Step by Step</h2>
+<ol>
+<li><strong>Create project:</strong> railway.app → New Project → Deploy from GitHub repo. Select your repository. Railway detects Node.js automatically.</li>
+<li><strong>Add PostgreSQL:</strong> in the project dashboard → + New → Database → PostgreSQL. Railway provisions a managed database and sets <code>DATABASE_URL</code> in your service's environment automatically.</li>
+<li><strong>Set environment variables:</strong> Service → Variables tab. Add all variables from your <code>.env.example</code>: <code>JWT_SECRET</code>, <code>NODE_ENV=production</code>, <code>CLIENT_ORIGIN</code> (your Railway domain — set this after the first deploy).</li>
+<li><strong>Set build + start commands:</strong> Settings → Build Command: <code>cd client &amp;&amp; npm install &amp;&amp; npm run build</code>. Start Command: <code>node server/index.js</code> (or <code>npm start</code>).</li>
+<li><strong>Deploy:</strong> push to your main branch — Railway builds and deploys automatically. Watch the build logs for errors.</li>
+<li><strong>Run schema.sql:</strong> after the first deploy, connect to the Railway PostgreSQL instance and run your schema. See the next slide for how.</li>
+<li><strong>Set CLIENT_ORIGIN:</strong> copy your Railway domain (e.g. <code>https://myapp.up.railway.app</code>) and add it as <code>CLIENT_ORIGIN</code> in Variables. Redeploy.</li>
+</ol>
+</section>
+
+<section id="running-your-schema-on-railway-postgresql" aria-labelledby="running-your-schema-on-railway-postgresql-h">
+  <h2 id="running-your-schema-on-railway-postgresql-h">Running Your Schema on Railway PostgreSQL</h2>
+<p>Railway's managed database doesn't have your tables yet. Run <code>schema.sql</code> once after the first deploy using either the Railway shell or a local connection via the Railway CLI.</p>
+<figure><figcaption>Option A — Railway CLI (recommended)</figcaption><pre><code># Install Railway CLI
+$ npm install -g @railway/cli
+
+# Authenticate
+$ railway login
+
+# Link to your project
+$ railway link
+
+# Run schema against Railway DB
+# (uses DATABASE_URL from Railway env)
+$ railway run psql $DATABASE_URL &lt; schema.sql
+
+# Verify tables were created
+$ railway run psql $DATABASE_URL -c "\dt"
+         List of relations
+ Schema │   Name   │ Type  │ Owner
+────────┼──────────┼───────┼───────
+ public │ books    │ table │ ...
+ public │ users    │ table │ ...</code></pre></figure>
+<figure><figcaption>Option B — Railway dashboard → PostgreSQL → Query</figcaption><pre><code># Paste schema.sql contents into the
+# Railway dashboard query editor and run</code></pre></figure>
+<aside class="note"><p>Run once — not on every deploy. schema.sql typically contains CREATE TABLE statements. Running it twice on a database with data will fail or drop data if you used DROP TABLE IF EXISTS. For subsequent changes, use ALTER TABLE migrations.</p></aside>
+<aside class="note"><p>Use <code>IF NOT EXISTS</code>: write CREATE TABLE IF NOT EXISTS in your schema so re-running is safe in development. Railway's DB is fresh on first deploy so this is mostly a safety net for local resets.</p></aside>
+<aside class="note"><p>DATABASE_URL format: Railway provides a full PostgreSQL connection string. Your pg Pool picks it up automatically: new Pool({ connectionString: process.env.DATABASE_URL }). No other DB config needed.</p></aside>
+<aside class="note"><p>After running the schema, test the health endpoint: curl https://your-app.up.railway.app/api/health. If it returns { "ok": true }, the server is up and connected to the database.</p></aside>
+</section>
+
+<section id="environment-variables-in-production" aria-labelledby="environment-variables-in-production-h">
+  <h2 id="environment-variables-in-production-h">Environment Variables in Production</h2>
+<p>Every secret that lives in your local <code>.env</code> must be set in Railway's dashboard. Never commit secrets to Git.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Variable</th><th scope="col">Value in Railway</th><th scope="col">Notes</th></tr></thead><tbody><tr><th scope="row">DATABASE_URL</th><td>Set automatically by Railway PostgreSQL plugin</td><td>Do not set manually — Railway manages this</td></tr><tr><th scope="row">JWT_SECRET</th><td>A long random string (32+ chars)</td><td>Generate with <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code></td></tr><tr><th scope="row">NODE_ENV</th><td><code>production</code></td><td>Some packages behave differently in production (logging, error detail)</td></tr><tr><th scope="row">CLIENT_ORIGIN</th><td><code>https://myapp.up.railway.app</code></td><td>Set after first deploy when you know the domain</td></tr><tr><th scope="row">PORT</th><td>Do not set — Railway provides it</td><td>Your code reads <code>process.env.PORT || 3001</code></td></tr></tbody></table></div>
+<aside class="note"><p>JWT_SECRET in production must be different from development. If the same secret is used in both environments, a token signed in development is valid in production — a security hole.</p></aside>
+<aside class="note"><p>After setting variables, redeploy. Railway does not restart your service when env vars change — you must trigger a redeploy manually or push a new commit.</p></aside>
+</section>
+
+<section id="testing-the-live-deployment" aria-labelledby="testing-the-live-deployment-h">
+  <h2 id="testing-the-live-deployment-h">Testing the Live Deployment</h2>
+<p>Test in layers — API first, then auth, then the full frontend flow. Diagnose from the bottom up.</p>
+<figure><figcaption>terminal — replace with your domain</figcaption><pre><code># 1. Health check — server + DB connected
+$ curl https://myapp.up.railway.app/api/health
+{"ok":true}
+
+# 2. Register a user
+$ curl -s -X POST \
+  https://myapp.up.railway.app/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret123"}' | jq .
+{"message":"Created"}
+
+# 3. Login — capture the token
+$ TOKEN=$(curl -s -X POST \
+  https://myapp.up.railway.app/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret123"}' \
+  | jq -r .token)
+
+# 4. Authenticated request
+$ curl -s \
+  https://myapp.up.railway.app/api/books \
+  -H "Authorization: Bearer $TOKEN" | jq .
+[]
+
+# 5. Add a book
+$ curl -s -X POST \
+  https://myapp.up.railway.app/api/books \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"The Pragmatic Programmer","author":"Hunt &amp; Thomas","status":"reading"}' | jq .
+{"id":1,"title":"The Pragmatic Programmer",...}</code></pre></figure>
+<aside class="note"><p>Test with curl before the browser. curl removes browser-layer issues (CORS, caching, React Router) — if curl works, the API is correct and any remaining issues are frontend.</p></aside>
+<aside class="note"><p>If the health check fails: check Railway build logs. The most common causes are a missing start script, a hardcoded port, or a missing dependency that was accidentally in devDependencies.</p></aside>
+<aside class="note"><p>If login returns 500: JWT_SECRET is probably not set in Railway. Verify in Variables → confirm the key is spelled exactly as process.env.JWT_SECRET reads it in your code.</p></aside>
+<aside class="note"><p>If the React app loads but API calls fail: open DevTools → Network → look at a failing API request. Check the URL it is calling — if it still says localhost:3001, VITE_API_URL is set in Railway and overriding the empty default.</p></aside>
+</section>
+
+<section id="common-deploy-failures" aria-labelledby="common-deploy-failures-h">
+  <h2 id="common-deploy-failures-h">Common Deploy Failures</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Symptom</th><th scope="col">Cause</th><th scope="col">Fix</th></tr></thead><tbody><tr><th scope="row">Build fails: "Cannot find module 'express'"</th><td>express is in <code>devDependencies</code> instead of <code>dependencies</code></td><td>Move to <code>dependencies</code>: <code>npm install express --save</code></td></tr><tr><th scope="row">Build fails: "No start script found"</th><td>Railway looks for <code>"start"</code> in <code>package.json</code> and finds nothing</td><td>Add <code>"start": "node server/index.js"</code> to root <code>package.json</code></td></tr><tr><th scope="row">App deploys but returns 502 on every request</th><td>Server crashes on startup — usually a missing env var or a bad DB connection</td><td>Check Railway deploy logs; confirm DATABASE_URL and JWT_SECRET are set</td></tr><tr><th scope="row">Health check passes, API returns 500</th><td>Schema not run — tables don't exist yet</td><td>Run <code>schema.sql</code> against Railway DB via CLI or dashboard query editor</td></tr><tr><th scope="row">React app loads, all API calls return CORS error</th><td>CLIENT_ORIGIN not set or set to wrong value</td><td>Set <code>CLIENT_ORIGIN=https://your-app.up.railway.app</code> and redeploy</td></tr><tr><th scope="row">API calls go to localhost:3001 from production</th><td>VITE_API_URL is set in Railway environment to localhost</td><td>Remove VITE_API_URL from Railway — it should only be set in local <code>.env</code> during development</td></tr></tbody></table></div>
+</section>
+
+<section id="prompt-reflection" aria-labelledby="prompt-reflection-h">
+  <h2 id="prompt-reflection-h">Prompt Reflection</h2>
+<p>Deployment surfaces assumptions you made during development. Reflect on what the process revealed.</p>
+<aside class="note"><p>The environment gap: Development uses .env files; production uses platform env vars. Which variables caused you the most trouble to transfer? What would make this process less error-prone — in your project structure or your prompts?</p></aside>
+<aside class="note"><p>Build-time vs runtime config: VITE_API_URL is baked in at build time. PORT is read at runtime. If you needed to change the API URL after deploying without rebuilding, would that be possible? What would you need to change in your architecture?</p></aside>
+<aside class="note"><p>The first curl test: What was the first error you encountered when testing the live API with curl? Walk through how you diagnosed it — what did you check first, what did the error message tell you, and what was the actual cause?</p></aside>
+<aside class="note"><p>AI and deployment: Deployment configuration is infrastructure, not application code. Did you use AI to help with the Railway setup or the build script? How useful was AI for this part of the project compared to the application code itself?</p></aside>
+</section>
+
+<section id="wrap-up" aria-labelledby="wrap-up-h">
+  <h2 id="wrap-up-h">Wrap-up</h2>
+<p class="lede">What you have built and can now do</p>
+<ul>
+<li><strong>✓</strong> &mdash; Run <code>npm run build</code> to produce a static React bundle and explain what Vite does with TypeScript, imports, and environment variables</li>
+<li><strong>✓</strong> &mdash; Apply the pre-deploy checklist — <code>.gitignore</code>, <code>.env.example</code>, dynamic PORT, build command, no hardcoded localhost</li>
+<li><strong>✓</strong> &mdash; Set up a Railway project with a PostgreSQL plugin, configure environment variables, and deploy via GitHub push</li>
+<li><strong>✓</strong> &mdash; Run <code>schema.sql</code> against a Railway PostgreSQL database using the Railway CLI</li>
+<li><strong>✓</strong> &mdash; Test a live deployment in layers — health check, register, login, protected request — using curl before opening the browser</li>
+<li><strong>✓</strong> &mdash; Diagnose the six most common deploy failures from Railway logs and error responses</li>
+</ul>
+<aside class="note"><p>Track D complete. You have built and deployed a fullstack app. A React frontend, an Express + PostgreSQL API, end-to-end authentication, and a live public URL — all built with AI, all understood line by line.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../deploy-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Deploy to Railway</dt><dd></dd></div>
+    <div><dt>Live API curl test</dt><dd></dd></div>
+    <div><dt>Deployment reflection</dt><dd></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

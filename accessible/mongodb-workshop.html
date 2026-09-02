@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document Databases &amp; MongoDB — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">A5 &middot; Foundations</p>
+  <h1>Document Databases &amp; MongoDB</h1>
+  <p class="lede">Collections, documents, Mongoose, embed vs reference, aggregation pipelines</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../mongodb-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#document-databases-mongodb">Document Databases &amp; MongoDB</a></li>
+    <li><a href="#two-philosophies">Two Philosophies</a></li>
+    <li><a href="#what-a-document-looks-like">What a Document Looks Like</a></li>
+    <li><a href="#json-bson-json">JSON → BSON → JSON</a></li>
+    <li><a href="#mongodb-atlas-free-cloud-setup">MongoDB Atlas: Free Cloud Setup</a></li>
+    <li><a href="#mongoose-adding-schema-to-flexibility">Mongoose: Adding Schema to Flexibility</a></li>
+    <li><a href="#crud-create-read">CRUD: Create &amp; Read</a></li>
+    <li><a href="#crud-update-delete">CRUD: Update &amp; Delete</a></li>
+    <li><a href="#embed-vs-reference">Embed vs Reference</a></li>
+    <li><a href="#lookup-joining-collections">$lookup: Joining Collections</a></li>
+    <li><a href="#aggregation-pipelines">Aggregation Pipelines</a></li>
+    <li><a href="#indexes-in-mongodb">Indexes in MongoDB</a></li>
+    <li><a href="#when-to-choose-mongodb-vs-postgresql">When to Choose MongoDB vs PostgreSQL</a></li>
+    <li><a href="#schema-design-with-ai">Schema Design with AI</a></li>
+    <li><a href="#mongodb-and-ai-a-natural-partnership">MongoDB and AI: a Natural Partnership</a></li>
+    <li><a href="#quick-reference">Quick Reference</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the document model and contrast it with the relational model</li>
+    <li>Design MongoDB schemas using Mongoose with appropriate field types and validation</li>
+    <li>Perform CRUD operations on a MongoDB collection using Mongoose methods</li>
+    <li>Choose between embedding and referencing related data in document schemas</li>
+    <li>Construct basic aggregation pipelines to filter, group, and transform documents</li>
+  </ul>
+</section>
+
+<section id="document-databases-mongodb" aria-labelledby="document-databases-mongodb-h">
+  <h2 id="document-databases-mongodb-h">Document Databases &amp; MongoDB</h2>
+<p>A different philosophy — built on JSON, designed for flexibility</p>
+<aside class="note"><p>You just finished A4 — you can model data in tables, write SQL queries, and think in joins. This module asks: what if you didn't need to? MongoDB stores data as JSON documents. Everything changes — and some things get simpler.</p></aside>
+</section>
+
+<section id="two-philosophies" aria-labelledby="two-philosophies-h">
+  <h2 id="two-philosophies-h">Two Philosophies</h2>
+<aside class="note"><p>Relational (PostgreSQL)</p>
+<ul>
+<li>› Organises data into <strong>tables</strong>, rows, columns</li>
+<li>› <strong>Fixed schema</strong> — change it with <code>ALTER TABLE</code></li>
+<li>› Relations via <strong>foreign keys</strong> and <strong>JOINs</strong></li>
+<li>› Strong consistency and <strong>ACID</strong> by default</li>
+</ul></aside>
+<aside class="note"><p>Document (MongoDB)</p>
+<ul>
+<li>› Organises data into <strong>collections</strong> of documents (JSON objects)</li>
+<li>› <strong>Flexible schema</strong> — documents in the same collection can differ</li>
+<li>› Relations via <strong>embedding</strong> or <strong>references</strong></li>
+<li>› Horizontally scalable, schema <strong>evolves with your app</strong></li>
+</ul></aside>
+<aside class="note"><p>Neither is universally better — they solve different problems. This module is about understanding when each fits. The best developers know both.</p></aside>
+</section>
+
+<section id="what-a-document-looks-like" aria-labelledby="what-a-document-looks-like-h">
+  <h2 id="what-a-document-looks-like-h">What a Document Looks Like</h2>
+<figure><figcaption>books collection — one document</figcaption><pre><code>{
+  "_id":        "64f2a3b8c91e2d4f1a7b3c2d",
+  "title":      "The Pragmatic Programmer",
+  "author":     "Hunt &amp; Thomas",
+  "status":     "reading",
+  "pageCount":  352,
+  "tags":       ["engineering", "career"],
+  "reviews":    [
+    {
+      "rating": 5,
+      "note":   "Essential reading",
+      "date":   "2026-01-15"
+    }
+  ],
+  "createdAt":  "2026-03-01T09:00:00Z"
+}</code></pre></figure>
+<p>In PostgreSQL, this would need:</p>
+<ul>
+<li><strong>books</strong> &mdash; core fields table</li>
+<li><strong>book_tags</strong> &mdash; join table for the tags array</li>
+<li><strong>reviews</strong> &mdash; separate table for the nested reviews</li>
+</ul>
+<p>Reassembling the full record: <strong>2 JOINs</strong>.</p>
+<aside class="note"><p>In MongoDB, the data you store is the shape of your API response. No column-by-column assembly, no JOIN — return the document directly.</p></aside>
+</section>
+
+<section id="json-bson-json" aria-labelledby="json-bson-json-h">
+  <h2 id="json-bson-json-h">JSON → BSON → JSON</h2>
+<p>MongoDB stores data as <strong>BSON</strong> (Binary JSON) — a binary-encoded superset of JSON. The driver handles the conversion invisibly.</p>
+<pre><code>Your JS Object
+      →
+driver
+      BSON (binary)
+      →
+MongoDB stores
+      BSON (binary)
+      →
+driver reads
+      Your JS Object</code></pre>
+<p>What BSON adds over plain JSON:</p>
+<ul>
+<li><strong>ISODate</strong> &mdash; Typed dates — <code>ISODate("2026-03-01")</code> not a string. Stored and compared as actual timestamps.</li>
+<li><strong>ObjectId</strong> &mdash; Compact 12-byte unique ID — encodes a timestamp + process ID + counter. Fast to generate and index.</li>
+<li><strong>Int32/Int64</strong> &mdash; Explicit integer sizes — no ambiguity between integers and floats.</li>
+<li><strong>Binary</strong> &mdash; Raw bytes — store files, hashes, or encrypted fields natively.</li>
+</ul>
+<aside class="note"><p>You never write BSON — the MongoDB Node.js driver converts automatically. You work with plain JS objects throughout. new Date() stays a Date; no ISO string parsing needed.</p></aside>
+</section>
+
+<section id="mongodb-atlas-free-cloud-setup" aria-labelledby="mongodb-atlas-free-cloud-setup-h">
+  <h2 id="mongodb-atlas-free-cloud-setup-h">MongoDB Atlas: Free Cloud Setup</h2>
+<p><strong>MongoDB Atlas</strong> — managed cloud MongoDB. Free M0 cluster: 512 MB, never expires.</p>
+<ol>
+<li>Create account at <strong>cloud.mongodb.com</strong></li>
+<li>New Project → Build a Database → <strong>Free tier</strong></li>
+<li>Choose region → Connect → Allow IP → Copy connection string</li>
+</ol>
+<figure><figcaption>connection string anatomy</figcaption><pre><code>mongodb+srv://username:password@cluster.mongodb.net/mydb?retryWrites=true
+
+│             │         │          │               │        └─ options
+│             │         │          │               └─── database name
+│             │         │          └──────────────────── host (Atlas cluster)
+│             │         └─────────────────────────────── password
+│             └───────────────────────────────────────── username
+└─────────────────────────────────────────────────────── protocol (SRV)
+
+-- Alternative: local install
+$ brew install mongodb-community
+$ brew services start mongodb-community
+
+-- .env
+MONGODB_URI=mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster.mongodb.net/readinglist</code></pre></figure>
+<aside class="note"><span class="note-label">Gotcha</span><p>Never hard-code your connection string. Add MONGODB_URI to .env and add .env to .gitignore before your first commit.</p></aside>
+<aside class="note"><span class="note-label">Hands-on</span><p>AI prompt: I've set up a MongoDB Atlas free tier cluster. Write the Mongoose connection code for a Node.js Express app that reads MONGODB_URI from .env. — Atlas docs ↗</p></aside>
+</section>
+
+<section id="mongoose-adding-schema-to-flexibility" aria-labelledby="mongoose-adding-schema-to-flexibility-h">
+  <h2 id="mongoose-adding-schema-to-flexibility-h">Mongoose: Adding Schema to Flexibility</h2>
+<p>MongoDB is schema-flexible, but your app usually isn't. Mongoose adds <strong>validation</strong>, <strong>type coercion</strong>, and <strong>middleware</strong> on top of the raw driver.</p>
+<figure><figcaption>models/Book.js</figcaption><pre><code>import mongoose from 'mongoose';
+
+const bookSchema = new mongoose.Schema({
+  title:     { type: String,  required: true },
+  author:    { type: String,  required: true },
+  status:    { type: String,  enum: ['unread', 'reading', 'done'],
+               default: 'unread' },
+  pageCount: { type: Number,  min: 1 },
+  tags:      [String],
+  reviews:   [{
+    rating: { type: Number, min: 1, max: 5, required: true },
+    note:   String
+  }]
+}, { timestamps: true });
+
+export const Book = mongoose.model('Book', bookSchema);</code></pre></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>{ timestamps: true } automatically adds createdAt and updatedAt fields — you don't need to manage them manually.</p></aside>
+<aside class="note"><p>Mongoose generates _id (ObjectId) automatically. The model name 'Book' maps to the collection books (lowercased + pluralised).</p></aside>
+<aside class="note"><p>Compare to A4: enum here replaces PostgreSQL's CHECK (status IN (...)) constraint — same intent, different syntax.</p></aside>
+</section>
+
+<section id="crud-create-read" aria-labelledby="crud-create-read-h">
+  <h2 id="crud-create-read-h">CRUD: Create &amp; Read</h2>
+<figure><figcaption>create and read</figcaption><pre><code>// Create
+const book = await Book.create({ title, author, status });
+// → returns the saved document including _id and timestamps
+
+// Read all (with optional filter)
+const books = await Book.find({ status: 'reading' });
+const books = await Book.find({ status: 'reading' })
+                   .sort({ createdAt: -1 });
+
+// Read one
+const book = await Book.findById(id);
+if (!book) return res.status(404).json({ error: 'Not found' });</code></pre></figure>
+<aside class="note"><p>Book.find() returns plain JS objects — you can pass them directly to res.json(). No row-to-object mapping needed.</p></aside>
+<aside class="note"><p>Compare to PostgreSQL from A4: const {'{ rows }'} = await pool.query('SELECT * FROM books WHERE status=$1', ['reading']) — notice you had to unwrap rows. With Mongoose, the result IS your array.</p></aside>
+</section>
+
+<section id="crud-update-delete" aria-labelledby="crud-update-delete-h">
+  <h2 id="crud-update-delete-h">CRUD: Update &amp; Delete</h2>
+<figure><figcaption>update and delete</figcaption><pre><code>// Partial update — only change fields present in req.body
+const book = await Book.findByIdAndUpdate(
+  id,
+  { $set: req.body },
+  { new: true, runValidators: true }
+);
+
+// Delete
+const book = await Book.findByIdAndDelete(id);
+if (!book) return res.status(404).json({ error: 'Not found' });</code></pre></figure>
+<aside class="note"><p>{ new: true } returns the updated document — equivalent to RETURNING * in PostgreSQL.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>Always use $set in updates. Without it, MongoDB replaces the entire document with your update object — you'd lose all other fields.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>runValidators: true runs your Mongoose schema validators on update — they don't run by default on findByIdAndUpdate.</p></aside>
+</section>
+
+<section id="embed-vs-reference" aria-labelledby="embed-vs-reference-h">
+  <h2 id="embed-vs-reference-h">Embed vs Reference</h2>
+<p>This is <strong>the</strong> key design decision in MongoDB. Unlike PostgreSQL — where relationships always live in separate tables — you choose.</p>
+<aside class="note"><p>Embed (reviews inside book)</p>
+<pre><code>{
+  "title": "Pragmatic Programmer",
+  "reviews": [{
+    "rating": 5, "note": "Great"
+  }]
+}</code></pre>
+<ul>
+<li>✓ One database read gets everything</li>
+<li>✓ Atomic updates</li>
+<li>✗ Document grows over time</li>
+<li>✗ Can't query reviews independently</li>
+</ul></aside>
+<aside class="note"><p>Reference (sessions as separate collection)</p>
+<pre><code>// books collection
+{ "_id": "abc123", "title": "Pragmatic..." }
+// readingsessions collection
+{ "bookId": "abc123", "startedAt": "2026-01" }</code></pre>
+<ul>
+<li>✓ Sessions grow independently</li>
+<li>✓ Query sessions without loading books</li>
+<li>✗ Needs <code>$lookup</code> (JOIN equivalent)</li>
+</ul></aside>
+<aside class="note"><span class="note-label">Tip</span><p>Rule of thumb: Embed when data is always read together, bounded size (&lt; ~100 items), one-to-few relationship. Reference when data grows unboundedly, queried independently, or many-to-many. AI prompt: My reading list app has books and reading sessions (one book can have many sessions over time). Should I embed sessions in the book document or use a separate collection? What are the trade-offs for this specific case?</p></aside>
+</section>
+
+<section id="lookup-joining-collections" aria-labelledby="lookup-joining-collections-h">
+  <h2 id="lookup-joining-collections-h">$lookup: Joining Collections</h2>
+<p>When you use references, <code>$lookup</code> is MongoDB's JOIN equivalent — it runs inside an aggregation pipeline.</p>
+<figure><figcaption>$lookup aggregation</figcaption><pre><code>await Book.aggregate([
+  {
+    $lookup: {
+      from:         'readingsessions',  // collection name
+      localField:   '_id',
+      foreignField: 'bookId',
+      as:           'sessions'   // array field added to each book
+    }
+  },
+  {
+    $addFields: {
+      sessionCount: { $size: '$sessions' }
+    }
+  },
+  {
+    $project: {
+      title: 1, author: 1, sessionCount: 1, _id: 0
+    }
+  }
+]);</code></pre></figure>
+<aside class="note"><span class="note-label">Gotcha</span><p>If you find yourself writing $lookup for most of your queries, that's a signal your data might be better modelled in a relational database.</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Write a MongoDB aggregation that returns each book with the number of reading sessions and the total pages read across all sessions.</p></aside>
+<aside class="note"><p>Compare to A4: PostgreSQL's LEFT JOIN reading_sessions rs ON rs.book_id = b.id is the same idea — match a foreign key to a local field.</p></aside>
+</section>
+
+<section id="aggregation-pipelines" aria-labelledby="aggregation-pipelines-h">
+  <h2 id="aggregation-pipelines-h">Aggregation Pipelines</h2>
+<p>Documents flow through <strong>stages</strong>. Each stage transforms the set and passes it to the next.</p>
+<pre><code>Collection</code></pre>
+<p>→</p>
+<pre><code>$match</code></pre>
+<p>filter</p>
+<p>→</p>
+<pre><code>$group</code></pre>
+<p>group + calculate</p>
+<p>→</p>
+<pre><code>$sort</code></pre>
+<p>order</p>
+<p>→</p>
+<pre><code>$project</code></pre>
+<p>shape output</p>
+<p>→</p>
+<pre><code>Result</code></pre>
+<figure><figcaption>books by status</figcaption><pre><code>await Book.aggregate([
+  { $match:  { userId: currentUserId } },  // filter first — fast
+  { $group:  {
+      _id:      '$status',
+      count:    { $sum:  1 },
+      avgPages: { $avg:  '$pageCount' }
+  }},
+  { $sort:   { count: -1 } }
+]);</code></pre></figure>
+<aside class="note"><span class="note-label">Tip</span><p>Aggregation pipelines are the most complex part of MongoDB. This is where AI saves the most time — but always read each stage and ask why it's there.</p></aside>
+<aside class="note"><p>AI prompt: Explain this MongoDB aggregation pipeline to me stage by stage: [paste pipeline]</p></aside>
+</section>
+
+<section id="indexes-in-mongodb" aria-labelledby="indexes-in-mongodb-h">
+  <h2 id="indexes-in-mongodb-h">Indexes in MongoDB</h2>
+<p>Same concept as PostgreSQL — a pre-sorted structure for fast lookups. Without an index, MongoDB scans every document in the collection.</p>
+<figure><figcaption>defining indexes</figcaption><pre><code>// On the schema (recommended — keeps indexes with the model)
+bookSchema.index({ status: 1 });                // ascending
+bookSchema.index({ author: 1, title: 1 });    // compound
+bookSchema.index({ title: 'text' });           // full-text search
+
+// Or directly on the collection
+await Book.collection.createIndex({ userId: 1 });
+
+// Check if index is being used
+await Book.find({ status: 'reading' })
+           .explain('executionStats');</code></pre></figure>
+<ul>
+<li><strong>1</strong> &mdash; Ascending index</li>
+<li><strong>-1</strong> &mdash; Descending index</li>
+<li><strong>'text'</strong> &mdash; Full-text search index — supports <code>$text: { $search: "..." }</code></li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>Always index foreign reference fields (e.g. bookId in readingsessions) and fields you filter or sort on frequently.</p></aside>
+<aside class="note"><p>.explain('executionStats') shows whether your index is being used — equivalent to EXPLAIN ANALYSE in PostgreSQL.</p></aside>
+</section>
+
+<section id="when-to-choose-mongodb-vs-postgresql" aria-labelledby="when-to-choose-mongodb-vs-postgresql-h">
+  <h2 id="when-to-choose-mongodb-vs-postgresql-h">When to Choose MongoDB vs PostgreSQL</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Scenario</th><th scope="col">PostgreSQL</th><th scope="col">MongoDB</th></tr></thead><tbody><tr><th scope="row">Fixed, well-understood schema</th><td>✓</td><td></td></tr><tr><th scope="row">Rapidly evolving schema</th><td></td><td>✓</td></tr><tr><th scope="row">Complex multi-table JOINs</th><td>✓</td><td></td></tr><tr><th scope="row">Hierarchical / nested data</th><td></td><td>✓</td></tr><tr><th scope="row">Financial / transactional data</th><td>✓</td><td></td></tr><tr><th scope="row">Content, catalogs, CMS</th><td></td><td>✓</td></tr><tr><th scope="row">Team strong in SQL</th><td>✓</td><td></td></tr><tr><th scope="row">Node.js API + JSON throughout</th><td></td><td>✓</td></tr></tbody></table></div>
+<aside class="note"><p>PostgreSQL also has JSONB columns — a powerful middle ground. You get relational structure for most fields, with schema-free flexibility for a specific field.</p></aside>
+<aside class="note"><p>Many production systems use both. User accounts + billing in PostgreSQL; product catalog + content in MongoDB.</p></aside>
+</section>
+
+<section id="schema-design-with-ai" aria-labelledby="schema-design-with-ai-h">
+  <h2 id="schema-design-with-ai-h">Schema Design with AI</h2>
+<figure><figcaption>prompt pattern for Mongoose schema design</figcaption><pre><code>I'm building a reading list app with Node.js,
+Express, and MongoDB (Mongoose).
+
+I need:
+- Users (email, hashed password, created date)
+- Books per user (title, author, status, page count, tags)
+- Reading sessions (which book, start date, end date, notes)
+
+Books can have embedded reviews (max ~20 per book).
+Should I embed reading sessions in the book document
+or use a separate collection?
+
+Provide Mongoose schemas with: required fields, enums
+for constrained values, timestamps, appropriate indexes,
+and a brief explanation of your embed/reference decisions.</code></pre></figure>
+<p>What to check in AI-generated Mongoose schemas:</p>
+<ul>
+<li><strong>required</strong> &mdash; <code>required: true</code> on every mandatory field?</li>
+<li><strong>enum</strong> &mdash; <code>enum</code> used for status/type fields?</li>
+<li><strong>timestamps</strong> &mdash; <code>{ timestamps: true }</code> set on the schema options?</li>
+<li><strong>indexes</strong> &mdash; Indexes defined for userId and other filtered fields?</li>
+<li><strong>embed/ref</strong> &mdash; Embed vs reference decision matches the stated access patterns?</li>
+</ul>
+</section>
+
+<section id="mongodb-and-ai-a-natural-partnership" aria-labelledby="mongodb-and-ai-a-natural-partnership-h">
+  <h2 id="mongodb-and-ai-a-natural-partnership-h">MongoDB and AI: a Natural Partnership</h2>
+<p>JSON all the way down</p>
+<p>Your API receives JSON. MongoDB stores JSON. AI thinks in JSON. Schema design prompts feel natural — paste a sample document and ask "write a Mongoose schema for this". The language of your stack and the language of your AI tool are the same.</p>
+<p>Aggregation pipelines</p>
+<p>The most powerful — and most complex — feature of MongoDB. AI generates correct pipelines quickly. Your job: read each <code>$stage</code>, understand what it does to the data, and ask "what would happen if I removed this stage?" Active engagement beats passive acceptance.</p>
+<p>Embed vs reference is a design conversation</p>
+<p>This isn't a syntax question — it's a judgement about access patterns and growth. Describe your app's query patterns to AI and ask it to reason through the trade-offs. Push back: "What if the number of sessions per book grows to thousands?"</p>
+<aside class="note"><p>Every AI-generated schema encodes assumptions about your data. Find those assumptions. If they're wrong, the schema is wrong — even if it looks correct.</p></aside>
+</section>
+
+<section id="quick-reference" aria-labelledby="quick-reference-h">
+  <h2 id="quick-reference-h">Quick Reference</h2>
+<p>Mongoose Methods</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Method</th><th scope="col">What it does</th></tr></thead><tbody><tr><th scope="row">Model.create(data)</th><td>Insert document</td></tr><tr><th scope="row">Model.find(filter)</th><td>Find many</td></tr><tr><th scope="row">Model.findById(id)</th><td>Find by _id</td></tr><tr><th scope="row">Model.findOne(filter)</th><td>Find first match</td></tr><tr><th scope="row">Model.findByIdAndUpdate(id, {$set:…}, {new:true})</th><td>Partial update</td></tr><tr><th scope="row">Model.findByIdAndDelete(id)</th><td>Delete</td></tr><tr><th scope="row">Model.countDocuments(filter)</th><td>Count matching</td></tr><tr><th scope="row">Model.aggregate([…])</th><td>Run pipeline</td></tr></tbody></table></div>
+<p>Common Operators</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Operator</th><th scope="col">What it does</th></tr></thead><tbody><tr><th scope="row">$set</th><td>Update specific fields</td></tr><tr><th scope="row">$push</th><td>Add item to array</td></tr><tr><th scope="row">$pull</th><td>Remove from array</td></tr><tr><th scope="row">$match</th><td>Filter (in pipeline)</td></tr><tr><th scope="row">$group</th><td>Group + aggregate</td></tr><tr><th scope="row">$lookup</th><td>Join collection</td></tr><tr><th scope="row">$sort</th><td>Sort documents</td></tr><tr><th scope="row">$project</th><td>Shape output fields</td></tr></tbody></table></div>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../mongodb-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Design a Mongoose schema <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Design a Mongoose schema for a blog post (title, body, author, tags, publishedAt). Add validation: title required, publishedAt defaults to now. How would you model comments — embed or reference?
+      <ul><li>Your schema compiles without errors in Mongoose</li><li>At least two fields have explicit validation rules (required, min, max, enum, etc.)</li><li>You gave a reasoned answer about embed vs reference for comments with a trade-off</li></ul></dd></div>
+    <div><dt>Aggregation pipeline <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Write a MongoDB aggregation that groups documents by a field and counts them. Use Compass or mongosh. What does $group do, and how does it compare to SQL GROUP BY?
+      <ul><li>Your pipeline produces the correct grouped output</li><li>You can explain what $group and $sum do in isolation</li><li>You can name one meaningful difference between MongoDB aggregation and SQL GROUP BY</li></ul></dd></div>
+    <div><dt>SQL vs document model <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>For the same data (e.g. a product catalogue with variants), sketch both a relational schema and a MongoDB document structure. What is the main trade-off between the two approaches?
+      <ul><li>You drew (even roughly) both data structures for the same domain</li><li>You identified the main trade-off (schema flexibility vs join efficiency, or similar)</li><li>Your answer goes beyond "MongoDB is flexible" to a concrete scenario</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calling APIs in n8n — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">E3 &middot; AI Agents & Automation</p>
+  <h1>Calling APIs in n8n</h1>
+  <p class="lede">Login for JWT, full CRUD, data mapping, debugging errors</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../n8n-api-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#what-we-re-building">What We're Building</a></li>
+    <li><a href="#login-post-auth-login">Login: POST /auth/login</a></li>
+    <li><a href="#passing-the-token-to-protected-nodes">Passing the Token to Protected Nodes</a></li>
+    <li><a href="#get-api-books-list-and-filter">GET /api/books — List and Filter</a></li>
+    <li><a href="#post-api-books-creating-a-book">POST /api/books — Creating a Book</a></li>
+    <li><a href="#patch-and-delete-modifying-records">PATCH and DELETE — Modifying Records</a></li>
+    <li><a href="#data-mapping-transforming-data-between-nodes">Data Mapping: Transforming Data Between Nodes</a></li>
+    <li><a href="#the-set-node-rename-extract-compute">The Set Node: Rename, Extract, Compute</a></li>
+    <li><a href="#code-node-and-aggregate">Code Node and Aggregate</a></li>
+    <li><a href="#the-errors-you-will-actually-hit">The Errors You Will Actually Hit</a></li>
+    <li><a href="#pin-data-test-nodes-without-running-the-whole-workflow">Pin Data: Test Nodes Without Running the Whole Workflow</a></li>
+    <li><a href="#what-you-built-with-vs-what-you-learned">What You Built With vs What You Learned</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Build an n8n workflow that authenticates against a JWT-protected REST API at runtime</li>
+    <li>Carry a JWT through a multi-node workflow using named-node expressions</li>
+    <li>Perform all four CRUD operations (GET, POST, PATCH, DELETE) via HTTP Request nodes with expressions</li>
+    <li>Use Set, Code, and Aggregate nodes to reshape and summarise item data between nodes</li>
+    <li>Diagnose and fix the four most common n8n API errors: 401, 404, ECONNREFUSED, and expression errors</li>
+  </ul>
+</section>
+
+<section id="what-we-re-building" aria-labelledby="what-we-re-building-h">
+  <h2 id="what-we-re-building-h">What We're Building</h2>
+<p>By the end of this deck you will have a working n8n workflow that authenticates against your Reading List API and performs full CRUD. This is the foundation every subsequent E-track workflow builds on.</p>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Webhook (Manual trigger) → Login (POST /auth/login) → Set (Extract token) → Get Books (GET /api/books) → Split Out (Per book) → Update (PATCH /api/books/:id)</p></figure>
+<aside class="note"><p>Why not just use a hardcoded token? Tokens expire. A workflow that logs in at runtime always has a fresh token — no manual credential rotation. This is the production-correct pattern.</p></aside>
+<aside class="note"><p>Prerequisites: Your Reading List API must be running at http://localhost:3001 with at least one registered user and a few books. If using Railway, substitute the production URL.</p></aside>
+</section>
+
+<section id="login-post-auth-login" aria-labelledby="login-post-auth-login-h">
+  <h2 id="login-post-auth-login-h">Login: POST /auth/login</h2>
+<p>The first node in any authenticated workflow logs in and captures the token. The response goes into the <code>messages</code> array — downstream nodes read from it via expressions.</p>
+<aside class="note"><p>HTTP Request node config</p></aside>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Method</th><td><code>POST</code></td></tr><tr><th scope="row">URL</th><td><code>http://localhost:3001/auth/login</code></td></tr><tr><th scope="row">Authentication</th><td>None (public endpoint)</td></tr><tr><th scope="row">Body Content Type</th><td>JSON</td></tr><tr><th scope="row">Body</th><td><code>{ "email": "you@example.com", "password": "..." }</code></td></tr></tbody></table></div>
+<aside class="note"><p>Response you receive</p></aside>
+<pre><code>{
+  json: {
+    token: "eyJhbGciOiJIUzI1NiIs..."
+  }
+}</code></pre>
+<aside class="note"><p>Access it downstream: {{ $('Login').item.json.token }}</p></aside>
+<aside class="note"><p>Naming nodes matters. Give the login node a clear name like "Login" — then any downstream node can reference $('Login').item.json.token without ambiguity. Unnamed nodes default to "HTTP Request", "HTTP Request1", etc. — fragile and hard to read.</p></aside>
+</section>
+
+<section id="passing-the-token-to-protected-nodes" aria-labelledby="passing-the-token-to-protected-nodes-h">
+  <h2 id="passing-the-token-to-protected-nodes-h">Passing the Token to Protected Nodes</h2>
+<p>There are two ways to carry the JWT forward to protected API nodes. The first is cleaner; the second works but is fragile if the workflow grows.</p>
+<aside class="note"><p>Option A — Expression in each node (recommended)</p></aside>
+<p>In each HTTP Request node that needs auth, set the <strong>Header Auth</strong> credential type to "None" and instead add a custom Header manually:</p>
+<pre><code>Header name:  Authorization
+Header value: Bearer {{ $('Login').item.json.token }}</code></pre>
+<p>The expression evaluates fresh on every execution — always uses the token from the current run's login step.</p>
+<aside class="note"><p>Option B — Set node to extract token once</p></aside>
+<p>Add a <strong>Set</strong> node after Login. Set a field <code>token</code> = <code>{{ $json.token }}</code>. Subsequent nodes reference <code>{{ $('Set').item.json.token }}</code>. Useful when many nodes need the same value — change the Set node, not every consumer.</p>
+<aside class="note"><p>In large workflows, a Set node acting as a "variables" step improves maintainability — one place to update when the field name changes.</p></aside>
+</section>
+
+<section id="get-api-books-list-and-filter" aria-labelledby="get-api-books-list-and-filter-h">
+  <h2 id="get-api-books-list-and-filter-h">GET /api/books — List and Filter</h2>
+<p>The Reading List API supports a <code>?status=</code> query parameter. Use it in n8n by adding a Query Parameter field — n8n URL-encodes it automatically.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Method</th><td><code>GET</code></td></tr><tr><th scope="row">URL</th><td><code>http://localhost:3001/api/books</code></td></tr><tr><th scope="row">Auth header</th><td><code>Bearer {{ $('Login').item.json.token }}</code></td></tr><tr><th scope="row">Query Parameters</th><td>Name: <code>status</code> · Value: <code>unread</code></td></tr><tr><th scope="row">Response format</th><td>JSON</td></tr></tbody></table></div>
+<aside class="note"><p>To make the filter dynamic — driven by a previous node — use an expression for the query parameter value: {{ $json.filter }}</p></aside>
+<aside class="note"><p>What comes back</p></aside>
+<pre><code>{
+  json: {
+    books: [
+      { id: 1, title: "DDIA",
+        author: "Kleppmann",
+        status: "unread" },
+      { id: 3, title: "SICP",
+        author: "Abelson",
+        status: "unread" }
+    ]
+  }
+}
+
+Add Split Out after this →
+Field: books
+→ one item per book</code></pre>
+</section>
+
+<section id="post-api-books-creating-a-book" aria-labelledby="post-api-books-creating-a-book-h">
+  <h2 id="post-api-books-creating-a-book-h">POST /api/books — Creating a Book</h2>
+<p>POST sends a JSON body. The fields in the body can be static values, expressions from previous nodes, or a mix of both.</p>
+<aside class="note"><p>HTTP Request node config</p></aside>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Method</th><td><code>POST</code></td></tr><tr><th scope="row">URL</th><td><code>http://localhost:3001/api/books</code></td></tr><tr><th scope="row">Auth</th><td>Bearer token header (as before)</td></tr><tr><th scope="row">Body type</th><td>JSON</td></tr><tr><th scope="row">Body fields</th><td>title, author, status, year</td></tr></tbody></table></div>
+<aside class="note"><p>Dynamic from a previous node</p></aside>
+<pre><code>Body (JSON fields):
+  title:  {{ $json.title }}
+  author: {{ $json.author }}
+  status: unread      ← static
+  year:   {{ $json.year }}
+
+Result: { "id": 7, "title": "...",
+  "author": "...", "status": "unread",
+  ... }
+
+The API returns RETURNING * —
+full created record is available
+in $json on the next node</code></pre>
+<aside class="note"><p>Batch inserts: If you have multiple books to create (from a Split Out), place the HTTP Request node after the Split Out. n8n runs one POST per item automatically — no loop needed.</p></aside>
+</section>
+
+<section id="patch-and-delete-modifying-records" aria-labelledby="patch-and-delete-modifying-records-h">
+  <h2 id="patch-and-delete-modifying-records-h">PATCH and DELETE — Modifying Records</h2>
+<aside class="note"><p>PATCH /api/books/:id</p></aside>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Method</th><td><code>PATCH</code></td></tr><tr><th scope="row">URL</th><td><code>http://localhost:3001/api/books/{{ $json.id }}</code></td></tr><tr><th scope="row">Body fields</th><td>Only the fields you want to change</td></tr></tbody></table></div>
+<aside class="note"><p>The Reading List API uses COALESCE — omitted fields keep their current value. Send only status: "reading" to update just the status.</p></aside>
+<aside class="note"><span class="note-label">Warning</span><p>DELETE /api/books/:id — add a safety gate</p></aside>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Method</th><td><code>DELETE</code></td></tr><tr><th scope="row">URL</th><td><code>http://localhost:3001/api/books/{{ $json.id }}</code></td></tr><tr><th scope="row">Body</th><td>None</td></tr></tbody></table></div>
+<aside class="note"><span class="note-label">Warning</span><p>Always add a Wait node or IF node before DELETE. A DELETE is irreversible. Confirm the ID is correct — log it, or require human approval (see E6).</p></aside>
+<aside class="note"><p>DELETE returns { "deleted": 7 }. Use an IF node to check: {{ $json.deleted }} is truthy → success branch; else → error branch.</p></aside>
+</section>
+
+<section id="data-mapping-transforming-data-between-nodes" aria-labelledby="data-mapping-transforming-data-between-nodes-h">
+  <h2 id="data-mapping-transforming-data-between-nodes-h">Data Mapping: Transforming Data Between Nodes</h2>
+<p class="lede">Set, Code, Aggregate — the three nodes for reshaping what flows between steps.</p>
+</section>
+
+<section id="the-set-node-rename-extract-compute" aria-labelledby="the-set-node-rename-extract-compute-h">
+  <h2 id="the-set-node-rename-extract-compute-h">The Set Node: Rename, Extract, Compute</h2>
+<p>The Set node (also called "Edit Fields") modifies the item's JSON without calling an external service. Use it to rename fields, compute derived values, or drop fields you no longer need.</p>
+<aside class="note"><p>Common uses</p></aside>
+<div class="table-scroll"><table><thead><tr><th scope="col">Task</th><th scope="col">Set node field</th></tr></thead><tbody><tr><th scope="row">Rename <code>id</code> to <code>bookId</code></th><td>bookId = <code>{{ $json.id }}</code></td></tr><tr><th scope="row">Build a display string</th><td>label = <code>{{ $json.title }} by {{ $json.author }}</code></td></tr><tr><th scope="row">Uppercase status</th><td>status = <code>{{ $json.status.toUpperCase() }}</code></td></tr><tr><th scope="row">Flag overdue reads</th><td>overdue = <code>{{ $json.status === 'reading' &amp;&amp; $json.year &lt; 2023 }}</code></td></tr></tbody></table></div>
+<aside class="note"><p>"Keep Only Set Fields" toggle</p></aside>
+<p>By default, Set passes all existing fields through and adds/overwrites the ones you specify. Enable <strong>Keep Only Set Fields</strong> to strip everything else — useful when the downstream node only needs two specific fields from a large API response.</p>
+<aside class="note"><p>Example: API returns 12 fields per book. The Slack node only needs title and status. Set both fields, enable Keep Only — the item is now clean and minimal.</p></aside>
+</section>
+
+<section id="code-node-and-aggregate" aria-labelledby="code-node-and-aggregate-h">
+  <h2 id="code-node-and-aggregate-h">Code Node and Aggregate</h2>
+<p>For logic the Set node cannot express, use the Code node (JavaScript). For combining multiple items into one summary, use Aggregate.</p>
+<aside class="note"><p>Code node — process all items</p></aside>
+<pre><code>// Mode: "Run once for all items"
+// $input.all() returns all items
+const books = $input.all()
+  .map(i =&gt; i.json);
+
+const summary = books
+  .map(b =&gt; `• ${b.title}`)
+  .join('\n');
+
+return [{ json: {
+  count: books.length,
+  list: summary
+}}];</code></pre>
+<aside class="note"><p>Aggregate node — no-code summary</p></aside>
+<p>Aggregate collects all items flowing through and outputs one item. Common modes:</p>
+<ul>
+<li><strong>→</strong> &mdash; <strong>Append to array</strong>: collect all <code>title</code> fields into one array</li>
+<li><strong>→</strong> &mdash; <strong>Concatenate</strong>: join all <code>label</code> strings with a separator</li>
+<li><strong>→</strong> &mdash; <strong>Count</strong>: output the number of items received</li>
+</ul>
+<aside class="note"><p>Use Aggregate when: Split Out created multiple items and you need to recombine them before sending one email or one API call.</p></aside>
+</section>
+
+<section id="the-errors-you-will-actually-hit" aria-labelledby="the-errors-you-will-actually-hit-h">
+  <h2 id="the-errors-you-will-actually-hit-h">The Errors You Will Actually Hit</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Error</th><th scope="col">What it means</th><th scope="col">Fix</th></tr></thead><tbody><tr><th scope="row"><strong>401 Unauthorized</strong></th><td>JWT missing, malformed, or expired</td><td>Check: (1) header name is exactly <code>Authorization</code>, (2) value starts <code>Bearer</code> with a space, (3) the login step ran and <code>$('Login').item.json.token</code> is not undefined</td></tr><tr><th scope="row"><strong>404 Not Found</strong></th><td>URL is wrong or ID doesn't exist</td><td>Pin the node output and check the URL — log <code>{{ $json.id }}</code> with a Set node before the request to verify the value</td></tr><tr><th scope="row"><strong>Connection refused / ECONNREFUSED</strong></th><td>The API server is not running at that address</td><td>Check the API is running (<code>curl http://localhost:3001/api/health</code>). If using n8n in Docker, <code>localhost</code> refers to the container — use <code>host.docker.internal</code> instead.</td></tr><tr><th scope="row"><strong>Expression error: Cannot read property</strong></th><td>An expression references a field that doesn't exist at that point in the flow</td><td>Pin the output of the previous node and inspect the actual JSON shape. The field name or nesting may differ from what you expected.</td></tr><tr><th scope="row"><strong>409 Conflict</strong></th><td>UNIQUE constraint violation — item already exists</td><td>Add an IF node before POST to check whether the book already exists. Or use an upsert pattern if the API supports it.</td></tr></tbody></table></div>
+</section>
+
+<section id="pin-data-test-nodes-without-running-the-whole-workflow" aria-labelledby="pin-data-test-nodes-without-running-the-whole-workflow-h">
+  <h2 id="pin-data-test-nodes-without-running-the-whole-workflow-h">Pin Data: Test Nodes Without Running the Whole Workflow</h2>
+<p>When building incrementally, you do not want to call the login endpoint every time you adjust a downstream node. <strong>Pinning</strong> freezes a node's output so downstream nodes use it without the node re-executing.</p>
+<ul>
+<li><strong>1</strong> &mdash; <strong>Run the workflow once</strong> to populate real data through all nodes.</li>
+<li><strong>2</strong> &mdash; <strong>Click the node</strong> you want to freeze → in the output panel → click the <strong>pin icon</strong>. The node now shows a pin badge.</li>
+<li><strong>3</strong> &mdash; <strong>Edit downstream nodes</strong> freely. Re-run from the pinned node — the login is not called again; the pinned data flows through as if it had just executed.</li>
+<li><strong>4</strong> &mdash; <strong>Unpin</strong> when you are happy with the downstream logic and want to run end-to-end again.</li>
+</ul>
+<aside class="note"><p>Pin the login node while working on data transformation — you avoid repeatedly hitting the auth endpoint and can inspect the exact token and structure being used.</p></aside>
+</section>
+
+<section id="what-you-built-with-vs-what-you-learned" aria-labelledby="what-you-built-with-vs-what-you-learned-h">
+  <h2 id="what-you-built-with-vs-what-you-learned-h">What You Built With vs What You Learned</h2>
+<p>If you used an AI assistant to generate any part of this workflow, answer these before moving to E4.</p>
+<blockquote class="prompt"><span class="note-label">Questions to answer without re-reading the AI's explanation</span><ul>
+<li>Where does the JWT come from in your workflow? Trace the exact expression that carries it to each protected node.</li>
+<li>Why is Split Out needed after GET /api/books? What is the shape of the data before and after?</li>
+<li>In the PATCH node, what expression builds the URL? What happens if <code>$json.id</code> is undefined?</li>
+<li>Name one place in your workflow where a mistake would cause a 401. Name one place where it would cause a 404.</li>
+<li>What does pinning a node do, and when would you use it?</li>
+</ul></blockquote>
+<aside class="note"><p>Up next — E4: The AI Agent Node. Your workflow now has a working API connection. E4 adds an AI Agent node on top — turning the workflow into an agent that can reason about which books to update, draft summaries, and respond to natural-language queries.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../n8n-api-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Build the authenticated CRUD workflow <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Build the complete workflow shown in slide 2: Webhook → Login → Set (extract token) → GET /api/books → Split Out → PATCH each book's status to "reading". Use expressions throughout. Verify with a GET at the end that statuses changed.
+      <ul><li>The JWT is obtained at runtime via POST /auth/login — no hardcoded token</li><li>Split Out correctly creates one item per book from the books array</li><li>The PATCH URL uses {{ $json.id }} to target each book individually</li></ul></dd></div>
+    <div><dt>Add a filter and summary <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Extend the workflow: after GET /api/books, add an IF node to filter to only books with status="unread". Then add an Aggregate node to count the unread books and build a formatted list of their titles. Log the result.
+      <ul><li>The IF node correctly filters on $json.status === "unread" (or equivalent expression)</li><li>The Aggregate node produces one output item with a count and formatted list</li><li>You can explain why Aggregate is needed here instead of just using Split Out output directly</li></ul></dd></div>
+    <div><dt>Debugging: what went wrong? <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>During the build, you will hit at least one error. Document it: what was the error, what did you check first, and what fixed it? Use the debugging patterns from slide 11.
+      <ul><li>You named the specific error message or HTTP status code</li><li>You described what you checked to diagnose it (pinning, inspecting node output, etc.)</li><li>Your fix addresses the root cause, not just the symptom</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

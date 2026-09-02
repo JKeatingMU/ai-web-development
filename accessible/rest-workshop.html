@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REST &amp; HTTP APIs — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">A6 &middot; Foundations</p>
+  <h1>REST &amp; HTTP APIs</h1>
+  <p class="lede">Methods, URI design, status codes, statelessness, error design</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../rest-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#rest-http-apis">REST &amp; HTTP APIs</a></li>
+    <li><a href="#what-is-an-api">What is an API?</a></li>
+    <li><a href="#rest-six-constraints">REST: Six Constraints</a></li>
+    <li><a href="#the-uniform-interface-in-practice">The Uniform Interface in Practice</a></li>
+    <li><a href="#resources-and-uris">Resources and URIs</a></li>
+    <li><a href="#http-methods-in-depth">HTTP Methods in Depth</a></li>
+    <li><a href="#status-codes-the-full-picture">Status Codes: The Full Picture</a></li>
+    <li><a href="#request-response-anatomy">Request &amp; Response Anatomy</a></li>
+    <li><a href="#query-strings-filtering-pagination">Query Strings, Filtering &amp; Pagination</a></li>
+    <li><a href="#statelessness-in-practice">Statelessness in Practice</a></li>
+    <li><a href="#content-negotiation-headers">Content Negotiation &amp; Headers</a></li>
+    <li><a href="#error-response-design">Error Response Design</a></li>
+    <li><a href="#rest-vs-alternatives">REST vs Alternatives</a></li>
+    <li><a href="#versioning-documentation">Versioning &amp; Documentation</a></li>
+    <li><a href="#rest-is-a-design-language-ai-helps-you-speak-it">REST is a design language — AI helps you speak it</a></li>
+    <li><a href="#quick-reference">Quick Reference</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the six REST constraints and their practical implications for API design</li>
+    <li>Design clean, resource-oriented URI structures following REST conventions</li>
+    <li>Select appropriate HTTP methods and status codes for each API operation</li>
+    <li>Explain statelessness and its implications for session management and scalability</li>
+    <li>Design consistent, informative error responses that distinguish client from server errors</li>
+  </ul>
+</section>
+
+<section id="rest-http-apis" aria-labelledby="rest-http-apis-h">
+  <h2 id="rest-http-apis-h">REST &amp; HTTP APIs</h2>
+<p>The design principles behind every API you've used in this course</p>
+<aside class="note"><p>In this course, you've already built and consumed a REST API. This module explains why it's designed the way it is.</p></aside>
+</section>
+
+<section id="what-is-an-api" aria-labelledby="what-is-an-api-h">
+  <h2 id="what-is-an-api-h">What is an API?</h2>
+<p><strong>API</strong> = Application Programming Interface — a defined contract for how software talks to software. A <strong>Web API</strong> is an API that communicates over HTTP.</p>
+<p>Think of a restaurant menu: it's a contract — you don't go into the kitchen, you order from the menu. The chef doesn't ask how you want the dish cooked beyond what the menu specifies. The API is the menu.</p>
+<p>Your code can create repos, open issues, read commit history — all via HTTP requests to GitHub's defined endpoints.</p>
+<p>Charge cards, create subscriptions, issue refunds — your app sends HTTP requests; Stripe handles the banking.</p>
+<p>Create books, update reading status, query by filter — the API you built in the B-track.</p>
+<aside class="note"><p>In this course, you've already built and consumed a REST API. This module explains why it's designed the way it is.</p></aside>
+</section>
+
+<section id="rest-six-constraints" aria-labelledby="rest-six-constraints-h">
+  <h2 id="rest-six-constraints-h">REST: Six Constraints</h2>
+<p>REST (Representational State Transfer) is an architectural <em>style</em> defined by 6 constraints — not a standard or a protocol.</p>
+<ul>
+<li><strong>1 · Client–server</strong> &mdash; UI and data storage are separated; each can evolve independently.</li>
+<li><strong>2 · Stateless</strong> &mdash; Every request contains all information needed; server stores no session state.</li>
+<li><strong>3 · Cacheable</strong> &mdash; Responses can declare themselves cacheable; improves performance at scale.</li>
+<li><strong>4 · Uniform interface</strong> &mdash; Consistent, predictable URLs and methods — the core of REST.</li>
+<li><strong>5 · Layered system</strong> &mdash; Client can't tell if it's talking to the real server or a proxy/load balancer.</li>
+<li><strong>6 · Code on demand</strong> &mdash; (Optional) Server can send executable code (e.g. JavaScript) to the client.</li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>Most 'REST APIs' only implement constraints 1, 2, and 4. That's still fine — REST is a spectrum, not a binary.</p></aside>
+</section>
+
+<section id="the-uniform-interface-in-practice" aria-labelledby="the-uniform-interface-in-practice-h">
+  <h2 id="the-uniform-interface-in-practice-h">The Uniform Interface in Practice</h2>
+<p>Constraint 4 is the one that matters most day-to-day. It has four sub-constraints:</p>
+<ul>
+<li><strong>Resource IDs</strong> &mdash; Resources are identified by URI — <code>/api/books/123</code>, not <code>/getBook?id=123</code>.</li>
+<li><strong>Representations</strong> &mdash; You receive a JSON representation of a book; you send a modified JSON to update it — you never manipulate the resource directly.</li>
+<li><strong>Self-descriptive</strong> &mdash; Each request/response includes enough information to describe how to process it (Content-Type, status codes, etc.).</li>
+<li><strong>HATEOAS</strong> &mdash; Hypermedia as the Engine of Application State — responses include links to related actions. Most APIs skip this.</li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>The reason your API uses /api/books (plural noun) and HTTP verbs rather than /api/getBooks or /api/createBook — that's the Uniform Interface constraint.</p></aside>
+</section>
+
+<section id="resources-and-uris" aria-labelledby="resources-and-uris-h">
+  <h2 id="resources-and-uris-h">Resources and URIs</h2>
+<p>Resource design is the first design decision when building an API.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">✓ Good</th><th scope="col">✗ Avoid</th></tr></thead><tbody><tr><th scope="row"><code>GET /api/books</code></th><td><code>GET /api/getBooks</code></td></tr><tr><th scope="row"><code>POST /api/books</code></th><td><code>POST /api/createBook</code></td></tr><tr><th scope="row"><code>GET /api/books/123</code></th><td><code>GET /api/book?id=123</code></td></tr><tr><th scope="row"><code>PATCH /api/books/123</code></th><td><code>POST /api/updateBook/123</code></td></tr><tr><th scope="row"><code>DELETE /api/books/123</code></th><td><code>POST /api/deleteBook</code></td></tr><tr><th scope="row"><code>GET /api/users/42/books</code></th><td><code>GET /api/getUserBooks?userId=42</code></td></tr></tbody></table></div>
+<ul>
+<li><strong>Nouns</strong> &mdash; Not verbs — the HTTP method IS the verb.</li>
+<li><strong>Plural</strong> &mdash; Collections use plural: <code>/books</code>, <code>/users</code>.</li>
+<li><strong>Nested</strong> &mdash; Use nesting for ownership: <code>/users/42/books</code>.</li>
+<li><strong>Lowercase</strong> &mdash; Hyphens not underscores: <code>/reading-sessions</code>.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Design the URI structure for a REST API that manages users, their reading lists, and reading sessions. Follow REST conventions.</p></aside>
+</section>
+
+<section id="http-methods-in-depth" aria-labelledby="http-methods-in-depth-h">
+  <h2 id="http-methods-in-depth-h">HTTP Methods in Depth</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Method</th><th scope="col">Safe?</th><th scope="col">Idempotent?</th><th scope="col">Body?</th><th scope="col">Use for</th></tr></thead><tbody><tr><th scope="row"><code>GET</code></th><td></td><td></td><td>No</td><td>Retrieve a resource or collection</td></tr><tr><th scope="row"><code>POST</code></th><td></td><td></td><td>Yes</td><td>Create a new resource</td></tr><tr><th scope="row"><code>PUT</code></th><td></td><td></td><td>Yes</td><td>Replace a resource entirely</td></tr><tr><th scope="row"><code>PATCH</code></th><td></td><td>✗*</td><td>Yes</td><td>Partial update (modify specific fields)</td></tr><tr><th scope="row"><code>DELETE</code></th><td></td><td></td><td>Rarely</td><td>Delete a resource</td></tr></tbody></table></div>
+<aside class="note"><p>Safe : doesn't modify server state — can be called freely, cached, prefetched by browsers.</p></aside>
+<aside class="note"><p>Idempotent : calling it N times has the same effect as calling it once — important for retry logic.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>Your Reading List API uses PATCH for updates (not PUT ) because it only updates the fields you send — thanks to COALESCE($2, title) in PostgreSQL or $set in MongoDB.</p></aside>
+</section>
+
+<section id="status-codes-the-full-picture" aria-labelledby="status-codes-the-full-picture-h">
+  <h2 id="status-codes-the-full-picture-h">Status Codes: The Full Picture</h2>
+<p>2xx — Success</p>
+<div class="table-scroll"><table><thead><tr><th scope="col"></th><th scope="col">GET, PATCH, DELETE succeeded</th></tr></thead><tbody><tr><th scope="row"></th><td>GET, PATCH, DELETE succeeded</td></tr><tr><th scope="row"></th><td>POST created a resource — include <code>Location</code> header with the new URL</td></tr><tr><th scope="row"></th><td>Success with no body — common for DELETE</td></tr></tbody></table></div>
+<p>3xx — Redirection</p>
+<div class="table-scroll"><table><thead><tr><th scope="col"></th><th scope="col">Resource has a new permanent URL</th></tr></thead><tbody><tr><th scope="row"></th><td>Resource has a new permanent URL</td></tr><tr><th scope="row"></th><td>Cached response is still valid</td></tr></tbody></table></div>
+<p>4xx — Client Errors</p>
+<div class="table-scroll"><table><thead><tr><th scope="col"></th><th scope="col">Malformed body or missing required field</th></tr></thead><tbody><tr><th scope="row"></th><td>Malformed body or missing required field</td></tr><tr><th scope="row"></th><td>Not authenticated — no or invalid token</td></tr><tr><th scope="row"></th><td>Authenticated but not allowed</td></tr><tr><th scope="row"></th><td>Resource doesn't exist</td></tr><tr><th scope="row"></th><td>Duplicate unique field (email already registered)</td></tr><tr><th scope="row"></th><td>Syntactically valid but semantically wrong (failed validation)</td></tr></tbody></table></div>
+<p>5xx — Server Errors</p>
+<div class="table-scroll"><table><thead><tr><th scope="col"></th><th scope="col">Unhandled exception — something crashed</th></tr></thead><tbody><tr><th scope="row"></th><td>Unhandled exception — something crashed</td></tr><tr><th scope="row"></th><td>DB connection failed, rate limited, overloaded</td></tr></tbody></table></div>
+<aside class="note"><p>The distinction between 401 and 403 matters: 401 = "who are you?", 403 = "I know who you are but no".</p></aside>
+</section>
+
+<section id="request-response-anatomy" aria-labelledby="request-response-anatomy-h">
+  <h2 id="request-response-anatomy-h">Request &amp; Response Anatomy</h2>
+<p>HTTP Request</p>
+<figure><figcaption>POST /api/books</figcaption><pre><code>POST /api/books HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Authorization: Bearer eyJhbGci...
+
+{
+  "title": "The Pragmatic Programmer",
+  "author": "Hunt &amp; Thomas"
+}
+
+↑ method + path + version
+↑ headers
+↑ blank line separates headers/body
+↑ body (JSON)</code></pre></figure>
+<p>HTTP Response</p>
+<figure><figcaption>201 Created</figcaption><pre><code>HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /api/books/64f2a3b8
+
+{
+  "id": "64f2a3b8",
+  "title": "The Pragmatic Programmer",
+  "author": "Hunt &amp; Thomas",
+  "status": "unread",
+  "createdAt": "2026-03-08T10:00:00Z"
+}
+
+↑ status line
+↑ headers
+↑ body</code></pre></figure>
+<aside class="note"><p>The Location header on a 201 tells the client where to find the newly created resource — often omitted but technically required by the spec.</p></aside>
+</section>
+
+<section id="query-strings-filtering-pagination" aria-labelledby="query-strings-filtering-pagination-h">
+  <h2 id="query-strings-filtering-pagination-h">Query Strings, Filtering &amp; Pagination</h2>
+<p>Query strings carry optional parameters — <code>?key=value&amp;key2=value2</code></p>
+<figure><figcaption>filter + pagination pattern</figcaption><pre><code>-- filter by status
+GET /api/books?status=reading
+
+-- first page of 10
+GET /api/books?limit=10&amp;offset=0
+
+-- second page
+GET /api/books?limit=10&amp;offset=10
+
+-- sorted descending
+GET /api/books?sort=createdAt&amp;order=desc
+
+-- response envelope (collection endpoint)
+{
+  "data": [ ... ],
+  "total": 47,
+  "limit": 10,
+  "offset": 0
+}</code></pre></figure>
+<aside class="note"><p>Never return unlimited results from a collection endpoint — always paginate. Even if you only have 5 records now.</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Add pagination to my Express GET /api/books route. Use limit/offset query params with a response envelope that includes total count.</p></aside>
+</section>
+
+<section id="statelessness-in-practice" aria-labelledby="statelessness-in-practice-h">
+  <h2 id="statelessness-in-practice-h">Statelessness in Practice</h2>
+<p>The most important — and most misunderstood — REST constraint.</p>
+<p>What stateless means</p>
+<ul>
+<li><strong>No session</strong> &mdash; The server stores no session data between requests.</li>
+<li><strong>Self-contained</strong> &mdash; Every request must carry its own authentication, context, and intent.</li>
+<li><strong>Stateless</strong> &mdash; The server doesn't remember the previous request.</li>
+</ul>
+<p>How it's implemented in the course API</p>
+<ul>
+<li><strong>JWT</strong> &mdash; <code>Authorization: Bearer &lt;token&gt;</code> carries user identity on every request.</li>
+<li><strong>No sessions</strong> &mdash; No <code>req.session</code>, no server-side session store.</li>
+<li><strong>Scale</strong> &mdash; Any server instance can handle any request — horizontal scaling works.</li>
+</ul>
+<p>What would break statelessness</p>
+<ul>
+<li><strong>Server sessions</strong> &mdash; Storing session data in memory or a DB per login — sticky session problem.</li>
+<li><strong>"Remember me"</strong> &mdash; "Remember what I said last request" — the server doesn't, by design.</li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>Statelessness is why your API can scale to multiple server instances without a sticky session problem. The token IS the state — it travels with every request.</p></aside>
+<aside class="note"><p>Sessions (like express-session) aren't "wrong" — they're a deliberate trade-off. They're stateful by design. That makes them non-RESTful, but perfectly valid.</p></aside>
+</section>
+
+<section id="content-negotiation-headers" aria-labelledby="content-negotiation-headers-h">
+  <h2 id="content-negotiation-headers-h">Content Negotiation &amp; Headers</h2>
+<p>Key Request Headers</p>
+<ul>
+<li><code>Content-Type: application/json</code> Tells the server what format the body is in.</li>
+<li><code>Accept: application/json</code> Tells the server what format the client wants back.</li>
+<li><code>Authorization: Bearer &lt;token&gt;</code> Authentication credential.</li>
+<li><code>Cache-Control: no-cache</code> Skip the cache — always fetch fresh.</li>
+</ul>
+<p>Key Response Headers</p>
+<ul>
+<li><code>Content-Type: application/json; charset=utf-8</code> Format of the response body.</li>
+<li><code>Location: /api/books/123</code> Where the new resource is (after 201).</li>
+<li><code>X-Total-Count: 47</code> Total records for pagination (alternative to envelope).</li>
+</ul>
+<figure><figcaption>Express sets headers for you</figcaption><pre><code>// Express does this for you:
+res.status(201).json({ id, title, author });
+// Sets: Content-Type: application/json; charset=utf-8
+//       Status: 201 Created</code></pre></figure>
+<aside class="note"><p>Always use res.json() not res.send() for API responses — it sets Content-Type correctly and serialises the object.</p></aside>
+</section>
+
+<section id="error-response-design" aria-labelledby="error-response-design-h">
+  <h2 id="error-response-design-h">Error Response Design</h2>
+<p>Consistent error responses are as important as successful ones.</p>
+<figure><figcaption>error response formats</figcaption><pre><code>// Detailed validation error
+{
+  "error": "Validation failed",
+  "details": [
+    { "field": "title",   "message": "Title is required"     },
+    { "field": "author",  "message": "Author must be a string" }
+  ]
+}
+
+// Minimal error for simpler cases
+{ "error": "Book not found" }
+
+// Express centralised error handler
+app.use((err, req, res, next) =&gt; {
+  console.error(err);
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal server error'
+  });
+});</code></pre></figure>
+<aside class="note"><span class="note-label">Gotcha</span><p>Never expose stack traces or internal error messages to API clients in production — they reveal your implementation and can be a security risk.</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Add a centralised error handling middleware to my Express app that always returns JSON errors with appropriate status codes.</p></aside>
+</section>
+
+<section id="rest-vs-alternatives" aria-labelledby="rest-vs-alternatives-h">
+  <h2 id="rest-vs-alternatives-h">REST vs Alternatives</h2>
+<p>Brief comparative overview — you'll encounter these in the wild.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Approach</th><th scope="col">Transport</th><th scope="col">Format</th><th scope="col">When used</th></tr></thead><tbody><tr><th scope="row"><strong>REST</strong></th><td>HTTP</td><td>JSON/XML</td><td>Most web APIs — simple, widely understood</td></tr><tr><th scope="row"><strong>GraphQL</strong></th><td>HTTP</td><td>JSON</td><td>Complex data needs; client controls shape of response</td></tr><tr><th scope="row"><strong>gRPC</strong></th><td>HTTP/2</td><td>Protocol Buffers</td><td>Internal microservices, high performance</td></tr><tr><th scope="row"><strong>WebSocket</strong></th><td>WS</td><td>Any</td><td>Real-time: chat, live dashboards, collaborative tools</td></tr><tr><th scope="row"><strong>tRPC</strong></th><td>HTTP</td><td>JSON</td><td>TypeScript full-stack — type-safe end-to-end</td></tr></tbody></table></div>
+<aside class="note"><p>REST is the right default for public APIs and most web applications. Consider GraphQL when clients need to request exactly the fields they want across multiple resources in one call.</p></aside>
+<aside class="note"><p>AI prompt: My app needs real-time notifications when another user updates a shared reading list. Should I use WebSockets, Server-Sent Events, or polling? Compare the trade-offs.</p></aside>
+</section>
+
+<section id="versioning-documentation" aria-labelledby="versioning-documentation-h">
+  <h2 id="versioning-documentation-h">Versioning &amp; Documentation</h2>
+<p>API Versioning — two common approaches</p>
+<figure><figcaption>URI versioning (preferred)</figcaption><pre><code>/api/v1/books
+/api/v2/books   ← breaking change? bump the version
+
+// Header versioning (cleaner URLs, less common)
+Accept: application/vnd.myapi.v2+json</code></pre></figure>
+<aside class="note"><p>URI versioning is more common because it's explicit and easy to test in a browser. Use it.</p></aside>
+<p>OpenAPI / Swagger snippet</p>
+<figure><figcaption>openapi.yaml</figcaption><pre><code>paths:
+  /api/books:
+    get:
+      summary: List all books
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Array of books</code></pre></figure>
+<p>What every API needs</p>
+<ul>
+<li><strong>OpenAPI</strong> &mdash; Machine-readable API spec — describes every endpoint, parameters, schemas, auth.</li>
+<li><strong>Swagger UI</strong> &mdash; Interactive browser UI generated from your OpenAPI spec — clients can try endpoints.</li>
+<li><strong>Postman</strong> &mdash; Import your spec, create collections, share with your team.</li>
+</ul>
+<aside class="note"><p>AI prompt: Generate an OpenAPI 3.0 spec for my Reading List API. Include all endpoints, request bodies, and response schemas.</p></aside>
+</section>
+
+<section id="rest-is-a-design-language-ai-helps-you-speak-it" aria-labelledby="rest-is-a-design-language-ai-helps-you-speak-it-h">
+  <h2 id="rest-is-a-design-language-ai-helps-you-speak-it-h">REST is a design language — AI helps you speak it</h2>
+<aside class="note"><p>URI design When starting a new API, describe your domain to AI: "I'm building an app that manages X, Y, Z with these relationships." Ask it to design the URI structure following REST conventions — then push back: "Why plural? Why nested here? What if Z belongs to both X and Y?"</p></aside>
+<aside class="note"><p>Status codes as communication Your API's status codes are a contract with its clients. When AI generates route handlers, check every <code>res.status()</code> call — are 400s used for client errors? Is 201 returned (not 200) for POST? Is 404 returned when a resource isn't found? These details matter.</p></aside>
+<aside class="note"><p>Error design Ask AI: "Review my error handling — are all error responses JSON? Do 4xx and 5xx errors have consistent structure? Am I leaking any stack traces?" Error design is where most APIs cut corners.</p></aside>
+<aside class="note"><p>REST is learnable from reading. Fielding's original dissertation is freely available. The HTTP spec (RFC 9110) is dense but authoritative. AI can summarise both — but reading primary sources deepens understanding.</p></aside>
+</section>
+
+<section id="quick-reference" aria-labelledby="quick-reference-h">
+  <h2 id="quick-reference-h">Quick Reference</h2>
+<p>HTTP Methods</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Method</th><th scope="col">Use</th></tr></thead><tbody><tr><th scope="row"><code>GET</code></th><td>Read resource or collection</td></tr><tr><th scope="row"><code>POST</code></th><td>Create new resource</td></tr><tr><th scope="row"><code>PUT</code></th><td>Replace resource entirely</td></tr><tr><th scope="row"><code>PATCH</code></th><td>Partial update</td></tr><tr><th scope="row"><code>DELETE</code></th><td>Delete resource</td></tr></tbody></table></div>
+<p>Status Codes</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Code</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>200</code></th><td>OK</td></tr><tr><th scope="row"><code>201</code></th><td>Created</td></tr><tr><th scope="row"><code>204</code></th><td>No Content</td></tr><tr><th scope="row"><code>400</code></th><td>Bad Request</td></tr><tr><th scope="row"><code>401</code></th><td>Unauthorized</td></tr><tr><th scope="row"><code>403</code></th><td>Forbidden</td></tr><tr><th scope="row"><code>404</code></th><td>Not Found</td></tr><tr><th scope="row"><code>409</code></th><td>Conflict</td></tr><tr><th scope="row"><code>422</code></th><td>Unprocessable Entity</td></tr><tr><th scope="row"><code>500</code></th><td>Internal Server Error</td></tr></tbody></table></div>
+<aside class="note"><p>Nouns not verbs &amp;middot; Plural collections &amp;middot; Nested for ownership /users/42/books not /getUserBooks?userId=42 HTTP method IS the verb</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../rest-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Design a REST API <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Design the URL structure and HTTP methods for a task-tracking API with tasks, users, and projects. Write at least 6 routes. Apply REST naming conventions: no verbs in URLs, plural nouns.
+      <ul><li>All route URLs use plural nouns and contain no verbs</li><li>HTTP methods are correctly assigned (GET reads, POST creates, PATCH/PUT updates, DELETE removes)</li><li>You included at least one nested resource URL (e.g. /projects/:id/tasks)</li></ul></dd></div>
+    <div><dt>Spot a REST violation <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Find an API you've used (or invent one) that violates a REST constraint. Describe the violation, which constraint it breaks, and how you would redesign that endpoint.
+      <ul><li>You named the specific REST constraint being violated (not just "it is wrong")</li><li>Your redesign fixes the violation without introducing a new one</li><li>You tested your redesign mentally: would a new client understand it without docs?</li></ul></dd></div>
+    <div><dt>REST vs just HTTP <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>What makes an API 'RESTful' rather than just 'HTTP'? In your own words, explain the statelessness constraint and why it matters for scaling.
+      <ul><li>You explained statelessness in your own words, not copied from the slides</li><li>You connected statelessness to a concrete consequence (horizontal scaling, token auth, etc.)</li><li>Your explanation distinguishes REST constraints from HTTP mechanics</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

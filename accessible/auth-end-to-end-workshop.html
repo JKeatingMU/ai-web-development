@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auth End-to-End — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">D2 &middot; Fullstack</p>
+  <h1>Auth End-to-End</h1>
+  <p class="lede">Register, login, useAuth hook, token lifecycle, logout</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../auth-end-to-end-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#auth-end-to-end">Auth End-to-End</a></li>
+    <li><a href="#the-complete-auth-flow">The Complete Auth Flow</a></li>
+    <li><a href="#registration-frontend-to-backend">Registration — Frontend to Backend</a></li>
+    <li><a href="#login-storing-the-token">Login — Storing the Token</a></li>
+    <li><a href="#making-authenticated-requests">Making Authenticated Requests</a></li>
+    <li><a href="#token-lifecycle-and-expiry">Token Lifecycle and Expiry</a></li>
+    <li><a href="#navbar-auth-state">NavBar Auth State</a></li>
+    <li><a href="#the-useauth-hook-centralising-auth-state">The useAuth Hook — Centralising Auth State</a></li>
+    <li><a href="#part-2-prompting-prompting-for-full-auth">Part 2 — Prompting: Prompting for Full Auth</a></li>
+    <li><a href="#scaffold-prompt-full-auth-integration">Scaffold Prompt — Full Auth Integration</a></li>
+    <li><a href="#common-auth-bugs">Common Auth Bugs</a></li>
+    <li><a href="#prompt-reflection">Prompt Reflection</a></li>
+    <li><a href="#wrap-up">Wrap-up</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Trace the complete auth flow across register, login, protected request, and logout, identifying what each operation stores and returns</li>
+    <li>Implement a useAuth hook that updates both localStorage and React state atomically on login and logout</li>
+    <li>Write a LoginPage that stores the token before navigating, uses replace navigation, and shows a uniform error message</li>
+    <li>Explain why registration must not store a token and why error messages should be uniform to prevent email enumeration</li>
+    <li>Diagnose the six common auth bugs: token key mismatch, wrong Bearer prefix, stale NavBar state, Back-button loop, registration token storage, and email enumeration</li>
+    <li>Explain JWT expiry handling in the browser and why window.location.href is used instead of navigate in api.ts</li>
+  </ul>
+</section>
+
+<section id="auth-end-to-end" aria-labelledby="auth-end-to-end-h">
+  <h2 id="auth-end-to-end-h">Auth End-to-End</h2>
+<aside class="note"><p>Authentication spans both layers — the backend issues and verifies tokens, the frontend stores and sends them. This deck traces the complete flow from registration through logout and covers the most common wiring mistakes that appear when both sides are generated by AI.</p></aside>
+<aside class="note"><p>Prerequisites: This deck assumes you have completed B3 — Authentication (JWT, bcrypt, and the auth middleware on the backend) and C4 — Forms &amp; Validation (controlled inputs, form submission state, and accessible error display). The server-side auth implementation and the React form patterns are taken as understood here — this deck wires them together.</p></aside>
+</section>
+
+<section id="the-complete-auth-flow" aria-labelledby="the-complete-auth-flow-h">
+  <h2 id="the-complete-auth-flow-h">The Complete Auth Flow</h2>
+<p>Four operations. Each one has a distinct frontend action, a backend operation, and a specific outcome. Understanding all four prevents half of all auth bugs.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Operation</th><th scope="col">Frontend action</th><th scope="col">Backend operation</th><th scope="col">Outcome</th></tr></thead><tbody><tr><th scope="row">Register</th><td>Submit email + password form → <code>POST /auth/register</code></td><td>Hash password with bcrypt, insert user row</td><td>201 Created — frontend redirects to <code>/login</code> (does not store token)</td></tr><tr><th scope="row">Login</th><td>Submit credentials → <code>POST /auth/login</code></td><td>Find user, compare bcrypt hash, sign JWT</td><td>200 + <code>{ token }</code> — frontend stores token, navigates to <code>/</code></td></tr><tr><th scope="row">Protected request</th><td>Component mounts → reads token → sends <code>Authorization: Bearer &lt;token&gt;</code></td><td>Middleware verifies JWT signature and expiry, attaches <code>req.user</code></td><td>200 + data — OR 401 if token missing / invalid / expired</td></tr><tr><th scope="row">Logout</th><td><code>localStorage.removeItem('token')</code> → navigate to <code>/login replace</code></td><td>No server call needed (JWTs are stateless)</td><td>Token removed from browser — ProtectedRoute redirects on next visit</td></tr></tbody></table></div>
+<aside class="note"><p>Common mistake: storing the token after registration (not just login). Registration confirms the account was created — the user still needs to prove their identity by logging in.</p></aside>
+</section>
+
+<section id="registration-frontend-to-backend" aria-labelledby="registration-frontend-to-backend-h">
+  <h2 id="registration-frontend-to-backend-h">Registration — Frontend to Backend</h2>
+<p>Registration is the simpler of the two forms — no token storage, no redirect to a protected page. The only success action is navigating to the login page.</p>
+<figure><figcaption>RegisterPage.tsx</figcaption><pre><code>const navigate = useNavigate();
+const [form, setForm] = useState({
+  email: '', password: '', confirm: '',
+});
+const [error, setError] = useState('');
+const [loading, setLoading] = useState(false);
+
+async function handleSubmit(e: FormEvent) {
+  e.preventDefault();
+
+  // Client-side guard — passwords match
+  if (form.password !== form.confirm) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await api.post('/auth/register', {
+      email:    form.email,
+      password: form.password,
+    });
+    // Success — go to login, do NOT store a token
+    navigate('/login');
+  } catch (err) {
+    setError(err instanceof Error
+      ? err.message : 'Registration failed');
+  } finally {
+    setLoading(false);
+  }
+}</code></pre></figure>
+<aside class="note"><p>No token storage on register. Your backend returns 201 with no body (or just { message: "Created" } ). There is no token to store. AI sometimes generates localStorage.setItem('token', data.token) here — check for it.</p></aside>
+<aside class="note"><p>Password confirmation is client-only. The backend receives only email and password — it does not receive confirm. The match check is a UX guard, not a security measure.</p></aside>
+<aside class="note"><p>Uniform error messages on the backend: whether the email is invalid, already taken, or the password too short — return the same generic message ("Registration failed") rather than "Email already taken". This prevents email enumeration — an attack where an adversary probes your API to discover which email addresses are registered by reading different error messages for different failure modes.</p></aside>
+<aside class="note"><p>After registration, navigate to /login without replace — pressing Back to review the registration form is acceptable behaviour, unlike the post-login case.</p></aside>
+</section>
+
+<section id="login-storing-the-token" aria-labelledby="login-storing-the-token-h">
+  <h2 id="login-storing-the-token-h">Login — Storing the Token</h2>
+<p>Login is the critical path. The token must be stored before navigating — in the right key, with the right navigate options, and with the NavBar updated to reflect the new auth state.</p>
+<figure><figcaption>LoginPage.tsx</figcaption><pre><code>async function handleSubmit(e: FormEvent) {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+
+  try {
+    const { token } = await api.post&lt;{ token: string }&gt;(
+      '/auth/login',
+      { email: form.email, password: form.password }
+    );
+
+    // Store before navigating
+    localStorage.setItem('token', token);
+
+    // replace: true — Back won't return to /login
+    navigate('/', { replace: true });
+
+  } catch (err) {
+    // Uniform message — don't reveal which field is wrong
+    setError('Invalid email or password');
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ─────────────────────────────────────────────
+// Backend returns
+// POST /auth/login → 200 { token: "eyJ..." }
+// POST /auth/login → 401 { error: "Invalid credentials" }</code></pre></figure>
+<aside class="note"><p>Store before navigate. navigate causes React to unmount LoginPage and mount the next page. If you navigate first, the store call on the now-unmounted component may not execute.</p></aside>
+<aside class="note"><p>Uniform error message: "Invalid email or password" — never "Email not found" or "Wrong password". Distinguishing them tells attackers which half of the credentials is correct.</p></aside>
+<aside class="note"><p>The token key must be consistent. localStorage.setItem('token', ...) in LoginPage must exactly match localStorage.getItem('token') in ProtectedRoute, NavBar, and api.ts. AI sometimes uses different key names across files.</p></aside>
+<aside class="note"><p>Check the token is a string. Some AI-generated backends wrap the token: { data: { token: "..." } }. If you destructure { token } from that response, you get undefined. curl the endpoint to check the exact shape.</p></aside>
+</section>
+
+<section id="making-authenticated-requests" aria-labelledby="making-authenticated-requests-h">
+  <h2 id="making-authenticated-requests-h">Making Authenticated Requests</h2>
+<p>Every request to a protected endpoint must carry the token in the <code>Authorization</code> header. Your <code>api.ts</code> handles this automatically — but only if the token key is consistent and the backend middleware reads the same header.</p>
+<p>Frontend — api.ts sends the token</p>
+<figure><figcaption>api.ts</figcaption><pre><code>function getHeaders(): HeadersInit {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? {
+      'Authorization': `Bearer ${token}`
+    } : {}),
+  };
+}</code></pre></figure>
+<p>Backend — middleware verifies it</p>
+<figure><figcaption>middleware/authenticate.js</figcaption><pre><code>export function authenticate(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header?.startsWith('Bearer ')) {
+    return res.status(401).json({
+      error: 'No token provided',
+    });
+  }
+  const token = header.slice(7);
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}</code></pre></figure>
+<aside class="note"><p>The Bearer prefix must match exactly. Frontend sends Bearer &lt;token&gt;. Backend slices 7 characters off ("Bearer " is 7 chars). If the prefix is wrong, the token extracted from the header is corrupted.</p></aside>
+<aside class="note"><p>Header names are case-insensitive in HTTP but Express normalises them to lowercase. Access with req.headers['authorization'] (lowercase) — not req.headers['Authorization'].</p></aside>
+<aside class="note"><p><code>jwt.verify</code> throws on expiry. The catch block returns 401, which triggers api.ts 's global 401 handler, which removes the token and redirects to login. The user flow is automatic.</p></aside>
+<aside class="note"><p>After middleware: <code>req.user</code> contains the JWT payload ({ id, email, iat, exp } ). Route handlers access the current user's ID via req.user.id — no need to pass it in the request body.</p></aside>
+</section>
+
+<section id="token-lifecycle-and-expiry" aria-labelledby="token-lifecycle-and-expiry-h">
+  <h2 id="token-lifecycle-and-expiry-h">Token Lifecycle and Expiry</h2>
+<p>JWTs expire. When a token expires mid-session, the user's next API call returns 401. Your app needs to handle this gracefully — not crash with an unhandled error.</p>
+<figure><figcaption>api.ts — global 401 handler</figcaption><pre><code>// When any API call returns 401:
+// 1. Remove the expired token
+// 2. Redirect to /login
+// 3. Throw so the calling code's catch fires
+
+if (res.status === 401) {
+  localStorage.removeItem('token');
+  window.location.href = '/login';
+  throw new Error('Session expired');
+}
+
+// ─────────────────────────────────────────────
+// Backend — signing with expiry
+const token = jwt.sign(
+  { id: user.id, email: user.email },
+  process.env.JWT_SECRET,
+  { expiresIn: '24h' }  // or '7d', '1h'
+);
+
+// ─────────────────────────────────────────────
+// Reading expiry in the browser (without a library)
+function tokenExpiresAt(token: string): Date {
+  const payload = JSON.parse(
+    atob(token.split('.')[1])
+  );
+  return new Date(payload.exp * 1000);
+}</code></pre></figure>
+<aside class="note"><p>24h is a reasonable starting expiry. Shorter is more secure but more disruptive. Longer is convenient but a stolen token stays valid longer. For a learning project, 24h is fine.</p></aside>
+<aside class="note"><p><code>window.location.href</code> vs <code>navigate</code>: the 401 handler in api.ts runs outside React, so it can't use the Router's navigate hook. A full page redirect via window.location.href is the pragmatic solution.</p></aside>
+<aside class="note"><p>Decoding the JWT client-side doesn't verify the signature — it just reads the payload. This is fine for reading expiry or the user's name for display. Never trust client-side decoded data for access control.</p></aside>
+<aside class="note"><p>Refresh tokens are the production solution to expiry — a long-lived token that exchanges for a new short-lived JWT. For a learning project, sending the user back to login on expiry is perfectly acceptable.</p></aside>
+</section>
+
+<section id="navbar-auth-state" aria-labelledby="navbar-auth-state-h">
+  <h2 id="navbar-auth-state-h">NavBar Auth State</h2>
+<p>The NavBar needs to show different content to logged-in and logged-out users. Since the token lives in localStorage — not React state — you need a small state bridge.</p>
+<figure><figcaption>NavBar.tsx</figcaption><pre><code>import { NavLink, useNavigate } from 'react-router-dom';
+
+function NavBar() {
+  // Re-read token on every render — it may change
+  const isLoggedIn = !!localStorage.getItem('token');
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    localStorage.removeItem('token');
+    navigate('/login', { replace: true });
+  }
+
+  return (
+    &lt;nav&gt;
+      &lt;NavLink to="/" end&gt;Home&lt;/NavLink&gt;
+      {isLoggedIn ? (
+        &lt;&gt;
+          &lt;NavLink to="/books"&gt;My Books&lt;/NavLink&gt;
+          &lt;button onClick={handleLogout}&gt;Log out&lt;/button&gt;
+        &lt;/&gt;
+      ) : (
+        &lt;&gt;
+          &lt;NavLink to="/login"&gt;Log in&lt;/NavLink&gt;
+          &lt;NavLink to="/register"&gt;Register&lt;/NavLink&gt;
+        &lt;/&gt;
+      )}
+    &lt;/nav&gt;
+  );
+}</code></pre></figure>
+<aside class="note"><p>The NavBar re-reads localStorage on every render. When the user logs in, React re-renders the Layout (which contains NavBar), and the new render picks up the token. No extra state management needed for this simple case.</p></aside>
+<aside class="note"><p>If the NavBar doesn't update after login: the Layout may not be re-rendering. The navigate call in LoginPage causes a route change, which unmounts LoginPage and mounts the new page — Layout stays mounted but doesn't re-render unless its state or props change. Use a useAuth hook (next slide) to fix this properly.</p></aside>
+<aside class="note"><p>Logout uses <code>replace: true</code>: pressing Back after logging out should not return to a protected page (the ProtectedRoute would redirect back to login anyway, but replace prevents the confusing back-redirect loop).</p></aside>
+</section>
+
+<section id="the-useauth-hook-centralising-auth-state" aria-labelledby="the-useauth-hook-centralising-auth-state-h">
+  <h2 id="the-useauth-hook-centralising-auth-state-h">The useAuth Hook — Centralising Auth State</h2>
+<p>Reading localStorage directly in every component that needs auth state creates scattered, unsynchronised logic. A <code>useAuth</code> hook centralises it and ensures all components update together.</p>
+<figure><figcaption>hooks/useAuth.ts</figcaption><pre><code>import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export function useAuth() {
+  // Initialise from localStorage — survives page refresh
+  const [token, setToken] = useState&lt;string | null&gt;(
+    () =&gt; localStorage.getItem('token')
+  );
+  const navigate = useNavigate();
+
+  const login = useCallback((newToken: string) =&gt; {
+    localStorage.setItem('token', newToken);
+    setToken(newToken);   // triggers NavBar re-render
+    navigate('/', { replace: true });
+  }, [navigate]);
+
+  const logout = useCallback(() =&gt; {
+    localStorage.removeItem('token');
+    setToken(null);
+    navigate('/login', { replace: true });
+  }, [navigate]);
+
+  return {
+    token,
+    isLoggedIn: !!token,
+    login,
+    logout,
+  };
+}
+
+// Usage in LoginPage
+const { login } = useAuth();
+// on success:
+login(token); // stores + navigates atomically</code></pre></figure>
+<aside class="note"><p>State + localStorage together: the hook updates both simultaneously. React state causes component re-renders; localStorage persists across page refreshes. You need both.</p></aside>
+<aside class="note"><p>Lazy initialiser: useState(() =&gt; localStorage.getItem('token')) runs the function once on mount — avoids reading localStorage on every render while still catching a token from a previous session.</p></aside>
+<aside class="note"><p>For shared state across many components, lift useAuth to a Context provider so all components share the same token state without prop drilling. For small apps the hook alone is sufficient.</p></aside>
+<aside class="note"><p>This hook is what AI should generate when you ask for "a complete auth integration". If it gives you scattered localStorage reads instead, ask it to refactor into a useAuth hook.</p></aside>
+</section>
+
+<section id="part-2-prompting-prompting-for-full-auth" aria-labelledby="part-2-prompting-prompting-for-full-auth-h">
+  <h2 id="part-2-prompting-prompting-for-full-auth-h">Part 2 — Prompting: Prompting for Full Auth</h2>
+<p class="lede">One prompt for the complete integration · What to check · Common bugs</p>
+</section>
+
+<section id="scaffold-prompt-full-auth-integration" aria-labelledby="scaffold-prompt-full-auth-integration-h">
+  <h2 id="scaffold-prompt-full-auth-integration-h">Scaffold Prompt — Full Auth Integration</h2>
+<blockquote class="prompt"><span class="note-label">Scaffold prompt — paste into your AI assistant</span><p>Add complete auth integration to my Reading List app. The backend already has POST /auth/register and POST /auth/login endpoints and a JWT authenticate middleware. The frontend uses api.ts with a generic request&lt;T&gt; function and a global 401 handler that removes the token and redirects to /login. Generate:</p>
+<ul>
+<li>A <em>useAuth</em> hook (<em>hooks/useAuth.ts</em>) with <em>login(token)</em>, <em>logout()</em>, and <em>isLoggedIn</em>. It must: initialise from <em>localStorage.getItem('token')</em> on mount, update both localStorage and React state atomically on login and logout, use <em>useNavigate</em> with <em>replace: true</em> for both redirects</li>
+<li>A <em>RegisterPage</em> component that: submits email + password (not confirm) to <em>POST /auth/register</em>, navigates to <em>/login</em> on success without storing a token, shows a uniform error message on failure</li>
+<li>A <em>LoginPage</em> component that: calls <em>useAuth().login(token)</em> on success, shows "Invalid email or password" for any 401 (not field-specific messages)</li>
+<li>A <em>NavBar</em> component that uses <em>useAuth().isLoggedIn</em> to conditionally show: (logged in) My Books link + Logout button; (logged out) Login link + Register link</li>
+</ul>
+<p>Token key: 'token' in localStorage throughout — all files must use exactly this key.</p></blockquote>
+</section>
+
+<section id="common-auth-bugs" aria-labelledby="common-auth-bugs-h">
+  <h2 id="common-auth-bugs-h">Common Auth Bugs</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Symptom</th><th scope="col">Cause</th><th scope="col">Fix</th></tr></thead><tbody><tr><th scope="row">Login succeeds but user still sees logged-out NavBar</th><td>Token stored in localStorage but React state not updated — NavBar reads stale state</td><td>Use <code>useAuth</code> hook — <code>login(token)</code> updates both localStorage and React state</td></tr><tr><th scope="row">Registration stores a token</th><td>AI generated <code>localStorage.setItem</code> in the register success handler</td><td>Remove it — registration returns no token. Navigate to <code>/login</code> only</td></tr><tr><th scope="row">API returns 401 on every request despite being logged in</th><td>Token key mismatch — <code>api.ts</code> reads <code>'auth_token'</code>, LoginPage stores <code>'token'</code></td><td>Search all files for <code>localStorage</code> and standardise on one key</td></tr><tr><th scope="row">Bearer header malformed — middleware rejects valid token</th><td>Frontend sends <code>Token &lt;jwt&gt;</code> instead of <code>Bearer &lt;jwt&gt;</code></td><td>Confirm <code>api.ts</code> uses exactly <code>`Bearer ${token}`</code></td></tr><tr><th scope="row">Pressing Back after logout returns to a protected page</th><td><code>navigate('/login')</code> without <code>replace: true</code></td><td>Use <code>navigate('/login', { replace: true })</code> in logout</td></tr><tr><th scope="row">Error message reveals "Email already taken"</th><td>Backend returns specific error messages for registration failures</td><td>Return a uniform message for all registration errors to prevent email enumeration</td></tr></tbody></table></div>
+</section>
+
+<section id="prompt-reflection" aria-labelledby="prompt-reflection-h">
+  <h2 id="prompt-reflection-h">Prompt Reflection</h2>
+<p>Auth bugs are often invisible until a specific sequence of actions triggers them. Reflect on the integration you built.</p>
+<aside class="note"><p>The token key problem: The localStorage key must be consistent across at least four files: api.ts, LoginPage.tsx, ProtectedRoute.tsx, and useAuth.ts. Did the AI generate a consistent key? What would you add to your scaffold prompt to enforce this?</p></aside>
+<aside class="note"><p>State vs storage: The useAuth hook stores the token in both React state and localStorage. What happens if you only use localStorage (no React state)? What happens if you only use React state (no localStorage)? When would each approach break?</p></aside>
+<aside class="note"><p>Security check: Open DevTools → Application → localStorage. You can see your JWT. Open a JWT decoder and paste the token. What is in the payload? What would happen if you modified a field in the payload and sent the modified token to the API?</p></aside>
+<aside class="note"><p>Sequence matters: The login flow is: validate → call API → store token → navigate. If you swap the last two steps (navigate then store), what breaks? Have you tested this by temporarily swapping the order in your code?</p></aside>
+</section>
+
+<section id="wrap-up" aria-labelledby="wrap-up-h">
+  <h2 id="wrap-up-h">Wrap-up</h2>
+<p class="lede">What you can now do with end-to-end authentication</p>
+<ul>
+<li><strong>✓</strong> &mdash; Trace the complete auth flow — register, login, protected request, logout — and identify exactly what each operation stores, sends, and returns</li>
+<li><strong>✓</strong> &mdash; Wire a <code>useAuth</code> hook that updates both localStorage and React state atomically, so NavBar and ProtectedRoute stay in sync without prop drilling</li>
+<li><strong>✓</strong> &mdash; Write a LoginPage that stores the token before navigating, uses <code>replace: true</code>, and shows a uniform error message that does not reveal which credential was wrong</li>
+<li><strong>✓</strong> &mdash; Diagnose the six common auth bugs in the table — token key mismatch, wrong Bearer prefix, registration storing a token, stale NavBar state, Back-button loop, and email enumeration</li>
+<li><strong>✓</strong> &mdash; Explain JWT expiry handling — why the 401 redirects to login, why <code>window.location.href</code> is used instead of <code>navigate</code>, and what refresh tokens solve</li>
+</ul>
+<aside class="note"><p>Next — D3: Build &amp; Deploy — npm run build, Railway, environment variables in production, and running your schema on a live database.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../auth-end-to-end-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Wire full auth integration</dt><dd></dd></div>
+    <div><dt>Token key audit</dt><dd></dd></div>
+    <div><dt>JWT inspection and reflection</dt><dd></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git &amp; GitHub — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">A3 &middot; Foundations</p>
+  <h1>Git &amp; GitHub</h1>
+  <p class="lede">Version control, commit, push, branches, PRs, GitHub Pages</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../git-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#git-github">Git &amp; GitHub</a></li>
+    <li><a href="#why-version-control">Why Version Control?</a></li>
+    <li><a href="#git-s-mental-model-three-zones">Git's Mental Model — Three Zones</a></li>
+    <li><a href="#install-first-time-setup">Install &amp; First-Time Setup</a></li>
+    <li><a href="#starting-a-project">Starting a Project</a></li>
+    <li><a href="#the-daily-commit-workflow">The Daily Commit Workflow</a></li>
+    <li><a href="#reading-history">Reading History</a></li>
+    <li><a href="#undoing-things-safely">Undoing Things Safely</a></li>
+    <li><a href="#branches">Branches</a></li>
+    <li><a href="#merging-conflicts">Merging &amp; Conflicts</a></li>
+    <li><a href="#github-remotes-pushing">GitHub — Remotes &amp; Pushing</a></li>
+    <li><a href="#github-pages-free-static-hosting">GitHub Pages — Free Static Hosting</a></li>
+    <li><a href="#pull-requests">Pull Requests</a></li>
+    <li><a href="#gitignore-what-git-should-never-track">.gitignore — What Git Should Never Track</a></li>
+    <li><a href="#git-is-where-ai-collaboration-becomes-visible">Git is Where AI Collaboration Becomes Visible</a></li>
+    <li><a href="#quick-reference">Quick Reference</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the three-zone Git model: working tree, staging area, and commit history</li>
+    <li>Apply the daily commit workflow: stage, commit, push to a remote repository</li>
+    <li>Create and merge branches safely, resolving conflicts when they arise</li>
+    <li>Collaborate using GitHub: open pull requests and review changes</li>
+    <li>Configure .gitignore to protect sensitive and generated files from version control</li>
+  </ul>
+</section>
+
+<section id="git-github" aria-labelledby="git-github-h">
+  <h2 id="git-github-h">Git &amp; GitHub</h2>
+<aside class="note"><span class="note-label">Key concept</span><p>Every professional project uses version control. Git lets you save snapshots of your work, undo mistakes, collaborate without overwriting each other's code, and publish to the web. This deck gives you the vocabulary and the daily workflow.</p></aside>
+</section>
+
+<section id="why-version-control" aria-labelledby="why-version-control-h">
+  <h2 id="why-version-control-h">Why Version Control?</h2>
+<p>Without git, projects look like this:</p>
+<figure><figcaption>project folder without git</figcaption><pre><code>project/
+  server.js
+  server_old.js
+  server_backup.js
+  server_WORKING.js
+  server_REAL_v2.js
+  server_REAL_v3_FIXED.js
+  server_v3_FINAL.js
+  server_v3_FINAL_actually.js
+  server_DO_NOT_DELETE.js</code></pre></figure>
+<ul>
+<li><strong>History</strong> &mdash; Every saved state is accessible forever. No more backup copies — git is the backup.</li>
+<li><strong>Rollback</strong> &mdash; Break something? Revert to any previous commit in seconds.</li>
+<li><strong>Collaboration</strong> &mdash; Multiple people work on the same codebase without overwriting each other.</li>
+<li><strong>Blame</strong> &mdash; <code>git log</code> shows who changed what and when — invaluable for debugging.</li>
+</ul>
+<aside class="note"><p>Git tracks changes, not files — every commit is a snapshot of your whole project.</p></aside>
+</section>
+
+<section id="git-s-mental-model-three-zones" aria-labelledby="git-s-mental-model-three-zones-h">
+  <h2 id="git-s-mental-model-three-zones-h">Git's Mental Model — Three Zones</h2>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">Working Tree → your files on disk → edit freely here → server.js, README… → git add → Staging Area → index — chosen changes → review before committing → also called the index → git commit → Commit History → the log — permanent → snapshots over time → git log shows these</p></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>Working Tree Where you edit files. Changes here are untracked until you git add them.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>Staging Area A holding area. You choose exactly which changes go into the next commit — file by file if needed.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>Commit History The permanent record. Each commit has a unique hash, a message, and a pointer to its parent.</p></aside>
+</section>
+
+<section id="install-first-time-setup" aria-labelledby="install-first-time-setup-h">
+  <h2 id="install-first-time-setup-h">Install &amp; First-Time Setup</h2>
+<figure><figcaption>install git</figcaption><pre><code># Check if already installed
+$ git --version
+git version 2.44.0
+
+# macOS (Homebrew)
+$ brew install git
+
+# Windows (winget)
+$ winget install Git.Git
+
+# Ubuntu / Debian
+$ sudo apt install git</code></pre></figure>
+<figure><figcaption>one-time global config</figcaption><pre><code>$ git config --global user.name  "Your Name"
+$ git config --global user.email "you@example.com"
+$ git config --global init.defaultBranch main</code></pre></figure>
+<ul>
+<li><strong>--version</strong> &mdash; If this prints a version number, git is installed. macOS ships with a basic version via Xcode CLI tools.</li>
+<li><strong>user.name / email</strong> &mdash; Attached to every commit you make. Use the same email as your GitHub account so commits link to your profile.</li>
+<li><strong>defaultBranch</strong> &mdash; Sets new repos to use <code>main</code> instead of the legacy <code>master</code> default.</li>
+<li><strong>~/.gitconfig</strong> &mdash; All <code>--global</code> settings are stored here. One file, applies to every repo on the machine.</li>
+</ul>
+<aside class="note"><p>These go in ~/.gitconfig — only do this once per machine. Check with git config --global --list.</p></aside>
+</section>
+
+<section id="starting-a-project" aria-labelledby="starting-a-project-h">
+  <h2 id="starting-a-project-h">Starting a Project</h2>
+<figure><figcaption>new project from scratch</figcaption><pre><code># Start a brand-new repo
+$ mkdir my-project &amp;&amp; cd my-project
+$ git init
+Initialized empty Git repository in .git/
+
+$ echo "# My Project" &gt; README.md
+$ git add README.md
+$ git commit -m "Initial commit"
+[main (root-commit) a1b2c3d] Initial commit
+ 1 file changed, 1 insertion(+)
+
+# Copy an existing repo instead
+$ git clone https://github.com/you/my-project.git</code></pre></figure>
+<ul>
+<li><strong>git init</strong> &mdash; Creates a hidden <code>.git/</code> directory — this is the entire repository. Delete <code>.git/</code> to un-git a project.</li>
+<li><strong>git add</strong> &mdash; Moves changes from the working tree to the staging area. Required before every commit.</li>
+<li><strong>git commit -m</strong> &mdash; Takes a snapshot of staged changes. The <code>-m</code> flag sets the message inline.</li>
+<li><strong>git clone</strong> &mdash; Downloads an existing repo and sets up <code>origin</code> automatically. The alternative to <code>git init</code>.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Generate a README.md for a Node.js REST API that manages a reading list.</p></aside>
+</section>
+
+<section id="the-daily-commit-workflow" aria-labelledby="the-daily-commit-workflow-h">
+  <h2 id="the-daily-commit-workflow-h">The Daily Commit Workflow</h2>
+<figure><figcaption>everyday git commands</figcaption><pre><code># What has changed since last commit?
+$ git status
+On branch main
+Changes not staged for commit:
+  modified:   server.js
+
+# See exactly what changed line by line
+$ git diff
+
+# Stage a specific file
+$ git add server.js
+
+# Stage everything changed
+$ git add .
+
+# Commit with a message
+$ git commit -m "Add pagination to GET /api/books"</code></pre></figure>
+<ul>
+<li><strong>git status</strong> &mdash; The command to run first, always. Shows modified, staged, and untracked files at a glance.</li>
+<li><strong>git diff</strong> &mdash; Shows exact line-by-line changes in unstaged files. <code>git diff --staged</code> shows staged changes.</li>
+<li><strong>git add .</strong> &mdash; Stages everything in the current directory. Convenient but check <code>git status</code> first.</li>
+</ul>
+<aside class="note"><p>Good commit messages: present-tense imperative. "Add pagination" — not "Added pagination" or "pagination stuff".</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Write a one-line git commit message for these changes: [paste diff]</p></aside>
+</section>
+
+<section id="reading-history" aria-labelledby="reading-history-h">
+  <h2 id="reading-history-h">Reading History</h2>
+<figure><figcaption>git log and show</figcaption><pre><code># Compact one-line log
+$ git log --oneline
+a1b2c3d Add DELETE /api/books/:id route
+9f8e7d6 Add pagination to GET /api/books
+3c2b1a0 Initial commit
+
+# Visualise branches
+$ git log --oneline --graph --all
+* a1b2c3d Add DELETE route
+* 9f8e7d6 Add pagination
+| * f4e5d6c feature/add-auth: Add JWT
+|/
+* 3c2b1a0 Initial commit
+
+# Inspect a specific commit
+$ git show 9f8e7d6
+
+# What changed since the last commit?
+$ git diff HEAD~1</code></pre></figure>
+<ul>
+<li><strong>--oneline</strong> &mdash; Compact view: short hash + message. Fits many commits on screen. Good for a quick audit.</li>
+<li><strong>--graph --all</strong> &mdash; ASCII art branch diagram. Shows where branches diverge and merge across the whole repo.</li>
+<li><strong>git show</strong> &mdash; Full details of one commit: author, date, message, and the diff. Uses the short hash.</li>
+<li><strong>HEAD~1</strong> &mdash; <code>HEAD</code> means the current commit. <code>HEAD~1</code> is one commit back, <code>HEAD~2</code> is two, and so on.</li>
+</ul>
+</section>
+
+<section id="undoing-things-safely" aria-labelledby="undoing-things-safely-h">
+  <h2 id="undoing-things-safely-h">Undoing Things Safely</h2>
+<figure><figcaption>safe undo commands</figcaption><pre><code># Discard unstaged changes in a file
+$ git restore server.js
+
+# Unstage a file (undo git add)
+$ git restore --staged server.js
+
+# Undo a commit safely — adds a new "undo" commit
+# Does NOT rewrite history — safe on shared branches
+$ git revert a1b2c3d
+[main b4c5d6e] Revert "Add DELETE /api/books/:id route"
+
+# DANGER — discards all uncommitted changes permanently
+# git reset --hard HEAD</code></pre></figure>
+<ul>
+<li><strong>git restore</strong> &mdash; Discard changes in the working tree. The file goes back to how it was at the last commit. Irreversible for those edits.</li>
+<li><strong>--staged</strong> &mdash; Moves a file back out of the staging area without touching the file contents. Safe — your edits are preserved.</li>
+<li><strong>git revert</strong> &mdash; The safe undo. Creates a new commit that reverses the named one. History is preserved — teammates see the revert.</li>
+</ul>
+<aside class="note"><span class="note-label">Gotcha</span><p>Avoid git reset --hard until you understand it — it discards uncommitted work permanently.</p></aside>
+<aside class="note"><p>AI prompt: Explain the difference between git revert and git reset --hard.</p></aside>
+</section>
+
+<section id="branches" aria-labelledby="branches-h">
+  <h2 id="branches-h">Branches</h2>
+<figure><figcaption>branch commands</figcaption><pre><code># Create a new branch and switch to it
+$ git checkout -b feature/add-auth
+Switched to a new branch 'feature/add-auth'
+
+# List all local branches
+$ git branch
+* feature/add-auth
+  main
+
+# Switch back to main
+$ git checkout main
+
+# Delete a branch (after it's merged)
+$ git branch -d feature/add-auth</code></pre></figure>
+<ul>
+<li><strong>Branch</strong> &mdash; Just a pointer to a commit — creating one is instant and costs almost nothing. Git is built for branching.</li>
+<li><strong>checkout -b</strong> &mdash; Create + switch in one step. The modern equivalent is <code>git switch -c</code> — both work.</li>
+<li><strong>git branch</strong> &mdash; Lists branches. <code>*</code> marks the current one. <code>-a</code> includes remote branches.</li>
+<li><strong>-d</strong> &mdash; Delete a branch that has been merged. Use <code>-D</code> to force-delete an unmerged branch.</li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>Convention — main for stable, always-deployable code. Feature branches for everything else. Never commit untested code directly to main.</p></aside>
+</section>
+
+<section id="merging-conflicts" aria-labelledby="merging-conflicts-h">
+  <h2 id="merging-conflicts-h">Merging &amp; Conflicts</h2>
+<figure><figcaption>merge and conflict resolution</figcaption><pre><code># Merge feature branch into main
+$ git checkout main
+$ git merge feature/add-auth
+Auto-merging server.js
+CONFLICT (content): Merge conflict in server.js
+Automatic merge failed; fix conflicts and commit.
+
+# Inside server.js — conflict markers:
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+app.use(express.json());
+=======
+app.use(express.json({ limit: '10mb' }));
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/add-auth
+
+# After editing — remove markers, save, then:
+$ git add server.js
+$ git commit -m "Merge feature/add-auth into main"</code></pre></figure>
+<ul>
+<li><strong>git merge</strong> &mdash; Integrates changes from one branch into another. Run it while on the <em>destination</em> branch.</li>
+<li><strong>Conflict</strong> &mdash; Happens when both branches changed the same lines. Git cannot decide which version to keep — you must.</li>
+<li><strong>&lt;&lt;&lt; / === / &gt;&gt;&gt;</strong> &mdash; <code>HEAD</code> = your current branch. Below <code>=======</code> = the incoming branch. Delete the markers and keep what you want.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Help me resolve this git merge conflict: [paste conflict]</p></aside>
+</section>
+
+<section id="github-remotes-pushing" aria-labelledby="github-remotes-pushing-h">
+  <h2 id="github-remotes-pushing-h">GitHub — Remotes &amp; Pushing</h2>
+<figure><figcaption>connecting to GitHub</figcaption><pre><code># After creating a repo on GitHub:
+$ git remote add origin https://github.com/you/my-project.git
+
+# First push — -u sets the upstream tracking
+$ git push -u origin main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
+
+# Subsequent pushes (no flags needed)
+$ git push
+
+# Download + merge remote changes
+$ git pull
+
+# List remotes
+$ git remote -v
+origin  https://github.com/you/my-project.git (fetch)
+origin  https://github.com/you/my-project.git (push)</code></pre></figure>
+<ul>
+<li><strong>remote</strong> &mdash; A named URL. <code>origin</code> is the conventional name for the primary remote — set it once, use forever.</li>
+<li><strong>git push -u</strong> &mdash; The <code>-u</code> flag links your local branch to the remote branch so future <code>git push</code>/<code>git pull</code> need no arguments.</li>
+<li><strong>git pull</strong> &mdash; Shorthand for <code>git fetch</code> + <code>git merge</code>. Downloads remote commits and merges them into your local branch.</li>
+<li><strong>HTTPS vs SSH</strong> &mdash; HTTPS works anywhere. SSH is more convenient if you set up a key. GitHub's docs cover both.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>Clone = remote + copy in one step. git clone &lt;url&gt; sets up origin automatically.</p></aside>
+</section>
+
+<section id="github-pages-free-static-hosting" aria-labelledby="github-pages-free-static-hosting-h">
+  <h2 id="github-pages-free-static-hosting-h">GitHub Pages — Free Static Hosting</h2>
+<figure><figcaption>publish from docs/ folder</figcaption><pre><code># 1. Push your repo to GitHub as usual
+$ git push
+
+# 2. In GitHub: Settings → Pages
+#    Source: branch = main
+#    Folder = /docs
+#    Click Save
+
+# 3. After ~1 minute, your site is live:
+https://username.github.io/repo-name/
+
+# 4. Every push to main auto-deploys
+$ git push   # → site updates within seconds</code></pre></figure>
+<ul>
+<li><strong>GitHub Pages</strong> &mdash; Serves static files (HTML, CSS, JS) directly from a branch and folder. No server needed.</li>
+<li><strong>docs/ folder</strong> &mdash; The <code>/docs</code> option lets you keep source code in root and publishable content in <code>docs/</code> — ideal for course material.</li>
+<li><strong>Auto-deploy</strong> &mdash; Every push to the configured branch triggers a redeploy. No CI setup required for static sites.</li>
+<li><strong>Custom domain</strong> &mdash; Add a <code>CNAME</code> file to <code>docs/</code> and configure your DNS to point to GitHub Pages.</li>
+</ul>
+<aside class="note"><p>All the decks in this course are plain HTML — no build step. GitHub Pages works out of the box.</p></aside>
+<aside class="note"><p>AI prompt: Write a GitHub Actions workflow to deploy the docs/ folder to GitHub Pages on every push to main.</p></aside>
+</section>
+
+<section id="pull-requests" aria-labelledby="pull-requests-h">
+  <h2 id="pull-requests-h">Pull Requests</h2>
+<figure><figcaption>PR workflow</figcaption><pre><code># 1. Create a feature branch and do your work
+$ git checkout -b feature/pagination
+# ... edit files, commit ...
+
+# 2. Push the branch to GitHub
+$ git push -u origin feature/pagination
+
+# 3. Open a Pull Request on GitHub
+#    Compare: feature/pagination → main
+#    Add title, description, reviewers
+
+# 4. After review + CI pass → Merge
+# 5. Delete the branch
+$ git branch -d feature/pagination</code></pre></figure>
+<ul>
+<li><strong>Pull Request</strong> &mdash; A proposal to merge one branch into another. Named "PR" on GitHub, "MR" (Merge Request) on GitLab — same concept.</li>
+<li><strong>Code review</strong> &mdash; Teammates comment on specific lines. Discussion happens in the PR thread before anything merges to main.</li>
+<li><strong>CI checks</strong> &mdash; GitHub Actions (or other CI) can run tests automatically on every PR. Green checks required before merge.</li>
+<li><strong>Fork workflow</strong> &mdash; For open source: fork the repo, work on your fork, open a PR from fork → upstream. Git handles the cross-repo diff.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Write a pull request description for these changes: [paste diff or summary]</p></aside>
+</section>
+
+<section id="gitignore-what-git-should-never-track" aria-labelledby="gitignore-what-git-should-never-track-h">
+  <h2 id="gitignore-what-git-should-never-track-h">.gitignore — What Git Should Never Track</h2>
+<figure><figcaption>.gitignore for a Node.js project</figcaption><pre><code># .gitignore
+node_modules/
+.env
+dist/
+.DS_Store
+*.log
+
+# If you accidentally staged .env already:
+$ git rm --cached .env
+rm '.env'
+
+# Then add to .gitignore and commit:
+$ git add .gitignore
+$ git commit -m "Remove .env from tracking"</code></pre></figure>
+<ul>
+<li><strong>node_modules/</strong> &mdash; Hundreds of megabytes of installed packages. Never commit — regenerate with <code>npm install</code>.</li>
+<li><strong>.env</strong> &mdash; Contains database URLs, API keys, JWT secrets. One leaked secret can compromise an entire system.</li>
+<li><strong>dist/</strong> &mdash; Build output — generated from source. Commit the source, not the output.</li>
+<li><strong>*.log</strong> &mdash; Glob pattern. The <code>*</code> wildcard matches any filename ending in <code>.log</code>.</li>
+<li><strong>git rm --cached</strong> &mdash; Stops tracking a file without deleting it from disk. Use this if you accidentally staged a secret.</li>
+</ul>
+<aside class="note"><span class="note-label">Gotcha</span><p>Never commit <code>.env</code> — it contains secrets. Add it to .gitignore before your first commit. If a secret reaches a public repo, assume it is compromised — rotate it immediately.</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Generate a .gitignore for a Node.js Express app with a PostgreSQL database. gitignore.io — generate .gitignore by project type ↗</p></aside>
+</section>
+
+<section id="git-is-where-ai-collaboration-becomes-visible" aria-labelledby="git-is-where-ai-collaboration-becomes-visible-h">
+  <h2 id="git-is-where-ai-collaboration-becomes-visible-h">Git is Where AI Collaboration Becomes Visible</h2>
+<aside class="note"><p>Commit messages Describe what you built with AI in natural language. git log becomes a learning diary — a record of every session, every feature, every fix.</p></aside>
+<aside class="note"><p>Diffs as prompts Paste git diff directly into the AI chat. Ask it to explain what changed, spot bugs, or suggest improvements. The diff is the context.</p></aside>
+<aside class="note"><p>Branching strategies Ask AI to design a branching strategy for your project — when to branch, naming conventions, merge vs rebase, how many long-lived branches to keep.</p></aside>
+<aside class="note"><p>Your git history is a record of every AI session. Make it readable.</p></aside>
+<p>Every commit message you write in this course is a data point. Future you — or a collaborator — should be able to read <code>git log --oneline</code> and understand exactly what was built, when, and why.</p>
+</section>
+
+<section id="quick-reference" aria-labelledby="quick-reference-h">
+  <h2 id="quick-reference-h">Quick Reference</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Command</th><th scope="col">What it does</th></tr></thead><tbody><tr><th scope="row">git init</th><td>Start a new repo in the current directory</td></tr><tr><th scope="row">git clone &lt;url&gt;</th><td>Copy an existing repo and set up origin</td></tr><tr><th scope="row">git status</th><td>See what has changed since the last commit</td></tr><tr><th scope="row">git add &lt;file&gt;</th><td>Stage a file for the next commit</td></tr><tr><th scope="row">git add.</th><td>Stage all changed files</td></tr><tr><th scope="row">git commit -m "..."</th><td>Save a snapshot with a message</td></tr><tr><th scope="row">git log --oneline</th><td>View compact commit history</td></tr><tr><th scope="row">git diff</th><td>Show unstaged line-by-line changes</td></tr><tr><th scope="row">git checkout -b &lt;name&gt;</th><td>Create and switch to a new branch</td></tr><tr><th scope="row">git merge &lt;branch&gt;</th><td>Merge named branch into current branch</td></tr><tr><th scope="row">git push</th><td>Upload local commits to GitHub</td></tr><tr><th scope="row">git pull</th><td>Download and merge remote changes</td></tr><tr><th scope="row">git restore &lt;file&gt;</th><td>Discard unstaged changes in a file</td></tr><tr><th scope="row">git restore --staged &lt;file&gt;</th><td>Unstage a file (undo git add)</td></tr><tr><th scope="row">git revert &lt;hash&gt;</th><td>Undo a commit safely — adds a new commit</td></tr><tr><th scope="row">git rm --cached &lt;file&gt;</th><td>Stop tracking a file without deleting it</td></tr></tbody></table></div>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../git-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Branch, commit, message <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>In a practice repo: create a new branch, make a small change, commit with a message explaining *why* (not what), and push. What does git diff show before staging vs after?
+      <ul><li>Your commit message starts with a verb and explains why the change was made, not what changed</li><li>git diff shows exactly the change you intended and nothing else</li><li>You can explain the difference between staged and unstaged changes</li></ul></dd></div>
+    <div><dt>.gitignore + git status <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Add a .gitignore to a project that excludes: .env, node_modules/, and any OS files (.DS_Store). Verify with git status that those files no longer appear as untracked.
+      <ul><li>git status no longer shows .env, node_modules/, or .DS_Store as untracked</li><li>The .gitignore file itself is tracked by git (it should not ignore itself)</li><li>You tested it with the actual files present in the directory, not just empty patterns</li></ul></dd></div>
+    <div><dt>Accidental commit <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>What would you do if you accidentally committed a secret key? Walk through the exact git commands you would use, and explain why a simple git rm isn't sufficient.
+      <ul><li>You mentioned git revert or git reset and know which is safer on a shared branch</li><li>You explained why git rm --cached alone is insufficient (the commit history still contains the secret)</li><li>You noted that removing from history requires a tool like git filter-repo or BFG Repo-Cleaner</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

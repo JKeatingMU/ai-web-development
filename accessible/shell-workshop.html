@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal &amp; Shell — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">A2 &middot; Foundations</p>
+  <h1>Terminal &amp; Shell</h1>
+  <p class="lede">Navigation, pipes, environment variables, aliases, scripting</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../shell-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#terminal-shell">Terminal &amp; Shell</a></li>
+    <li><a href="#terminal-shell-command-line">Terminal, Shell, Command Line</a></li>
+    <li><a href="#where-am-i-moving-around">Where Am I? Moving Around</a></li>
+    <li><a href="#creating-moving-deleting">Creating, Moving, Deleting</a></li>
+    <li><a href="#reading-file-contents">Reading File Contents</a></li>
+    <li><a href="#the-path-how-the-shell-finds-commands">The PATH — How the Shell Finds Commands</a></li>
+    <li><a href="#environment-variables">Environment Variables</a></li>
+    <li><a href="#the-env-file-secrets-and-config">The .env File — Secrets and Config</a></li>
+    <li><a href="#pipes-connecting-commands">Pipes — Connecting Commands</a></li>
+    <li><a href="#chaining-commands">Chaining Commands — &amp;&amp;, ||, ;</a></li>
+    <li><a href="#command-substitution-capturing-output">Command Substitution — Capturing Output</a></li>
+    <li><a href="#controlling-running-programs">Controlling Running Programs</a></li>
+    <li><a href="#zshrc-your-shell-s-startup-file">~/.zshrc — Your Shell's Startup File</a></li>
+    <li><a href="#writing-a-shell-script">Writing a Shell Script</a></li>
+    <li><a href="#reading-ai-generated-shell-commands">Reading AI-Generated Shell Commands</a></li>
+    <li><a href="#shell-quick-reference">Shell Quick Reference</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Navigate the filesystem and manage files and directories from the command line</li>
+    <li>Compose shell pipelines using pipes, redirection, and chaining operators (&amp;&amp;, ||)</li>
+    <li>Configure environment variables and apply the .env / .env.example pattern</li>
+    <li>Write basic shell scripts with variables and exit codes</li>
+    <li>Use curl and jq to make HTTP requests and process JSON responses from the terminal</li>
+  </ul>
+</section>
+
+<section id="terminal-shell" aria-labelledby="terminal-shell-h">
+  <h2 id="terminal-shell-h">Terminal &amp; Shell</h2>
+<aside class="note"><span class="note-label">Key concept</span><p>Every curl command in this course, every npm install, every psql connection, every node server.js — all of these run in the terminal. This deck gives you the vocabulary to understand, modify, and write your own shell commands.</p></aside>
+</section>
+
+<section id="terminal-shell-command-line" aria-labelledby="terminal-shell-command-line-h">
+  <h2 id="terminal-shell-command-line-h">Terminal, Shell, Command Line</h2>
+<ul>
+<li><strong>Terminal</strong> &mdash; The window you type in. A graphical interface to the shell. (iTerm2, Terminal.app, Windows Terminal)</li>
+<li><strong>Shell</strong> &mdash; The program that reads your commands and runs them. <strong>zsh</strong> (macOS default), <strong>bash</strong> (Linux default), PowerShell (Windows)</li>
+<li><strong>Command</strong> &mdash; A program you run by name. <code>node</code>, <code>npm</code>, <code>psql</code>, <code>curl</code>, <code>git</code> — all programs found somewhere on your system.</li>
+<li><strong>Prompt</strong> &mdash; The line where you type. Usually shows your current directory. The <code>$</code> symbol means "ready for input."</li>
+</ul>
+<figure><figcaption>shell prompt and basic commands</figcaption><pre><code>username@machine ~/projects/my-api $
+
+$ node --version
+v22.0.0
+
+$ npm --version
+10.5.0
+
+$ whoami
+username</code></pre></figure>
+<aside class="note"><p>macOS / Linux : use Terminal.app, iTerm2, or any terminal emulator. The shell is zsh or bash. Windows : use Windows Terminal with WSL2 (Ubuntu) or Git Bash. The commands in this course assume a Unix-like shell.</p></aside>
+</section>
+
+<section id="where-am-i-moving-around" aria-labelledby="where-am-i-moving-around-h">
+  <h2 id="where-am-i-moving-around-h">Where Am I? Moving Around</h2>
+<figure><figcaption>navigation commands</figcaption><pre><code>$ pwd
+/Users/alice/projects
+
+$ ls
+my-api/   notes.md   .env
+
+$ ls -la
+drwxr-xr-x  alice  my-api/
+-rw-r--r--  alice  notes.md
+-rw-------  alice  .env
+
+$ cd my-api
+$ pwd
+/Users/alice/projects/my-api
+
+$ cd ..          # go up one level
+$ cd ~           # go to home directory
+$ cd -           # go to previous directory</code></pre></figure>
+<ul>
+<li><strong>pwd</strong> &mdash; <strong>P</strong> rint <strong>W</strong> orking <strong>D</strong> irectory — where you are right now</li>
+<li><strong>ls</strong> &mdash; <strong>L</strong> i <strong>s</strong> t files in current directory. <code>-l</code> for details, <code>-a</code> to show hidden files (starting with <code>.</code>)</li>
+<li><strong>cd</strong> &mdash; <strong>C</strong> hange <strong>D</strong> irectory. <code>cd path</code> to go there, <code>cd ..</code> to go up, <code>cd ~</code> for home</li>
+<li><strong>Tab</strong> &mdash; Press Tab to autocomplete paths and filenames — use it constantly</li>
+<li><strong>↑ / ↓</strong> &mdash; Navigate command history without retyping</li>
+</ul>
+</section>
+
+<section id="creating-moving-deleting" aria-labelledby="creating-moving-deleting-h">
+  <h2 id="creating-moving-deleting-h">Creating, Moving, Deleting</h2>
+<figure><figcaption>file operations</figcaption><pre><code>$ mkdir my-project         # create a directory
+$ mkdir -p a/b/c           # create nested directories
+
+$ touch server.js          # create an empty file
+
+$ mv server.js app.js      # rename a file
+$ mv app.js src/           # move a file into src/
+
+$ cp .env.example .env     # copy a file
+$ cp -r src/ backup/       # copy a directory
+
+$ rm notes.txt             # delete a file
+$ rm -rf node_modules/     # delete a directory recursively</code></pre></figure>
+<ul>
+<li><strong>mkdir</strong> &mdash; Make directory. <code>-p</code> creates all parent dirs.</li>
+<li><strong>touch</strong> &mdash; Create empty file (or update timestamp).</li>
+<li><strong>mv</strong> &mdash; Move or rename. Works for both files and directories.</li>
+<li><strong>cp</strong> &mdash; Copy. Use <code>-r</code> for directories.</li>
+<li><strong>rm</strong> &mdash; Delete — <strong>permanent</strong>. No trash bin. No undo.</li>
+</ul>
+<aside class="note"><span class="note-label">Gotcha</span><p><code>rm -rf</code> is irreversible. It deletes everything in the path recursively with no confirmation. Before running any rm -rf command — especially AI-generated ones — verify the path is exactly what you intend. A stray space can destroy your project.</p></aside>
+</section>
+
+<section id="reading-file-contents" aria-labelledby="reading-file-contents-h">
+  <h2 id="reading-file-contents-h">Reading File Contents</h2>
+<figure><figcaption>reading file contents</figcaption><pre><code>$ cat server.js           # print entire file
+
+$ head -n 20 server.js   # first 20 lines
+$ tail -n 20 server.js   # last 20 lines
+
+$ tail -f server.log     # follow a file live
+^C to stop
+
+$ less server.js         # page through file
+# space = next page, b = back, q = quit, /term = search
+
+$ wc -l server.js        # count lines
+87 server.js</code></pre></figure>
+<ul>
+<li><strong>cat</strong> &mdash; Print entire file. Good for small files; overwhelming for large ones.</li>
+<li><strong>head / tail</strong> &mdash; First or last N lines. <code>tail -f</code> follows a log file as it grows — invaluable for watching a server's output.</li>
+<li><strong>less</strong> &mdash; Page through large files. Searchable. Press <code>q</code> to quit.</li>
+<li><strong>wc -l</strong> &mdash; Word count — with <code>-l</code> counts lines. Useful for checking file size.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>Reading server logs: When your Express server is running with node --watch server.js, its console.log output goes to the terminal. If something breaks, look there first — the error message and stack trace tell you exactly what went wrong.</p></aside>
+</section>
+
+<section id="the-path-how-the-shell-finds-commands" aria-labelledby="the-path-how-the-shell-finds-commands-h">
+  <h2 id="the-path-how-the-shell-finds-commands-h">The PATH — How the Shell Finds Commands</h2>
+<figure><figcaption>PATH — finding executables</figcaption><pre><code>$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+$ which node
+/usr/local/bin/node
+
+$ which psql
+/usr/local/bin/psql
+
+# If you see "command not found":
+$ node
+zsh: command not found: node
+# → node is not in any PATH directory
+
+# nvm adds itself to PATH in ~/.zshrc:
+export PATH="$HOME/.nvm/versions/node/v22.0.0/bin:$PATH"</code></pre></figure>
+<ul>
+<li><strong>$PATH</strong> &mdash; A colon-separated list of directories. When you type <code>node</code>, the shell searches each directory in order for a file named <code>node</code>.</li>
+<li><strong>which</strong> &mdash; Shows where a command's executable lives. <code>which node</code> tells you exactly which installation is being used.</li>
+<li><strong>nvm</strong> &mdash; Manages multiple Node.js versions by adding the active version's <code>bin/</code> directory to PATH. That's why <code>nvm use 22</code> changes which <code>node</code> you run.</li>
+<li><strong>brew / apt</strong> &mdash; Package managers install programs into standard PATH directories, which is why after <code>brew install jq</code> you can just type <code>jq</code>.</li>
+</ul>
+</section>
+
+<section id="environment-variables" aria-labelledby="environment-variables-h">
+  <h2 id="environment-variables-h">Environment Variables</h2>
+<figure><figcaption>environment variables</figcaption><pre><code># Set a variable in the current session
+$ export DATABASE_URL="postgresql://localhost/mydb"
+$ export PORT=3001
+$ export NODE_ENV=development
+
+# Read it back
+$ echo $DATABASE_URL
+postgresql://localhost/mydb
+
+# All current env vars
+$ env
+# ... long list
+
+# In Node.js:
+# process.env.DATABASE_URL
+# process.env.PORT
+# process.env.NODE_ENV</code></pre></figure>
+<ul>
+<li><strong>export</strong> &mdash; Makes the variable available to any program started in this session. Without <code>export</code>, it's only in the shell itself.</li>
+<li><strong>$VAR</strong> &mdash; Read a variable. <code>$DATABASE_URL</code> expands to its value. Unset variables expand to an empty string.</li>
+<li><strong>process.env</strong> &mdash; In Node.js, all environment variables are available as properties of <code>process.env</code>. Express reads <code>process.env.PORT</code>, <code>process.env.DATABASE_URL</code>, etc.</li>
+<li><strong>Session scope</strong> &mdash; Variables set with <code>export</code> last for the current terminal session only. A new terminal window starts fresh.</li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>Convention: environment variable names are UPPER_CASE. This distinguishes them from shell variables and code variables.</p></aside>
+</section>
+
+<section id="the-env-file-secrets-and-config" aria-labelledby="the-env-file-secrets-and-config-h">
+  <h2 id="the-env-file-secrets-and-config-h">The .env File — Secrets and Config</h2>
+<figure><figcaption>.env and .env.example</figcaption><pre><code># .env — your actual secrets (NEVER commit this)
+DATABASE_URL=postgresql://localhost:5432/reading_list
+PORT=3001
+JWT_SECRET=a-long-random-string-here
+NODE_ENV=development
+
+# .env.example — template (commit this)
+DATABASE_URL=postgresql://localhost:5432/your_db_name
+PORT=3001
+JWT_SECRET=replace-with-a-long-random-string
+NODE_ENV=development</code></pre></figure>
+<ul>
+<li><strong>.env</strong> &mdash; Contains real secrets. In <code>.gitignore</code>. Never committed. Different on every machine.</li>
+<li><strong>.env.example</strong> &mdash; Template with placeholder values. Committed to git. Tells collaborators (and future you) what variables are needed.</li>
+<li><strong>dotenv</strong> &mdash; <code>import 'dotenv/config'</code> at the top of your server file loads <code>.env</code> into <code>process.env</code> automatically.</li>
+</ul>
+<aside class="note"><span class="note-label">Gotcha</span><p>Never commit .env to git. If a secret reaches a public repository, assume it is compromised — rotate it immediately. Railway and Vercel have a dashboard for setting production env vars; they never go in the code.</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>How to create a strong JWT_SECRET: openssl rand -base64 32 in the terminal. 32 bytes of random data, base64 encoded.</p></aside>
+</section>
+
+<section id="pipes-connecting-commands" aria-labelledby="pipes-connecting-commands-h">
+  <h2 id="pipes-connecting-commands-h">Pipes — Connecting Commands</h2>
+<figure><figcaption>pipes and redirection</figcaption><pre><code># Pipe: output of left becomes input of right
+$ curl -s http://localhost:3001/api/books | jq .
+
+# Chain multiple pipes
+$ cat server.js | grep "app\." | wc -l
+12
+
+# grep: filter lines matching a pattern
+$ ls -la | grep ".js"
+
+# sort and count unique values
+$ cat access.log | sort | uniq -c | sort -rn
+
+# Redirect to a file
+$ curl -s .../books &gt; books.json
+$ curl -s .../books &gt;&gt; books.json  # append
+
+# Redirect stderr to stdout
+$ node server.js 2&gt;&amp;1 | tee server.log</code></pre></figure>
+<ul>
+<li><strong>|</strong> &mdash; The pipe operator. Takes stdout of the left command and feeds it as stdin to the right command. Chains can be as long as you need.</li>
+<li><strong>&gt;</strong> &mdash; Redirect output to a file. Creates or overwrites.</li>
+<li><strong>&gt;&gt;</strong> &mdash; Append to a file. Creates if it doesn't exist.</li>
+<li><strong>2&gt;&amp;1</strong> &mdash; Redirect stderr (error output, stream 2) to stdout (stream 1). Useful when errors would otherwise be invisible.</li>
+<li><strong>grep</strong> &mdash; Filter lines matching a regex pattern. <code>-i</code> for case-insensitive, <code>-v</code> to invert.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>The curl ... | jq. pattern you've used throughout this course is a pipe. curl writes JSON to stdout. The | passes it to jq, which pretty-prints it to your terminal.</p></aside>
+</section>
+
+<section id="chaining-commands" aria-labelledby="chaining-commands-h">
+  <h2 id="chaining-commands-h">Chaining Commands — &amp;&amp;, ||, ;</h2>
+<figure><figcaption>chaining operators</figcaption><pre><code># &amp;&amp; — run next only if previous succeeded (exit code 0)
+$ npm install &amp;&amp; node server.js
+$ psql $DATABASE_URL &lt; schema.sql &amp;&amp; echo "Migration done"
+
+# || — run next only if previous FAILED
+$ ping -c1 localhost || echo "No network"
+
+# ; — run next regardless
+$ npm run build; npm start
+
+# Practical: create project and enter it
+$ mkdir my-api &amp;&amp; cd my-api &amp;&amp; npm init -y
+
+# Practical: migrate and start
+$ psql $DATABASE_URL &lt; schema.sql &amp;&amp; \
+  npm install &amp;&amp; \
+  node server.js</code></pre></figure>
+<ul>
+<li><strong>&amp;&amp;</strong> &mdash; "And then — if success." The most common. Stops the chain on first failure. Used in npm scripts, deployment steps, CI pipelines.</li>
+<li><strong>||</strong> &mdash; "Or — if failure." Good for fallback behaviour or error messages.</li>
+<li><strong>;</strong> &mdash; "Then — always." Runs both commands regardless of success or failure. Rarely what you want in automated scripts.</li>
+<li><strong>Exit codes</strong> &mdash; Programs signal success (0) or failure (non-zero) with an exit code. <code>$?</code> holds the exit code of the last command.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>AI often generates multi-step setup commands joined by &amp;&amp;. Now you know why: if npm install fails, you don't want node server.js to run with incomplete dependencies.</p></aside>
+</section>
+
+<section id="command-substitution-capturing-output" aria-labelledby="command-substitution-capturing-output-h">
+  <h2 id="command-substitution-capturing-output-h">Command Substitution — Capturing Output</h2>
+<figure><figcaption>command substitution with $()</figcaption><pre><code># $() captures the output of a command as a string
+
+# Capture a JWT token
+$ TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+    -H 'Content-Type: application/json' \
+    -d '{"email":"alice@example.com","password":"abc"}' \
+    | jq -r '.token')
+
+# Confirm it worked
+$ echo $TOKEN
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Capture date for a filename
+$ DATE=$(date +%Y-%m-%d)
+$ cp backup.sql backup-$DATE.sql
+
+# Capture line count
+$ LINES=$(wc -l &lt; server.js)
+$ echo "server.js has $LINES lines"</code></pre></figure>
+<ul>
+<li><strong>$()</strong> &mdash; Runs the command inside and substitutes its stdout in place. The outer shell sees the captured text, not the original command.</li>
+<li><strong>TOKEN=$(...)</strong> &mdash; The entire TOKEN capture pattern from the curl deck — this is how it works. The <code>jq -r '.token'</code> extracts just the token string from the JSON response.</li>
+<li><strong>Variable in strings</strong> &mdash; <code>$VARNAME</code> expands inside double-quoted strings. In single-quoted strings, it does NOT expand. That's why you need double quotes when using variables.</li>
+<li><strong>Backticks</strong> &mdash; The older syntax <code>`command`</code> is equivalent to <code>$(command)</code>. Prefer <code>$()</code> — it nests more clearly.</li>
+</ul>
+</section>
+
+<section id="controlling-running-programs" aria-labelledby="controlling-running-programs-h">
+  <h2 id="controlling-running-programs-h">Controlling Running Programs</h2>
+<figure><figcaption>process management</figcaption><pre><code># Stop a running program
+Ctrl+C
+
+# Suspend (pause) a running program
+Ctrl+Z
+
+# Resume in background
+$ bg
+
+# Resume in foreground
+$ fg
+
+# Run in background from the start
+$ node server.js &amp;
+[1] 12345         # PID printed
+
+# List background jobs
+$ jobs
+[1]+ Running  node server.js
+
+# Kill by PID
+$ kill 12345
+$ kill -9 12345   # force kill (SIGKILL)
+
+# Find what's using port 3001
+$ lsof -i :3001</code></pre></figure>
+<ul>
+<li><strong>Ctrl+C</strong> &mdash; Sends SIGINT — asks the program to stop cleanly. Use this to stop your dev server.</li>
+<li><strong>Ctrl+Z</strong> &mdash; Suspends the process. You get your prompt back. The process is paused, not killed.</li>
+<li><strong>&amp;</strong> &mdash; Run a command in the background. Your prompt returns immediately. The process keeps running.</li>
+<li><strong>lsof -i :PORT</strong> &mdash; Shows what process is listening on a port. If "address already in use" — use this to find what's occupying port 3001.</li>
+</ul>
+<aside class="note"><p>Keyboard shortcuts in the shell: Ctrl+A — beginning of line. Ctrl+E — end of line. Ctrl+R — search command history. Ctrl+L — clear screen. ↑ /↓ — navigate history. !! — repeat last command.</p></aside>
+</section>
+
+<section id="zshrc-your-shell-s-startup-file" aria-labelledby="zshrc-your-shell-s-startup-file-h">
+  <h2 id="zshrc-your-shell-s-startup-file-h">~/.zshrc — Your Shell's Startup File</h2>
+<figure><figcaption>~/.zshrc example</figcaption><pre><code># ~/.zshrc — loaded every time you open a terminal
+
+# Make ls use colour
+alias ls='ls --color=auto'
+alias ll='ls -la'
+alias la='ls -A'
+
+# Shortcut to project directory
+alias api='cd ~/projects/my-api'
+
+# Always set NODE_ENV for development
+export NODE_ENV=development
+
+# nvm (added automatically by nvm install)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] &amp;&amp; \. "$NVM_DIR/nvm.sh"
+
+# Reload after editing:
+# source ~/.zshrc</code></pre></figure>
+<ul>
+<li><strong>~/.zshrc</strong> &mdash; The file zsh reads when it starts. <code>~</code> means your home directory. On macOS with bash it's <code>~/.bashrc</code> or <code>~/.bash_profile</code>.</li>
+<li><strong>alias</strong> &mdash; Create a shortcut. <code>alias ll='ls -la'</code> means typing <code>ll</code> runs <code>ls -la</code>. Saved permanently once in .zshrc.</li>
+<li><strong>export</strong> &mdash; Variables set here are available to every program you run in every terminal session. Good place for EDITOR, NODE_ENV etc.</li>
+<li><strong>source</strong> &mdash; <code>source ~/.zshrc</code> reloads the file without closing the terminal. Run this after editing .zshrc.</li>
+</ul>
+<aside class="note"><span class="note-label">Gotcha</span><p>Don't blindly copy .zshrc snippets from the internet. Understand each line before adding it. AI can generate .zshrc snippets — ask it to explain each line.</p></aside>
+</section>
+
+<section id="writing-a-shell-script" aria-labelledby="writing-a-shell-script-h">
+  <h2 id="writing-a-shell-script-h">Writing a Shell Script</h2>
+<figure><figcaption>test-api.sh</figcaption><pre><code>#!/usr/bin/env bash
+# test-api.sh — basic API smoke test
+
+BASE="http://localhost:3001"
+
+# 1. Health check
+echo "--- Health check ---"
+curl -s $BASE/api/health | jq -r '.status'
+
+# 2. Login and capture token
+echo "--- Login ---"
+TOKEN=$(curl -s -X POST $BASE/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"alice@example.com","password":"test123"}' \
+  | jq -r '.token')
+
+if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+  echo "Login failed — is the server running?"
+  exit 1
+fi
+echo "Token captured"
+
+# 3. Create a book
+echo "--- Create book ---"
+curl -s -X POST $BASE/api/books \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Test Book","author":"Tester"}' | jq '{id,title}'</code></pre></figure>
+<ul>
+<li><strong>#!/usr/bin/env bash</strong> &mdash; The shebang line — tells the OS which interpreter to use. Always the first line of a script.</li>
+<li><strong>Variables</strong> &mdash; <code>BASE="..."</code> — assign without spaces around <code>=</code>. Read with <code>$BASE</code>.</li>
+<li><strong>if [ -z ... ]</strong> &mdash; Test if a string is empty (<code>-z</code>). <code>-n</code> tests non-empty. <code>[ "$VAR" = "value" ]</code> tests equality.</li>
+<li><strong>exit 1</strong> &mdash; Stop the script and signal failure (non-zero exit code). <code>exit 0</code> signals success.</li>
+<li><strong>Make executable</strong> &mdash; <code>chmod +x test-api.sh</code>, then run with <code>./test-api.sh</code></li>
+</ul>
+<p>explainshell.com — paste any command to see it explained token by token ↗</p>
+</section>
+
+<section id="reading-ai-generated-shell-commands" aria-labelledby="reading-ai-generated-shell-commands-h">
+  <h2 id="reading-ai-generated-shell-commands-h">Reading AI-Generated Shell Commands</h2>
+<aside class="note"><span class="note-label">Gotcha</span><p>AI generates shell commands constantly — curl examples, npm scripts, deployment instructions, database setup commands. Always read a shell command before running it. Unlike a code file you can review and test in stages, a shell command executes immediately and some effects are irreversible. AI is often overconfident about shell syntax: it may use the wrong flags for your OS, assume a tool is installed, or generate rm -rf patterns you should scrutinise carefully.</p></aside>
+<aside class="note"><p>AI-generated commands you'll see in this course: npm install &amp;&amp; node server.js · psql $DATABASE_URL &lt; schema.sql · TOKEN=$(curl ... | jq -r '.token') · export $(grep -v '^#' .env | xargs). Now you can read every token of these commands and understand exactly what they do.</p></aside>
+<aside class="note"><p>Using AI to learn shell: Ask AI to explain any command you don't recognise. curl -s -X POST ... -H ... -d ... — ask "what does each flag do?". Ask it to write a test script and explain each line. The AI is an excellent shell tutor when you engage with it rather than just copying.</p></aside>
+<aside class="note"><p>Cross-platform note: bash scripts run on macOS and Linux. Windows users should use WSL2 or Git Bash. PowerShell has different syntax. If AI generates a shell command, ask it to confirm which shell it assumes.</p></aside>
+</section>
+
+<section id="shell-quick-reference" aria-labelledby="shell-quick-reference-h">
+  <h2 id="shell-quick-reference-h">Shell Quick Reference</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Navigation &amp; Files</th></tr></thead><tbody><tr><th scope="row">Navigation &amp; Files</th></tr><tr><th scope="row">pwd</th><td>Print current directory</td></tr><tr><th scope="row">ls -la</th><td>List files with details + hidden</td></tr><tr><th scope="row">cd path</th><td>Change directory</td></tr><tr><th scope="row">mkdir -p</th><td>Create directory (and parents)</td></tr><tr><th scope="row">cp -r</th><td>Copy file or directory</td></tr><tr><th scope="row">mv</th><td>Move or rename</td></tr><tr><th scope="row">rm -rf</th><td>Delete (permanent — careful)</td></tr><tr><th scope="row">cat / less</th><td>Read file contents</td></tr><tr><th scope="row">tail -f</th><td>Follow log file live</td></tr><tr><th scope="row">Variables &amp; Environment</th></tr><tr><th scope="row">export VAR=val</th><td>Set environment variable</td></tr><tr><th scope="row">echo $VAR</th><td>Print variable value</td></tr><tr><th scope="row">env</th><td>List all env variables</td></tr></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th scope="col">Pipes &amp; Combining</th></tr></thead><tbody><tr><th scope="row">Pipes &amp; Combining</th></tr><tr><th scope="row">cmd1 | cmd2</th><td>Pipe output to next command</td></tr><tr><th scope="row">cmd &gt; file</th><td>Redirect output to file</td></tr><tr><th scope="row">cmd &gt;&gt; file</th><td>Append output to file</td></tr><tr><th scope="row">cmd1 &amp;&amp; cmd2</th><td>Run cmd2 if cmd1 succeeded</td></tr><tr><th scope="row">cmd &amp;</th><td>Run in background</td></tr><tr><th scope="row">$(cmd)</th><td>Capture output as string</td></tr><tr><th scope="row">Keyboard Shortcuts</th></tr><tr><th scope="row">Ctrl+C</th><td>Stop running process</td></tr><tr><th scope="row">Ctrl+R</th><td>Search command history</td></tr><tr><th scope="row">Ctrl+L</th><td>Clear screen</td></tr><tr><th scope="row">Tab</th><td>Autocomplete path/command</td></tr><tr><th scope="row">↑ / ↓</th><td>Navigate history</td></tr></tbody></table></div>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../shell-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Write a shell script <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Write a script that: (1) prints today's date, (2) counts how many .js files are in the current directory tree, (3) shows the last 10 commands from your shell history.
+      <ul><li>The script runs without errors from a fresh terminal session</li><li>Each of the three tasks is handled by a distinct command or pipeline</li><li>You can explain what each line does and why you wrote it that way</li></ul></dd></div>
+    <div><dt>curl + jq pipeline <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Run: curl -s https://jsonplaceholder.typicode.com/todos/1 | jq '.title' Then modify the jq expression to extract a different field. If you don't have jq, install it: brew install jq or apt install jq.
+      <ul><li>You ran the command and received output (not a connection or parse error)</li><li>You successfully extracted a different field with a modified jq expression</li><li>You can explain what the pipe | does and why the output changes with different jq filters</li></ul></dd></div>
+    <div><dt>Where will you use this? <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Which shell skill from this module will you use first in your own work? What would you ask an AI to help you write, and what would you want to understand yourself before running it?
+      <ul><li>You named a specific skill, not just "shell scripting" in general</li><li>You described something you would ask AI to help with AND something you would want to understand yourself</li><li>Your answer reflects your actual workflow or project, not a hypothetical one</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

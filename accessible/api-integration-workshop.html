@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Integration — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">C3 &middot; Frontend</p>
+  <h1>API Integration</h1>
+  <p class="lede">CORS, env vars, Vite proxy, centralised api.ts, token storage</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../api-integration-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#api-integration">API Integration</a></li>
+    <li><a href="#the-two-server-problem">The Two-Server Problem</a></li>
+    <li><a href="#cors-the-browser-s-same-origin-policy">CORS — The Browser's Same-Origin Policy</a></li>
+    <li><a href="#configuring-cors-in-express">Configuring CORS in Express</a></li>
+    <li><a href="#environment-variables-in-vite-the-vite-prefix">Environment Variables in Vite — The VITE_ Prefix</a></li>
+    <li><a href="#the-vite-proxy-simpler-in-development">The Vite Proxy — Simpler in Development</a></li>
+    <li><a href="#centralising-api-calls-the-api-ts-module">Centralising API Calls — The api.ts Module</a></li>
+    <li><a href="#prompt-walkthrough-generating-the-api-layer">Prompt Walkthrough: Generating the API Layer</a></li>
+    <li><a href="#prompting-ai-for-the-api-integration-layer">Prompting AI for the API Integration Layer</a></li>
+    <li><a href="#handling-authentication-errors-401-unauthorised">Handling Authentication Errors — 401 Unauthorised</a></li>
+    <li><a href="#using-api-ts-in-components">Using api.ts in Components</a></li>
+    <li><a href="#token-storage-localstorage-vs-sessionstorage-vs-cookies">Token Storage — localStorage vs sessionStorage vs Cookies</a></li>
+    <li><a href="#debugging-cors-reading-the-error">Debugging CORS — Reading the Error</a></li>
+    <li><a href="#reflect-evaluating-the-api-layer-ai-built">Reflect — Evaluating the API Layer AI Built</a></li>
+    <li><a href="#what-you-can-now-do-and-what-comes-next">What You Can Now Do — and What Comes Next</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the same-origin policy and why the browser blocks cross-origin requests</li>
+    <li>Configure the cors() middleware in Express with explicit origin, methods, and allowedHeaders</li>
+    <li>Use VITE_ prefixed environment variables and read them via import.meta.env in React</li>
+    <li>Set up the Vite dev proxy to forward API requests without CORS in development</li>
+    <li>Build a centralised api.ts module with typed methods, auth headers, and global error handling</li>
+    <li>Handle 401 responses globally by clearing the token and redirecting to login</li>
+    <li>Evaluate the trade-offs between localStorage, sessionStorage, and httpOnly cookies for token storage</li>
+  </ul>
+</section>
+
+<section id="api-integration" aria-labelledby="api-integration-h">
+  <h2 id="api-integration-h">API Integration</h2>
+<aside class="note"><p>You have a React front end (C1, C2) and an Express API (Tracks A and B). This deck connects them. It covers the browser security model, environment variables, auth headers, and how to centralise API calls into a reusable module that AI generates and you understand.</p></aside>
+</section>
+
+<section id="the-two-server-problem" aria-labelledby="the-two-server-problem-h">
+  <h2 id="the-two-server-problem-h">The Two-Server Problem</h2>
+<p>In development you run two servers simultaneously. They live on different ports — and the browser's same-origin policy blocks requests between different origins. You will see this reported as a <strong>CORS error</strong>; the next slide explains exactly what CORS is and why the browser enforces it.</p>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">Vite Dev Server → localhost:5173 → React app → Express API → localhost:3001 → your backend → ⛔ CORS blocked → different origin = browser blocks the request</p></figure>
+<aside class="note"><span class="note-label">Warning</span><p>The symptom: your fetch call fails with a CORS error in the browser console. The API is running fine — the browser is blocking the response from reaching your code.</p></aside>
+<aside class="note"><p>Two solutions: configure CORS on the Express server (production approach), or use the Vite proxy (development shortcut). You need to understand both.</p></aside>
+<aside class="note"><p>In production both apps often share the same origin — Express serves the built React files. CORS becomes less of an issue, but still matters for external API consumers.</p></aside>
+</section>
+
+<section id="cors-the-browser-s-same-origin-policy" aria-labelledby="cors-the-browser-s-same-origin-policy-h">
+  <h2 id="cors-the-browser-s-same-origin-policy-h">CORS — The Browser's Same-Origin Policy</h2>
+<p>CORS (Cross-Origin Resource Sharing) is a browser security mechanism. It prevents a page on one origin from reading responses from a different origin — unless the server explicitly allows it.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Scenario</th><th scope="col">Same origin?</th></tr></thead><tbody><tr><th scope="row">5173 → 5173</th><td>✓ Yes — allowed</td></tr><tr><th scope="row">5173 → 3001</th><td>✗ No — different port</td></tr><tr><th scope="row">app.com → api.app.com</th><td>✗ No — different subdomain</td></tr><tr><th scope="row">http → https</th><td>✗ No — different scheme</td></tr><tr><th scope="row">app.com → app.com</th><td>✓ Yes — same everything</td></tr></tbody></table></div>
+<aside class="note"><p>CORS is a browser rule, not a server rule. curl and Postman are not browsers — they never enforce CORS. If your API works in curl but not in React, CORS is the likely cause.</p></aside>
+<aside class="note"><p>The browser sends a preflight OPTIONS request before a POST/PATCH/DELETE with custom headers. Your server must respond correctly to the preflight or the real request never happens.</p></aside>
+<aside class="note"><p>CORS headers are added to the response by the server. The browser reads them and decides whether to give the response to your JavaScript.</p></aside>
+</section>
+
+<section id="configuring-cors-in-express" aria-labelledby="configuring-cors-in-express-h">
+  <h2 id="configuring-cors-in-express-h">Configuring CORS in Express</h2>
+<p>The <code>cors</code> npm package adds the correct response headers. AI generates this — understand every option before deploying to production.</p>
+<figure><figcaption>server/index.js</figcaption><pre><code>import cors from 'cors';
+
+// Development — allow Vite dev server
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,        // allow cookies / auth headers
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Production — use environment variable
+const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
+
+app.use(cors({
+  origin: allowedOrigin,
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));</code></pre></figure>
+<aside class="note"><p>Never use <code>origin: '*'</code> with <code>credentials: true</code> — this is a security error. Browsers reject it. Always name your origin explicitly when sending credentials.</p></aside>
+<aside class="note"><p>Authorization header must be in allowedHeaders — otherwise the browser strips it from the request before it reaches your JWT middleware.</p></aside>
+<aside class="note"><p>CLIENT_URL env var — set to your deployed React app's domain in production. AI generates this pattern; it is the correct approach.</p></aside>
+</section>
+
+<section id="environment-variables-in-vite-the-vite-prefix" aria-labelledby="environment-variables-in-vite-the-vite-prefix-h">
+  <h2 id="environment-variables-in-vite-the-vite-prefix-h">Environment Variables in Vite — The VITE_ Prefix</h2>
+<p>Your React app needs to know where the API lives. In Vite, environment variables are injected at build time — and only variables prefixed with <code>VITE_</code> are exposed to the browser.</p>
+<figure><figcaption>.env.local (never commit this)</figcaption><pre><code># .env.local — Vite reads this automatically
+VITE_API_URL=http://localhost:3001
+
+# .env.production — used in production build
+VITE_API_URL=https://api.yourapp.railway.app</code></pre></figure>
+<figure><figcaption>src/api.ts — reading the variable</figcaption><pre><code>// import.meta.env — Vite's env object
+const API_URL = import.meta.env.VITE_API_URL;
+
+// Usage:
+const res = await fetch(`${API_URL}/api/books`);</code></pre></figure>
+<aside class="note"><p>VITE_ prefix is required — Vite strips variables without it. This prevents accidentally exposing secrets (database passwords, private keys) to the browser bundle.</p></aside>
+<aside class="note"><p>import.meta.env — Vite's equivalent of Node's process.env. At build time, Vite replaces these references with the actual string values.</p></aside>
+<aside class="note"><p>.env.local is for secrets — add it to .gitignore. Provide a .env.example with placeholder values so other developers know what to set.</p></aside>
+<aside class="note"><p>Restart required — Vite reads env files on startup. After adding or changing a .env file, stop and restart npm run dev.</p></aside>
+</section>
+
+<section id="the-vite-proxy-simpler-in-development" aria-labelledby="the-vite-proxy-simpler-in-development-h">
+  <h2 id="the-vite-proxy-simpler-in-development-h">The Vite Proxy — Simpler in Development</h2>
+<p>Instead of configuring CORS, you can tell Vite to forward API requests to your Express server. The browser sees only one origin — CORS never triggers.</p>
+<figure><figcaption>vite.config.ts</figcaption><pre><code>import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      // Any request to /api/** is forwarded to Express
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/auth': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
+  },
+});</code></pre></figure>
+<aside class="note"><p>With the proxy, your React code calls fetch('/api/books') — no full URL needed. Vite intercepts the request and forwards it to Express on port 3001.</p></aside>
+<aside class="note"><p>Development only — the Vite proxy is a dev-server feature. In production your app is built into static files that cannot proxy. You still need CORS configured on Express for production.</p></aside>
+<aside class="note"><p>The proxy approach means you can use relative URLs in development and absolute URLs in production by reading VITE_API_URL — or use an empty string for the base URL when the proxy is active.</p></aside>
+</section>
+
+<section id="centralising-api-calls-the-api-ts-module" aria-labelledby="centralising-api-calls-the-api-ts-module-h">
+  <h2 id="centralising-api-calls-the-api-ts-module-h">Centralising API Calls — The api.ts Module</h2>
+<p>Scattering <code>fetch('/api/books', { headers: { Authorization: ... } })</code> across every component is fragile. AI generates a central API module — one place to set the base URL, auth header, and error handling.</p>
+<figure><figcaption>src/api.ts</figcaption><pre><code>const BASE = import.meta.env.VITE_API_URL ?? '';
+
+function getHeaders(): HeadersInit {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+}
+
+async function request&lt;T&gt;(
+  path: string,
+  options: RequestInit = {}
+): Promise&lt;T&gt; {
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: { ...getHeaders(), ...options.headers },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() =&gt; ({}));
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+  return res.json() as Promise&lt;T&gt;;
+}
+
+export const api = {
+  getBooks: () =&gt; request&lt;Book[]&gt;('/api/books'),
+  addBook: (b: NewBook) =&gt;
+    request&lt;Book&gt;('/api/books', { method: 'POST', body: JSON.stringify(b) }),
+  deleteBook: (id: number) =&gt;
+    request&lt;void&gt;(`/api/books/${id}`, { method: 'DELETE' }),
+};</code></pre></figure>
+<aside class="note"><p>One source of truth for the base URL, auth header, and error shape. Change how auth works → edit one file, not every component.</p></aside>
+<aside class="note"><p>Spread operator on headers — { ...getHeaders(), ...options.headers } lets callers override headers if needed, while always including the defaults.</p></aside>
+<aside class="note"><p>Error body parsing — res.json().catch(() =&gt; ({})) gracefully handles non-JSON error responses (e.g. HTML error pages from a crashed server) without throwing a second error.</p></aside>
+</section>
+
+<section id="prompt-walkthrough-generating-the-api-layer" aria-labelledby="prompt-walkthrough-generating-the-api-layer-h">
+  <h2 id="prompt-walkthrough-generating-the-api-layer-h">Prompt Walkthrough: Generating the API Layer</h2>
+<p class="lede">One prompt to connect your React app to your Express API.</p>
+</section>
+
+<section id="prompting-ai-for-the-api-integration-layer" aria-labelledby="prompting-ai-for-the-api-integration-layer-h">
+  <h2 id="prompting-ai-for-the-api-integration-layer-h">Prompting AI for the API Integration Layer</h2>
+<blockquote class="prompt"><span class="note-label">Prompt — full API integration layer</span><p>I have a React + TypeScript + Vite front end and an Express REST API with JWT authentication. The API runs on http://localhost:3001 in development. Please generate:</p>
+<ul>
+<li>A <em>vite.config.ts</em> with a proxy that forwards <code>/api</code> and <code>/auth</code> requests to port 3001</li>
+<li>A <em>src/api.ts</em> module with a generic <code>request&lt;T&gt;</code> function that reads the JWT from localStorage, attaches it as a Bearer token, checks <code>res.ok</code>, and parses error messages from the JSON body</li>
+<li>Typed API methods: <code>getBooks</code>, <code>addBook</code>, <code>updateBook</code>, <code>deleteBook</code>, <code>login</code>, <code>register</code></li>
+<li>A <em>.env.example</em> file with the correct variable name</li>
+</ul>
+<p>The Book type has: id: number, title: string, author: string, status: 'to-read' | 'reading' | 'read'. Explain what happens when a 401 response is received and whether your code handles it.</p></blockquote>
+<aside class="note"><p>Why include the 401 question: AI often silently ignores auth errors in the API layer. Forcing it to address the question reveals whether it throws, redirects, or leaves it to the caller — and gives you a prompt for the follow-up fix.</p></aside>
+</section>
+
+<section id="handling-authentication-errors-401-unauthorised" aria-labelledby="handling-authentication-errors-401-unauthorised-h">
+  <h2 id="handling-authentication-errors-401-unauthorised-h">Handling Authentication Errors — 401 Unauthorised</h2>
+<p>A 401 response means the token is missing, expired, or invalid. The API layer is the right place to detect this and redirect to login — not every individual component.</p>
+<figure><figcaption>src/api.ts — 401 handling</figcaption><pre><code>async function request&lt;T&gt;(
+  path: string,
+  options: RequestInit = {}
+): Promise&lt;T&gt; {
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: { ...getHeaders(), ...options.headers },
+  });
+
+  // Handle token expiry globally
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    // Redirect to login without React Router
+    window.location.href = '/login';
+    throw new Error('Session expired');
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() =&gt; ({}));
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+
+  return res.json() as Promise&lt;T&gt;;
+}</code></pre></figure>
+<aside class="note"><p>Clear the token first — before redirecting, remove the expired token. Otherwise the login page loads, the user logs in, and the old token remains causing an immediate re-expiry.</p></aside>
+<aside class="note"><p>window.location.href — a hard navigation, not React Router. This ensures state is fully reset. With React Router you'd use a navigate() hook, but that requires being inside the router — the API module is outside it.</p></aside>
+<aside class="note"><p>Ask AI: "What should happen if the 401 occurs on the login endpoint itself?" (It should not redirect in that case — you're already on login.) This is an edge case AI sometimes misses.</p></aside>
+</section>
+
+<section id="using-api-ts-in-components" aria-labelledby="using-api-ts-in-components-h">
+  <h2 id="using-api-ts-in-components-h">Using api.ts in Components</h2>
+<p>With the API module in place, components become clean — they describe what to render, not how to talk to the server.</p>
+<figure><figcaption>BookList.tsx — clean component</figcaption><pre><code>import { api } from '../api';
+
+function BookList() {
+  const [books, setBooks]         = useState&lt;Book[]&gt;([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError]         = useState&lt;string|null&gt;(null);
+
+  useEffect(() =&gt; {
+    api.getBooks()
+      .then(setBooks)
+      .catch(e =&gt; setError(e.message))
+      .finally(() =&gt; setIsLoading(false));
+  }, []);
+
+  async function handleDelete(id: number) {
+    await api.deleteBook(id);
+    setBooks(prev =&gt; prev.filter(b =&gt; b.id !== id));
+  }
+
+  if (isLoading) return &lt;p&gt;Loading…&lt;/p&gt;;
+  if (error)     return &lt;p&gt;{error}&lt;/p&gt;;
+  return (
+    &lt;ul&gt;
+      {books.map(b =&gt;
+        &lt;li key={b.id}&gt;
+          {b.title}
+          &lt;button onClick={() =&gt; handleDelete(b.id)}&gt;Delete&lt;/button&gt;
+        &lt;/li&gt;
+      )}
+    &lt;/ul&gt;
+  );
+}</code></pre></figure>
+<aside class="note"><p>Optimistic UI — handleDelete awaits the API call, then filters the local state. A more responsive version removes from state first, then reverses on error. Ask AI to show you both approaches.</p></aside>
+<aside class="note"><p>The component does not know or care about the base URL, auth headers, or error parsing. All of that lives in api.ts. This is separation of concerns in practice.</p></aside>
+<aside class="note"><p>Notice api.getBooks().then(setBooks) — because getBooks returns a typed Promise, you can chain directly. No need for a wrapper async function for simple cases.</p></aside>
+</section>
+
+<section id="token-storage-localstorage-vs-sessionstorage-vs-cookies" aria-labelledby="token-storage-localstorage-vs-sessionstorage-vs-cookies-h">
+  <h2 id="token-storage-localstorage-vs-sessionstorage-vs-cookies-h">Token Storage — localStorage vs sessionStorage vs Cookies</h2>
+<p>AI will often default to <code>localStorage</code> for the JWT. Understand the trade-offs before accepting that choice.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Storage</th><th scope="col">Persists across tabs?</th><th scope="col">Persists after close?</th><th scope="col">XSS risk</th><th scope="col">CSRF risk</th></tr></thead><tbody><tr><th scope="row">localStorage</th><td>Yes</td><td>Yes</td><td>High — JS readable</td><td>Low</td></tr><tr><th scope="row">sessionStorage</th><td>No</td><td>No</td><td>High — JS readable</td><td>Low</td></tr><tr><th scope="row">httpOnly cookie</th><td>Yes</td><td>Yes</td><td>Low — not JS readable</td><td>Higher</td></tr></tbody></table></div>
+<aside class="note"><p>The real question to ask AI: "You stored the JWT in localStorage. What are the XSS implications, and under what threat model would you choose httpOnly cookies instead?" This single question reveals whether AI is making a considered choice or a default one. For a learning project, localStorage is fine. For production handling sensitive data, evaluate carefully.</p></aside>
+</section>
+
+<section id="debugging-cors-reading-the-error" aria-labelledby="debugging-cors-reading-the-error-h">
+  <h2 id="debugging-cors-reading-the-error-h">Debugging CORS — Reading the Error</h2>
+<p>CORS errors are verbose. Knowing which part of the message to read saves significant time.</p>
+<figure><figcaption>browser console — CORS error anatomy</figcaption><pre><code>Access to fetch at
+  'http://localhost:3001/api/books'
+from origin
+  'http://localhost:5173'
+has been blocked by CORS policy:
+
+Case 1 — no CORS header at all:
+No 'Access-Control-Allow-Origin' header
+is present on the requested resource.
+→ cors() not installed or not before routes
+
+Case 2 — wrong origin:
+The 'Access-Control-Allow-Origin' header
+has value 'https://example.com' that is
+not equal to the supplied origin.
+→ origin: in cors() config doesn't match
+
+Case 3 — preflight failed:
+Response to preflight request doesn't
+pass access control check.
+→ Authorization missing from allowedHeaders</code></pre></figure>
+<aside class="note"><p>Check middleware order — app.use(cors(...)) must come before route definitions. If it's after, requests hit the routes before CORS headers are added.</p></aside>
+<aside class="note"><p>Check the Network tab — look at the OPTIONS preflight request. What status did it return? What headers came back? This tells you whether the server responded at all or whether Express rejected the preflight route.</p></aside>
+<aside class="note"><p>curl to the same endpoint works? Then it is definitely CORS — not a server bug. This rules out half the problem space immediately.</p></aside>
+</section>
+
+<section id="reflect-evaluating-the-api-layer-ai-built" aria-labelledby="reflect-evaluating-the-api-layer-ai-built-h">
+  <h2 id="reflect-evaluating-the-api-layer-ai-built-h">Reflect — Evaluating the API Layer AI Built</h2>
+<p>The API module is infrastructure — it touches every feature. Read it more carefully than any other generated file.</p>
+<ul>
+<li>01 <strong>Where is the token read from?</strong> localStorage? sessionStorage? A cookie? Was this an explicit design choice in the prompt, or an AI default? Do you agree with it for your use case?</li>
+<li>02 <strong>What happens on a 401?</strong> Does the code redirect, throw, or silently fail? Test it: expire or delete the token, make a request, and observe what happens. Does the user experience match your expectation?</li>
+<li>03 <strong>Are all HTTP methods covered?</strong> GET and POST are easy — did AI correctly set <code>Content-Type</code> on POST bodies? Did it include PATCH and DELETE? Test each endpoint with a real request.</li>
+<li>04 <strong>What does the TypeScript tell you?</strong> If you call <code>api.addBook()</code> with the wrong shape, does TypeScript catch it? Open the type hover in your editor and verify the parameter types match your API schema.</li>
+</ul>
+</section>
+
+<section id="what-you-can-now-do-and-what-comes-next" aria-labelledby="what-you-can-now-do-and-what-comes-next-h">
+  <h2 id="what-you-can-now-do-and-what-comes-next-h">What You Can Now Do — and What Comes Next</h2>
+<p>Covered in this deck:</p>
+<ul>
+<li>✓ The two-server problem and why CORS exists</li>
+<li>✓ Same-origin policy — what counts as a different origin</li>
+<li>✓ Configuring <code>cors()</code> in Express with explicit options</li>
+<li>✓ VITE_ environment variables and <code>import.meta.env</code></li>
+<li>✓ The Vite proxy for development</li>
+<li>✓ A centralised <code>api.ts</code> with typed methods</li>
+<li>✓ Global 401 handling and token cleanup</li>
+<li>✓ Token storage trade-offs</li>
+<li>✓ Debugging CORS errors from the browser console</li>
+</ul>
+<p>Coming up:</p>
+<aside class="note"><p>C4 — Auth in the Browser Login form, registration, React Context for auth state, protecting routes before React Router is added</p></aside>
+<aside class="note"><p>C5 — Routing React Router v6, nested routes, URL parameters, protected route wrappers, useNavigate</p></aside>
+<aside class="note"><p>D1 — CORS &amp; Contracts Shared TypeScript types between client and server, API design contracts, monorepo patterns</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../api-integration-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Reproduce the CORS error <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Start your Express API on port 3001 and your Vite dev server on 5173 (no proxy configured). In a component, fetch from the full URL http://localhost:3001/api/health. Open the browser console. Screenshot the CORS error. Then add the cors() middleware to Express with origin: "http://localhost:5173" and confirm the error resolves.
+      <ul><li>You observed the CORS error in the browser console (not a network error, not a 404)</li><li>Adding cors() with the correct origin resolved the error</li><li>You can explain in one sentence why the error happened and what cors() does to fix it</li></ul></dd></div>
+    <div><dt>Build api.ts <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Using the prompt from slide 9, generate a src/api.ts module. Add a VITE_API_URL variable to .env.local. Use api.getBooks() in a component inside useEffect. Verify the books load. Then temporarily break the token (set localStorage.setItem("token", "bad")) and confirm the 401 handling redirects or throws correctly.
+      <ul><li>api.ts has a generic request&lt;T&gt; function with correct TypeScript types</li><li>Authorization header is attached when a token exists in localStorage</li><li>A 401 response removes the token and either redirects or throws a recognisable error</li></ul></dd></div>
+    <div><dt>Token storage decision <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Ask AI: "You stored the JWT in localStorage. What XSS attack could exploit this, and when would you choose httpOnly cookies instead?" Evaluate the response. Write 2-3 sentences of your own assessment of the trade-off for the reading list application specifically.
+      <ul><li>You can describe an XSS scenario that would steal a localStorage token</li><li>You understand what httpOnly prevents and its CSRF trade-off</li><li>Your assessment is specific to the threat model of a learning project vs a production app</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

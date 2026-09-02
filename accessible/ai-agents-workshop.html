@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is an AI Agent? — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">E1 &middot; AI Agents & Automation</p>
+  <h1>What is an AI Agent?</h1>
+  <p class="lede">LLMs + tools + loops, ReAct pattern, agent vs chatbot</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../ai-agents-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#chatbot-vs-agent">Chatbot vs Agent</a></li>
+    <li><a href="#four-components-of-every-agent">Four Components of Every Agent</a></li>
+    <li><a href="#the-react-loop-reason-act-observe">The ReAct Loop: Reason → Act → Observe</a></li>
+    <li><a href="#what-are-tools">What Are "Tools"?</a></li>
+    <li><a href="#the-agent-loop-in-node-js">The Agent Loop in Node.js</a></li>
+    <li><a href="#agent-patterns-how-agents-are-structured">Agent Patterns: How Agents Are Structured</a></li>
+    <li><a href="#single-agent">Single Agent</a></li>
+    <li><a href="#multi-agent-systems">Multi-Agent Systems</a></li>
+    <li><a href="#human-in-the-loop">Human-in-the-Loop</a></li>
+    <li><a href="#four-agent-failure-modes">Four Agent Failure Modes</a></li>
+    <li><a href="#how-to-read-agentic-code">How to Read Agentic Code</a></li>
+    <li><a href="#agent-or-something-simpler">Agent, or Something Simpler?</a></li>
+    <li><a href="#what-you-built-with-vs-what-you-learned">What You Built With vs What You Learned</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the four components of an AI agent: LLM, tools, memory, and objective</li>
+    <li>Trace the ReAct loop (Reason → Act → Observe) through a concrete agent interaction</li>
+    <li>Read function-calling code and identify the tool definition, call, and observation pattern</li>
+    <li>Distinguish single-agent, multi-agent, and human-in-the-loop architectures and their trade-offs</li>
+    <li>Identify the four common agent failure modes and describe how to mitigate each</li>
+  </ul>
+</section>
+
+<section id="chatbot-vs-agent" aria-labelledby="chatbot-vs-agent-h">
+  <h2 id="chatbot-vs-agent-h">Chatbot vs Agent</h2>
+<p>Both use an LLM. The difference is structure: a chatbot answers one question and stops. An agent pursues a goal across multiple steps, taking actions and observing their effects.</p>
+<aside class="note"><p>Chatbot User sends message → LLM responds → done. Single turn. No memory of actions. No tools. No loop.</p></aside>
+<aside class="note"><p>Agent Goal defined → [reason → act → observe] → [reason → act → observe] → goal reached. Multi-step loop. Persistent context. Tool calls. Exit condition.</p></aside>
+<p>The word <strong>agentic</strong> describes any system with this loop — the LLM decides what to do next based on what it observes.</p>
+<aside class="note"><p>Concrete example: "Find me the three best-reviewed books on machine learning" — a chatbot guesses from training data; an agent searches, fetches review scores, ranks them, and returns a justified answer.</p></aside>
+</section>
+
+<section id="four-components-of-every-agent" aria-labelledby="four-components-of-every-agent-h">
+  <h2 id="four-components-of-every-agent-h">Four Components of Every Agent</h2>
+<p>Every agent system — from a simple research helper to a complex orchestration pipeline — is built from the same four parts.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Component</th><th scope="col">What it does</th><th scope="col">Example</th></tr></thead><tbody><tr><th scope="row"><strong>LLM</strong></th><td>The reasoning engine — reads the goal, decides what to do next, interprets tool results</td><td>Claude, GPT-4o, Gemini</td></tr><tr><th scope="row"><strong>Tools</strong></th><td>Functions the LLM can call — search the web, read a file, query a database, call an API, send an email</td><td><code>get_book_status</code>, <code>web_search</code></td></tr><tr><th scope="row"><strong>Memory</strong></th><td>The conversation history passed to the LLM each turn (in-context) plus optional external storage (database, vector store)</td><td><code>messages</code> array, PostgreSQL</td></tr><tr><th scope="row"><strong>Objective</strong></th><td>The goal the agent is trying to reach — usually the user's original request, plus any system instructions</td><td>"Summarise all unread books and email the list"</td></tr></tbody></table></div>
+<aside class="note"><p>Remove any one of these and the system stops being agentic. No tools = chatbot. No loop = one-shot generation. No objective = random wandering.</p></aside>
+</section>
+
+<section id="the-react-loop-reason-act-observe" aria-labelledby="the-react-loop-reason-act-observe-h">
+  <h2 id="the-react-loop-reason-act-observe-h">The ReAct Loop: Reason → Act → Observe</h2>
+<p>ReAct (Yao et al., 2022) describes the pattern at the heart of most production agents: the LLM reasons, acts, then incorporates what it observes before reasoning again.</p>
+<pre><code>Goal: "Which books on my reading list are unread?"
+─────────────────────────────────────────────────────
+Thought:  I need to query the reading list API for unread books.
+Action:   get_books({ status: "unread" })
+Observe:  [{ title: "DDIA", author: "Kleppmann" }, { title: "SICP", ... }]
+─────────────────────────────────────────────────────
+Thought:  I have the list. I can now answer the user directly.
+Action:   respond({ answer: "You have 2 unread books: DDIA and SICP." })
+─────────────────────────────────────────────────────
+Done.</code></pre>
+<aside class="note"><p>Each iteration adds to the messages array. The LLM always sees the full history — goal, all actions taken so far, all observations received. This is how it "knows what it has already tried."</p></aside>
+</section>
+
+<section id="what-are-tools" aria-labelledby="what-are-tools-h">
+  <h2 id="what-are-tools-h">What Are "Tools"?</h2>
+<p>Tools are typed function definitions you provide to the LLM. The LLM decides which tool to call and with what arguments — <strong>you</strong> execute the function and return the result. The LLM never runs code directly.</p>
+<aside class="note"><p>You define (JSON Schema)</p></aside>
+<pre><code>{
+  name: "get_book_status",
+  description: "Look up a book
+    in the reading list by title",
+  input_schema: {
+    type: "object",
+    properties: {
+      title: {
+        type: "string",
+        description: "Book title"
+      }
+    },
+    required: ["title"]
+  }
+}</code></pre>
+<aside class="note"><p>LLM returns (tool_use block)</p></aside>
+<pre><code>{
+  type: "tool_use",
+  id: "toolu_01...",
+  name: "get_book_status",
+  input: {
+    title: "Designing Data-
+      Intensive Applications"
+  }
+}
+
+// Your code: run the DB query,
+// return the result, continue loop</code></pre>
+</section>
+
+<section id="the-agent-loop-in-node-js" aria-labelledby="the-agent-loop-in-node-js-h">
+  <h2 id="the-agent-loop-in-node-js-h">The Agent Loop in Node.js</h2>
+<p>This is the essential structure — every production agent is a variation of this pattern.</p>
+<pre><code>async function runAgent(userGoal) {
+  const messages = [{ role: 'user', content: userGoal }];
+
+  for (let i = 0; i &lt; 5; i++) {           // ← max 5 iterations (exit condition)
+    const response = await claude.messages.create({
+      model: 'claude-haiku-4-5-20251001', tools, messages
+    });
+
+    if (response.stop_reason === 'end_turn') break; // ← LLM is done
+
+    const toolResults = [];
+    for (const block of response.content) {
+      if (block.type === 'tool_use') {             // ← Act
+        const result = await executeTool(block.name, block.input);
+        toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: result });
+      }
+    }
+    messages.push({ role: 'assistant', content: response.content }); // ← history
+    messages.push({ role: 'user', content: toolResults });           // ← Observe
+  }
+  return messages;
+}</code></pre>
+<aside class="note"><p>Three things to find in any agent code: (1) the loop with a max_iterations limit, (2) the tool execution block, (3) where results are appended to messages.</p></aside>
+</section>
+
+<section id="agent-patterns-how-agents-are-structured" aria-labelledby="agent-patterns-how-agents-are-structured-h">
+  <h2 id="agent-patterns-how-agents-are-structured-h">Agent Patterns: How Agents Are Structured</h2>
+<p class="lede">Single-agent, multi-agent, human-in-the-loop — three patterns for three different kinds of problem.</p>
+</section>
+
+<section id="single-agent" aria-labelledby="single-agent-h">
+  <h2 id="single-agent-h">Single Agent</h2>
+<p>One LLM, a set of tools, one goal. The simplest agentic architecture — and the right choice for most tasks.</p>
+<aside class="note"><p>Good for</p>
+<ul>
+<li>Research tasks: "Find all unread books tagged 'CS theory'"</li>
+<li>Document processing: "Summarise this article and extract key claims"</li>
+<li>Anything that fits in one context window with its tools</li>
+<li>Tasks where the full reasoning chain is auditable in one place</li>
+</ul></aside>
+<aside class="note"><p>Limits</p>
+<ul>
+<li>Context window fills up on long tasks</li>
+<li>One model handles all reasoning — no specialisation</li>
+<li>Cannot parallelise independent subtasks</li>
+<li>Slow on complex multi-step workflows</li>
+</ul></aside>
+<aside class="note"><p>Start here. Build the simplest agent that could work. Add complexity only when you have hit a concrete limit.</p></aside>
+</section>
+
+<section id="multi-agent-systems" aria-labelledby="multi-agent-systems-h">
+  <h2 id="multi-agent-systems-h">Multi-Agent Systems</h2>
+<p>An <strong>orchestrator</strong> agent breaks the goal into subtasks and delegates them to <strong>specialist</strong> agents. Each specialist has a limited, focused tool set.</p>
+<pre><code>Orchestrator
+    ├── Research Agent  ── tools: web_search, fetch_url
+    ├── Writer Agent    ── tools: draft_text, check_facts
+    └── Reviewer Agent  ── tools: compare_versions, flag_issues</code></pre>
+<aside class="note"><p>When to use Task too long for one context window. Independent subtasks that can run in parallel. Need specialist reasoning at each step (e.g. research vs writing vs reviewing are genuinely different).</p></aside>
+<aside class="note"><span class="note-label">Warning</span><p>Added complexity Orchestrator can misroute. Specialists can disagree. Errors propagate across agents. Debugging requires tracing the full chain. Start single-agent.</p></aside>
+</section>
+
+<section id="human-in-the-loop" aria-labelledby="human-in-the-loop-h">
+  <h2 id="human-in-the-loop-h">Human-in-the-Loop</h2>
+<p>The agent proposes an action; a human approves or rejects it before execution. Required for any <strong>irreversible</strong> or <strong>high-stakes</strong> action.</p>
+<aside class="note"><span class="note-label">Warning</span><p>Actions that must have a human gate</p>
+<ul>
+<li>Sending emails or Slack messages</li>
+<li>Deleting or modifying production records</li>
+<li>Deploying to a live environment</li>
+<li>Spending real money (API calls with cost, purchases)</li>
+</ul></aside>
+<aside class="note"><p>Three levels of autonomy</p>
+<ul>
+<li><strong>Full autonomy</strong> — agent acts immediately (safe for low-stakes reads)</li>
+<li><strong>Approval gate</strong> — agent proposes, human clicks approve (n8n "Wait" node)</li>
+<li><strong>Human reviewer</strong> — agent drafts, human edits before anything is sent</li>
+</ul></aside>
+<aside class="note"><p>n8n (E2–E4) makes human-in-the-loop straightforward: pause a workflow, send a notification, resume when a human responds.</p></aside>
+</section>
+
+<section id="four-agent-failure-modes" aria-labelledby="four-agent-failure-modes-h">
+  <h2 id="four-agent-failure-modes-h">Four Agent Failure Modes</h2>
+<p>Agents fail in characteristic ways. Knowing these before you build saves debugging hours.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Failure</th><th scope="col">Cause</th><th scope="col">Mitigation</th></tr></thead><tbody><tr><th scope="row"><strong>Infinite loop</strong></th><td>No exit condition — tool calls keep triggering new tool calls</td><td><code>max_iterations</code> limit + hard timeout</td></tr><tr><th scope="row"><strong>Hallucinated arguments</strong></th><td>LLM invents parameter values not present in context (a book ID that doesn't exist)</td><td>Validate inputs before executing the tool; return a clear error if invalid</td></tr><tr><th scope="row"><strong>Context overflow</strong></th><td>History grows until early context is truncated — agent "forgets" the original goal</td><td>Summarise history periodically; use external memory for long tasks</td></tr><tr><th scope="row"><strong>Confident wrong answer</strong></th><td>Agent completes its loop and reports success — but achieved the wrong goal</td><td>Output schemas; structured assertions on result; human review gates</td></tr></tbody></table></div>
+<aside class="note"><p>The most dangerous failure is the last one — the agent is confident. Add structured output validation to catch wrong-but-plausible results before they propagate.</p></aside>
+</section>
+
+<section id="how-to-read-agentic-code" aria-labelledby="how-to-read-agentic-code-h">
+  <h2 id="how-to-read-agentic-code-h">How to Read Agentic Code</h2>
+<p>When you encounter an agent codebase — whether AI-generated or human-written — work through these five questions before trusting the system.</p>
+<ul>
+<li><strong>1</strong> &mdash; <strong>Where is the loop?</strong> Find the <code>for</code> or <code>while</code> that drives the agent. What is the exit condition? What enforces the maximum iteration count?</li>
+<li><strong>2</strong> &mdash; <strong>What are the tools?</strong> List every tool definition. For each: what can it read? What can it modify? Is any tool destructive or irreversible?</li>
+<li><strong>3</strong> &mdash; <strong>Where is memory stored?</strong> Is the <code>messages</code> array the only memory, or is there a database? What happens to context when the array grows large?</li>
+<li><strong>4</strong> &mdash; <strong>What happens on tool failure?</strong> Find the error handling inside <code>executeTool</code>. Does a failed tool call stop the agent or return an error observation?</li>
+<li><strong>5</strong> &mdash; <strong>Is there a human gate?</strong> Before any irreversible action, is there an approval step? If not — should there be?</li>
+</ul>
+</section>
+
+<section id="agent-or-something-simpler" aria-labelledby="agent-or-something-simpler-h">
+  <h2 id="agent-or-something-simpler-h">Agent, or Something Simpler?</h2>
+<p>Agents add real complexity. Use the simplest tool that solves the problem.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Situation</th><th scope="col">Right tool</th><th scope="col">Why</th></tr></thead><tbody><tr><th scope="row">Fixed sequence of API calls, same every time</th><td><strong>Just write the code</strong></td><td>No reasoning needed — deterministic sequence is simpler and faster</td></tr><tr><th scope="row">Different paths depending on a condition you can enumerate</th><td><strong>if/else or switch</strong></td><td>Explicit logic is more auditable and reliable than LLM decision-making</td></tr><tr><th scope="row">One external API call with a known schema</th><td><strong>fetch() + a prompt</strong></td><td>No loop needed — one-shot generation with the API result in context</td></tr><tr><th scope="row">Need to decide <em>which</em> of several tools to use based on ambiguous input</th><td><strong>Agent</strong></td><td>LLM reasoning is the right tool for genuine ambiguity about what to do next</td></tr><tr><th scope="row">Multi-step workflow connecting APIs + AI nodes visually</th><td><strong>n8n</strong></td><td>Visual orchestration with human-in-the-loop nodes built in — see E2</td></tr></tbody></table></div>
+<aside class="note"><p>The pattern: reach for the agent when the path is unknown at the time you write the code — not just when the data is unknown.</p></aside>
+</section>
+
+<section id="what-you-built-with-vs-what-you-learned" aria-labelledby="what-you-built-with-vs-what-you-learned-h">
+  <h2 id="what-you-built-with-vs-what-you-learned-h">What You Built With vs What You Learned</h2>
+<p>If you used an AI assistant to generate an agent scaffold, work through these before moving to E2.</p>
+<blockquote class="prompt"><span class="note-label">Questions to answer without looking at the AI's explanation</span><ul>
+<li>Where is the loop in the generated code? Copy the line that limits iterations.</li>
+<li>List every tool in the <code>tools</code> array. For each: what does it read or write?</li>
+<li>Trace one complete iteration: find the Thought, the Action, and the Observe.</li>
+<li>Find the <code>stop_reason</code> check. What happens if the LLM never returns <code>end_turn</code>?</li>
+<li>Is there any irreversible action in the tool list? If so, is there a human gate?</li>
+</ul></blockquote>
+<aside class="note"><p>The goal is not to memorise syntax. It is to be able to answer "what does this agent do, how does it stop, and what could go wrong?" for any agent code you are asked to trust.</p></aside>
+<aside class="note"><p>Up next — E2: n8n Fundamentals. You have seen the agent loop in code. Now you will build the same logic visually — nodes, connections, AI nodes, and the HTTP Request node calling your Reading List API.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../ai-agents-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Map an agent loop <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Find or generate a simple agent implementation (Node.js or Python). Draw a diagram showing: the loop, every tool call in one iteration, where the observation goes, and what stops the loop. Annotate the code with these labels.
+      <ul><li>You identified the loop and its exit condition in the actual code</li><li>You named every tool and described what it reads or writes</li><li>You traced at least one full Reason → Act → Observe iteration in the messages array</li></ul></dd></div>
+    <div><dt>Agent or something simpler? <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Take a feature you have built or plan to build in this course. Decide: should it be an agent, a fixed sequence of API calls, or an if/else branch? Write a short justification for your decision using the criteria from slide 13.
+      <ul><li>You named the specific decision criterion that determined your choice</li><li>If you chose "agent": you identified which part of the task is genuinely ambiguous at code-write time</li><li>If you chose something simpler: you explained why deterministic logic is sufficient here</li></ul></dd></div>
+    <div><dt>Identify the failure modes <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Review an agent you have built or found online. For each of the four failure modes (infinite loop, hallucinated arguments, context overflow, confident wrong answer): assess whether the agent is protected. Note any gap.
+      <ul><li>You checked for a max_iterations or equivalent limit</li><li>You checked whether tool inputs are validated before execution</li><li>You identified whether any tool is irreversible and whether there is a human gate</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

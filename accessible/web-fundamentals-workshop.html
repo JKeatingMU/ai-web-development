@@ -5,109 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How the Web Works — accessible text version — Learning Web Development by Building with AI</title>
 <style>
-  :root {
-    --bg: #ffffff;
-    --text: #1a1a1a;
-    --muted: #4a4a4a;
-    --rule: #d0d0d0;
-    --accent: #0b5fa5;
-    --code-bg: #f4f4f4;
-    --card-bg: #f7f7f7;
-  }
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #14171c;
-      --text: #e8e8e8;
-      --muted: #b3b3b3;
-      --rule: #3a3f47;
-      --accent: #6fb3ff;
-      --code-bg: #1e222a;
-      --card-bg: #1b1f26;
-    }
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
   }
   * { box-sizing: border-box; }
-  html { font-size: 100%; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.7;
-  }
-  .wrap { max-width: 44rem; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
-  a { color: var(--accent); }
-  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-
-  .skip {
-    position: absolute;
-    left: -9999px;
-    top: 0;
-    background: var(--accent);
-    color: #fff;
-    padding: 0.6rem 1rem;
-    border-radius: 0 0 6px 0;
-    z-index: 10;
-  }
-  .skip:focus { left: 0; }
-
-  header.doc { border-bottom: 2px solid var(--rule); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
-  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 0.5rem; }
-  .kicker { font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.75rem; }
-  .lede { font-size: 1.05rem; color: var(--muted); margin: 0.75rem 0 0; }
-
-  .note {
-    background: var(--card-bg);
-    border: 1px solid var(--rule);
-    border-left: 4px solid var(--accent);
-    padding: 0.9rem 1.1rem;
-    border-radius: 4px;
-    margin: 1.25rem 0;
-    font-size: 0.97rem;
-  }
-  .note p { margin: 0.4rem 0; }
-  .note p:first-child { margin-top: 0; }
-  .note p:last-child { margin-bottom: 0; }
-
-  nav.toc { margin: 1.5rem 0 2.5rem; }
-  nav.toc h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); border: 0; margin: 0 0 0.5rem; padding: 0; }
-  nav.toc ol { margin: 0; padding-left: 1.4rem; }
-  nav.toc li { margin: 0.3rem 0; }
-
-  section { margin: 2.75rem 0; }
-  h2 { font-size: 1.4rem; line-height: 1.3; margin: 0 0 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--rule); }
-  section:first-of-type h2 { border-top: 0; padding-top: 0; }
-  h3 { font-size: 1.08rem; margin: 1.5rem 0 0.5rem; }
-  p { margin: 0.85rem 0; }
-
-  ul, ol { padding-left: 1.4rem; }
-  li { margin: 0.35rem 0; }
-
-  .figure-caption { font-size: 0.9rem; color: var(--muted); font-style: italic; margin: 0.25rem 0 1rem; }
-
-  pre {
-    background: var(--code-bg);
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: 0.9rem 1rem;
-    overflow-x: auto;
-    font-size: 0.9rem;
-    line-height: 1.6;
-  }
-  code { font-family: "SF Mono", "Fira Code", Consolas, "Courier New", monospace; }
-  p code, li code, td code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.92em; }
-
-  .table-scroll { overflow-x: auto; margin: 1rem 0; -webkit-overflow-scrolling: touch; }
-  table { border-collapse: collapse; width: 100%; min-width: 30rem; font-size: 0.95rem; }
-  caption { text-align: left; font-weight: 600; margin-bottom: 0.5rem; }
-  th, td { border: 1px solid var(--rule); padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
-  th { background: var(--card-bg); }
-
-  dl.glossary { margin: 1rem 0; }
-  dl.glossary div { padding: 0.7rem 0; border-bottom: 1px solid var(--rule); }
-  dl.glossary dt { font-weight: 700; }
-  dl.glossary dd { margin: 0.2rem 0 0; color: var(--muted); }
-
-  footer.doc { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 2px solid var(--rule); font-size: 0.92rem; color: var(--muted); }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
 </style>
 </head>
 <body>
@@ -115,139 +63,128 @@
 <div class="wrap">
 
 <header class="doc">
-  <p class="kicker">Track A · Foundations · Module 1</p>
+  <p class="kicker">A1 &middot; Foundations</p>
   <h1>How the Web Works</h1>
-  <p class="lede">HTTP, requests, responses, REST, and JSON — the vocabulary an AI assistant assumes you already have when it builds you an API.</p>
+  <p class="lede">HTTP request/response, status codes, DNS, browsers, JSON</p>
 </header>
 
 <div class="note">
-  <p><strong>This is the accessible text version of an interactive slide deck.</strong> It contains the same material as a single linear page: no slideshow controls, no scripted animation, and it responds normally to browser zoom and screen readers.</p>
-  <p><a href="../web-fundamentals-workshop.html">Open the interactive deck</a> &nbsp;·&nbsp; <a href="../index.html">Course home</a></p>
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../web-fundamentals-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
 </div>
 
 <nav class="toc" aria-label="Sections">
   <h2>On this page</h2>
   <ol>
-    <li><a href="#client-server">Client and server</a></li>
-    <li><a href="#http">HTTP — the language of the web</a></li>
-    <li><a href="#methods">HTTP methods</a></li>
-    <li><a href="#status">HTTP status codes</a></li>
-    <li><a href="#url">Anatomy of a URL</a></li>
-    <li><a href="#request">What a request looks like</a></li>
-    <li><a href="#response">What a response looks like</a></li>
-    <li><a href="#json">JSON — the language of APIs</a></li>
-    <li><a href="#rest">REST — a style, not a protocol</a></li>
-    <li><a href="#routes">RESTful routes — the pattern</a></li>
-    <li><a href="#dns">DNS — domain names to IP addresses</a></li>
-    <li><a href="#express">How Express fits in</a></li>
-    <li><a href="#ai">What AI assumes you know</a></li>
-    <li><a href="#terms">Key terms</a></li>
+    <li><a href="#how-the-web-works">How the Web Works</a></li>
+    <li><a href="#client-and-server">Client and Server</a></li>
+    <li><a href="#http-the-language-of-the-web">HTTP — The Language of the Web</a></li>
+    <li><a href="#http-methods-what-you-re-asking-for">HTTP Methods — What You're Asking For</a></li>
+    <li><a href="#http-status-codes-the-server-s-reply">HTTP Status Codes — The Server's Reply</a></li>
+    <li><a href="#anatomy-of-a-url">Anatomy of a URL</a></li>
+    <li><a href="#what-a-request-looks-like">What a Request Looks Like</a></li>
+    <li><a href="#what-a-response-looks-like">What a Response Looks Like</a></li>
+    <li><a href="#json-the-language-of-apis">JSON — The Language of APIs</a></li>
+    <li><a href="#rest-a-style-not-a-protocol">REST — A Style, Not a Protocol</a></li>
+    <li><a href="#restful-routes-the-pattern">RESTful Routes — The Pattern</a></li>
+    <li><a href="#dns-domain-names-to-ip-addresses">DNS — Domain Names to IP Addresses</a></li>
+    <li><a href="#how-express-fits-in">How Express Fits In</a></li>
+    <li><a href="#what-ai-assumes-you-know">What AI Assumes You Know</a></li>
+    <li><a href="#key-terms">Key Terms</a></li>
   </ol>
 </nav>
 
 <main id="main">
-
-<section id="client-server" aria-labelledby="client-server-h">
-  <h2 id="client-server-h">Client and server</h2>
-  <p>Every web interaction is a conversation between two computers: a <strong>client</strong> that asks for something and a <strong>server</strong> that responds. The client is anything that sends requests — a browser, <code>curl</code> on the terminal, a mobile app, or another server. The server is a program that listens for those requests and sends back responses.</p>
-  <p><strong>HTTP</strong> is the protocol — the agreed language both sides speak. You never write raw HTTP yourself; frameworks like Express and the browser handle that for you.</p>
-  <p>A single exchange looks like this: the client sends an HTTP request such as <code>GET /api/books</code>, and the server sends back an HTTP response such as <code>200 OK</code> together with some JSON data.</p>
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Trace what happens when a browser makes an HTTP request and receives a response</li>
+    <li>Interpret HTTP status codes, methods, and headers in the context of real API calls</li>
+    <li>Explain the role of DNS in resolving domain names to IP addresses</li>
+    <li>Parse and construct JSON data structures used in API communication</li>
+    <li>Distinguish between REST and non-REST API design approaches</li>
+  </ul>
 </section>
 
-<section id="http" aria-labelledby="http-h">
-  <h2 id="http-h">HTTP — the language of the web</h2>
-  <p>HTTP (HyperText Transfer Protocol) is the rulebook that defines how clients and servers communicate. It specifies the format of requests and responses, what the methods mean, and which status codes to use.</p>
-  <p>A key property: HTTP is <strong>stateless</strong>. Each request is completely independent and the server has no memory of previous requests. This is why JSON Web Tokens (JWTs) exist — each request must carry its own proof of identity.</p>
-  <p>HTTP/1.1 is text-based and is what you see in <code>curl</code> output. HTTP/2 and HTTP/3 are faster binary versions, but the semantics — methods, headers, status codes — are identical.</p>
-  <h3>A raw HTTP request, simplified</h3>
-  <pre><code>GET /api/books HTTP/1.1
+<section id="how-the-web-works" aria-labelledby="how-the-web-works-h">
+  <h2 id="how-the-web-works-h">How the Web Works</h2>
+<p class="narration">Understanding how the web works is crucial because it sets the foundation for everything we'll cover. This deck aims to fill the vocabulary gap you might have. When AI generates a REST API, it assumes you know what HTTP methods mean, why status codes exist, and what JSON is. By the end of this course, you'll have a solid grasp of these essential concepts. Next, we'll dive into the client-server relationship, which is the backbone of web interactions.</p>
+<aside class="note"><p>This deck fills the vocabulary gap. When AI generates a REST API, it assumes you know what HTTP methods mean, why status codes exist, and what JSON is. By the end you will.</p></aside>
+</section>
+
+<section id="client-and-server" aria-labelledby="client-and-server-h">
+  <h2 id="client-and-server-h">Client and Server</h2>
+<p class="narration">Every web interaction is essentially a conversation between two computers. You have a client, which is anything that sends requests—like a browser or a mobile app—and a server, which is a program that listens for those requests and sends back responses. HTTP is the protocol, or the language, they both speak. You don’t write raw HTTP; frameworks like Express handle that for you. Next, we'll explore HTTP, the language of the web, to understand how these conversations are structured.</p>
+<p>Every web interaction is a conversation between two computers: a client that asks for something and a server that responds.</p>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">Client → Browser / curl / app → Server → Express / Node.js → HTTP Request — GET /api/books → HTTP Response — 200 OK + JSON</p></figure>
+<aside class="note"><p>Client — anything that sends requests. A browser, curl on the terminal, a mobile app, another server.</p></aside>
+<aside class="note"><p>Server — a program that listens for requests and sends responses. Express is our server framework.</p></aside>
+<aside class="note"><p>Protocol — HTTP is the agreed language both sides speak. You never write raw HTTP — Express and the browser handle it.</p></aside>
+</section>
+
+<section id="http-the-language-of-the-web" aria-labelledby="http-the-language-of-the-web-h">
+  <h2 id="http-the-language-of-the-web-h">HTTP — The Language of the Web</h2>
+<p class="narration">HTTP, or HyperText Transfer Protocol, is like a rulebook for how clients and servers communicate. It defines the format of requests and responses, what different methods mean, and what status codes to use. A key concept is that HTTP is stateless, meaning each request is independent. This is why we use JWTs for authentication. While HTTP/2 and HTTP/3 are faster, they maintain the same semantics as HTTP/1.1. Let's look at a simplified raw HTTP request to see this in action.</p>
+<p>HTTP (HyperText Transfer Protocol) is the rulebook that defines how clients and servers communicate. It specifies the format of requests and responses, what methods mean, and what status codes to use.</p>
+<aside class="note"><span class="note-label">Key concept</span><p>HTTP is stateless — each request is completely independent. The server has no memory of previous requests. This is why JWTs exist: each request must carry its own proof of identity.</p></aside>
+<aside class="note"><p>HTTP/1.1 (text-based) is what you see in curl output. HTTP/2 and HTTP/3 are faster binary versions, but the semantics — methods, headers, status codes — are identical.</p></aside>
+<figure><figcaption>raw HTTP request (simplified)</figcaption><pre><code>GET /api/books HTTP/1.1
 Host: localhost:3001
 Authorization: Bearer eyJhbG...
-Content-Type: application/json</code></pre>
+Content-Type: application/json</code></pre></figure>
 </section>
 
-<section id="methods" aria-labelledby="methods-h">
-  <h2 id="methods-h">HTTP methods</h2>
-  <p>The method tells the server what operation to perform. Four methods cover about 95% of web APIs.</p>
-  <div class="table-scroll">
-  <table>
-    <caption>Common HTTP methods</caption>
-    <thead>
-      <tr><th scope="col">Method</th><th scope="col">Meaning</th><th scope="col">Has request body?</th><th scope="col">Typical success code</th></tr>
-    </thead>
-    <tbody>
-      <tr><th scope="row">GET</th><td>Read data — fetch a resource or list</td><td>No</td><td>200 OK</td></tr>
-      <tr><th scope="row">POST</th><td>Create — add a new resource</td><td>Yes (JSON)</td><td>201 Created</td></tr>
-      <tr><th scope="row">PATCH</th><td>Update — modify part of a resource</td><td>Yes (JSON)</td><td>200 OK</td></tr>
-      <tr><th scope="row">DELETE</th><td>Remove — delete a resource</td><td>No</td><td>200 OK or 204 No Content</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p><strong>PUT</strong> replaces the entire resource and is rarely used in practice. <strong>PATCH</strong> is preferred for partial updates — only send the fields you want to change.</p>
-  <p><strong>Safe</strong> methods (GET) should never change data. <strong>Idempotent</strong> methods (GET, PUT, DELETE) can be called multiple times with the same result. POST is neither — sending it twice creates two records.</p>
+<section id="http-methods-what-you-re-asking-for" aria-labelledby="http-methods-what-you-re-asking-for-h">
+  <h2 id="http-methods-what-you-re-asking-for-h">HTTP Methods — What You're Asking For</h2>
+<p class="narration">HTTP methods tell the server what action to perform. There are four main methods that cover most web APIs. PUT replaces the entire resource, which is rarely used; PATCH is preferred for partial updates. Safe methods like GET shouldn’t change data, while idempotent methods like PUT and DELETE yield the same result even if called multiple times. POST, however, is neither safe nor idempotent. Let's look at a table to see these methods and their characteristics.</p>
+<p>The method tells the server what operation to perform. These four cover 95% of web APIs.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Method</th><th scope="col">Meaning</th><th scope="col">Has Request Body?</th><th scope="col">Typical Success Code</th></tr></thead><tbody><tr><th scope="row">GET</th><td>Read data — fetch a resource or list</td><td>No</td><td>200 OK</td></tr><tr><th scope="row">POST</th><td>Create — add a new resource</td><td>Yes (JSON)</td><td>201 Created</td></tr><tr><th scope="row">PATCH</th><td>Update — modify part of a resource</td><td>Yes (JSON)</td><td>200 OK</td></tr><tr><th scope="row">DELETE</th><td>Remove — delete a resource</td><td>No</td><td>200 OK or 204 No Content</td></tr></tbody></table></div>
+<aside class="note"><span class="note-label">Gotcha</span><p>PUT replaces the entire resource (rarely used in practice). PATCH is preferred for partial updates — only send the fields you want to change. The AI-generated API in this course uses PATCH with COALESCE.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>Safe methods (GET) should never change data. Idempotent methods (GET, PUT, DELETE) can be called multiple times with the same result. POST is neither — sending it twice creates two records.</p></aside>
 </section>
 
-<section id="status" aria-labelledby="status-h">
-  <h2 id="status-h">HTTP status codes</h2>
-  <p>Every HTTP response includes a three-digit status code. The first digit tells you the category:</p>
-  <ul>
-    <li><strong>2xx — Success.</strong> The request worked. 200 for reads and updates, 201 for creates.</li>
-    <li><strong>4xx — Client error.</strong> You sent something wrong. Fix the request, not the server.</li>
-    <li><strong>5xx — Server error.</strong> The server crashed. Check your terminal logs — there will be a stack trace.</li>
-  </ul>
-  <div class="table-scroll">
-  <table>
-    <caption>Status codes you will meet in this course</caption>
-    <thead>
-      <tr><th scope="col">Code</th><th scope="col">Meaning</th><th scope="col">When you see it</th></tr>
-    </thead>
-    <tbody>
-      <tr><th scope="row">200 OK</th><td>Success</td><td>Successful GET, PATCH, DELETE</td></tr>
-      <tr><th scope="row">201 Created</th><td>Resource created</td><td>Successful POST</td></tr>
-      <tr><th scope="row">400 Bad Request</th><td>Client sent bad data</td><td>Missing required field, invalid format</td></tr>
-      <tr><th scope="row">401 Unauthorized</th><td>Authentication failed</td><td>No token, wrong password, expired token</td></tr>
-      <tr><th scope="row">403 Forbidden</th><td>Not allowed</td><td>Valid token but insufficient permissions</td></tr>
-      <tr><th scope="row">404 Not Found</th><td>Resource missing</td><td>Wrong id, typo in route</td></tr>
-      <tr><th scope="row">409 Conflict</th><td>Duplicate</td><td>Email already registered</td></tr>
-      <tr><th scope="row">500 Internal Server Error</th><td>Server crashed</td><td>Bug in your code — check the logs</td></tr>
-    </tbody>
-  </table>
-  </div>
+<section id="http-status-codes-the-server-s-reply" aria-labelledby="http-status-codes-the-server-s-reply-h">
+  <h2 id="http-status-codes-the-server-s-reply-h">HTTP Status Codes — The Server's Reply</h2>
+<p class="narration">Every HTTP response includes a status code that tells you what happened. A 2xx code means success, like 200 for a successful read or update. A 4xx code indicates a client error, meaning you need to fix your request. A 5xx code is a server error, suggesting the server crashed. Check your logs for a stack trace if this happens. The table here lists common status codes and what they mean. Next, we'll break down the anatomy of a URL.</p>
+<p>Every HTTP response includes a 3-digit status code. The first digit tells you the category.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Code</th><th scope="col">Meaning</th><th scope="col">When you see it</th></tr></thead><tbody><tr><th scope="row">200 OK</th><td>Success</td><td>Successful GET, PATCH, DELETE</td></tr><tr><th scope="row">201 Created</th><td>Resource created</td><td>Successful POST</td></tr><tr><th scope="row">400 Bad Request</th><td>Client sent bad data</td><td>Missing required field, invalid format</td></tr><tr><th scope="row">401 Unauthorized</th><td>Auth failed</td><td>No token, wrong password, expired token</td></tr><tr><th scope="row">403 Forbidden</th><td>Not allowed</td><td>Valid token but insufficient permissions</td></tr><tr><th scope="row">404 Not Found</th><td>Resource missing</td><td>Wrong id, typo in route</td></tr><tr><th scope="row">409 Conflict</th><td>Duplicate</td><td>Email already registered</td></tr><tr><th scope="row">500 Internal Server Error</th><td>Server crashed</td><td>Bug in your code — check the logs</td></tr></tbody></table></div>
+<aside class="note"><p>2xx — Success. The request worked. 200 for reads/updates, 201 for creates.</p></aside>
+<aside class="note"><p>4xx — Client error. You sent something wrong. Fix the request, not the server.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>5xx — Server error. The server crashed. Check your terminal logs — there will be a stack trace.</p></aside>
 </section>
 
-<section id="url" aria-labelledby="url-h">
-  <h2 id="url-h">Anatomy of a URL</h2>
-  <p>A URL is a structured way to locate a resource. Take this example:</p>
-  <pre><code>https://api.example.com:3001/api/books?status=reading&amp;limit=10</code></pre>
-  <ul>
-    <li><strong>Protocol</strong> (<code>https</code>) — http or https. Always use https in production; it encrypts data in transit.</li>
-    <li><strong>Host</strong> (<code>api.example.com</code>) — the server's address. In development this is <code>localhost:3001</code>; after a Railway deploy it is your Railway domain.</li>
-    <li><strong>Port</strong> (<code>:3001</code>) — which process on the host to talk to. Often omitted when it is the default for the protocol.</li>
-    <li><strong>Path</strong> (<code>/api/books</code>) — the route on the server. Express matches this to a route handler, for example <code>app.get('/api/books', ...)</code>.</li>
-    <li><strong>Query string</strong> (<code>?status=reading&amp;limit=10</code>) — optional key–value pairs after <code>?</code>, separated by <code>&amp;</code>. Read in Express with <code>req.query.status</code>.</li>
-  </ul>
+<section id="anatomy-of-a-url" aria-labelledby="anatomy-of-a-url-h">
+  <h2 id="anatomy-of-a-url-h">Anatomy of a URL</h2>
+<p class="narration">A URL is more than just a web address; it’s a structured way to locate resources. The protocol, like https, ensures secure data transfer. The host is the server's address, while the path specifies the route on the server. Query strings add optional parameters to requests. Understanding these parts helps you navigate and construct URLs effectively. Next, we'll see what a request looks like in action.</p>
+<pre><code>https://api.example.com:3001/api/books?status=reading&amp;limit=10</code></pre>
+<aside class="note"><p>Protocol (https ) — http or https. Always use https in production. Encrypts data in transit.</p></aside>
+<aside class="note"><p>Host (api.example.com ) — the server's address. In development: localhost:3001. After Railway deploy: your Railway domain.</p></aside>
+<aside class="note"><p>Path (/api/books ) — the route on the server. Express matches this to a route handler: app.get('/api/books', ...).</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>Query string (?status=reading&amp;limit=10 ) — optional key-value pairs after ?, separated by &amp;. Read in Express with req.query.status.</p></aside>
 </section>
 
-<section id="request" aria-labelledby="request-h">
-  <h2 id="request-h">What a request looks like</h2>
-  <p>A typical HTTP request has a method, a URL, headers, and often a body. Here is a POST request that adds a book, sent with <code>curl</code>:</p>
-  <pre><code>curl -s -X POST http://localhost:3001/api/books \
+<section id="what-a-request-looks-like" aria-labelledby="what-a-request-looks-like-h">
+  <h2 id="what-a-request-looks-like-h">What a Request Looks Like</h2>
+<p class="narration">A typical HTTP request includes several components. The method specifies the action, while the URL identifies the resource. Headers provide additional information, like authorization tokens and content type. The body contains the actual data being sent, which Express reads as req.body. This is how a POST request to add a book might look. Next, we’ll see what a response looks like from the server.</p>
+<figure><figcaption>curl — POST /api/books</figcaption><pre><code>$ curl -s -X POST http://localhost:3001/api/books \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Clean Code","author":"Martin"}'</code></pre>
-  <ul>
-    <li><strong>Method</strong> — POST: what operation to perform.</li>
-    <li><strong>URL</strong> — <code>/api/books</code>: which resource.</li>
-    <li><strong>Header, Authorization</strong> — a Bearer token that proves who you are.</li>
-    <li><strong>Header, Content-Type</strong> — <code>application/json</code>: tells the server the body is JSON.</li>
-    <li><strong>Body</strong> — the JSON data being sent. Express reads this as <code>req.body</code>.</li>
-  </ul>
+  -d '{"title":"Clean Code","author":"Martin"}'</code></pre></figure>
+<ul>
+<li><strong>Method</strong> &mdash; POST — what operation to perform</li>
+<li><strong>URL</strong> &mdash; /api/books — which resource</li>
+<li><strong>Header: Authorization</strong> &mdash; Bearer token — proves who you are</li>
+<li><strong>Header: Content-Type</strong> &mdash; application/json — tells server the body is JSON</li>
+<li><strong>Body</strong> &mdash; the JSON data being sent — Express reads this as <code>req.body</code></li>
+</ul>
 </section>
 
-<section id="response" aria-labelledby="response-h">
-  <h2 id="response-h">What a response looks like</h2>
-  <p>When the server responds, it sends back a status code, headers, and a body:</p>
-  <pre><code>HTTP/1.1 201 Created
+<section id="what-a-response-looks-like" aria-labelledby="what-a-response-looks-like-h">
+  <h2 id="what-a-response-looks-like-h">What a Response Looks Like</h2>
+<p class="narration">When a server responds, it sends back a status code and headers, informing the client how to handle the data. A 201 status code indicates a resource was successfully created. The content type tells the client how to parse the body, which contains the JSON payload. This JSON data is immediately available for further processing. Now, let’s look at JSON, the language of APIs.</p>
+<figure><figcaption>HTTP response — 201 Created</figcaption><pre><code>HTTP/1.1 201 Created
 Content-Type: application/json
 
 {
@@ -256,18 +193,18 @@ Content-Type: application/json
   "author": "Martin",
   "status": "want-to-read",
   "created_at": "2026-03-08T10:23:41Z"
-}</code></pre>
-  <ul>
-    <li><strong>201 Created</strong> — the status code: success, resource created.</li>
-    <li><strong>Content-Type: application/json</strong> — tells the client to parse the body as JSON.</li>
-    <li><strong>Body</strong> — the JSON payload: the created book, returned immediately (in this course, via SQL <code>RETURNING *</code>).</li>
-  </ul>
+}</code></pre></figure>
+<ul>
+<li><strong>201 Created</strong> &mdash; The status code — success, resource created</li>
+<li><strong>Content-Type</strong> &mdash; application/json — tells the client to parse the body as JSON</li>
+<li><strong>Body</strong> &mdash; the JSON payload — the created book, returned immediately via <code>RETURNING *</code></li>
+</ul>
 </section>
 
-<section id="json" aria-labelledby="json-h">
-  <h2 id="json-h">JSON — the language of APIs</h2>
-  <p>JSON (JavaScript Object Notation) is a text format that looks like JavaScript object syntax and is used to structure data for APIs.</p>
-  <pre><code>// JSON object
+<section id="json-the-language-of-apis" aria-labelledby="json-the-language-of-apis-h">
+  <h2 id="json-the-language-of-apis-h">JSON — The Language of APIs</h2>
+<p class="narration">JSON, or JavaScript Object Notation, is a text format that looks like JavaScript object syntax. It’s used to structure data for APIs. Strings are always in double quotes, numbers are unquoted, and booleans are lowercase. JSON doesn’t allow comments or trailing commas. Understanding these rules ensures your data is correctly parsed. Let's check out a JSON object and array to see these principles in action.</p>
+<figure><figcaption>JSON — object and array</figcaption><pre><code>// JSON object
 {
   "id": 1,
   "title": "Clean Code",
@@ -281,121 +218,107 @@ Content-Type: application/json
 [
   { "id": 1, "title": "Clean Code" },
   { "id": 2, "title": "The Pragmatic Programmer" }
-]</code></pre>
-  <ul>
-    <li><strong>Strings</strong> — always double quotes: <code>"title"</code>, not <code>'title'</code>.</li>
-    <li><strong>Numbers</strong> — no quotes: <code>5</code>, not <code>"5"</code>.</li>
-    <li><strong>Booleans</strong> — lowercase <code>true</code> / <code>false</code>.</li>
-    <li><strong>Null</strong> — lowercase <code>null</code>, meaning &ldquo;no value&rdquo;.</li>
-    <li><strong>No trailing commas</strong> — <code>{"a":1,"b":2}</code>, not <code>{"a":1,"b":2,}</code>.</li>
-    <li><strong>No comments</strong> — JSON cannot contain <code>//</code> or <code>/* */</code>. (The comments above are only for explanation.)</li>
-  </ul>
-  <p>JSON is not JavaScript — it is a text format that resembles JS object syntax. <code>JSON.parse(text)</code> converts text into a JS object; <code>JSON.stringify(obj)</code> converts a JS object into text. Express calls these automatically.</p>
+]</code></pre></figure>
+<ul>
+<li><strong>Strings</strong> &mdash; always double quotes — <code>"title"</code> not <code>'title'</code></li>
+<li><strong>Numbers</strong> &mdash; no quotes — <code>5</code> not <code>"5"</code></li>
+<li><strong>Booleans</strong> &mdash; lowercase — <code>true</code>, <code>false</code></li>
+<li><strong>Null</strong> &mdash; lowercase <code>null</code> — means "no value"</li>
+<li><strong>No trailing commas</strong> &mdash; <code>{"a":1,"b":2}</code> not <code>{"a":1,"b":2,}</code></li>
+<li><strong>No comments</strong> &mdash; JSON cannot contain <code>//</code> or <code>/* */</code></li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>JSON is not JavaScript — it's a text format that looks like JS object syntax. JSON.parse(text) converts text → JS object. JSON.stringify(obj) converts JS object → text. Express calls these automatically.</p></aside>
 </section>
 
-<section id="rest" aria-labelledby="rest-h">
-  <h2 id="rest-h">REST — a style, not a protocol</h2>
-  <p>REST (Representational State Transfer) is a set of conventions for structuring HTTP APIs. An API that follows them is called <strong>RESTful</strong>.</p>
-  <ul>
-    <li><strong>Resources are nouns.</strong> URLs identify things, not actions: <code>/books</code>, not <code>/getBooks</code> or <code>/fetchAllBooks</code>.</li>
-    <li><strong>Methods have meaning.</strong> GET reads, POST creates, PATCH updates, DELETE removes.</li>
-    <li><strong>Stateless.</strong> Each request contains everything the server needs. No sessions are stored on the server — hence JWT.</li>
-    <li><strong>Standard responses.</strong> JSON data plus an appropriate status code: 201 for creates, 404 when missing.</li>
-  </ul>
-  <p><strong>Why this matters:</strong> when an AI generates an API it follows REST conventions, so understanding REST lets you spot when the AI broke them — for example a DELETE route that also creates a record, or a GET route that modifies data.</p>
-  <p><strong>Not every API is RESTful.</strong> GraphQL, gRPC, and WebSockets are different styles. REST is the most common and the default that AI generates.</p>
+<section id="rest-a-style-not-a-protocol" aria-labelledby="rest-a-style-not-a-protocol-h">
+  <h2 id="rest-a-style-not-a-protocol-h">REST — A Style, Not a Protocol</h2>
+<p class="narration">REST, or Representational State Transfer, is a set of conventions for structuring APIs. An API that follows these conventions is called RESTful. This matters because AI-generated APIs often follow REST principles. Understanding REST helps you identify when an API deviates from these norms. Not every API is RESTful; alternatives like GraphQL and WebSockets exist. Next, we’ll look at RESTful routes and their predictable patterns.</p>
+<p>REST (REpresentational State Transfer) is a set of conventions for how to structure HTTP APIs. An API that follows them is called RESTful.</p>
+<ul>
+<li><strong>Resources are nouns</strong> &mdash; URLs identify things, not actions. <code>/books</code> not <code>/getBooks</code> or <code>/fetchAllBooks</code>.</li>
+<li><strong>Methods have meaning</strong> &mdash; GET reads, POST creates, PATCH updates, DELETE removes. Use the right method.</li>
+<li><strong>Stateless</strong> &mdash; Each request contains everything the server needs. No sessions stored on the server — hence JWT.</li>
+<li><strong>Standard responses</strong> &mdash; JSON data + appropriate status codes. 201 for creates, 404 when missing.</li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>Why this matters: When AI generates an API, it follows REST conventions. Understanding REST lets you spot when the AI broke them — e.g., a DELETE route that also creates a record, or a GET route that modifies data.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>Not every API is RESTful. GraphQL, gRPC, and WebSockets are different styles. REST is by far the most common and the default that AI generates.</p></aside>
 </section>
 
-<section id="routes" aria-labelledby="routes-h">
-  <h2 id="routes-h">RESTful routes — the pattern</h2>
-  <p>REST APIs follow a predictable URL structure. Once you know the pattern, you can guess any API's routes.</p>
-  <div class="table-scroll">
-  <table>
-    <caption>The standard five routes for a resource</caption>
-    <thead>
-      <tr><th scope="col">Method</th><th scope="col">URL</th><th scope="col">Action</th><th scope="col">Express handler</th></tr>
-    </thead>
-    <tbody>
-      <tr><th scope="row">GET</th><td><code>/api/books</code></td><td>List all books (with optional filter)</td><td><code>app.get('/api/books', ...)</code></td></tr>
-      <tr><th scope="row">GET</th><td><code>/api/books/:id</code></td><td>Get one book by id</td><td><code>app.get('/api/books/:id', ...)</code></td></tr>
-      <tr><th scope="row">POST</th><td><code>/api/books</code></td><td>Create a new book</td><td><code>app.post('/api/books', ...)</code></td></tr>
-      <tr><th scope="row">PATCH</th><td><code>/api/books/:id</code></td><td>Update fields of one book</td><td><code>app.patch('/api/books/:id', ...)</code></td></tr>
-      <tr><th scope="row">DELETE</th><td><code>/api/books/:id</code></td><td>Delete one book</td><td><code>app.delete('/api/books/:id', ...)</code></td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p><code>:id</code> is a route parameter; Express puts it in <code>req.params.id</code>. The <code>/api/</code> prefix is a convention that distinguishes API routes from HTML page routes.</p>
-  <p><strong>Nested resources</strong> follow the same pattern: <code>GET /api/books/:id/sessions</code> lists sessions for one book, and <code>POST /api/books/:id/sessions</code> creates a new session for that book.</p>
+<section id="restful-routes-the-pattern" aria-labelledby="restful-routes-the-pattern-h">
+  <h2 id="restful-routes-the-pattern-h">RESTful Routes — The Pattern</h2>
+<p class="narration">RESTful APIs follow a predictable URL structure, making it easy to guess a route once you know the pattern. Route parameters like :id are used to specify resources, and the /api/ prefix distinguishes API routes from HTML routes. Nested resources follow the same pattern, allowing you to build complex API structures. Let’s look at a table to see how different HTTP methods fit into this pattern.</p>
+<p>REST APIs follow a predictable URL structure. Once you know the pattern, you can guess any API's routes.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Method</th><th scope="col">URL</th><th scope="col">Action</th><th scope="col">Express handler</th></tr></thead><tbody><tr><th scope="row">GET</th><td>/api/books</td><td>List all books (with optional filter)</td><td><code>app.get('/api/books', ...)</code></td></tr><tr><th scope="row">GET</th><td>/api/books/:id</td><td>Get one book by id</td><td><code>app.get('/api/books/:id', ...)</code></td></tr><tr><th scope="row">POST</th><td>/api/books</td><td>Create a new book</td><td><code>app.post('/api/books', ...)</code></td></tr><tr><th scope="row">PATCH</th><td>/api/books/:id</td><td>Update fields of one book</td><td><code>app.patch('/api/books/:id', ...)</code></td></tr><tr><th scope="row">DELETE</th><td>/api/books/:id</td><td>Delete one book</td><td><code>app.delete('/api/books/:id', ...)</code></td></tr></tbody></table></div>
+<aside class="note"><span class="note-label">Tip</span><p>/api/books/:id — the :id is a route parameter. Express puts it in req.params.id. The /api/ prefix is a convention that distinguishes API routes from HTML page routes.</p></aside>
+<aside class="note"><p>Nested resources follow the same pattern: GET /api/books/:id/sessions lists sessions for one book. POST /api/books/:id/sessions creates a new session for that book.</p></aside>
 </section>
 
-<section id="dns" aria-labelledby="dns-h">
-  <h2 id="dns-h">DNS — domain names to IP addresses</h2>
-  <p>The Domain Name System (DNS) translates domain names into IP addresses — the numbers that identify a specific machine. When a client wants <code>api.example.com</code>, it asks a DNS server, which replies with an address such as <code>203.0.113.4</code>; the client then sends its request there.</p>
-  <ul>
-    <li><strong>localhost</strong> always resolves to <code>127.0.0.1</code> — your own machine. No DNS lookup is needed, which is why <code>http://localhost:3001</code> works without internet.</li>
-    <li><strong>Railway</strong> (the platform used in this course) assigns a domain like <code>your-app.railway.app</code> and resolves it to its own servers, which forward requests to your Express process.</li>
-    <li><strong>You do not need to configure DNS</strong> for this course. Railway handles it automatically when you deploy.</li>
-  </ul>
+<section id="dns-domain-names-to-ip-addresses" aria-labelledby="dns-domain-names-to-ip-addresses-h">
+  <h2 id="dns-domain-names-to-ip-addresses-h">DNS — Domain Names to IP Addresses</h2>
+<p class="narration">Domain Name System, or DNS, translates domain names to IP addresses. When you use localhost, it resolves to your own machine without a DNS lookup. Railway, the platform we use, assigns a domain for your app, automatically handling DNS configuration. This simplifies deployment, allowing you to focus on building your application. Next, we’ll see how Express fits into this web ecosystem.</p>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">api.example.com → DNS Server → 203.0.113.4 → query → IP address → Every domain name resolves to an IP address — a number that identifies a specific machine</p></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>localhost always resolves to 127.0.0.1 — your own machine. No DNS lookup needed. This is why http://localhost:3001 works without internet.</p></aside>
+<aside class="note"><p>Railway assigns a domain like your-app.railway.app. DNS resolves this to Railway's servers, which forward requests to your Express process.</p></aside>
+<aside class="note"><p>You don't need to configure DNS for this course. Railway handles it automatically when you deploy.</p></aside>
 </section>
 
-<section id="express" aria-labelledby="express-h">
-  <h2 id="express-h">How Express fits in</h2>
-  <p>Express is a minimal web-server framework that makes handling HTTP requests straightforward. A request travels through it in order:</p>
-  <ol>
-    <li><strong>Browser or curl sends an HTTP request</strong> — method, URL, headers, optional body.</li>
-    <li><strong>Express receives it</strong> — the <code>app.listen(PORT)</code> call opens a socket waiting for connections.</li>
-    <li><strong>Middleware runs</strong> — <code>express.json()</code> parses the body, an <code>authenticate</code> function checks the JWT, and so on.</li>
-    <li><strong>Route handler matches</strong> — Express finds the first <code>app.get</code> / <code>post</code> / <code>patch</code> / <code>delete</code> whose path matches the URL.</li>
-    <li><strong>Your code runs</strong> — query the database, apply business logic.</li>
-    <li><strong><code>res.json(data)</code> sends the response</strong> — Express formats it as HTTP with the right headers and status code.</li>
-    <li><strong>Client receives the response</strong> — the browser renders it, curl prints it, your code processes it.</li>
-  </ol>
-  <p><strong>Try it:</strong> run <code>node server.js</code> in your project folder, then in another terminal run <code>curl http://localhost:3001/api/health</code>. You should see a JSON response. See the <a href="https://expressjs.com/en/starter/hello-world.html">Express &ldquo;Hello World&rdquo; guide</a>.</p>
+<section id="how-express-fits-in" aria-labelledby="how-express-fits-in-h">
+  <h2 id="how-express-fits-in-h">How Express Fits In</h2>
+<p class="narration">Express is a minimal web server framework that makes handling HTTP requests straightforward. When you run your server, Express listens for incoming requests. Middleware functions process these requests, parsing JSON, authenticating users, and more. Route handlers match the URL to execute your code, which might query a database or apply business logic. Finally, Express sends a response back to the client. Let's see how understanding these steps helps you build robust web applications.</p>
+<ol>
+<li><strong>Browser or curl sends an HTTP request</strong> — method, URL, headers, optional body</li>
+<li><strong>Express receives it</strong> — the <code>app.listen(PORT)</code> call opens a socket waiting for connections</li>
+<li><strong>Middleware runs</strong> — <code>express.json()</code> parses the body, <code>authenticate</code> checks the JWT, etc.</li>
+<li><strong>Route handler matches</strong> — Express finds the first <code>app.get/post/patch/delete</code> whose path matches the URL</li>
+<li><strong>Your code runs</strong> — query the database, apply business logic</li>
+<li><strong><code>res.json(data)</code> sends the response</strong> — Express formats it as HTTP with the right headers and status code</li>
+<li><strong>Client receives the response</strong> — browser renders it, curl prints it, your code processes it</li>
+</ol>
+<aside class="note"><span class="note-label">Hands-on</span><p>Try it: run node server.js in your project folder, then open a new terminal and run curl http://localhost:3001/api/health. You should see a JSON response. Express Hello World guide</p></aside>
 </section>
 
-<section id="ai" aria-labelledby="ai-h">
-  <h2 id="ai-h">What AI assumes you know</h2>
-  <p>When you give an AI a prompt like <em>&ldquo;Build me a REST API for a reading list&rdquo;</em>, it immediately makes decisions based on everything above: which HTTP methods to use for which routes, which status codes to return, how to structure JSON, how to name URLs using REST conventions, and which headers to include. Understanding these concepts lets you <strong>verify</strong> those decisions rather than just accept them.</p>
-  <h3>Questions to ask about AI-generated routes</h3>
-  <ul>
-    <li>Does <code>GET /books/:id</code> return 404 when the id does not exist?</li>
-    <li>Does POST return 201, not 200?</li>
-    <li>Does PATCH only update the fields you sent?</li>
-    <li>Does DELETE return a meaningful response?</li>
-  </ul>
-  <h3>Questions to ask about AI-generated JSON</h3>
-  <ul>
-    <li>Are error responses consistent — always <code>{ "error": "..." }</code>?</li>
-    <li>Do list endpoints return arrays, not objects?</li>
-    <li>Are field names consistent across routes — <code>id</code> everywhere, not sometimes <code>bookId</code>?</li>
-  </ul>
-  <p>A developer who understands HTTP can spot a bug in AI-generated code before testing it. A developer who just copies and pastes only finds out when something breaks in production.</p>
+<section id="what-ai-assumes-you-know" aria-labelledby="what-ai-assumes-you-know-h">
+  <h2 id="what-ai-assumes-you-know-h">What AI Assumes You Know</h2>
+<p class="narration">AI assumes you understand key web concepts when generating a REST API. It makes decisions on HTTP methods, status codes, JSON structure, and more. Knowing these concepts lets you verify those decisions and spot errors early. Ask yourself if AI-generated routes and JSON meet standards, like returning 404 for missing resources or consistent error responses. This proactive approach helps you catch bugs before they hit production. Next, we'll summarize key terms.</p>
+<aside class="note"><p>When you give an AI a prompt like "Build me a REST API for a reading list", it immediately makes decisions based on this deck's content: which HTTP methods to use for which routes, which status codes to return, how to structure JSON, how to name URLs using REST conventions, and what headers to include. Understanding these concepts lets you verify those decisions — not just accept them.</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>Questions to ask about AI-generated routes: Does GET /books/:id return 404 when the id doesn't exist? Does POST return 201, not 200? Does PATCH only update the fields I sent? Does DELETE return a meaningful response?</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>Questions to ask about AI-generated JSON: Are error responses consistent — always { "error": "..." } ? Do list endpoints return arrays, not objects? Are field names consistent across routes — id everywhere, not sometimes bookId ?</p></aside>
+<aside class="note"><p>A developer who understands HTTP can spot a bug in AI-generated code before testing it. A developer who just copies and pastes will only find out when something breaks in production.</p></aside>
 </section>
 
-<section id="terms" aria-labelledby="terms-h">
-  <h2 id="terms-h">Key terms</h2>
-  <dl class="glossary">
-    <div><dt>HTTP</dt><dd>The protocol defining how clients and servers communicate.</dd></div>
-    <div><dt>Client</dt><dd>Anything that sends requests — a browser, curl, a mobile app.</dd></div>
-    <div><dt>Server</dt><dd>A program that listens for and responds to HTTP requests.</dd></div>
-    <div><dt>Request</dt><dd>A message from client to server: method + URL + headers + body.</dd></div>
-    <div><dt>Response</dt><dd>A message from server to client: status code + headers + body.</dd></div>
-    <div><dt>Method</dt><dd>GET, POST, PATCH, or DELETE — the operation being performed.</dd></div>
-    <div><dt>Status code</dt><dd>Three-digit number indicating success (2xx), client error (4xx), or server error (5xx).</dd></div>
-    <div><dt>URL</dt><dd>Protocol + host + port + path + query string.</dd></div>
-    <div><dt>Route</dt><dd>A path pattern that Express matches, for example <code>/api/books/:id</code>.</dd></div>
-    <div><dt>JSON</dt><dd>Text format for structured data. Every API body in this course is JSON.</dd></div>
-    <div><dt>REST</dt><dd>Convention: resources as nouns, HTTP methods have meaning, stateless, JSON.</dd></div>
-    <div><dt>DNS</dt><dd>Translates domain names to IP addresses. <code>localhost</code> = <code>127.0.0.1</code>.</dd></div>
+<section id="key-terms" aria-labelledby="key-terms-h">
+  <h2 id="key-terms-h">Key Terms</h2>
+<p class="narration">This slide will summarize the key terms we've covered throughout the course. Understanding these terms is crucial for navigating web development and working effectively with APIs, whether you're writing them or interacting with them.</p>
+<p><strong>HTTP</strong> The protocol defining how clients and servers communicate</p>
+<p><strong>Client</strong> Anything that sends requests (browser, curl, mobile app)</p>
+<p><strong>Server</strong> A program that listens for and responds to HTTP requests</p>
+<p><strong>Request</strong> A message from client to server: method + URL + headers + body</p>
+<p><strong>Response</strong> A message from server to client: status code + headers + body</p>
+<p><strong>Method</strong> GET / POST / PATCH / DELETE — the operation being performed</p>
+<p><strong>Status Code</strong> 3-digit number indicating success (2xx), client error (4xx), server error (5xx)</p>
+<p><strong>URL</strong> Protocol + host + port + path + query string</p>
+<p><strong>Route</strong> A path pattern that Express matches: <code>/api/books/:id</code></p>
+<p><strong>JSON</strong> Text format for structured data. All API bodies in this course are JSON.</p>
+<p><strong>REST</strong> Convention: resources as nouns, HTTP methods have meaning, stateless, JSON</p>
+<p><strong>DNS</strong> Translates domain names to IP addresses. localhost = 127.0.0.1.</p>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../web-fundamentals-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>curl health check <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Run: curl -si http://localhost:3001/api/health Note the status code, the Content-Type header, and the response body. What does each tell you about the server?
+      <ul><li>You can identify the status code and explain what it means</li><li>You can name at least two response headers and their purpose</li><li>You can explain why the Content-Type header matters</li></ul></dd></div>
+    <div><dt>DevTools network inspection <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Open any website in your browser. Open DevTools → Network tab. Reload the page. Find the main HTML document request and note: HTTP method, status code, response headers, and how long it took.
+      <ul><li>You found the HTML document request (not just assets like images or scripts)</li><li>You can distinguish between request headers and response headers</li><li>You noted the time-to-first-byte and can explain what causes variation</li></ul></dd></div>
+    <div><dt>Biggest concept <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Which HTTP concept in this module was least familiar to you? How would you explain it to a colleague who has never worked with web APIs?
+      <ul><li>Your explanation avoids jargon, or defines any technical terms you use</li><li>You described the concept in your own words, not copied from the slides</li><li>Your explanation would make sense to a non-technical colleague</li></ul></dd></div>
   </dl>
 </section>
-
 </main>
 
 <footer class="doc">
-  <p>Accessible text version of the <a href="../web-fundamentals-workshop.html">How the Web Works</a> deck, part of <a href="../index.html">Learning Web Development by Building with AI</a>. Licensed CC BY 4.0.</p>
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
 </footer>
-
 </div>
 </body>
 </html>

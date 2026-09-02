@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Database Concepts — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">A4 &middot; Foundations</p>
+  <h1>Database Concepts</h1>
+  <p class="lede">Tables, SQL, psql, primary keys, constraints, transactions</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../database-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#database-concepts">Database Concepts</a></li>
+    <li><a href="#why-databases">Why Databases?</a></li>
+    <li><a href="#the-relational-model">The Relational Model</a></li>
+    <li><a href="#postgresql-data-types">PostgreSQL Data Types</a></li>
+    <li><a href="#primary-keys">Primary Keys</a></li>
+    <li><a href="#select-where">SELECT &amp; WHERE</a></li>
+    <li><a href="#insert-update-delete">INSERT, UPDATE, DELETE</a></li>
+    <li><a href="#constraints">Constraints</a></li>
+    <li><a href="#joins">JOINs</a></li>
+    <li><a href="#transactions">Transactions</a></li>
+    <li><a href="#indexes">Indexes</a></li>
+    <li><a href="#psql-your-command-line-client">psql: Your Command-Line Client</a></li>
+    <li><a href="#schema-design-with-ai">Schema Design with AI</a></li>
+    <li><a href="#migrations-evolving-your-schema">Migrations: Evolving Your Schema</a></li>
+    <li><a href="#using-ai-to-reason-about-data">Using AI to Reason About Data</a></li>
+    <li><a href="#quick-reference">Quick Reference</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the relational model: tables, rows, columns, primary keys, and foreign keys</li>
+    <li>Write SQL queries to create, read, update, and delete records</li>
+    <li>Apply database constraints (NOT NULL, UNIQUE, CHECK, FK) to enforce data integrity</li>
+    <li>Construct JOIN queries to retrieve related data from multiple tables</li>
+    <li>Apply safe migration discipline: extend schemas without dropping existing data</li>
+  </ul>
+</section>
+
+<section id="database-concepts" aria-labelledby="database-concepts-h">
+  <h2 id="database-concepts-h">Database Concepts</h2>
+<aside class="note"><p>When AI generates a schema or writes a query, it assumes you can read SQL, understand what a foreign key enforces, and know when a JOIN is needed. This deck builds that foundation.</p></aside>
+</section>
+
+<section id="why-databases" aria-labelledby="why-databases-h">
+  <h2 id="why-databases-h">Why Databases?</h2>
+<p>Flat files (JSON, CSV, text) seem simple — until things go wrong.</p>
+<aside class="note"><p>Problems with files No concurrent access — two users writing at once corrupt the file. No querying — to find one record you read the whole file. No referential integrity — nothing stops you deleting a record that others depend on. No rollback — a crash mid-write leaves partial data permanently.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>ACID guarantees — what a database gives you Atomicity — a transaction is all-or-nothing; partial writes never happen. Consistency — constraints are always enforced; invalid data is rejected. Isolation — concurrent transactions don't interfere with each other. Durability — once committed, data survives crashes and restarts.</p></aside>
+<aside class="note"><p>PostgreSQL is the database used throughout this course — free, open source, production-grade.</p></aside>
+</section>
+
+<section id="the-relational-model" aria-labelledby="the-relational-model-h">
+  <h2 id="the-relational-model-h">The Relational Model</h2>
+<p>Data is organised into <strong>tables</strong> (relations). Each table has named <strong>columns</strong> (fields/attributes). Each <strong>row</strong> is one record (tuple). Tables are linked by <strong>foreign keys</strong>.</p>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">books → id UUID PRIMARY KEY → title TEXT NOT NULL → author TEXT NOT NULL → status TEXT NOT NULL → created_at TIMESTAMPTZ → reading_sessions → id UUID PRIMARY KEY → book_id UUID FK → started_at TIMESTAMPTZ → finished_at TIMESTAMPTZ → 1 → N</p></figure>
+<aside class="note"><p>Every table should have a primary key — a column (or set of columns) that uniquely identifies each row.</p></aside>
+</section>
+
+<section id="postgresql-data-types" aria-labelledby="postgresql-data-types-h">
+  <h2 id="postgresql-data-types-h">PostgreSQL Data Types</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Category</th><th scope="col">Types</th></tr></thead><tbody><tr><th scope="row">Text</th><td><code>TEXT</code>, <code>VARCHAR(n)</code>, <code>CHAR(n)</code></td></tr><tr><th scope="row">Numbers</th><td><code>INTEGER</code>, <code>BIGINT</code>, <code>NUMERIC(p,s)</code>, <code>REAL</code></td></tr><tr><th scope="row">Boolean</th><td><code>BOOLEAN</code> — <code>true</code> / <code>false</code></td></tr><tr><th scope="row">Date / time</th><td><code>TIMESTAMPTZ</code>, <code>DATE</code></td></tr><tr><th scope="row">Special</th><td><code>UUID</code>, <code>JSONB</code>, <code>ARRAY</code></td></tr></tbody></table></div>
+<aside class="note"><span class="note-label">Gotcha</span><p>Use TIMESTAMPTZ not TIMESTAMP — always store time with timezone. Without timezone information, timestamps become ambiguous when servers move regions or clocks change. Use TEXT not VARCHAR — PostgreSQL handles them identically internally and TEXT is simpler. Only use VARCHAR(n) if you specifically need to enforce a length limit.</p></aside>
+</section>
+
+<section id="primary-keys" aria-labelledby="primary-keys-h">
+  <h2 id="primary-keys-h">Primary Keys</h2>
+<p>Two common strategies for generating unique IDs:</p>
+<figure><figcaption>primary key options</figcaption><pre><code>-- Auto-incrementing integer (simple)
+id SERIAL PRIMARY KEY
+
+-- UUID (better for distributed systems / APIs)
+id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+
+-- Complete minimal CREATE TABLE
+CREATE TABLE books (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title      TEXT NOT NULL,
+  author     TEXT NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'unread',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre></figure>
+<ul>
+<li><strong>SERIAL</strong> &mdash; Integer, auto-incremented by the DB. Simple. Leaks row count — avoid exposing directly in URLs.</li>
+<li><strong>UUID</strong> &mdash; Globally unique. Doesn't leak row count. Safe to expose in public URLs. Best choice for APIs.</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Design a PostgreSQL schema for a reading list app with user accounts. Include appropriate constraints and indexes.</p></aside>
+</section>
+
+<section id="select-where" aria-labelledby="select-where-h">
+  <h2 id="select-where-h">SELECT &amp; WHERE</h2>
+<p>The most common SQL operation — reading data from a table.</p>
+<figure><figcaption>SELECT examples</figcaption><pre><code>-- All columns, all rows
+SELECT * FROM books;
+
+-- Specific columns with a filter
+SELECT title, author FROM books WHERE status = 'reading';
+
+-- Most recent 10 books
+SELECT * FROM books ORDER BY created_at DESC LIMIT 10;</code></pre></figure>
+<aside class="note"><p>SELECT * is fine for learning but in production code name your columns explicitly — it prevents surprises when the schema changes and a new column appears unexpectedly in your JSON output.</p></aside>
+</section>
+
+<section id="insert-update-delete" aria-labelledby="insert-update-delete-h">
+  <h2 id="insert-update-delete-h">INSERT, UPDATE, DELETE</h2>
+<figure><figcaption>write operations</figcaption><pre><code>-- INSERT a new row
+INSERT INTO books (title, author, status)
+VALUES ('The Pragmatic Programmer', 'Hunt &amp; Thomas', 'unread')
+RETURNING *;
+
+-- UPDATE with COALESCE (partial update pattern)
+UPDATE books
+SET   title  = COALESCE($2, title),
+      status = COALESCE($3, status)
+WHERE id = $1
+RETURNING *;
+
+-- DELETE a row
+DELETE FROM books WHERE id = $1 RETURNING id;</code></pre></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>RETURNING * gives you back the modified row without a second SELECT — use it in every INSERT and UPDATE.</p></aside>
+<ul>
+<li><strong>COALESCE($2, title)</strong> &mdash; Returns <code>$2</code> if not null, otherwise keeps the existing <code>title</code>. This enables partial PATCH updates.</li>
+<li><strong>$1, $2, $3</strong> &mdash; Parameterised placeholders — prevents SQL injection. Your driver fills these in safely.</li>
+</ul>
+</section>
+
+<section id="constraints" aria-labelledby="constraints-h">
+  <h2 id="constraints-h">Constraints</h2>
+<p>Constraints are rules enforced by the database on every write operation.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Constraint</th><th scope="col">What it enforces</th></tr></thead><tbody><tr><th scope="row">NOT NULL</th><td>Column must have a value — never empty</td></tr><tr><th scope="row">UNIQUE</th><td>No two rows may have the same value in this column</td></tr><tr><th scope="row">CHECK</th><td>A boolean condition must be true: <code>CHECK (status IN ('unread','reading','done'))</code></td></tr><tr><th scope="row">FOREIGN KEY</th><td>Value must exist in the referenced table</td></tr><tr><th scope="row">PRIMARY KEY</th><td>Implies NOT NULL + UNIQUE; identifies each row</td></tr></tbody></table></div>
+<figure><figcaption>foreign key with ON DELETE</figcaption><pre><code>book_id UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE</code></pre></figure>
+<ul>
+<li><strong>CASCADE</strong> &mdash; Delete child rows automatically when the parent is deleted</li>
+<li><strong>RESTRICT</strong> &mdash; Block the parent delete if any children exist</li>
+<li><strong>SET NULL</strong> &mdash; Set the FK column to NULL when the parent is deleted</li>
+</ul>
+<aside class="note"><span class="note-label">Key concept</span><p>Constraints are enforced by the database — not your application code. This is your last line of defence against invalid data.</p></aside>
+</section>
+
+<section id="joins" aria-labelledby="joins-h">
+  <h2 id="joins-h">JOINs</h2>
+<p>JOINs combine rows from two tables based on a matching column — typically a foreign key.</p>
+<figure><figcaption>LEFT JOIN example</figcaption><pre><code>-- List books with their session count
+SELECT b.title, COUNT(rs.id) AS session_count
+FROM   books b
+LEFT JOIN reading_sessions rs
+       ON rs.book_id = b.id
+GROUP BY b.id, b.title;</code></pre></figure>
+<aside class="note"><p>Use LEFT JOIN when you want all rows from the left table even if there are no matching rows in the right table.</p></aside>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">INNER → JOIN → books → sessions → LEFT JOIN → all books + matches</p></figure>
+<ul>
+<li><strong>INNER JOIN</strong> &mdash; Only rows that match in both tables</li>
+<li><strong>LEFT JOIN</strong> &mdash; All left rows + matching right rows (nulls for non-matches)</li>
+</ul>
+</section>
+
+<section id="transactions" aria-labelledby="transactions-h">
+  <h2 id="transactions-h">Transactions</h2>
+<p><strong>Atomicity</strong> means all or nothing. Without a transaction, a crash between two related writes leaves the database inconsistent.</p>
+<figure><figcaption>transaction syntax</figcaption><pre><code>BEGIN;
+  UPDATE accounts
+    SET balance = balance - 100
+    WHERE id = 1;
+
+  UPDATE accounts
+    SET balance = balance + 100
+    WHERE id = 2;
+
+COMMIT;
+-- or ROLLBACK; if something went wrong</code></pre></figure>
+<ul>
+<li><strong>BEGIN</strong> &mdash; Start a transaction — all subsequent statements are grouped</li>
+<li><strong>COMMIT</strong> &mdash; Apply all grouped statements permanently</li>
+<li><strong>ROLLBACK</strong> &mdash; Discard all grouped statements — as if they never happened</li>
+</ul>
+<aside class="note"><p>In pg (the Node.js driver), use client.query('BEGIN') / client.query('COMMIT') from a checked-out pool client — not pool.query(). Pool queries run in auto-commit mode.</p></aside>
+</section>
+
+<section id="indexes" aria-labelledby="indexes-h">
+  <h2 id="indexes-h">Indexes</h2>
+<p>An index is a pre-sorted data structure that speeds up WHERE and JOIN lookups. Without one, PostgreSQL reads the entire table (O(n)). With a B-tree index, it jumps to the match (~O(log n)).</p>
+<figure><figcaption>creating indexes</figcaption><pre><code>CREATE INDEX ON books(status);                   -- frequently filtered column
+CREATE INDEX ON reading_sessions(book_id);       -- FK column (always index FKs)
+CREATE UNIQUE INDEX ON users(email);             -- enforce uniqueness + speed</code></pre></figure>
+<aside class="note"><span class="note-label">Gotcha</span><p>Don't index everything — indexes slow down INSERT and UPDATE because the index must be updated too. Index FKs and columns you filter or sort on frequently.</p></aside>
+<aside class="note"><p>EXPLAIN ANALYSE SELECT ... shows you what PostgreSQL is actually doing — use it to confirm your indexes are being used and to spot full table scans.</p></aside>
+</section>
+
+<section id="psql-your-command-line-client" aria-labelledby="psql-your-command-line-client-h">
+  <h2 id="psql-your-command-line-client-h">psql: Your Command-Line Client</h2>
+<p>Connect directly to a PostgreSQL database and run SQL interactively.</p>
+<figure><figcaption>connect</figcaption><pre><code>$ psql $DATABASE_URL</code></pre></figure>
+<div class="table-scroll"><table><thead><tr><th scope="col">Command</th><th scope="col">What it does</th></tr></thead><tbody><tr><th scope="row">\l</th><td>List databases</td></tr><tr><th scope="row">\c mydb</th><td>Connect to a database</td></tr><tr><th scope="row">\dt</th><td>List tables</td></tr><tr><th scope="row">\d books</th><td>Describe a table (columns, constraints, indexes)</td></tr></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th scope="col">Command</th><th scope="col">What it does</th></tr></thead><tbody><tr><th scope="row">\i schema.sql</th><td>Run a SQL file</td></tr><tr><th scope="row">\x</th><td>Toggle expanded display (one column per line)</td></tr><tr><th scope="row">\q</th><td>Quit</td></tr><tr><th scope="row">\copy</th><td>Import/export CSV data</td></tr></tbody></table></div>
+<aside class="note"><span class="note-label">Hands-on</span><p>AI prompt: I'm in psql and see this error: [paste error]. What does it mean and how do I fix it? — psql docs ↗</p></aside>
+</section>
+
+<section id="schema-design-with-ai" aria-labelledby="schema-design-with-ai-h">
+  <h2 id="schema-design-with-ai-h">Schema Design with AI</h2>
+<figure><figcaption>prompt pattern for schema design</figcaption><pre><code>I'm building a reading list app with Node.js and PostgreSQL.
+I need tables for: users, books (per user), and reading
+sessions (start/end dates per book). Include appropriate
+data types, primary keys, foreign keys, constraints, and
+any useful indexes. Return a single schema.sql file ready
+to run in psql.</code></pre></figure>
+<p>What to check in AI-generated schemas:</p>
+<ul>
+<li><strong>PK</strong> &mdash; Primary key on every table?</li>
+<li><strong>FK</strong> &mdash; Foreign keys declared with <code>ON DELETE</code> behaviour?</li>
+<li><strong>TIMESTAMPTZ</strong> &mdash; Timestamps using timezone-aware type?</li>
+<li><strong>Names</strong> &mdash; Constraint names sensible and consistent?</li>
+</ul>
+<aside class="note"><span class="note-label">Tip</span><p>Paste the schema back to the AI: Review this schema for any issues with normalisation, missing constraints, or security concerns.</p></aside>
+</section>
+
+<section id="migrations-evolving-your-schema" aria-labelledby="migrations-evolving-your-schema-h">
+  <h2 id="migrations-evolving-your-schema-h">Migrations: Evolving Your Schema</h2>
+<p>A production database already has data — you cannot re-run <code>schema.sql</code> from scratch. Migrations apply incremental, safe changes.</p>
+<figure><figcaption>safe migration pattern</figcaption><pre><code>-- Always use IF NOT EXISTS / IF EXISTS
+ALTER TABLE books
+  ADD COLUMN IF NOT EXISTS page_count INTEGER;
+
+CREATE INDEX IF NOT EXISTS idx_books_status
+  ON books(status);</code></pre></figure>
+<p><strong>Dangerous without a backup first:</strong></p>
+<ul>
+<li><strong>DROP TABLE</strong> &mdash; Deletes all data permanently</li>
+<li><strong>DROP COLUMN</strong> &mdash; Column and all its data gone</li>
+<li><strong>ALTER TYPE</strong> &mdash; May fail or silently lose data</li>
+</ul>
+<aside class="note"><span class="note-label">Gotcha</span><p>Always take a backup before running any migration: pg_dump $DATABASE_URL &gt; backup-$(date +%Y%m%d).sql</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>AI prompt: Write a migration to add a <code>page_count</code> column to the books table. Use IF NOT EXISTS and include a rollback comment.</p></aside>
+</section>
+
+<section id="using-ai-to-reason-about-data" aria-labelledby="using-ai-to-reason-about-data-h">
+  <h2 id="using-ai-to-reason-about-data-h">Using AI to Reason About Data</h2>
+<p>Schema design</p>
+<p>AI generates schemas quickly. Your job is to read every column and ask: why this type? why this constraint? Could this constraint cause a problem at scale?</p>
+<p>Query writing</p>
+<p>AI writes JOIN queries fluently. Paste the query back and ask: <em>"explain this query to me as if I'm learning SQL"</em> — then verify the explanation matches what the code does.</p>
+<p>Debugging</p>
+<p>Paste psql error messages directly into the AI. PostgreSQL error codes (like <code>23505</code> for UNIQUE violation) are well-known and AI diagnoses them accurately.</p>
+<aside class="note"><span class="note-label">Key concept</span><p>Every time you use AI to write SQL, run it, understand the result, then ask AI to explain any part that's unclear. Never merge SQL you cannot read.</p></aside>
+</section>
+
+<section id="quick-reference" aria-labelledby="quick-reference-h">
+  <h2 id="quick-reference-h">Quick Reference</h2>
+<p>SQL Verbs</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Verb</th><th scope="col">Purpose</th></tr></thead><tbody><tr><th scope="row">SELECT</th><td>Read rows from a table</td></tr><tr><th scope="row">INSERT</th><td>Add a new row</td></tr><tr><th scope="row">UPDATE</th><td>Modify existing rows</td></tr><tr><th scope="row">DELETE</th><td>Remove rows</td></tr><tr><th scope="row">CREATE TABLE</th><td>Define a new table</td></tr><tr><th scope="row">ALTER TABLE</th><td>Modify a table's structure</td></tr><tr><th scope="row">DROP TABLE</th><td>Delete a table and all its data</td></tr><tr><th scope="row">CREATE INDEX</th><td>Speed up lookups on a column</td></tr><tr><th scope="row">BEGIN / COMMIT / ROLLBACK</th><td>Transaction control</td></tr></tbody></table></div>
+<p>psql Commands</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Command</th><th scope="col">What it does</th></tr></thead><tbody><tr><th scope="row">\l</th><td>List databases</td></tr><tr><th scope="row">\c</th><td>Connect to a database</td></tr><tr><th scope="row">\dt</th><td>List tables</td></tr><tr><th scope="row">\d</th><td>Describe a table</td></tr><tr><th scope="row">\i</th><td>Run a SQL file</td></tr><tr><th scope="row">\x</th><td>Toggle expanded display</td></tr><tr><th scope="row">\q</th><td>Quit</td></tr><tr><th scope="row">\copy</th><td>Import / export CSV</td></tr></tbody></table></div>
+<aside class="note"><p>The full Reading List schema is at docs/crud-demo/schema.sql</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../database-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Write a JOIN query <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Using the demo app schema (or any two related tables), write a SQL query that JOINs them and filters with WHERE. Explain what INNER JOIN vs LEFT JOIN would return differently for the same data.
+      <ul><li>Your query runs without error and returns the rows you expected</li><li>You can explain why INNER JOIN excludes rows with no match on the other side</li><li>You can explain what LEFT JOIN would return differently for the same dataset</li></ul></dd></div>
+    <div><dt>Add a CHECK constraint <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Alter the books table in the demo app schema to add a CHECK constraint on a column (e.g. rating BETWEEN 1 AND 5). Test it by attempting to INSERT an invalid value via psql.
+      <ul><li>The constraint was added with ALTER TABLE ... ADD CONSTRAINT syntax</li><li>Inserting an invalid value was rejected with a constraint violation error</li><li>You can name the PostgreSQL error code for a CHECK constraint violation (23514)</li></ul></dd></div>
+    <div><dt>When not to use SQL <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>When would you choose NOT to use a relational database for a project? What alternative would you reach for, and what trade-offs would you accept?
+      <ul><li>You named a specific alternative (MongoDB, Redis, DynamoDB, etc.) not just "NoSQL"</li><li>You gave a concrete use case where that alternative fits better than a relational DB</li><li>You acknowledged at least one trade-off of your chosen alternative</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

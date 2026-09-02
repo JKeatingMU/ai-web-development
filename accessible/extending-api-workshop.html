@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extending Your API — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">B5 &middot; Backend API</p>
+  <h1>Extending Your API</h1>
+  <p class="lede">Pagination, relational data, JOIN queries</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../extending-api-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#extending-your-api">Extending Your API</a></li>
+    <li><a href="#two-things-every-real-api-needs">Two Things Every Real API Needs</a></li>
+    <li><a href="#part-01-pagination">Part 01: Pagination</a></li>
+    <li><a href="#why-it-matters">Why It Matters</a></li>
+    <li><a href="#two-patterns-which-should-you-use">Two Patterns — Which Should You Use?</a></li>
+    <li><a href="#giving-the-ai-enough-context">Giving the AI Enough Context</a></li>
+    <li><a href="#the-updated-get-api-books-route">The Updated GET /api/books Route</a></li>
+    <li><a href="#the-response-envelope-pattern">The Response Envelope Pattern</a></li>
+    <li><a href="#testing-pagination-with-curl">Testing Pagination with curl</a></li>
+    <li><a href="#common-pitfalls-to-check">Common Pitfalls to Check</a></li>
+    <li><a href="#part-02-a-second-table">Part 02: A Second Table</a></li>
+    <li><a href="#three-relationship-types">Three Relationship Types</a></li>
+    <li><a href="#prompting-for-schema-design">Prompting for Schema Design</a></li>
+    <li><a href="#the-reading-sessions-table">The reading_sessions Table</a></li>
+    <li><a href="#adding-tables-safely-in-production">Adding Tables Safely in Production</a></li>
+    <li><a href="#nested-routes-for-sub-resources">Nested Routes for Sub-Resources</a></li>
+    <li><a href="#combining-tables-with-join">Combining Tables with JOIN</a></li>
+    <li><a href="#testing-sessions-with-curl">Testing Sessions with curl</a></li>
+    <li><a href="#many-to-many-tags">Many-to-Many: Tags</a></li>
+    <li><a href="#what-ai-gets-wrong-key-takeaways">What AI Gets Wrong &amp; Key Takeaways</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Add offset pagination to an existing API endpoint using SQL LIMIT and OFFSET with a JSON envelope</li>
+    <li>Construct window function queries to include total count without a second database round-trip</li>
+    <li>Add a foreign-key relationship between two database tables with appropriate CASCADE rules</li>
+    <li>Write JOIN queries to fetch related data across tables in a single database call</li>
+    <li>Apply safe migration discipline: add tables and columns without modifying or dropping existing data</li>
+  </ul>
+</section>
+
+<section id="extending-your-api" aria-labelledby="extending-your-api-h">
+  <h2 id="extending-your-api-h">Extending Your API</h2>
+<p>Pagination &amp; Relational Data — adding the features every production API needs</p>
+</section>
+
+<section id="two-things-every-real-api-needs" aria-labelledby="two-things-every-real-api-needs-h">
+  <h2 id="two-things-every-real-api-needs-h">Two Things Every Real API Needs</h2>
+<aside class="note"><p>Part 1 — Pagination</p>
+<ul>
+<li>Return results in pages, not all at once</li>
+<li>Query params: <code>?page=2&amp;limit=20</code></li>
+<li>Response includes <code>total</code> and <code>pages</code></li>
+<li>Validate and cap inputs</li>
+</ul></aside>
+<aside class="note"><p>Part 2 — A Second Table</p>
+<ul>
+<li>Add a <code>reading_sessions</code> table</li>
+<li>Foreign key links sessions → books</li>
+<li>JOIN queries to combine data</li>
+<li>Nested routes: <code>/api/books/:id/sessions</code></li>
+</ul></aside>
+<pre><code>BEFORE:  GET /api/books
+
+  Response: [ book, book, book, ... ]   ← all 5,000 books
+  No metadata. Slow. Unusable at scale.
+
+AFTER:   GET /api/books?page=2&amp;limit=20
+
+  Response: {
+    data:  [ book, book, book, ... ]   ← 20 books
+    total: 5000,
+    page:  2,
+    limit: 20,
+    pages: 250
+  }</code></pre>
+</section>
+
+<section id="part-01-pagination" aria-labelledby="part-01-pagination-h">
+  <h2 id="part-01-pagination-h">Part 01: Pagination</h2>
+<p>Every list endpoint that can grow should be paginated. We'll add offset-based pagination to <code>GET /api/books</code>.</p>
+</section>
+
+<section id="why-it-matters" aria-labelledby="why-it-matters-h">
+  <h2 id="why-it-matters-h">Why It Matters</h2>
+<aside class="note"><p>Without pagination</p>
+<ul>
+<li>10 books: fine</li>
+<li>10,000 books: DB fetches everything, sends 4 MB of JSON</li>
+<li>Client renders a 10,000-row list — UI freezes</li>
+<li>One request can take down a small server</li>
+</ul></aside>
+<aside class="note"><p>With pagination</p>
+<ul>
+<li>DB fetches 20 rows — fast regardless of total size</li>
+<li>Client gets predictable, bounded responses</li>
+<li>UI can show "Page 3 of 250" or an infinite scroll trigger</li>
+</ul></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>The rule If an endpoint returns a list that could ever grow beyond a few dozen rows, paginate it from the start. Retrofitting pagination later breaks every existing client.</p></aside>
+<aside class="note"><p>Two parameters</p>
+<ul>
+<li><code>page</code> — which page (1-indexed)</li>
+<li><code>limit</code> — how many per page (cap at 100)</li>
+</ul></aside>
+</section>
+
+<section id="two-patterns-which-should-you-use" aria-labelledby="two-patterns-which-should-you-use-h">
+  <h2 id="two-patterns-which-should-you-use-h">Two Patterns — Which Should You Use?</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Feature</th><th scope="col">Offset / Page</th><th scope="col">Cursor / Keyset</th></tr></thead><tbody><tr><th scope="row"><strong>SQL</strong></th><td><code>LIMIT 20 OFFSET 40</code></td><td><code>WHERE id &gt; 123 LIMIT 20</code></td></tr><tr><th scope="row"><strong>URL</strong></th><td><code>?page=3&amp;limit=20</code></td><td><code>?after=abc123&amp;limit=20</code></td></tr><tr><th scope="row"><strong>Random access</strong></th><td>✓ "Jump to page 7"</td><td>✗ Forward-only</td></tr><tr><th scope="row"><strong>Stable on insert</strong></th><td>✗ New rows shift pages</td><td>✓ Consistent</td></tr><tr><th scope="row"><strong>Performance at scale</strong></th><td>Slow at high offsets (full scan)</td><td>Fast at any depth (index seek)</td></tr><tr><th scope="row"><strong>Complexity</strong></th><td>Low — easy to implement</td><td>Medium — cursor encoding needed</td></tr><tr><th scope="row"><strong>Use when</strong></th><td>Admin tables, &lt; 100k rows, page numbers needed</td><td>Feeds, chat, millions of rows</td></tr></tbody></table></div>
+<aside class="note"><p>We'll use offset pagination — it's the right fit for a reading list. If your dataset grows past ~500k rows, revisit cursor pagination.</p></aside>
+</section>
+
+<section id="giving-the-ai-enough-context" aria-labelledby="giving-the-ai-enough-context-h">
+  <h2 id="giving-the-ai-enough-context-h">Giving the AI Enough Context</h2>
+<blockquote class="prompt"><span class="note-label">Prompt</span><p>Prompt to AI</p>
+<p>I have a Reading List API (Node.js, Express, PostgreSQL). The GET /api/books route currently returns all books as an array. Add offset pagination using query parameters ?page and ?limit. Requirements: - Default: page=1, limit=20 - Validate: page must be &gt;= 1; limit between 1 and 100 - Return a JSON envelope: { data, total, page, limit, pages } - Use a single SQL query with a window function to get the total count without a second round-trip - Keep the existing authenticate middleware in place</p></blockquote>
+<aside class="note"><p>Why this prompt works</p>
+<ul>
+<li>Names the stack (no guessing)</li>
+<li>Describes the current state</li>
+<li>Specifies validation rules explicitly</li>
+<li>Defines the exact response shape</li>
+<li>Mentions the window function — otherwise AI often suggests two queries</li>
+<li>Reminds it not to break auth</li>
+</ul></aside>
+<aside class="note"><p>Window function? COUNT(*) OVER() runs alongside the SELECT and returns the total row count in every row — so one query gives you both the page of data and the total.</p></aside>
+</section>
+
+<section id="the-updated-get-api-books-route" aria-labelledby="the-updated-get-api-books-route-h">
+  <h2 id="the-updated-get-api-books-route-h">The Updated GET /api/books Route</h2>
+<figure><figcaption>server.js — GET /api/books</figcaption><pre><code>app.get('/api/books', authenticate, async (req, res) =&gt; {
+  // 1. Parse and validate inputs
+  const page  = Math.max(1,   parseInt(req.query.page)  || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  const offset = (page - 1) * limit;
+
+  // 2. One query: data + total via window function
+  const { rows } = await query(`
+    SELECT *, COUNT(*) OVER() AS total_count
+    FROM books
+    ORDER BY created_at DESC
+    LIMIT $1 OFFSET $2
+  `, [limit, offset]);
+
+  // 3. Extract total from first row (0 if empty)
+  const total = rows[0] ? parseInt(rows[0].total_count) : 0;
+
+  // 4. Strip total_count from each book object
+  res.json({
+    data:  rows.map(({ total_count, ...book }) =&gt; book),
+    total,
+    page,
+    limit,
+    pages: Math.ceil(total / limit)
+  });
+});</code></pre></figure>
+<aside class="note"><p>Math.max / Math.min Clamps the input to valid range. page=0 becomes 1. limit=9999 becomes 100. No error thrown — silent correction.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>COUNT(*) OVER() A window function — runs across all matching rows before LIMIT is applied. Each row gets the total count. One round-trip to the DB instead of two.</p></aside>
+<aside class="note"><p>Destructuring strip ({ total_count, ...book }) removes the internal total_count column before sending — clients never see it.</p></aside>
+</section>
+
+<section id="the-response-envelope-pattern" aria-labelledby="the-response-envelope-pattern-h">
+  <h2 id="the-response-envelope-pattern-h">The Response Envelope Pattern</h2>
+<aside class="note"><p>Plain array — avoid this</p></aside>
+<figure><figcaption>response — no envelope</figcaption><pre><code>[
+  { "id": 1, "title": "Clean Code" },
+  { "id": 2, "title": "The Pragmatic Programmer" }
+]
+
+Problem: no way to know if there are more pages.
+Client must guess or fetch until empty.</code></pre></figure>
+<aside class="note"><p>Envelope — the right shape</p></aside>
+<figure><figcaption>response — with envelope</figcaption><pre><code>{
+  "data": [
+    { "id": 1, "title": "Clean Code" },
+    { "id": 2, "title": "The Pragmatic Programmer" }
+  ],
+  "total": 47,
+  "page":  1,
+  "limit": 20,
+  "pages": 3
+}
+
+Client knows: 47 books, currently on page 1 of 3.</code></pre></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>The envelope adds metadata without changing the shape of individual book objects. Clients can render "Showing 1–20 of 47" or build page-number controls with no extra requests.</p></aside>
+</section>
+
+<section id="testing-pagination-with-curl" aria-labelledby="testing-pagination-with-curl-h">
+  <h2 id="testing-pagination-with-curl-h">Testing Pagination with curl</h2>
+<figure><figcaption>terminal</figcaption><pre><code># Set credentials — in real scripts, source these from your .env file
+$ export EMAIL=alice@example.com PASS=correct-horse-battery
+$ TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+  -H 'Content-Type: application/json' \
+  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASS\"}" \
+  | jq -r '.token')
+
+# First page (default: page=1, limit=20)
+$ curl -s http://localhost:3001/api/books \
+  -H "Authorization: Bearer $TOKEN" | jq '{total,page,limit,pages}'
+
+# Second page, 5 per page
+$ curl -s "http://localhost:3001/api/books?page=2&amp;limit=5" \
+  -H "Authorization: Bearer $TOKEN" | jq '.data | length'
+
+# Verify input clamping — limit=999 should be treated as 100
+$ curl -s "http://localhost:3001/api/books?limit=999" \
+  -H "Authorization: Bearer $TOKEN" | jq '.limit'
+100
+
+# Last page — data may have fewer than limit items
+$ curl -s "http://localhost:3001/api/books?page=999" \
+  -H "Authorization: Bearer $TOKEN" | jq '{page,pages,data_length: (.data|length)}'</code></pre></figure>
+<aside class="note"><p>What to verify</p>
+<ul>
+<li><code>total</code> matches your actual row count</li>
+<li><code>pages</code> = ⌈total / limit⌉</li>
+<li><code>data.length</code> ≤ limit always</li>
+<li>Last page: <code>data.length</code> may be less than limit</li>
+<li>Beyond last page: <code>data: []</code>, not an error</li>
+</ul></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>Credentials in scripts Never hardcode email/password. Export variables from your .env file: export $(grep -v '^#' .env | xargs) Then use $EMAIL and $PASS in your curl commands.</p></aside>
+</section>
+
+<section id="common-pitfalls-to-check" aria-labelledby="common-pitfalls-to-check-h">
+  <h2 id="common-pitfalls-to-check-h">Common Pitfalls to Check</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Issue</th><th scope="col">What happens</th><th scope="col">Fix</th></tr></thead><tbody><tr><th scope="row"><strong>No input validation</strong></th><td><code>page=-5</code> or <code>page=abc</code> causes a SQL error or NaN offset</td><td><code>Math.max(1, parseInt(...) || 1)</code></td></tr><tr><th scope="row"><strong>No limit cap</strong></th><td><code>?limit=1000000</code> fetches the whole table — denial of service</td><td><code>Math.min(100, limit)</code></td></tr><tr><th scope="row"><strong>No total count</strong></th><td>Client cannot compute number of pages</td><td>Include <code>total</code> in envelope; use window function or second query</td></tr><tr><th scope="row"><strong>OFFSET at scale</strong></th><td><code>OFFSET 50000</code> forces PostgreSQL to scan and discard 50,000 rows first</td><td>Acceptable for &lt;100k rows; switch to cursor pagination beyond that</td></tr><tr><th scope="row"><strong>Sorting inconsistency</strong></th><td>Without <code>ORDER BY</code>, page contents are non-deterministic</td><td>Always add <code>ORDER BY</code> — e.g., <code>ORDER BY created_at DESC</code></td></tr></tbody></table></div>
+<aside class="note"><p>Always ask the AI "What happens if page is 0, negative, or non-numeric?" — the answer reveals whether validation was included.</p></aside>
+</section>
+
+<section id="part-02-a-second-table" aria-labelledby="part-02-a-second-table-h">
+  <h2 id="part-02-a-second-table-h">Part 02: A Second Table</h2>
+<p>Real apps have multiple related tables. We'll add <code>reading_sessions</code> — a one-to-many relationship with <code>books</code> — and learn to JOIN, migrate safely, and build nested routes.</p>
+</section>
+
+<section id="three-relationship-types" aria-labelledby="three-relationship-types-h">
+  <h2 id="three-relationship-types-h">Three Relationship Types</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Type</th><th scope="col">Example</th><th scope="col">Implementation</th></tr></thead><tbody><tr><th scope="row"><strong>One-to-one</strong></th><td>User → profile</td><td>FK in one table, UNIQUE constraint</td></tr><tr><th scope="row"><strong>One-to-many</strong></th><td>Book → sessions</td><td>FK in the "many" table pointing to the "one"</td></tr><tr><th scope="row"><strong>Many-to-many</strong></th><td>Books ↔ tags</td><td>Junction table with two FKs</td></tr></tbody></table></div>
+<aside class="note"><p>We're building one-to-many One book can have many reading sessions. Each session belongs to exactly one book.</p></aside>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">books → id SERIAL PRIMARY KEY → title TEXT NOT NULL → author TEXT NOT NULL → genre TEXT → status VARCHAR(15) → rating SMALLINT → … → reading_sessions → id SERIAL PRIMARY KEY → book_id INTEGER FK → started_at DATE → finished_at DATE → pages_read INTEGER → notes TEXT → ON DELETE CASCADE → sessions deleted with book → 1 → N</p></figure>
+</section>
+
+<section id="prompting-for-schema-design" aria-labelledby="prompting-for-schema-design-h">
+  <h2 id="prompting-for-schema-design-h">Prompting for Schema Design</h2>
+<blockquote class="prompt"><span class="note-label">Prompt</span><p>Prompt to AI</p>
+<p>I'm extending my Reading List API (PostgreSQL). The existing books table has: id SERIAL PK, title, author, genre, status, rating, notes, created_at. Add a reading_sessions table so users can record when they read a book. Requirements: - id SERIAL PRIMARY KEY - book_id INTEGER, FK → books(id), delete sessions when book is deleted - started_at DATE, NOT NULL, default today - finished_at DATE, nullable - pages_read INTEGER, must be positive - notes TEXT, optional - created_at TIMESTAMPTZ default now - CHECK: finished_at must be on or after started_at (or null) - Add an index on book_id Write only the SQL. Do NOT modify the books table.</p></blockquote>
+<aside class="note"><p>Key phrases in the prompt</p>
+<ul>
+<li>"delete sessions when book is deleted" → AI adds <code>ON DELETE CASCADE</code></li>
+<li>"must be positive" → AI adds <code>CHECK (pages_read &gt; 0)</code></li>
+<li>"or null" → AI keeps <code>finished_at</code> nullable in the CHECK</li>
+<li>"Do NOT modify the books table" → prevents accidental ALTER statements</li>
+</ul></aside>
+<aside class="note"><p>Describe intent, not SQL "delete sessions when book is deleted" is clearer than asking for ON DELETE CASCADE by name. Let the AI translate intent to SQL — then verify it did so correctly.</p></aside>
+</section>
+
+<section id="the-reading-sessions-table" aria-labelledby="the-reading-sessions-table-h">
+  <h2 id="the-reading-sessions-table-h">The reading_sessions Table</h2>
+<figure><figcaption>schema.sql — new table</figcaption><pre><code>CREATE TABLE IF NOT EXISTS reading_sessions (
+  id          SERIAL PRIMARY KEY,
+
+  book_id     INTEGER NOT NULL
+              REFERENCES books(id) ON DELETE CASCADE,
+
+  started_at  DATE NOT NULL DEFAULT CURRENT_DATE,
+  finished_at DATE,               -- nullable: in-progress sessions
+
+  pages_read  INTEGER CHECK (pages_read &gt; 0),
+  notes       TEXT,
+
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+
+  CHECK (finished_at IS NULL
+         OR finished_at &gt;= started_at)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_book
+  ON reading_sessions(book_id);</code></pre></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>ON DELETE CASCADE When a book is deleted, PostgreSQL automatically deletes all its sessions. Without this, deleting a book would fail with a FK violation (orphaned sessions).</p></aside>
+<aside class="note"><p>Two CHECK constraints</p>
+<ul>
+<li><code>pages_read &gt; 0</code> — no zero or negative page counts</li>
+<li><code>finished_at &gt;= started_at</code> — can't finish before starting</li>
+<li>Both enforced at the DB level — can't be bypassed by application code</li>
+</ul></aside>
+<aside class="note"><p>Index on book_id Queries like "give me all sessions for book #42" scan only that book's sessions. Without it, PostgreSQL reads the whole table.</p></aside>
+</section>
+
+<section id="adding-tables-safely-in-production" aria-labelledby="adding-tables-safely-in-production-h">
+  <h2 id="adding-tables-safely-in-production-h">Adding Tables Safely in Production</h2>
+<aside class="note"><span class="note-label">Gotcha</span><p>Never do this in production</p></aside>
+<figure><figcaption>dangerous</figcaption><pre><code>DROP TABLE books;           -- deletes all data
+CREATE TABLE books ( ... );  -- recreates from scratch
+
+-- AI sometimes suggests this for "a clean rebuild"
+-- Every real book record is gone forever</code></pre></figure>
+<blockquote class="prompt"><span class="note-label">Prompt</span><p>Safer prompt</p>
+<p>I need to add a reading_sessions table to my production database that already has data. Write ONLY a CREATE TABLE IF NOT EXISTS statement. Do NOT drop, modify, or recreate any existing table.</p></blockquote>
+<aside class="note"><p>Safe migration — only add</p></aside>
+<figure><figcaption>safe</figcaption><pre><code>-- Run once against the live DB
+CREATE TABLE IF NOT EXISTS reading_sessions (
+  ...
+);
+
+-- IF NOT EXISTS = safe to run multiple times
+-- Existing data is never touched
+
+-- To add a column to an existing table:
+ALTER TABLE books
+  ADD COLUMN IF NOT EXISTS
+  page_count INTEGER;</code></pre></figure>
+<aside class="note"><span class="note-label">Tip</span><p>Three safe primitives</p>
+<ul>
+<li><code>CREATE TABLE IF NOT EXISTS</code> — new table, idempotent</li>
+<li><code>ALTER TABLE ... ADD COLUMN IF NOT EXISTS</code> — new column</li>
+<li><code>CREATE INDEX IF NOT EXISTS</code> — new index</li>
+</ul></aside>
+</section>
+
+<section id="nested-routes-for-sub-resources" aria-labelledby="nested-routes-for-sub-resources-h">
+  <h2 id="nested-routes-for-sub-resources-h">Nested Routes for Sub-Resources</h2>
+<figure><figcaption>server.js — session routes</figcaption><pre><code>// POST /api/books/:id/sessions — record a new session
+app.post('/api/books/:id/sessions', authenticate, async (req, res) =&gt; {
+  const { started_at, finished_at, pages_read, notes } = req.body;
+  const { rows } = await query(
+    `INSERT INTO reading_sessions
+       (book_id, started_at, finished_at, pages_read, notes)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [req.params.id, started_at, finished_at, pages_read, notes]
+  );
+  res.status(201).json(rows[0]);
+});
+
+// GET /api/books/:id/sessions — list sessions for one book
+app.get('/api/books/:id/sessions', authenticate, async (req, res) =&gt; {
+  const { rows } = await query(
+    `SELECT * FROM reading_sessions
+     WHERE book_id = $1
+     ORDER BY started_at DESC`,
+    [req.params.id]
+  );
+  res.json(rows);
+});</code></pre></figure>
+<aside class="note"><p>Nested route pattern /api/books/:id/sessions makes the relationship explicit in the URL. The book ID comes from req.params.id and is passed as $1 in the SQL — never from the request body where it could be spoofed.</p></aside>
+<aside class="note"><p>RETURNING * Returns the newly created session (with its generated id and created_at ) in the same query — no need for a second SELECT.</p></aside>
+<aside class="note"><p>Route ordering matters These two routes must come after GET /api/books/stats and before no other routes that would conflict with :id.</p></aside>
+</section>
+
+<section id="combining-tables-with-join" aria-labelledby="combining-tables-with-join-h">
+  <h2 id="combining-tables-with-join-h">Combining Tables with JOIN</h2>
+<figure><figcaption>Enrich GET /api/books with session stats</figcaption><pre><code>-- Upgrade the paginated books query to include session data
+SELECT
+  b.*,
+  COUNT(rs.id)            AS session_count,
+  MAX(rs.finished_at)      AS last_read,
+  SUM(rs.pages_read)       AS total_pages_read,
+  COUNT(*) OVER()          AS total_count
+FROM   books b
+LEFT JOIN reading_sessions rs ON rs.book_id = b.id
+GROUP BY b.id
+ORDER BY b.created_at DESC
+LIMIT $1 OFFSET $2;</code></pre></figure>
+<figure><figcaption>example enriched book object</figcaption><pre><code>{
+  "id": 1, "title": "Clean Code", "status": "done",
+  "session_count":    3,
+  "last_read":        "2026-02-14",
+  "total_pages_read": 464
+}</code></pre></figure>
+<aside class="note"><p>LEFT JOIN vs INNER JOIN LEFT JOIN returns every book, even those with no sessions yet (session_count = 0 ). INNER JOIN would silently drop books with no sessions.</p></aside>
+<aside class="note"><p>GROUP BY b.id Required when mixing aggregate functions (COUNT, MAX, SUM ) with non-aggregate columns. PostgreSQL needs to know how to group the session rows per book.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>Avoid the N+1 pattern Don't fetch books, then loop and fetch sessions per book. That's N+1 queries. One JOIN does it in a single round-trip.</p></aside>
+</section>
+
+<section id="testing-sessions-with-curl" aria-labelledby="testing-sessions-with-curl-h">
+  <h2 id="testing-sessions-with-curl-h">Testing Sessions with curl</h2>
+<figure><figcaption>terminal</figcaption><pre><code># 1. Add a book (if you don't have one)
+$ curl -s -X POST http://localhost:3001/api/books \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Clean Code","author":"Robert Martin"}' \
+  | jq '.id'
+1
+
+# 2. Record a completed reading session for book 1
+$ curl -s -X POST http://localhost:3001/api/books/1/sessions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"started_at":"2026-01-10","finished_at":"2026-02-14","pages_read":464}' \
+  | jq '{id, started_at, finished_at, pages_read}'
+
+# 3. List all sessions for book 1
+$ curl -s http://localhost:3001/api/books/1/sessions \
+  -H "Authorization: Bearer $TOKEN" | jq 'length'
+
+# 4. Verify CHECK constraint — should return 400 or 500
+$ curl -s -X POST http://localhost:3001/api/books/1/sessions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"started_at":"2026-03-01","finished_at":"2026-02-01","pages_read":10}' \
+  | jq '.error // .detail'
+
+# 5. Delete book 1 — verify sessions are gone too (CASCADE)
+$ curl -s -X DELETE http://localhost:3001/api/books/1 \
+  -H "Authorization: Bearer $TOKEN"
+$ curl -s http://localhost:3001/api/books/1/sessions \
+  -H "Authorization: Bearer $TOKEN" | jq 'length'
+0</code></pre></figure>
+<aside class="note"><span class="note-label">Hands-on</span><p>Test the constraints Don't just test the happy path. Verify:</p>
+<ul>
+<li>Finish before start → rejected</li>
+<li>Negative pages → rejected</li>
+<li>Session for non-existent book → FK error</li>
+<li>Delete book → sessions gone</li>
+</ul></aside>
+<aside class="note"><p>Test #5 is important Confirms ON DELETE CASCADE is working. Without it, step 5 would either error on the DELETE or leave orphaned session rows.</p></aside>
+</section>
+
+<section id="many-to-many-tags" aria-labelledby="many-to-many-tags-h">
+  <h2 id="many-to-many-tags-h">Many-to-Many: Tags</h2>
+<figure><figcaption>schema — many-to-many</figcaption><pre><code>-- Tag vocabulary
+CREATE TABLE tags (
+  id   SERIAL PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- Junction table: one row per book-tag pair
+CREATE TABLE book_tags (
+  book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
+  tag_id  INTEGER REFERENCES tags(id)  ON DELETE CASCADE,
+  PRIMARY KEY (book_id, tag_id)   -- no duplicate pairs
+);
+
+-- Get every book with its tags as an array
+SELECT b.title,
+       ARRAY_AGG(t.name) AS tags
+FROM   books b
+LEFT JOIN book_tags bt ON bt.book_id = b.id
+LEFT JOIN tags t      ON t.id = bt.tag_id
+GROUP BY b.id;</code></pre></figure>
+<aside class="note"><p>Why a junction table? A book can have many tags ("fiction", "classic", "CS"). A tag can belong to many books. You can't store that in either table directly — you need a third table that holds pairs.</p></aside>
+<aside class="note"><p>ARRAY_AGG PostgreSQL-specific aggregate that collects values into an array. Returns ["fiction","classic"] as a JSON array — no post-processing needed.</p></aside>
+<aside class="note"><p>Composite primary key PRIMARY KEY (book_id, tag_id) ensures each book-tag pair appears only once. No separate id column needed.</p></aside>
+<aside class="note"><span class="note-label">Hands-on</span><p>Extend this yourself Try prompting: "Add a tags system so each book can have multiple tags. Include routes to add and remove tags, and return tags in the book listing."</p></aside>
+</section>
+
+<section id="what-ai-gets-wrong-key-takeaways" aria-labelledby="what-ai-gets-wrong-key-takeaways-h">
+  <h2 id="what-ai-gets-wrong-key-takeaways-h">What AI Gets Wrong &amp; Key Takeaways</h2>
+<aside class="note"><p>What AI commonly gets wrong</p>
+<ul>
+<li>No input validation on <code>page</code> / <code>limit</code></li>
+<li>Omitting <code>ORDER BY</code> (non-deterministic pages)</li>
+<li>Missing <code>ON DELETE CASCADE</code> → FK violations on delete</li>
+<li>Suggesting <code>DROP TABLE</code> for migrations</li>
+<li>N+1 queries (JS loop + per-row SELECT) instead of JOIN</li>
+<li>No index on FK columns</li>
+<li>INNER JOIN instead of LEFT JOIN (silently drops rows)</li>
+</ul></aside>
+<aside class="note"><p>Key takeaways</p>
+<ul>
+<li>Paginate every list endpoint from the start</li>
+<li>Validate and cap <code>page</code> and <code>limit</code> inputs</li>
+<li>Always include <code>ORDER BY</code> with <code>LIMIT</code></li>
+<li>Foreign keys enforce data integrity at the DB layer</li>
+<li>Think carefully about CASCADE: right for sessions, maybe not for billing records</li>
+<li>Index every FK column</li>
+<li>JOIN at the DB layer — never loop in JavaScript</li>
+<li>Migrate with <code>CREATE IF NOT EXISTS</code> — never DROP</li>
+<li>Test constraints deliberately, not just the happy path</li>
+</ul></aside>
+<pre><code>reading-list-api/  ← updated after this workshop
+├── server.js           ← paginated GET /api/books + session routes
+└── schema.sql          ← reading_sessions table added</code></pre>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../extending-api-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Add pagination <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Add ?page= and ?limit= parameters to GET /api/books. Use LIMIT and OFFSET in SQL. Return total count alongside results so the client knows how many pages exist. Test with curl.
+      <ul><li>GET /api/books?page=2&amp;limit=3 returns the correct subset of rows</li><li>The response includes a total count so the client can calculate page count</li><li>You tested the edge case: a page beyond the last row returns an empty array, not an error</li></ul></dd></div>
+    <div><dt>Add a related table <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Add a reviews table (book_id FK, rating 1-5, body text, created_at). Write a route that returns a book with its reviews joined. Handle the case where a book has no reviews.
+      <ul><li>The reviews table has a FK constraint referencing books with appropriate CASCADE rules</li><li>The JOIN route handles books with no reviews (empty array, not null or an error)</li><li>You tested with curl: create a book, add reviews, fetch the joined result</li></ul></dd></div>
+    <div><dt>Safe production migrations <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>If the demo app had 50,000 live rows, what migration strategy would you use to add a NOT NULL column safely? What could go wrong with ALTER TABLE on a live database, and how would you avoid downtime?
+      <ul><li>You mentioned adding the column as nullable first, backfilling, then adding NOT NULL</li><li>You identified a real risk: long-running ALTER TABLE can lock the table in PostgreSQL</li><li>You noted at least one tool or technique for zero-downtime migrations (pg_repack, pt-online-schema-change, or a deploy-in-phases approach)</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

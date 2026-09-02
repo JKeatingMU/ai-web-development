@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building a CRUD API with AI — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">B2 &middot; Backend API</p>
+  <h1>Building a CRUD API with AI</h1>
+  <p class="lede">Node.js, Express, PostgreSQL, generated code walkthrough</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../ai-crud-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#what-we-re-building">What We're Building</a></li>
+    <li><a href="#why-node-js-express-postgresql">Why Node.js + Express + PostgreSQL?</a></li>
+    <li><a href="#part-1-prompting-an-ai-to-build-this">Part 1: Prompting an AI to Build This</a></li>
+    <li><a href="#what-makes-a-good-scaffold-prompt">What Makes a Good Scaffold Prompt?</a></li>
+    <li><a href="#the-opening-prompt">The Opening Prompt</a></li>
+    <li><a href="#follow-up-prompts-iterating-on-what-you-got">Follow-up Prompts — Iterating on What You Got</a></li>
+    <li><a href="#part-2-reading-the-generated-code">Part 2: Reading the Generated Code</a></li>
+    <li><a href="#what-the-ai-produces-five-files">What the AI Produces — Five Files</a></li>
+    <li><a href="#package-json-project-manifest">package.json — Project Manifest</a></li>
+    <li><a href="#schema-sql-the-database-table">schema.sql — The Database Table</a></li>
+    <li><a href="#db-js-the-database-connection">db.js — The Database Connection</a></li>
+    <li><a href="#server-js-structure-overview">server.js — Structure Overview</a></li>
+    <li><a href="#the-routes-get-and-post">The Routes — GET and POST</a></li>
+    <li><a href="#coalesce-the-partial-update-pattern">COALESCE — The Partial Update Pattern</a></li>
+    <li><a href="#parameterised-queries-why-they-matter">Parameterised Queries — Why They Matter</a></li>
+    <li><a href="#the-stats-route-aggregation-in-sql">The Stats Route — Aggregation in SQL</a></li>
+    <li><a href="#part-3-testing-every-route-with-curl">Part 3: Testing Every Route with curl</a></li>
+    <li><a href="#health-check-creating-books">Health Check + Creating Books</a></li>
+    <li><a href="#reading-books-list-filter-single">Reading Books — List, Filter, Single</a></li>
+    <li><a href="#updating-and-deleting-books">Updating and Deleting Books</a></li>
+    <li><a href="#part-4-deployment-live-in-10-minutes">Part 4: Deployment — Live in 10 Minutes</a></li>
+    <li><a href="#deploying-to-railway-step-by-step">Deploying to Railway — Step by Step</a></li>
+    <li><a href="#the-env-pattern-local-vs-production">The .env Pattern — Local vs Production</a></li>
+    <li><a href="#part-5-the-bigger-picture">Part 5: The Bigger Picture</a></li>
+    <li><a href="#what-ai-assisted-development-actually-looks-like">What AI-Assisted Development Actually Looks Like</a></li>
+    <li><a href="#what-ai-does-well-and-where-it-falls-short">What AI Does Well — and Where It Falls Short</a></li>
+    <li><a href="#key-takeaways">Key Takeaways</a></li>
+    <li><a href="#where-to-go-from-here">Where to Go From Here</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Use a scaffold prompt to generate a working Node.js / Express / PostgreSQL CRUD API</li>
+    <li>Read and explain the purpose of every generated file, including package.json and db.js</li>
+    <li>Apply parameterised queries to prevent SQL injection in AI-generated database code</li>
+    <li>Identify and correct common AI mistakes: ES module paths, route ordering, dynamic PORT handling</li>
+    <li>Deploy a Node.js API to Railway and configure environment variables for production</li>
+  </ul>
+</section>
+
+<section id="what-we-re-building" aria-labelledby="what-we-re-building-h">
+  <h2 id="what-we-re-building-h">What We're Building</h2>
+<p>A <strong>Reading List API</strong> — a minimal REST API that stores books and lets you track your reading progress. One database table. Five routes. Fully working.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Notes</th></tr></thead><tbody><tr><th scope="row"><code>id</code></th><td>integer</td><td><strong>Auto-assigned</strong> by the database</td></tr><tr><th scope="row"><code>title</code></th><td>text</td><td>Required</td></tr><tr><th scope="row"><code>author</code></th><td>text</td><td>Required</td></tr><tr><th scope="row"><code>genre</code></th><td>text</td><td>Optional</td></tr><tr><th scope="row"><code>status</code></th><td>varchar</td><td><code>want-to-read</code> / <code>reading</code> / <code>done</code></td></tr><tr><th scope="row"><code>rating</code></th><td>integer</td><td>1–5, optional, set when done</td></tr><tr><th scope="row"><code>notes</code></th><td>text</td><td>Optional free text</td></tr><tr><th scope="row"><code>created_at</code></th><td>timestamp</td><td><strong>Auto-set</strong> by the database</td></tr></tbody></table></div>
+<aside class="note"><p>Why a reading list? Simple enough to understand completely. Rich enough to show all CRUD operations, query filtering, and validation. The same patterns apply to any domain.</p></aside>
+<aside class="note"><p>The full route set: GET /api/health · GET /api/books · GET /api/books/:id · POST /api/books · PATCH /api/books/:id · DELETE /api/books/:id · GET /api/books/stats</p></aside>
+</section>
+
+<section id="why-node-js-express-postgresql" aria-labelledby="why-node-js-express-postgresql-h">
+  <h2 id="why-node-js-express-postgresql-h">Why Node.js + Express + PostgreSQL?</h2>
+<aside class="note"><p>Node.js JavaScript on the server. One language for front and back end. Huge ecosystem (npm). Excellent for I/O-heavy APIs — reading from a database, calling external APIs. Non-blocking I/O means it handles many simultaneous requests while waiting for database responses. The same V8 engine as Chrome — familiar if you already know browser JS. Not ideal for CPU-heavy computation.</p></aside>
+<aside class="note"><p>Express Minimal web framework — routes, middleware, request/response handling. Does almost nothing by default, which means you see exactly what is happening. A complete working API is a single file of ~50 lines. Middleware chains let you add logging, auth, or validation before any route handler. The most-used Node.js web framework in production worldwide.</p></aside>
+<aside class="note"><p>PostgreSQL Production-grade relational database. Free, open source, battle-tested. Runs on every cloud platform. Full SQL — joins, aggregates, constraints, transactions. Enforces data types and constraints at the database level, so bad data cannot enter even if your application has a bug. The right default choice for nearly every new project.</p></aside>
+<aside class="note"><p>The alternative path: SQLite (file-based, zero setup) is great for prototyping and learning — no database server to install. But PostgreSQL is what you'll encounter in industry and research infrastructure. We use it here.</p></aside>
+</section>
+
+<section id="part-1-prompting-an-ai-to-build-this" aria-labelledby="part-1-prompting-an-ai-to-build-this-h">
+  <h2 id="part-1-prompting-an-ai-to-build-this-h">Part 1: Prompting an AI to Build This</h2>
+<p class="lede">The quality of what an AI generates depends almost entirely on the quality of what you ask for. Prompt engineering is a learnable skill.</p>
+</section>
+
+<section id="what-makes-a-good-scaffold-prompt" aria-labelledby="what-makes-a-good-scaffold-prompt-h">
+  <h2 id="what-makes-a-good-scaffold-prompt-h">What Makes a Good Scaffold Prompt?</h2>
+<p>A vague prompt produces vague code. A precise prompt produces code you can actually use. The difference is specificity.</p>
+<aside class="note"><span class="note-label">Warning</span><p>Weak prompt: "Write me a Node.js REST API for a reading list." What you get: generic boilerplate, likely outdated patterns, probably uses CommonJS not ES modules, no validation, no error handling, fields you didn't want, fields you needed missing.</p></aside>
+<aside class="note"><p>Strong prompt includes:</p>
+<ul>
+<li><strong>✓</strong> &mdash; Exact stack + versions (Node, Express, pg)</li>
+<li><strong>✓</strong> &mdash; Module system (ES modules — <code>type: module</code>)</li>
+<li><strong>✓</strong> &mdash; Every field with type and constraints</li>
+<li><strong>✓</strong> &mdash; Every route with its exact behaviour</li>
+<li><strong>✓</strong> &mdash; What files to produce</li>
+<li><strong>✓</strong> &mdash; What to <em>exclude</em> (no auth, no ORM, etc.)</li>
+</ul></aside>
+<aside class="note"><span class="note-label">Tip</span><p>The rule of thumb: Imagine you are handing the specification to a junior developer. Would they know exactly what to build? If not, your prompt is not specific enough. An AI coding assistant is not a mind reader. It is a very fast, very capable developer who needs clear requirements.</p></aside>
+</section>
+
+<section id="the-opening-prompt" aria-labelledby="the-opening-prompt-h">
+  <h2 id="the-opening-prompt-h">The Opening Prompt</h2>
+<blockquote class="prompt"><span class="note-label">Prompt sent to Claude / ChatGPT / Gemini</span><p>I want to build a simple REST API using Node.js, Express, and PostgreSQL (pg package). The app is a personal reading list tracker. A book has these fields:</p>
+<ul>
+<li><em>title</em> (text, required) and <em>author</em> (text, required)</li>
+<li><em>genre</em> (text, optional), <em>status</em> ('want-to-read' / 'reading' / 'done', default 'want-to-read')</li>
+<li><em>rating</em> (integer 1–5, optional), <em>notes</em> (text, optional), <em>created_at</em> (auto-set)</li>
+</ul>
+<p>Please generate these files: package.json (with dependencies), db.js (pg Pool), schema.sql (CREATE TABLE with CHECK constraints), server.js (Express routes), .env.example. Routes needed: GET /api/health · GET /api/books (with optional ?status= filter) · GET /api/books/:id · POST /api/books · PATCH /api/books/:id (partial update with COALESCE) · DELETE /api/books/:id. Use ES modules (type: module). Keep it minimal — no auth, no ORM, no extra middleware. Use parameterised queries ($1, $2…) throughout. PATCH should return the updated row (RETURNING * ).</p></blockquote>
+<aside class="note"><p>Notice: stack, module system, schema, every route, every file, explicit patterns (COALESCE, RETURNING *), and what to exclude — all specified upfront.</p></aside>
+</section>
+
+<section id="follow-up-prompts-iterating-on-what-you-got" aria-labelledby="follow-up-prompts-iterating-on-what-you-got-h">
+  <h2 id="follow-up-prompts-iterating-on-what-you-got-h">Follow-up Prompts — Iterating on What You Got</h2>
+<p>The first prompt gets you 80% of the way. Follow-up prompts refine and extend.</p>
+<blockquote class="prompt"><span class="note-label">Prompt 2 — Understanding</span><p>Can you explain the COALESCE pattern in the PATCH route? Why use COALESCE($2, title) instead of just $2 ? And why do we need RETURNING * at the end?</p></blockquote>
+<aside class="note"><span class="note-label">Tip</span><p>Always ask why. If you don't understand a pattern the AI generated, ask it to explain. This is how you learn — not just what to write, but why it works.</p></aside>
+<blockquote class="prompt"><span class="note-label">Prompt 3 — Adding a Feature</span><p>Add a GET /api/books/stats route that returns in a single query:</p>
+<ul>
+<li>total book count</li>
+<li>count by each status value</li>
+<li>average rating for 'done' books</li>
+</ul>
+<p>Use COUNT(*) FILTER (WHERE ...) rather than multiple queries.</p></blockquote>
+<aside class="note"><p>Iterative development: Start with the skeleton, verify it works, then add features one by one. Never ask for everything at once.</p></aside>
+</section>
+
+<section id="part-2-reading-the-generated-code" aria-labelledby="part-2-reading-the-generated-code-h">
+  <h2 id="part-2-reading-the-generated-code-h">Part 2: Reading the Generated Code</h2>
+<p class="lede">Understanding every file and every pattern — so you own the code, not just the output.</p>
+</section>
+
+<section id="what-the-ai-produces-five-files" aria-labelledby="what-the-ai-produces-five-files-h">
+  <h2 id="what-the-ai-produces-five-files-h">What the AI Produces — Five Files</h2>
+<pre><code>reading-list-api/
+├── package.json     ← project config + dependencies
+├── .env.example    ← environment variable template
+├── schema.sql      ← database table definition
+├── db.js           ← PostgreSQL connection pool
+└── server.js       ← Express app + all routes</code></pre>
+<aside class="note"><p>Separation of concerns: database config lives in db.js, schema lives in schema.sql, routes live in server.js. Each file has one job. Key terms: A table stores rows of data with named, typed columns — like a spreadsheet with rules. A schema describes the table structure (columns, types, constraints). SQL (Structured Query Language) is the language for creating and querying databases. psql is PostgreSQL's command-line client for running SQL files.</p></aside>
+<aside class="note"><p>Note: .env (your actual secrets) is never committed. .env.example (the template) is committed so other developers know what variables they need.</p></aside>
+<aside class="note"><span class="note-label">Hands-on</span><p>Install and run: npm install → creates node_modules/ cp .env.example .env → fill in DATABASE_URL psql $DATABASE_URL &lt; schema.sql → create table npm run dev → start server http://localhost:3001/api/health ↗</p></aside>
+</section>
+
+<section id="package-json-project-manifest" aria-labelledby="package-json-project-manifest-h">
+  <h2 id="package-json-project-manifest-h">package.json — Project Manifest</h2>
+<figure><figcaption>package.json</figcaption><pre><code>{
+  "name": "reading-list-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev":   "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv":  "^16.4.5",
+    "express": "^4.18.2",
+    "pg":      "^8.11.3"
+  }
+}</code></pre></figure>
+<ul>
+<li><strong>"type": "module"</strong> &mdash; <strong>ES modules</strong> — enables <code>import</code>/<code>export</code> syntax. Without this, Node.js uses CommonJS (<code>require()</code>/<code>module.exports</code>). You'll see both in tutorials — always check which style a project uses before mixing them.</li>
+<li><strong>--watch</strong> &mdash; <strong>Auto-restart</strong> — built into Node.js since v18. No need for nodemon. Every file save restarts the server.</li>
+<li><strong>dotenv</strong> &mdash; Loads <code>.env</code> file into <code>process.env</code>. Keeps secrets out of your code.</li>
+<li><strong>pg</strong> &mdash; The official PostgreSQL client for Node.js. Gives us a connection pool and parameterised queries.</li>
+</ul>
+<aside class="note"><p>ES modules vs CommonJS — the syntax difference:</p>
+<p><code>// ES modules ("type":"module") import express from 'express'; export default app;</code></p>
+<p><code>// CommonJS (Node default) const express = require('express'); module.exports = app;</code></p></aside>
+</section>
+
+<section id="schema-sql-the-database-table" aria-labelledby="schema-sql-the-database-table-h">
+  <h2 id="schema-sql-the-database-table-h">schema.sql — The Database Table</h2>
+<figure><figcaption>schema.sql</figcaption><pre><code>CREATE TABLE IF NOT EXISTS books (
+  id         SERIAL PRIMARY KEY,
+  title      TEXT         NOT NULL,
+  author     TEXT         NOT NULL,
+  genre      TEXT,
+  status     VARCHAR(15)  NOT NULL DEFAULT 'want-to-read'
+               CHECK (status IN ('want-to-read','reading','done')),
+  rating     SMALLINT     CHECK (rating BETWEEN 1 AND 5),
+  notes      TEXT,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_books_status ON books(status);</code></pre></figure>
+<ul>
+<li><strong>SERIAL</strong> &mdash; <strong>Auto-increment</strong> integer. Database assigns the id — your app never needs to calculate one.</li>
+<li><strong>NOT NULL</strong> &mdash; Database-level enforcement. Even if your app has a bug and tries to insert a null title, the database rejects it.</li>
+<li><strong>CHECK</strong> &mdash; <strong>Constraint</strong> — the database will reject any row with an invalid status or a rating outside 1–5. Defence in depth.</li>
+<li><strong>DEFAULT NOW()</strong> &mdash; <code>created_at</code> is set automatically. Your app never passes it — the database handles it.</li>
+<li><strong>INDEX</strong> &mdash; Speeds up <code>WHERE status = ...</code> queries. Critical for filtered list endpoints on large tables.</li>
+</ul>
+</section>
+
+<section id="db-js-the-database-connection" aria-labelledby="db-js-the-database-connection-h">
+  <h2 id="db-js-the-database-connection-h">db.js — The Database Connection</h2>
+<figure><figcaption>db.js</figcaption><pre><code>import 'dotenv/config';
+import pg from 'pg';
+
+const { Pool } = pg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
+
+export const query = (text, params) =&gt; pool.query(text, params);</code></pre></figure>
+<aside class="note"><p>Connection Pool: a Pool maintains multiple open database connections and reuses them. Opening a new connection for every request is slow — a pool of 10 connections handles hundreds of concurrent requests efficiently.</p></aside>
+<aside class="note"><p>The query helper: export const query = ... means every route file imports this one function. One place to change if you ever need to swap the database driver.</p></aside>
+<aside class="note"><p>process.env.DATABASE_URL — the connection string is read from the environment, never hardcoded. On your laptop: from .env. In production: from Railway's environment variables.</p></aside>
+</section>
+
+<section id="server-js-structure-overview" aria-labelledby="server-js-structure-overview-h">
+  <h2 id="server-js-structure-overview-h">server.js — Structure Overview</h2>
+<figure><figcaption>server.js — skeleton</figcaption><pre><code>import 'dotenv/config';          // load .env file
+import express from 'express';     // web framework
+import { query } from './db.js';  // our db helper
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(express.json());  // parse JSON request bodies automatically
+
+app.get('/api/health', ...);    // health check
+app.get('/api/books', ...);     // list all
+app.get('/api/books/stats', ...); // aggregate stats  ← must come before /:id
+app.get('/api/books/:id', ...);  // get one
+app.post('/api/books', ...);    // create
+app.patch('/api/books/:id', ...);// update
+app.delete('/api/books/:id', ...); // delete
+
+app.listen(PORT, () =&gt; console.log(`API running on port ${PORT}`));</code></pre></figure>
+<aside class="note"><span class="note-label">Gotcha</span><p>Route order matters: /api/books/stats must be defined before /api/books/:id. Express matches routes top-to-bottom — if /:id comes first, the string "stats" would be treated as an id, giving a database error.</p></aside>
+</section>
+
+<section id="the-routes-get-and-post" aria-labelledby="the-routes-get-and-post-h">
+  <h2 id="the-routes-get-and-post-h">The Routes — GET and POST</h2>
+<figure><figcaption>GET /api/books — list with optional filter</figcaption><pre><code>app.get('/api/books', async (req, res) =&gt; {
+  const { status } = req.query;
+  const result = status
+    ? await query(
+        'SELECT * FROM books WHERE status = $1
+         ORDER BY created_at DESC',
+        [status]
+      )
+    : await query(
+        'SELECT * FROM books ORDER BY created_at DESC'
+      );
+  res.json(result.rows);
+});</code></pre></figure>
+<figure><figcaption>POST /api/books — create</figcaption><pre><code>app.post('/api/books', async (req, res) =&gt; {
+  const { title, author, genre,
+          status, notes } = req.body;
+  if (!title || !author) {
+    return res.status(400).json(
+      { error: 'title and author required' }
+    );
+  }
+  const result = await query(
+    `INSERT INTO books (title,author,genre,status,notes)
+     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+    [title, author, genre ?? null,
+     status ?? 'want-to-read', notes ?? null]
+  );
+  res.status(201).json(result.rows[0]);
+});</code></pre></figure>
+<aside class="note"><p>req.query — URL query string params (?status=reading ). req.body — parsed JSON body from the request.</p></aside>
+<aside class="note"><p>201 Created — correct status for a successful POST that creates a new resource. 200 OK is for reads and updates.</p></aside>
+</section>
+
+<section id="coalesce-the-partial-update-pattern" aria-labelledby="coalesce-the-partial-update-pattern-h">
+  <h2 id="coalesce-the-partial-update-pattern-h">COALESCE — The Partial Update Pattern</h2>
+<figure><figcaption>PATCH /api/books/:id — partial update</figcaption><pre><code>app.patch('/api/books/:id', async (req, res) =&gt; {
+  const { title, author, genre, status, rating, notes } = req.body;
+  const result = await query(
+    `UPDATE books SET
+       title  = COALESCE($2, title),
+       rating = COALESCE($6, rating),  ... (all fields)
+     WHERE id = $1 RETURNING *`,
+    [req.params.id, title, author, genre, status, rating, notes]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+  res.json(result.rows[0]);
+});</code></pre></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>COALESCE(A, B) returns A if A is not null, otherwise B. So COALESCE($2, title) means: "use the new value if one was provided, otherwise keep the existing value." This is how partial updates work — the client only sends the fields it wants to change.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>RETURNING * tells PostgreSQL to send back the updated row after the UPDATE. Without it you'd have to make a second SELECT query to see the result. 404 on empty result — if the id doesn't exist, result.rows is empty and we return 404 rather than silently succeeding.</p></aside>
+</section>
+
+<section id="parameterised-queries-why-they-matter" aria-labelledby="parameterised-queries-why-they-matter-h">
+  <h2 id="parameterised-queries-why-they-matter-h">Parameterised Queries — Why They Matter</h2>
+<p>Every query in this app uses <code>$1, $2, ...</code> placeholders. This is not just style — it is the difference between a secure app and one that can be destroyed.</p>
+<aside class="note"><span class="note-label">Gotcha</span><p>SQL Injection — the wrong way:</p>
+<pre><code>// NEVER DO THIS
+const id = req.params.id;
+query(`SELECT * FROM books
+  WHERE id = ${id}`);</code></pre>
+<p>If a user sends <code>id = "1 OR 1=1"</code> or <code>"1; DROP TABLE books"</code>, the injected SQL runs. Your entire database can be read or destroyed.</p></aside>
+<aside class="note"><p>Parameterised query — the right way:</p>
+<pre><code>// Always do this
+const id = req.params.id;
+query(
+  'SELECT * FROM books WHERE id = $1',
+  [id]  // passed separately
+);</code></pre>
+<p>The pg driver sends the query and the value separately to PostgreSQL. The value is <em>never interpreted as SQL</em>. Injection is impossible.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>SQL injection is the #1 web application vulnerability worldwide (OWASP Top 10). Parameterised queries prevent it completely. Every single database query you ever write should use them.</p></aside>
+</section>
+
+<section id="the-stats-route-aggregation-in-sql" aria-labelledby="the-stats-route-aggregation-in-sql-h">
+  <h2 id="the-stats-route-aggregation-in-sql-h">The Stats Route — Aggregation in SQL</h2>
+<p>One query, multiple aggregates. No post-processing in JavaScript needed — let the database do the work.</p>
+<figure><figcaption>GET /api/books/stats</figcaption><pre><code>app.get('/api/books/stats', async (_req, res) =&gt; {
+  const result = await query(`
+    SELECT
+      COUNT(*)                                                AS total,
+      COUNT(*) FILTER (WHERE status = 'want-to-read')  AS want_to_read,
+      COUNT(*) FILTER (WHERE status = 'reading')        AS reading,
+      COUNT(*) FILTER (WHERE status = 'done')           AS done,
+      ROUND(AVG(rating) FILTER (WHERE status = 'done'), 1) AS avg_rating
+    FROM books
+  `);
+  res.json(result.rows[0]);
+});</code></pre></figure>
+<aside class="note"><p>FILTER (WHERE ...) — PostgreSQL extension to SQL that applies a condition to an aggregate. Counts only the rows matching the filter, without needing a GROUP BY or a subquery. One round-trip to the database, one result object.</p></aside>
+</section>
+
+<section id="part-3-testing-every-route-with-curl" aria-labelledby="part-3-testing-every-route-with-curl-h">
+  <h2 id="part-3-testing-every-route-with-curl-h">Part 3: Testing Every Route with curl</h2>
+<p class="lede">From health check to full CRUD cycle — verify the API works exactly as specified before deploying anything.</p>
+</section>
+
+<section id="health-check-creating-books" aria-labelledby="health-check-creating-books-h">
+  <h2 id="health-check-creating-books-h">Health Check + Creating Books</h2>
+<figure><figcaption>bash — health + POST</figcaption><pre><code># 1. Confirm the server is running
+$ curl -s http://localhost:3001/api/health | jq .
+{ "status": "ok", "ts": "2026-03-04T10:00:00.000Z" }
+
+# 2. Add a book
+$ curl -s -X POST http://localhost:3001/api/books \
+  -H "Content-Type: application/json" \
+  -d '{"title":"The Pragmatic Programmer","author":"Hunt &amp; Thomas","genre":"CS"}' \
+  | jq .
+
+{
+  "id": 1,
+  "title": "The Pragmatic Programmer",
+  "author": "Hunt &amp; Thomas",
+  "genre": "CS",
+  "status": "want-to-read",
+  "rating": null,
+  "notes": null,
+  "created_at": "2026-03-04T10:01:22.400Z"
+}
+
+# 3. Test required-field validation
+$ curl -s -X POST http://localhost:3001/api/books \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Incomplete"}' | jq .
+{ "error": "title and author are required" }   ← 400 Bad Request</code></pre></figure>
+</section>
+
+<section id="reading-books-list-filter-single" aria-labelledby="reading-books-list-filter-single-h">
+  <h2 id="reading-books-list-filter-single-h">Reading Books — List, Filter, Single</h2>
+<figure><figcaption>bash — GET routes</figcaption><pre><code># List all books
+$ curl -s http://localhost:3001/api/books | jq '.[].title'
+"The Pragmatic Programmer"
+"Clean Code"
+"Designing Data-Intensive Applications"
+
+# Filter by status — note the ?status= query parameter
+$ curl -s "http://localhost:3001/api/books?status=reading" | jq '.[].title'
+"Clean Code"
+
+# Get one book by id
+$ curl -s http://localhost:3001/api/books/1 | jq {id,title,status}'
+{ "id": 1, "title": "The Pragmatic Programmer", "status": "want-to-read" }
+
+# Test 404 — id that doesn't exist
+$ curl -s http://localhost:3001/api/books/999 | jq .
+{ "error": "Not found" }   ← 404 Not Found
+
+# Stats aggregate
+$ curl -s http://localhost:3001/api/books/stats | jq .
+{ "total": "3", "want_to_read": "1", "reading": "1", "done": "1", "avg_rating": "4.0" }</code></pre></figure>
+</section>
+
+<section id="updating-and-deleting-books" aria-labelledby="updating-and-deleting-books-h">
+  <h2 id="updating-and-deleting-books-h">Updating and Deleting Books</h2>
+<figure><figcaption>bash — PATCH + DELETE</figcaption><pre><code># Mark a book as done and give it a rating — only send the fields that change
+$ curl -s -X PATCH http://localhost:3001/api/books/1 \
+  -H "Content-Type: application/json" \
+  -d '{"status":"done","rating":5,"notes":"Essential reading for every developer."}' \
+  | jq '{id,title,status,rating,notes}'
+
+{
+  "id": 1,
+  "title": "The Pragmatic Programmer",
+  "status": "done",
+  "rating": 5,
+  "notes": "Essential reading for every developer."
+}   ← title, author, genre unchanged (COALESCE at work)
+
+# Delete a book
+$ curl -s -X DELETE http://localhost:3001/api/books/3 | jq .
+{ "deleted": 3 }
+
+# Confirm it's gone
+$ curl -s http://localhost:3001/api/books/3 | jq .
+{ "error": "Not found" }</code></pre></figure>
+</section>
+
+<section id="part-4-deployment-live-in-10-minutes" aria-labelledby="part-4-deployment-live-in-10-minutes-h">
+  <h2 id="part-4-deployment-live-in-10-minutes-h">Part 4: Deployment — Live in 10 Minutes</h2>
+<p class="lede">From a working local API to a public URL. Railway makes this as frictionless as it gets.</p>
+</section>
+
+<section id="deploying-to-railway-step-by-step" aria-labelledby="deploying-to-railway-step-by-step-h">
+  <h2 id="deploying-to-railway-step-by-step-h">Deploying to Railway — Step by Step</h2>
+<ol>
+<li><strong>Push to GitHub</strong> — <code>git init</code>, <code>git add.</code>, <code>git commit -m "initial"</code>, push to a new repo. Railway deploys from git.</li>
+<li><strong>Create a Railway project</strong> — railway.app → New Project → Deploy from GitHub repo. Select your repository.</li>
+<li><strong>Add a PostgreSQL plugin</strong> — in Railway, click + Add Plugin → PostgreSQL. Railway creates a database and sets <code>DATABASE_URL</code> automatically.</li>
+<li><strong>Run the schema</strong> — in Railway's PostgreSQL panel, open the query console and run the contents of <code>schema.sql</code>.</li>
+<li><strong>Set the start command</strong> — Railway auto-detects Node.js and runs <code>npm start</code>. Your <code>package.json</code> already defines this.</li>
+<li><strong>Generate a public domain</strong> — in Railway, Settings → Domains → Generate Domain. Your API is now live at <code>https://your-app.railway.app</code>.</li>
+</ol>
+<aside class="note"><p>Why Railway? Free tier for small projects. No Docker required. Automatic deploys on every git push. Built-in PostgreSQL plugin. Environment variables injected automatically.</p></aside>
+<aside class="note"><p>What Railway injects automatically: DATABASE_URL — full PostgreSQL connection string PORT — the port your app must listen on This is why process.env.PORT || 3001 is important — on Railway the port is assigned by the platform, not fixed at 3001.</p></aside>
+<aside class="note"><span class="note-label">Hands-on</span><p>After deploy — test immediately: curl -s https://your-app.railway.app/api/health | jq. http://localhost:3001/api/health ↗</p></aside>
+</section>
+
+<section id="the-env-pattern-local-vs-production" aria-labelledby="the-env-pattern-local-vs-production-h">
+  <h2 id="the-env-pattern-local-vs-production-h">The .env Pattern — Local vs Production</h2>
+<pre><code>Development (your laptop)            Production (Railway)
+
+  .env file on disk                  Environment variables
+  (never committed to git)            set in Railway dashboard
+
+  DATABASE_URL=postgresql://...       DATABASE_URL=  ← injected by PostgreSQL plugin
+  PORT=3001                           PORT=          ← injected by Railway platform
+
+  process.env.DATABASE_URL            process.env.DATABASE_URL
+       ↑                                    ↑
+  Same code reads from process.env in both environments.
+  The source of the value changes — the code does not.</code></pre>
+<aside class="note"><span class="note-label">Gotcha</span><p>The .gitignore rule: Always add .env to .gitignore. Committing .env to GitHub exposes your database credentials publicly — a serious security incident.</p></aside>
+<aside class="note"><span class="note-label">Tip</span><p>The .env.example rule: Always commit .env.example — a template showing which variables are needed, with placeholder values. This tells the next developer (or your future self) what to fill in.</p></aside>
+</section>
+
+<section id="part-5-the-bigger-picture" aria-labelledby="part-5-the-bigger-picture-h">
+  <h2 id="part-5-the-bigger-picture-h">Part 5: The Bigger Picture</h2>
+<p class="lede">What AI-assisted development actually looks like — and what it means to be a developer in this era.</p>
+</section>
+
+<section id="what-ai-assisted-development-actually-looks-like" aria-labelledby="what-ai-assisted-development-actually-looks-like-h">
+  <h2 id="what-ai-assisted-development-actually-looks-like-h">What AI-Assisted Development Actually Looks Like</h2>
+<pre><code>You define requirements               Clear, specific prompt
+         ↓
+ AI generates scaffold                package.json, db.js, schema.sql, server.js
+         ↓
+ You read and understand it            Every line. Ask AI to explain what you don't get.
+         ↓
+ You test it                          curl: health → POST → GET → PATCH → DELETE
+         ↓
+ You verify behaviour                 Does the 400 fire? Does COALESCE work? Does 404 return?
+         ↓
+ You iterate                          "Add stats route." "Add pagination." "Add input sanitisation."
+         ↓
+ You deploy                           Railway. Test again on the live URL.</code></pre>
+<aside class="note"><span class="note-label">Tip</span><p>Notice where the AI sits: it handles the typing. You handle the thinking — requirements, verification, understanding, judgement. The developer who understands the code is the one who can fix it when something goes wrong.</p></aside>
+</section>
+
+<section id="what-ai-does-well-and-where-it-falls-short" aria-labelledby="what-ai-does-well-and-where-it-falls-short-h">
+  <h2 id="what-ai-does-well-and-where-it-falls-short-h">What AI Does Well — and Where It Falls Short</h2>
+<aside class="note"><p>AI is excellent at:</p>
+<ul>
+<li><strong>✓</strong> &mdash; Boilerplate and scaffold — the skeleton you'd write the same way every time</li>
+<li><strong>✓</strong> &mdash; Known patterns — parameterised queries, COALESCE, RETURNING *, connection pools</li>
+<li><strong>✓</strong> &mdash; Explaining code it generated — often clearer than documentation</li>
+<li><strong>✓</strong> &mdash; Translating requirements into SQL</li>
+<li><strong>✓</strong> &mdash; Adding features incrementally when the structure is already clear</li>
+</ul></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>AI struggles with:</p>
+<ul>
+<li><strong>!</strong> &mdash; Your specific business logic — it doesn't know what your app is <em>for</em></li>
+<li><strong>!</strong> &mdash; Edge cases in your data — only you know what weird inputs are possible</li>
+<li><strong>!</strong> &mdash; Security decisions — it generates technically correct but sometimes naive auth</li>
+<li><strong>!</strong> &mdash; Performance at scale — a pattern that works for 100 rows can destroy a database at 10 million</li>
+<li><strong>!</strong> &mdash; Knowing when it's wrong — it will confidently generate incorrect code</li>
+</ul></aside>
+</section>
+
+<section id="key-takeaways" aria-labelledby="key-takeaways-h">
+  <h2 id="key-takeaways-h">Key Takeaways</h2>
+<ol>
+<li><strong>Specificity in prompts is everything.</strong> Stack, module system, every field, every route, what to exclude — spell it all out. Vague prompts produce vague code.</li>
+<li><strong>Read every line the AI generates.</strong> Ask it to explain patterns you don't recognise. You are responsible for the code you deploy — "AI wrote it" is not a defence when it breaks.</li>
+<li><strong>Always use parameterised queries.</strong> <code>$1, $2, ...</code> — no exceptions. SQL injection is still the most common critical web vulnerability.</li>
+<li><strong>Test every route before deploying.</strong> Health → POST → GET → PATCH → DELETE → validate 400/404 cases. curl is your fastest feedback loop.</li>
+<li><strong>Secrets stay out of git.</strong> <code>.env</code> in <code>.gitignore</code>. <code>.env.example</code> committed. <code>process.env</code> everywhere. This pattern is non-negotiable in production.</li>
+<li><strong>The database enforces your invariants.</strong> <code>NOT NULL</code>, <code>CHECK</code>, <code>DEFAULT</code> — database constraints are the last line of defence. Always add them.</li>
+</ol>
+</section>
+
+<section id="where-to-go-from-here" aria-labelledby="where-to-go-from-here-h">
+  <h2 id="where-to-go-from-here-h">Where to Go From Here</h2>
+<aside class="note"><p>Add Authentication Add a <code>users</code> table. POST <code>/auth/register</code> and <code>/auth/login</code>. Return a JWT or session token. Protect routes with a middleware function. Prompt: "Add token-based auth to this API using the <code>jsonwebtoken</code> package."</p></aside>
+<aside class="note"><p>Add Pagination <code>GET /api/books?page=2&amp;limit=10</code>. <code>LIMIT</code> and <code>OFFSET</code> in SQL. Return total count alongside results. Prompt: "Add cursor-based pagination to the books list endpoint."</p></aside>
+<aside class="note"><p>Add a Second Table Add <code>authors</code> with a foreign key from <code>books</code>. Learn <code>JOIN</code>, cascading deletes, and the <code>ON CONFLICT</code> upsert pattern. Prompt: "Normalise the author field into a separate authors table with a foreign key."</p></aside>
+<aside class="note"><p>The demo app is at: docs/crud-demo/ in the course repository — fully working, five files, ready to clone, extend, and deploy.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../ai-crud-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Add a new route with AI <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Prompt an AI to add a GET /api/books/stats route that returns count and average rating. Read every line before running it. What did you have to change or understand?
+      <ul><li>The route returns the correct data when called with curl</li><li>You read every line of the generated code before running it</li><li>You can explain what each function and variable in the route does</li></ul></dd></div>
+    <div><dt>SQL injection audit <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Review 3 of the generated routes in the demo app. For each query, confirm it uses parameterised queries ($1, $2). If you find string concatenation, fix it and explain why it was unsafe.
+      <ul><li>You checked every database-touching route, not just one</li><li>You can explain why string concatenation in a query creates an injection risk</li><li>You confirmed $1, $2 placeholders are used for all user-supplied values</li></ul></dd></div>
+    <div><dt>AI as co-pilot <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>What was the most useful thing the AI did in your CRUD build? What did you have to correct, add, or understand yourself? Where is the line between 'AI did it' and 'I built it with AI help'?
+      <ul><li>You gave a specific example of something the AI did well</li><li>You gave a specific example of something you had to correct or add yourself</li><li>Your answer draws a clear line: what the AI contributed vs what you contributed</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

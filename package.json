@@ -1,0 +1,19 @@
+{
+  "name": "ai-web-development",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Learning Web Development by Building with AI — course build tooling",
+  "type": "module",
+  "scripts": {
+    "build:accessible": "node server/tools/build-accessible.mjs --all",
+    "build:accessible:one": "node server/tools/build-accessible.mjs",
+    "gen:scripts": "node server/tools/generate-deck-scripts.mjs"
+  },
+  "dependencies": {
+    "node-html-parser": "^6.1.13"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "openai": "^4.73.0"
+  }
+}

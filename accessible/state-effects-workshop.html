@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State &amp; Effects — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">C2 &middot; Frontend</p>
+  <h1>State &amp; Effects</h1>
+  <p class="lede">useEffect, async fetch, cleanup, custom hooks, useMemo</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../state-effects-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#state-effects">State &amp; Effects</a></li>
+    <li><a href="#the-render-cycle-what-triggers-a-re-render">The Render Cycle — What Triggers a Re-render?</a></li>
+    <li><a href="#side-effects-what-they-are-and-why-they-need-managing">Side Effects — What They Are and Why They Need Managing</a></li>
+    <li><a href="#useeffect-the-dependency-array">useEffect — The Dependency Array</a></li>
+    <li><a href="#async-await-inside-useeffect">Async/Await Inside useEffect</a></li>
+    <li><a href="#effect-cleanup-avoiding-memory-leaks">Effect Cleanup — Avoiding Memory Leaks</a></li>
+    <li><a href="#multiple-effects-one-concern-per-effect">Multiple Effects — One Concern Per Effect</a></li>
+    <li><a href="#custom-hooks-extracting-logic-into-reusable-hooks">Custom Hooks: Extracting Logic into Reusable Hooks</a></li>
+    <li><a href="#custom-hooks-reusing-stateful-logic">Custom Hooks — Reusing Stateful Logic</a></li>
+    <li><a href="#prompting-for-a-generic-usefetch-hook">Prompting for a Generic useFetch Hook</a></li>
+    <li><a href="#reading-the-generated-usefetch-hook">Reading the Generated useFetch Hook</a></li>
+    <li><a href="#state-batching-why-multiple-setters-don-t-mean-multiple-renders">State Batching — Why Multiple Setters Don't Mean Multiple Renders</a></li>
+    <li><a href="#usecallback-and-usememo-optimisation-hooks">useCallback and useMemo — Optimisation Hooks</a></li>
+    <li><a href="#reflect-reading-effects-in-ai-generated-code">Reflect — Reading Effects in AI-Generated Code</a></li>
+    <li><a href="#what-you-can-now-read-and-what-comes-next">What You Can Now Read — and What Comes Next</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain what triggers a React re-render and why side effects must not run during render</li>
+    <li>Use useEffect with the correct dependency array to control when effects run</li>
+    <li>Write async fetch logic inside useEffect using the define-then-call async pattern</li>
+    <li>Implement AbortController cleanup to prevent memory leaks on unmount</li>
+    <li>Extract reusable stateful logic into a custom hook and explain the naming convention</li>
+    <li>Recognise when useCallback and useMemo are and are not appropriate optimisations</li>
+  </ul>
+</section>
+
+<section id="state-effects" aria-labelledby="state-effects-h">
+  <h2 id="state-effects-h">State &amp; Effects</h2>
+<aside class="note"><p>C1 gave you components and local state. This deck goes deeper — how React handles side effects, how to fetch data from your API, and how to manage loading and error states cleanly. Every pattern here is what AI generates for real applications.</p></aside>
+</section>
+
+<section id="the-render-cycle-what-triggers-a-re-render" aria-labelledby="the-render-cycle-what-triggers-a-re-render-h">
+  <h2 id="the-render-cycle-what-triggers-a-re-render-h">The Render Cycle — What Triggers a Re-render?</h2>
+<p>Before useEffect makes sense, you need to understand when React re-renders. Everything else follows from this.</p>
+<aside class="note"><p>State change Calling a setter function (setCount, setBooks ) schedules a re-render. React batches multiple setters in one render.</p></aside>
+<aside class="note"><p>Props change When a parent re-renders and passes different prop values to a child, the child re-renders too. Same props = no re-render (by default).</p></aside>
+<aside class="note"><p>Context change If a component consumes a React context and the context value changes, it re-renders. You will meet this in C4 (auth state).</p></aside>
+<aside class="note"><p>Re-renders are cheap — React only updates the DOM where something actually changed. The concern is not re-renders themselves but side effects (API calls, timers) that must not run on every render. That is why useEffect exists.</p></aside>
+</section>
+
+<section id="side-effects-what-they-are-and-why-they-need-managing" aria-labelledby="side-effects-what-they-are-and-why-they-need-managing-h">
+  <h2 id="side-effects-what-they-are-and-why-they-need-managing-h">Side Effects — What They Are and Why They Need Managing</h2>
+<p>A <strong>side effect</strong> is anything a component does that reaches outside the React render cycle: fetching data, setting a timer, subscribing to an event, updating the document title.</p>
+<figure><figcaption>wrong — side effect in render</figcaption><pre><code>function BookList() {
+  // ❌ runs on EVERY render
+  // creates infinite loop: fetch → setBooks
+  // → re-render → fetch → setBooks → …
+  fetch('/api/books')
+    .then(r =&gt; r.json())
+    .then(data =&gt; setBooks(data));
+
+  return &lt;ul&gt;{books.map(…)}&lt;/ul&gt;;
+}</code></pre></figure>
+<figure><figcaption>correct — side effect in useEffect</figcaption><pre><code>function BookList() {
+  useEffect(() =&gt; {
+    // ✓ runs once after mount
+    fetch('/api/books')
+      .then(r =&gt; r.json())
+      .then(data =&gt; setBooks(data));
+  }, []); // ← empty array = run once
+
+  return &lt;ul&gt;{books.map(…)}&lt;/ul&gt;;
+}</code></pre></figure>
+<aside class="note"><p>useEffect separates what to render from what to do after rendering. AI always wraps fetch calls in useEffect — now you understand why.</p></aside>
+</section>
+
+<section id="useeffect-the-dependency-array" aria-labelledby="useeffect-the-dependency-array-h">
+  <h2 id="useeffect-the-dependency-array-h">useEffect — The Dependency Array</h2>
+<p>The second argument to useEffect controls when it runs. This is the most important thing to read in any AI-generated effect.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Second argument</th><th scope="col">When the effect runs</th><th scope="col">Typical use</th></tr></thead><tbody><tr><th scope="row">Omitted</th><td>After every render</td><td>Almost never correct — causes infinite loops with state updates</td></tr><tr><th scope="row"><code>[]</code> (empty array)</th><td>Once after mount</td><td>Fetch initial data, set up subscriptions, start timers</td></tr><tr><th scope="row"><code>[id]</code> (with value)</th><td>After mount, then whenever <code>id</code> changes</td><td>Fetch data that depends on a prop or state value</td></tr><tr><th scope="row"><code>[id, filter]</code> (multiple)</th><td>After mount, then when either changes</td><td>Re-fetch when any dependency changes</td></tr></tbody></table></div>
+<aside class="note"><p>AI often gets this right but sometimes omits values from the array. If you use a variable inside useEffect, it should appear in the dependency array — unless it is a setter function (those are stable and can be omitted). Ask AI to explain its dependency array if it is not obvious.</p></aside>
+</section>
+
+<section id="async-await-inside-useeffect" aria-labelledby="async-await-inside-useeffect-h">
+  <h2 id="async-await-inside-useeffect-h">Async/Await Inside useEffect</h2>
+<p>useEffect cannot take an async function directly — the callback must return either nothing or a cleanup function, not a Promise. AI works around this with an inner async function.</p>
+<figure><figcaption>the pattern AI always generates</figcaption><pre><code>useEffect(() =&gt; {
+  // Define async function inside the effect
+  async function fetchBooks() {
+    try {
+      setIsLoading(true);
+      const res  = await fetch('/api/books');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setBooks(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Call it immediately
+  fetchBooks();
+}, []);</code></pre></figure>
+<aside class="note"><p>Define then call — define the async function inside the effect, then call it on the next line. AI always uses this two-step pattern.</p></aside>
+<aside class="note"><p>try/catch/finally — catch handles network errors and non-OK responses. finally always runs — it resets isLoading whether the request succeeded or failed.</p></aside>
+<aside class="note"><p>res.ok check — fetch only throws on network failure, not HTTP errors. A 404 or 500 response does not throw. Always check res.ok before calling res.json().</p></aside>
+</section>
+
+<section id="effect-cleanup-avoiding-memory-leaks" aria-labelledby="effect-cleanup-avoiding-memory-leaks-h">
+  <h2 id="effect-cleanup-avoiding-memory-leaks-h">Effect Cleanup — Avoiding Memory Leaks</h2>
+<p>When a component unmounts, any ongoing work (timers, subscriptions, in-flight requests) should be cancelled. useEffect supports a <strong>cleanup function</strong> — the value you return from the effect.</p>
+<figure><figcaption>cleanup with AbortController</figcaption><pre><code>useEffect(() =&gt; {
+  // AbortController lets us cancel the fetch
+  const controller = new AbortController();
+
+  async function fetchBooks() {
+    try {
+      const res = await fetch('/api/books', {
+        signal: controller.signal  // ← link to controller
+      });
+      const data = await res.json();
+      setBooks(data);
+    } catch (err) {
+      // Ignore abort errors — expected on cleanup
+      if (err.name !== 'AbortError') setError(err.message);
+    }
+  }
+
+  fetchBooks();
+
+  // Return cleanup function — runs on unmount
+  return () =&gt; controller.abort();
+}, []);</code></pre></figure>
+<aside class="note"><p>Return a function — whatever you return from useEffect is called when the component unmounts (or before the effect re-runs). This is the cleanup slot.</p></aside>
+<aside class="note"><p>AbortController — a browser API for cancelling fetch requests. Pass controller.signal to fetch, call controller.abort() in cleanup. AI generates this for any component that might unmount mid-fetch.</p></aside>
+<aside class="note"><p>Without cleanup, setting state on an unmounted component causes a React warning. With cleanup, the fetch is cancelled before the state update happens.</p></aside>
+</section>
+
+<section id="multiple-effects-one-concern-per-effect" aria-labelledby="multiple-effects-one-concern-per-effect-h">
+  <h2 id="multiple-effects-one-concern-per-effect-h">Multiple Effects — One Concern Per Effect</h2>
+<p>You can have as many useEffect calls as you need. AI tends to write one effect per logical concern — this is the right pattern. Mixing unrelated concerns in one effect makes both harder to understand and test.</p>
+<figure><figcaption>separate concerns</figcaption><pre><code>// Effect 1: fetch books on mount
+useEffect(() =&gt; {
+  fetchBooks();
+}, []);
+
+// Effect 2: update page title when filter changes
+useEffect(() =&gt; {
+  document.title = filter
+    ? `Books — ${filter}`
+    : 'My Reading List';
+}, [filter]);
+
+// Effect 3: re-fetch when search term changes
+useEffect(() =&gt; {
+  if (searchTerm.trim()) searchBooks(searchTerm);
+}, [searchTerm]);</code></pre></figure>
+<aside class="note"><p>Each effect has its own dependency array. They run independently. Mixing them into one block means one change triggers unrelated work.</p></aside>
+<aside class="note"><p>document.title is a classic side effect — it's outside the React tree. useEffect with a dependency is the correct place for it.</p></aside>
+<aside class="note"><p>When AI generates a component with multiple effects, read each one separately. What is its purpose? What triggers it? What does it clean up?</p></aside>
+</section>
+
+<section id="custom-hooks-extracting-logic-into-reusable-hooks" aria-labelledby="custom-hooks-extracting-logic-into-reusable-hooks-h">
+  <h2 id="custom-hooks-extracting-logic-into-reusable-hooks-h">Custom Hooks: Extracting Logic into Reusable Hooks</h2>
+<p class="lede">When AI generates the same pattern twice, it's time for a hook.</p>
+</section>
+
+<section id="custom-hooks-reusing-stateful-logic" aria-labelledby="custom-hooks-reusing-stateful-logic-h">
+  <h2 id="custom-hooks-reusing-stateful-logic-h">Custom Hooks — Reusing Stateful Logic</h2>
+<p>A custom hook is just a function whose name starts with <code>use</code> and that calls React hooks internally. It lets you extract and reuse logic without duplicating useState + useEffect across components.</p>
+<figure><figcaption>hooks/useBooks.ts</figcaption><pre><code>import { useState, useEffect } from 'react';
+
+export function useBooks() {
+  const [books,     setBooks]     = useState&lt;Book[]&gt;([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error,     setError]     = useState&lt;string|null&gt;(null);
+
+  useEffect(() =&gt; {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        const res  = await fetch('/api/books', { signal: controller.signal });
+        const data = await res.json();
+        setBooks(data);
+      } catch (e: any) {
+        if (e.name !== 'AbortError') setError(e.message);
+      } finally { setIsLoading(false); }
+    }
+    load();
+    return () =&gt; controller.abort();
+  }, []);
+
+  return { books, isLoading, error };
+}
+
+// Usage — clean component:
+function BookList() {
+  const { books, isLoading, error } = useBooks();
+  if (isLoading) return &lt;p&gt;Loading…&lt;/p&gt;;
+  if (error)     return &lt;p&gt;{error}&lt;/p&gt;;
+  return &lt;ul&gt;{books.map(…)}&lt;/ul&gt;;
+}</code></pre></figure>
+<aside class="note"><p>Naming convention — must start with use. This is how React knows it is a hook and enforces the rules of hooks (not called conditionally, not called outside components).</p></aside>
+<aside class="note"><p>Returns whatever the consumer needs — usually an object { data, isLoading, error }. The component destructures what it needs.</p></aside>
+<aside class="note"><p>When AI generates a custom hook, ask: what would this component look like without the hook? The answer shows you exactly what complexity the hook is hiding.</p></aside>
+</section>
+
+<section id="prompting-for-a-generic-usefetch-hook" aria-labelledby="prompting-for-a-generic-usefetch-hook-h">
+  <h2 id="prompting-for-a-generic-usefetch-hook-h">Prompting for a Generic useFetch Hook</h2>
+<p>Once you understand <code>useBooks</code>, the next step is a generic version that works for any endpoint. This is a prompt where specifying the TypeScript generic is important.</p>
+<blockquote class="prompt"><span class="note-label">Prompt — generic data-fetching hook</span><p>I'm building a React + TypeScript app. Please generate a generic useFetch&lt;T&gt; custom hook that:</p>
+<ul>
+<li>Accepts a URL string as its parameter</li>
+<li>Returns <code>{ data: T | null, isLoading: boolean, error: string | null }</code></li>
+<li>Uses AbortController for cleanup on unmount</li>
+<li>Re-fetches when the URL changes</li>
+<li>Does not fetch if the URL is an empty string</li>
+</ul>
+<p>Show me how to use it to fetch a list of books typed as Book[]. Explain what the TypeScript generic T does here.</p></blockquote>
+<aside class="note"><p>Why this prompt works: the generic T requirement forces AI to generate TypeScript-aware code. The "do not fetch if empty string" requirement prevents unnecessary requests when a URL is conditionally built. The usage example forces AI to show the hook in context.</p></aside>
+</section>
+
+<section id="reading-the-generated-usefetch-hook" aria-labelledby="reading-the-generated-usefetch-hook-h">
+  <h2 id="reading-the-generated-usefetch-hook-h">Reading the Generated useFetch Hook</h2>
+<figure><figcaption>typical AI output — annotated</figcaption><pre><code>function useFetch&lt;T&gt;(url: string) {
+  const [data,      setData]      = useState&lt;T | null&gt;(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error,     setError]     = useState&lt;string | null&gt;(null);
+
+  useEffect(() =&gt; {
+    // ← url in deps: re-runs when url changes
+    if (!url) return; // ← guard: skip empty URL
+
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(null); // ← reset error on new fetch
+
+    async function load() {
+      try {
+        const res  = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        setData(json as T);
+      } catch (e: any) {
+        if (e.name !== 'AbortError') setError(e.message);
+      } finally { setIsLoading(false); }
+    }
+    load();
+    return () =&gt; controller.abort();
+  }, [url]); // ← url is the dependency
+
+  return { data, isLoading, error };
+}</code></pre></figure>
+<aside class="note"><p>T is a type parameter — it flows from the call site: useFetch&lt;Book[]&gt; makes data typed as Book[] | null. The hook itself is generic — it does not know or care what T is.</p></aside>
+<aside class="note"><p>setError(null) on each new fetch — clears any previous error so a successful retry is not obscured by the old error message.</p></aside>
+<aside class="note"><p>json as T — a type assertion. AI uses this because fetch returns any. It is safe here because you control the URL and know the shape. For external APIs, add runtime validation.</p></aside>
+</section>
+
+<section id="state-batching-why-multiple-setters-don-t-mean-multiple-renders" aria-labelledby="state-batching-why-multiple-setters-don-t-mean-multiple-renders-h">
+  <h2 id="state-batching-why-multiple-setters-don-t-mean-multiple-renders-h">State Batching — Why Multiple Setters Don't Mean Multiple Renders</h2>
+<p>Calling three setters in a row does not cause three re-renders. React batches state updates triggered in the same event handler or effect into a single render.</p>
+<figure><figcaption>three setters — one render</figcaption><pre><code>async function load() {
+  try {
+    const data = await fetchBooks();
+    // React 18: all three batched → one render
+    setBooks(data);
+    setIsLoading(false);
+    setError(null);
+  } catch (e) {
+    // These are also batched
+    setError(e.message);
+    setIsLoading(false);
+  }
+}
+
+// Alternative: combine related state
+const [state, setState] = useState({
+  books: [],
+  isLoading: true,
+  error: null
+});
+// setState({ ...state, books: data, isLoading: false })</code></pre></figure>
+<aside class="note"><p>React 18 automatic batching — batches updates inside async functions, setTimeout, and promises. Earlier React only batched inside event handlers. AI targeting React 18+ assumes automatic batching.</p></aside>
+<aside class="note"><p>Object state — some AI-generated code combines related state into one object. This is a valid pattern. The spread ...state is required to preserve other fields — omitting it replaces the whole object.</p></aside>
+<aside class="note"><p>Three separate state variables are easier to read and update independently. Object state reduces setter calls. Both are correct — understand the trade-off.</p></aside>
+</section>
+
+<section id="usecallback-and-usememo-optimisation-hooks" aria-labelledby="usecallback-and-usememo-optimisation-hooks-h">
+  <h2 id="usecallback-and-usememo-optimisation-hooks-h">useCallback and useMemo — Optimisation Hooks</h2>
+<p>AI sometimes generates these. Know what they do and when they are — and are not — needed.</p>
+<figure><figcaption>useCallback — stable function reference</figcaption><pre><code>// Without useCallback: new function on every render
+// This causes child to re-render even if props unchanged
+const handleDelete = (useCallback)((id: number) =&gt; {
+  setBooks(prev =&gt; prev.filter(b =&gt; b.id !== id));
+}, []); // ← deps: empty = created once
+
+// useMemo — expensive computation, cached
+const filteredBooks = useMemo(() =&gt;
+  books.filter(b =&gt; b.status === filter),
+  [books, filter] // recompute only when these change
+);</code></pre></figure>
+<aside class="note"><p>useCallback — memoises a function so it keeps the same reference between renders. Useful when the function is passed as a prop to a memoised child component.</p></aside>
+<aside class="note"><p>useMemo — memoises the result of a computation. Useful when filtering/sorting large arrays that would be recalculated on every render.</p></aside>
+<aside class="note"><p>Do not add these by default. AI sometimes over-optimises. A filter on 20 books does not need useMemo. Ask AI: "Is this actually needed here, or is it premature optimisation?"</p></aside>
+</section>
+
+<section id="reflect-reading-effects-in-ai-generated-code" aria-labelledby="reflect-reading-effects-in-ai-generated-code-h">
+  <h2 id="reflect-reading-effects-in-ai-generated-code-h">Reflect — Reading Effects in AI-Generated Code</h2>
+<p>When AI generates a component with useEffect, these are the questions that turn reading into understanding.</p>
+<ul>
+<li>01 <strong>What is the dependency array?</strong> Is it empty, does it have values, or is it missing? What does that mean for when this effect runs? If you are not sure, add a <code>console.log</code> and watch the console as you interact.</li>
+<li>02 <strong>Does the effect return a cleanup function?</strong> If it starts a fetch, sets a timer, or adds an event listener, it should clean up. If AI omitted cleanup, ask it why and whether it is intentional.</li>
+<li>03 <strong>What triggers a re-fetch?</strong> Trace from UI interaction → state change → dependency change → effect re-runs. If you cannot trace this path, the data flow is not yet understood.</li>
+<li>04 <strong>What happens on error?</strong> A fetch that only handles the happy path is incomplete. Does AI's error handling display a message, log to console, or silently fail? Is that appropriate for your use case?</li>
+</ul>
+</section>
+
+<section id="what-you-can-now-read-and-what-comes-next" aria-labelledby="what-you-can-now-read-and-what-comes-next-h">
+  <h2 id="what-you-can-now-read-and-what-comes-next-h">What You Can Now Read — and What Comes Next</h2>
+<p>Covered in this deck:</p>
+<ul>
+<li>✓ The render cycle and what triggers re-renders</li>
+<li>✓ Side effects and why they need useEffect</li>
+<li>✓ Dependency arrays — all four cases</li>
+<li>✓ Async/await inside useEffect</li>
+<li>✓ AbortController for fetch cleanup</li>
+<li>✓ Multiple effects, one concern each</li>
+<li>✓ Custom hooks — extracting reusable logic</li>
+<li>✓ State batching, useCallback, useMemo</li>
+</ul>
+<p>Coming up:</p>
+<aside class="note"><p>C3 — API Integration Connect your React app to your Express API — environment variables, CORS, JWT auth headers, and the full request/response cycle from the browser</p></aside>
+<aside class="note"><p>C4 — Auth in the Browser Login form, token storage, React Context for auth state, protected routes</p></aside>
+<aside class="note"><p>C5 — Routing React Router v6, nested routes, URL parameters, navigation guards</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../state-effects-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Trace the render cycle <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Add console.log("render") at the top of a component that has a useEffect with a state update inside. Open the browser console. How many times does it log on load? Now remove the [] from useEffect. What happens? Restore [] and explain what you observed.
+      <ul><li>You can predict how many renders occur for a given useEffect configuration</li><li>You observed the infinite loop and understand why it happens</li><li>You can explain in one sentence what the [] dependency array prevents</li></ul></dd></div>
+    <div><dt>Build useFetch <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Using the prompt from slide 10, generate a useFetch&lt;T&gt; hook. Use it in a component to fetch your book list from the API (or from a public JSON API if your API is not running). Verify loading and error states both work by temporarily changing the URL to something invalid.
+      <ul><li>The hook returns the correct TypeScript types for data, isLoading, and error</li><li>The error state is populated when the URL is invalid</li><li>AbortController cleanup is present and you can explain what it prevents</li></ul></dd></div>
+    <div><dt>useCallback audit <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Ask AI to generate a component that uses useCallback. Then ask it: "Is useCallback actually needed here? What would happen without it?" Record both answers. Do you agree with AI's assessment?
+      <ul><li>You can describe what useCallback does in your own words</li><li>You identified whether the use case genuinely benefits from memoisation</li><li>You formed your own opinion and can justify it</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

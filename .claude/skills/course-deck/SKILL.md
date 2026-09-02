@@ -23,8 +23,12 @@ API), checkpoint quizzes, and a prompt-reflection slide.
 3. Write `<slug>-workshop.html` in the repo root from the skeleton below.
 4. Add the card + `MODULE_LOS` entry to `index.html`.
 5. Run the verification checklist.
-6. Offer to generate narration (`server/tools/generate-deck-scripts.mjs`) and an
-   accessible long-form version (`accessible/<slug>-workshop.html`) as follow-ups.
+6. Follow-ups:
+   - `npm run build:accessible` — regenerates `accessible/<slug>-workshop.html`
+     and adds it to the `ACCESSIBLE_VERSIONS` manifest. Do this whenever a deck
+     is added or changed.
+   - `node server/tools/generate-deck-scripts.mjs <slug>-workshop.html --audio`
+     — narration + TTS audio (needs `OPENAI_API_KEY`).
 
 ## Track colours
 

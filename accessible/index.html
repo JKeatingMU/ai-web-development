@@ -5,34 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Course outline — accessible text version — Learning Web Development by Building with AI</title>
 <style>
-  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --card-bg:#f7f7f7; }
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --card-bg:#1b1f26; }
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
   }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
   .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
   a { color:var(--accent); }
-  a:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
-  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
   .skip:focus { left:0; }
   header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
-  h1 { font-size:1.9rem; margin:0 0 .4rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
   .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
-  .lede { color:var(--muted); margin:.5rem 0 0; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
   .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
     padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
   .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
   nav.toc { margin:1.5rem 0 2.5rem; }
   nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
   nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
   section { margin:2.75rem 0; }
   h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
   section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+
   h3 { font-size:1.1rem; margin:1.75rem 0 .35rem; }
-  p { margin:.75rem 0; }
-  ul, ol { padding-left:1.4rem; } li { margin:.3rem 0; }
   .module { border:1px solid var(--rule); background:var(--card-bg); border-radius:6px; padding:1rem 1.2rem; margin:1rem 0; }
   .module h3 { margin-top:0; }
   .module .desc { color:var(--muted); margin:.35rem 0 .6rem; }
@@ -40,10 +65,7 @@
   .module ul { margin:.2rem 0; }
   .module .links { margin-top:.7rem; font-size:.95rem; }
   .module.planned { opacity:.75; }
-  .tag { display:inline-block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
-    border:1px solid var(--rule); border-radius:3px; padding:.05rem .4rem; margin-left:.4rem; color:var(--muted); vertical-align:middle; }
-  footer.doc { margin-top:3rem; padding-top:1.25rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
-  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+  .tag { display:inline-block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; border:1px solid var(--rule); border-radius:3px; padding:.05rem .4rem; margin-left:.4rem; color:var(--muted); vertical-align:middle; }
 </style>
 </head>
 <body>
@@ -57,7 +79,8 @@
 </header>
 
 <div class="note">
-  <p><strong>This is the accessible text version of the course home page.</strong> It lists every module in reading order, with what you will be able to do after each one, as a single linear page: no interactive widgets, and it responds normally to browser zoom and to screen readers.</p>
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain text version of the course home page. It lists every module in reading order, with what you will be able to do after each one, as a single linear page: no interactive widgets, and it responds normally to browser zoom and to screen readers.</p>
   <p><a href="../index.html">Open the interactive course home</a> &nbsp;&middot;&nbsp; <a href="../setup-guide.html">Setup guide</a> &nbsp;&middot;&nbsp; <a href="../resources.html">Resources</a></p>
 </div>
 
@@ -66,13 +89,12 @@
   <ol>
     <li><a href="#about">How this course works</a></li>
     <li><a href="#outcomes">Course learning outcomes</a></li>
-    <li><a href="#start-here-orientation">Start Here — Orientation</a></li>
-    <li><a href="#track-a-foundations">Track A — Foundations</a></li>
-    <li><a href="#track-b-backend-api">Track B — Backend API</a></li>
-    <li><a href="#track-c-frontend">Track C — Frontend</a></li>
-    <li><a href="#track-d-fullstack">Track D — Fullstack</a></li>
-    <li><a href="#track-e-ai-agents-automation">Track E — AI Agents &amp; Automation</a></li>
-    <li><a href="#dependencies">Track dependencies</a></li>
+    <li><a href="#orientation">Orientation</a></li>
+    <li><a href="#foundations">Foundations</a></li>
+    <li><a href="#backend-api">Backend API</a></li>
+    <li><a href="#frontend">Frontend</a></li>
+    <li><a href="#fullstack">Fullstack</a></li>
+    <li><a href="#ai-agents-automation">AI Agents &amp; Automation</a></li>
   </ol>
 </nav>
 
@@ -80,8 +102,8 @@
 
 <section id="about" aria-labelledby="about-h">
   <h2 id="about-h">How this course works</h2>
-  <p>This course pairs hands-on building with deliberate reflection. At every step you use AI to generate code, then you read it, question it, and understand it. The goal is not to produce software faster. It is to become the developer who can evaluate, fix, and extend what AI produces. Every module ends with a prompt-reflection exercise: a structured pause to consider what the AI did, why, and what you would change next time.</p>
-  <p>Each module is an interactive slide deck with checkpoint quizzes, per-slide notes, optional narrated audio, and practical tasks; your progress is saved in your browser. Every deck also supports adjustable text size, full keyboard control, light and dark themes, screen-reader slide announcements, and honours a reduced-motion preference. Modules that have their own accessible text version are linked below.</p>
+  <p>This course pairs hands-on building with deliberate reflection. At every step you use AI to generate code, then you read it, question it, and understand it. The goal is not to produce software faster. It is to become the developer who can evaluate, fix, and extend what AI produces. Every module ends with a prompt-reflection exercise.</p>
+  <p>Each module is an interactive slide deck with checkpoint quizzes, per-slide notes, optional narrated audio, and practical tasks; progress is saved in your browser. Every deck also supports adjustable text size, full keyboard control, light and dark themes, screen-reader slide announcements, and honours a reduced-motion preference. Modules with their own accessible text version are linked below.</p>
 </section>
 
 <section id="outcomes" aria-labelledby="outcomes-h">
@@ -99,401 +121,173 @@
   </ol>
 </section>
 
-<section id="start-here-orientation" aria-labelledby="start-here-orientation-h">
-  <h2 id="start-here-orientation-h">Start Here — Orientation</h2>
-  <p>Read this before Track A: the prompting mindset, the reading habit, and how this course works.</p>
+<section id="orientation" aria-labelledby="orientation-h">
+  <h2 id="orientation-h">Orientation</h2>
+  <p>Read this before Track A — prompting mindset, reading habit, how this course works</p>
   <div class="module">
     <h3>S0 &mdash; Start Here</h3>
-    <p class="desc">Prompting philosophy, good vs bad prompts, what AI gets wrong, the reading checklist, and the vibe-coding debate.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Describe the AI-assisted development loop and identify where reading and understanding fit within it</li>
-      <li>Distinguish between surface-level and directed AI use and explain why the distinction matters for long-term maintainability</li>
-      <li>Write a scaffold prompt that includes stack context, state shape, API contract, error handling requirements, and constraints</li>
-      <li>Identify the four prompt move types — Scaffold, Explain, Debug, Extend — and the appropriate situation for each</li>
-      <li>List at least four failure modes of AI code generation and the corresponding strategy for catching each</li>
-      <li>Apply the five-point reading checklist to evaluate any piece of AI-generated code</li>
-    </ul>
-    <p class="links"><a href="../start-here.html">Open the Start Here deck</a></p>
+    <p class="desc">Prompting philosophy, good vs bad prompts, what AI gets wrong, the reading checklist, vibe coding debate</p>
+    <p class="links"><a href="../start-here.html">Open the Start Here deck</a> &nbsp;&middot;&nbsp; <a href="start-here.html">Accessible text version</a></p>
   </div>
 </section>
 
-<section id="track-a-foundations" aria-labelledby="track-a-foundations-h">
-  <h2 id="track-a-foundations-h">Track A — Foundations</h2>
-  <p>Core concepts every web developer needs before writing a line of backend code.</p>
+<section id="foundations" aria-labelledby="foundations-h">
+  <h2 id="foundations-h">Foundations</h2>
+  <p>Core concepts every web developer needs before writing a line of backend code</p>
   <div class="module">
     <h3>A1 &mdash; How the Web Works</h3>
-    <p class="desc">HTTP request/response, status codes, DNS, browsers, JSON.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Trace what happens when a browser makes an HTTP request and receives a response</li>
-      <li>Interpret HTTP status codes, methods, and headers in the context of real API calls</li>
-      <li>Explain the role of DNS in resolving domain names to IP addresses</li>
-      <li>Parse and construct JSON data structures used in API communication</li>
-      <li>Distinguish between REST and non-REST API design approaches</li>
-    </ul>
+    <p class="desc">HTTP request/response, status codes, DNS, browsers, JSON</p>
     <p class="links"><a href="../web-fundamentals-workshop.html">Open the How the Web Works deck</a> &nbsp;&middot;&nbsp; <a href="web-fundamentals-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>A2 &mdash; Terminal &amp; Shell</h3>
-    <p class="desc">Navigation, pipes, environment variables, aliases, scripting.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Navigate the filesystem and manage files and directories from the command line</li>
-      <li>Compose shell pipelines using pipes, redirection, and chaining operators (&amp;&amp;, ||)</li>
-      <li>Configure environment variables and apply the .env / .env.example pattern</li>
-      <li>Write basic shell scripts with variables and exit codes</li>
-      <li>Use curl and jq to make HTTP requests and process JSON responses from the terminal</li>
-    </ul>
-    <p class="links"><a href="../shell-workshop.html">Open the Terminal &amp; Shell deck</a></p>
+    <p class="desc">Navigation, pipes, environment variables, aliases, scripting</p>
+    <p class="links"><a href="../shell-workshop.html">Open the Terminal &amp; Shell deck</a> &nbsp;&middot;&nbsp; <a href="shell-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>A3 &mdash; Git &amp; GitHub</h3>
-    <p class="desc">Version control, commit, push, branches, pull requests, GitHub Pages.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the three-zone Git model: working tree, staging area, and commit history</li>
-      <li>Apply the daily commit workflow: stage, commit, push to a remote repository</li>
-      <li>Create and merge branches safely, resolving conflicts when they arise</li>
-      <li>Collaborate using GitHub: open pull requests and review changes</li>
-      <li>Configure .gitignore to protect sensitive and generated files from version control</li>
-    </ul>
-    <p class="links"><a href="../git-workshop.html">Open the Git &amp; GitHub deck</a></p>
+    <p class="desc">Version control, commit, push, branches, PRs, GitHub Pages</p>
+    <p class="links"><a href="../git-workshop.html">Open the Git &amp; GitHub deck</a> &nbsp;&middot;&nbsp; <a href="git-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>A4 &mdash; Database Concepts</h3>
-    <p class="desc">Tables, SQL, psql, primary keys, constraints, transactions.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the relational model: tables, rows, columns, primary keys, and foreign keys</li>
-      <li>Write SQL queries to create, read, update, and delete records</li>
-      <li>Apply database constraints (NOT NULL, UNIQUE, CHECK, FK) to enforce data integrity</li>
-      <li>Construct JOIN queries to retrieve related data from multiple tables</li>
-      <li>Apply safe migration discipline: extend schemas without dropping existing data</li>
-    </ul>
-    <p class="links"><a href="../database-workshop.html">Open the Database Concepts deck</a></p>
+    <p class="desc">Tables, SQL, psql, primary keys, constraints, transactions</p>
+    <p class="links"><a href="../database-workshop.html">Open the Database Concepts deck</a> &nbsp;&middot;&nbsp; <a href="database-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>A5 &mdash; Document Databases &amp; MongoDB</h3>
-    <p class="desc">Collections, documents, Mongoose, embed vs reference, aggregation pipelines.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the document model and contrast it with the relational model</li>
-      <li>Design MongoDB schemas using Mongoose with appropriate field types and validation</li>
-      <li>Perform CRUD operations on a MongoDB collection using Mongoose methods</li>
-      <li>Choose between embedding and referencing related data in document schemas</li>
-      <li>Construct basic aggregation pipelines to filter, group, and transform documents</li>
-    </ul>
-    <p class="links"><a href="../mongodb-workshop.html">Open the Document Databases &amp; MongoDB deck</a></p>
+    <p class="desc">Collections, documents, Mongoose, embed vs reference, aggregation pipelines</p>
+    <p class="links"><a href="../mongodb-workshop.html">Open the Document Databases &amp; MongoDB deck</a> &nbsp;&middot;&nbsp; <a href="mongodb-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>A6 &mdash; REST &amp; HTTP APIs</h3>
-    <p class="desc">Methods, URI design, status codes, statelessness, error design.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the six REST constraints and their practical implications for API design</li>
-      <li>Design clean, resource-oriented URI structures following REST conventions</li>
-      <li>Select appropriate HTTP methods and status codes for each API operation</li>
-      <li>Explain statelessness and its implications for session management and scalability</li>
-      <li>Design consistent, informative error responses that distinguish client from server errors</li>
-    </ul>
-    <p class="links"><a href="../rest-workshop.html">Open the REST &amp; HTTP APIs deck</a></p>
+    <p class="desc">Methods, URI design, status codes, statelessness, error design</p>
+    <p class="links"><a href="../rest-workshop.html">Open the REST &amp; HTTP APIs deck</a> &nbsp;&middot;&nbsp; <a href="rest-workshop.html">Accessible text version</a></p>
   </div>
 </section>
 
-<section id="track-b-backend-api" aria-labelledby="track-b-backend-api-h">
-  <h2 id="track-b-backend-api-h">Track B — Backend API</h2>
-  <p>Build a production-quality REST API from scratch, using AI as your coding partner. The running example is a Reading List API (Node, Express, PostgreSQL, JWT).</p>
+<section id="backend-api" aria-labelledby="backend-api-h">
+  <h2 id="backend-api-h">Backend API</h2>
+  <p>Build a production-quality REST API from scratch using AI as your coding partner</p>
   <div class="module">
     <h3>B1 &mdash; Prompt Engineering</h3>
-    <p class="desc">Four prompt types: Scaffold, Explain, Debug, Extend.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Apply the four prompt types — Scaffold, Explain, Debug, Extend — to appropriate coding tasks</li>
-      <li>Construct scaffold prompts that specify schema, environment, and security constraints</li>
-      <li>Use explain prompts to interrogate AI-generated code and understand each design decision</li>
-      <li>Apply debug prompts to diagnose errors systematically before requesting a fix</li>
-      <li>Evaluate AI-generated security choices and identify decisions that require human scrutiny</li>
-    </ul>
-    <p class="links"><a href="../prompt-engineering-workshop.html">Open the Prompt Engineering deck</a></p>
+    <p class="desc">Four prompt types: Scaffold, Explain, Debug, Extend</p>
+    <p class="links"><a href="../prompt-engineering-workshop.html">Open the Prompt Engineering deck</a> &nbsp;&middot;&nbsp; <a href="prompt-engineering-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>B2 &mdash; CRUD API with AI</h3>
-    <p class="desc">Node.js, Express, PostgreSQL; a generated-code walkthrough.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Use a scaffold prompt to generate a working Node.js / Express / PostgreSQL CRUD API</li>
-      <li>Read and explain the purpose of every generated file, including package.json and db.js</li>
-      <li>Apply parameterised queries to prevent SQL injection in AI-generated database code</li>
-      <li>Identify and correct common AI mistakes: ES module paths, route ordering, dynamic PORT handling</li>
-      <li>Deploy a Node.js API to Railway and configure environment variables for production</li>
-    </ul>
-    <p class="links"><a href="../ai-crud-workshop.html">Open the CRUD API with AI deck</a></p>
+    <p class="desc">Node.js, Express, PostgreSQL, generated code walkthrough</p>
+    <p class="links"><a href="../ai-crud-workshop.html">Open the CRUD API with AI deck</a> &nbsp;&middot;&nbsp; <a href="ai-crud-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>B3 &mdash; Authentication</h3>
-    <p class="desc">JWT, bcrypt, middleware, protected routes.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain how JWT works: structure (header, payload, signature), signing, and verification</li>
-      <li>Implement user registration with bcrypt password hashing and safe, uniform error messages</li>
-      <li>Build an Express authentication middleware that verifies JWTs and attaches the payload to req.user</li>
-      <li>Protect routes by composing middleware and trace the full auth flow from request to response</li>
-      <li>Apply JWT security best practices: secret management, token expiry, payload content, and revocation limitations</li>
-    </ul>
-    <p class="links"><a href="../auth-workshop.html">Open the Authentication deck</a></p>
+    <p class="desc">JWT, bcrypt, middleware, protected routes</p>
+    <p class="links"><a href="../auth-workshop.html">Open the Authentication deck</a> &nbsp;&middot;&nbsp; <a href="auth-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>B4 &mdash; Testing with curl</h3>
-    <p class="desc">curl, jq, a scripted API test workflow.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Use curl to send HTTP requests and interpret response bodies, headers, and status codes</li>
-      <li>Capture a JWT from a login response and use it in subsequent authenticated requests</li>
-      <li>Write a shell script that runs a complete CRUD test sequence automatically</li>
-      <li>Use jq to filter and extract data from JSON API responses in the terminal</li>
-      <li>Diagnose common API failures — connection refused, 401, 404, 422 — using curl output alone</li>
-    </ul>
-    <p class="links"><a href="../curl-testing-workshop.html">Open the Testing with curl deck</a></p>
+    <p class="desc">curl, jq, scripted API test workflow</p>
+    <p class="links"><a href="../curl-testing-workshop.html">Open the Testing with curl deck</a> &nbsp;&middot;&nbsp; <a href="curl-testing-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>B5 &mdash; Extending APIs</h3>
-    <p class="desc">Pagination, relational data, JOIN queries.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Add offset pagination to an existing API endpoint using SQL LIMIT and OFFSET with a JSON envelope</li>
-      <li>Construct window function queries to include total count without a second database round-trip</li>
-      <li>Add a foreign-key relationship between two database tables with appropriate CASCADE rules</li>
-      <li>Write JOIN queries to fetch related data across tables in a single database call</li>
-      <li>Apply safe migration discipline: add tables and columns without modifying or dropping existing data</li>
-    </ul>
-    <p class="links"><a href="../extending-api-workshop.html">Open the Extending APIs deck</a></p>
+    <p class="desc">Pagination, relational data, JOIN queries</p>
+    <p class="links"><a href="../extending-api-workshop.html">Open the Extending APIs deck</a> &nbsp;&middot;&nbsp; <a href="extending-api-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>B6 &mdash; Validation &amp; Errors</h3>
-    <p class="desc">Input validation, error middleware, Zod, asyncHandler.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Identify the four validation layers in a web application and explain why route-handler validation is essential</li>
-      <li>Write manual validation checks for required fields, type, length, and allowed values in an Express route</li>
-      <li>Create a centralised error-handling middleware and an AppError class that carries an HTTP status code</li>
-      <li>Wrap async route handlers with asyncHandler to eliminate try/catch boilerplate</li>
-      <li>Apply Zod schema validation with safeParse to parse and type-check request bodies in Express routes</li>
-    </ul>
-    <p class="links"><a href="../validation-workshop.html">Open the Validation &amp; Errors deck</a></p>
+    <p class="desc">Input validation, error middleware, Zod, asyncHandler</p>
+    <p class="links"><a href="../validation-workshop.html">Open the Validation &amp; Errors deck</a> &nbsp;&middot;&nbsp; <a href="validation-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module planned">
-    <h3>B7 &mdash; B7<span class="tag">Planned</span></h3>
-    <p class="desc">Railway, environment variables, Railway PostgreSQL, live testing. (Planned — not yet available.)</p>
+    <h3>B7 &mdash; Deployment <span class="tag">Planned</span></h3>
+    <p class="desc">Railway, env vars, Railway PostgreSQL, live testing</p>
     <p class="links">Not yet available.</p>
   </div>
 </section>
 
-<section id="track-c-frontend" aria-labelledby="track-c-frontend-h">
-  <h2 id="track-c-frontend-h">Track C — Frontend</h2>
-  <p>Build a React application that connects to your API.</p>
+<section id="frontend" aria-labelledby="frontend-h">
+  <h2 id="frontend-h">Frontend</h2>
+  <p>Build a React application that connects to your API</p>
   <div class="module">
     <h3>C1 &mdash; React Fundamentals</h3>
-    <p class="desc">Components, JSX, props, useState, events, forms, lists.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Set up a Vite + React + TypeScript project and explain the purpose of each generated file</li>
-      <li>Write function components with typed props using TypeScript interfaces</li>
-      <li>Manage local component state with useState and explain why direct mutation does not work</li>
-      <li>Build controlled form inputs using the value and onChange pattern</li>
-      <li>Render lists using .map() with stable key props and explain why keys are required</li>
-      <li>Apply conditional rendering using &amp;&amp;, ternary, and early return patterns</li>
-      <li>Read and critically evaluate AI-generated React components</li>
-    </ul>
-    <p class="links"><a href="../react-fundamentals-workshop.html">Open the React Fundamentals deck</a></p>
+    <p class="desc">Components, JSX, props, useState, events, forms, lists</p>
+    <p class="links"><a href="../react-fundamentals-workshop.html">Open the React Fundamentals deck</a> &nbsp;&middot;&nbsp; <a href="react-fundamentals-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>C2 &mdash; State &amp; Effects</h3>
-    <p class="desc">useEffect, async fetch, cleanup, custom hooks, useMemo.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain what triggers a React re-render and why side effects must not run during render</li>
-      <li>Use useEffect with the correct dependency array to control when effects run</li>
-      <li>Write async fetch logic inside useEffect using the define-then-call async pattern</li>
-      <li>Implement AbortController cleanup to prevent memory leaks on unmount</li>
-      <li>Extract reusable stateful logic into a custom hook and explain the naming convention</li>
-      <li>Recognise when useCallback and useMemo are and are not appropriate optimisations</li>
-    </ul>
-    <p class="links"><a href="../state-effects-workshop.html">Open the State &amp; Effects deck</a></p>
+    <p class="desc">useEffect, async fetch, cleanup, custom hooks, useMemo</p>
+    <p class="links"><a href="../state-effects-workshop.html">Open the State &amp; Effects deck</a> &nbsp;&middot;&nbsp; <a href="state-effects-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>C3 &mdash; API Integration</h3>
-    <p class="desc">CORS, environment variables, Vite proxy, a centralised api.ts, token storage.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the same-origin policy and why a Vite dev server and an Express server require CORS configuration</li>
-      <li>Configure the cors() middleware in Express with explicit origin, methods, and headers options</li>
-      <li>Use VITE_ prefixed environment variables to configure the API base URL for development and production</li>
-      <li>Set up a Vite proxy to forward /api requests to Express, eliminating CORS in development</li>
-      <li>Build a centralised api.ts module with a generic request&lt;T&gt; function, Bearer token header, and global 401 handling</li>
-      <li>Apply the token storage trade-offs between localStorage, sessionStorage, and httpOnly cookies</li>
-      <li>Diagnose CORS and authentication errors using browser DevTools Network and Console panels</li>
-    </ul>
-    <p class="links"><a href="../api-integration-workshop.html">Open the API Integration deck</a></p>
+    <p class="desc">CORS, env vars, Vite proxy, centralised api.ts, token storage</p>
+    <p class="links"><a href="../api-integration-workshop.html">Open the API Integration deck</a> &nbsp;&middot;&nbsp; <a href="api-integration-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>C4 &mdash; Forms &amp; Validation</h3>
-    <p class="desc">Controlled inputs, a generic onChange, validation, aria-describedby.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Use controlled inputs with value and onChange to manage form field values in React state</li>
-      <li>Manage multiple form fields with a single state object and a generic onChange handler that reads e.target.name</li>
-      <li>Write async submit handlers with loading and error state, and a finally block that always re-enables the button</li>
-      <li>Implement client-side validation and display per-field errors accessibly using aria-describedby and role="alert"</li>
-      <li>Apply the correct TypeScript generics for FormEvent and ChangeEvent handlers</li>
-      <li>Choose between submit-time and blur-time validation strategies and explain the trade-offs of each</li>
-      <li>Use a useDebounce custom hook to rate-limit async validation effects and prevent redundant network calls</li>
-    </ul>
-    <p class="links"><a href="../forms-validation-workshop.html">Open the Forms &amp; Validation deck</a></p>
+    <p class="desc">Controlled inputs, generic onChange, validation, aria-describedby</p>
+    <p class="links"><a href="../forms-validation-workshop.html">Open the Forms &amp; Validation deck</a> &nbsp;&middot;&nbsp; <a href="forms-validation-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>C5 &mdash; Routing</h3>
-    <p class="desc">React Router v6, Link, useParams, useNavigate, ProtectedRoute.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain client-side routing and how React Router intercepts navigation without a server round-trip</li>
-      <li>Set up React Router v6 with BrowserRouter, Routes, and Route, and identify differences from v5 syntax</li>
-      <li>Use Link for internal navigation and NavLink with active styling for nav bars</li>
-      <li>Read URL parameters with useParams and include them correctly in useEffect dependency arrays</li>
-      <li>Navigate programmatically with useNavigate after login, logout, and form submissions, using replace to prevent Back-button loops</li>
-      <li>Structure shared UI with layout routes and Outlet, keeping shared components mounted across route transitions</li>
-      <li>Build a ProtectedRoute component that redirects unauthenticated users before any API call is made, and explain why it is a UX guard rather than a security boundary</li>
-    </ul>
-    <p class="links"><a href="../routing-workshop.html">Open the Routing deck</a></p>
+    <p class="desc">React Router v6, Link, useParams, useNavigate, ProtectedRoute</p>
+    <p class="links"><a href="../routing-workshop.html">Open the Routing deck</a> &nbsp;&middot;&nbsp; <a href="routing-workshop.html">Accessible text version</a></p>
   </div>
 </section>
 
-<section id="track-d-fullstack" aria-labelledby="track-d-fullstack-h">
-  <h2 id="track-d-fullstack-h">Track D — Fullstack</h2>
-  <p>Connect everything. Requires Tracks B and C.</p>
+<section id="fullstack" aria-labelledby="fullstack-h">
+  <h2 id="fullstack-h">Fullstack</h2>
+  <p>Connect everything — requires Tracks B and C</p>
   <div class="module">
     <h3>D1 &mdash; Connecting the Stack</h3>
-    <p class="desc">Architecture, shared types, API contracts, production CORS, Express serving React.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the development vs production fullstack architecture and why same-origin production eliminates client-side CORS</li>
-      <li>Identify API contract mismatches between frontend and backend by comparing field names, wrapper objects, and error keys</li>
-      <li>Create a shared/types.ts file as a single source of truth for request and response shapes</li>
-      <li>Configure environment-based CORS using CLIENT_ORIGIN rather than a hardcoded origin string</li>
-      <li>Add express.static and a catch-all GET * route in the correct order to serve a React production build from Express</li>
-      <li>Run a local integration test to verify API and SPA routing both work on one port after building React</li>
-    </ul>
-    <p class="links"><a href="../fullstack-contracts-workshop.html">Open the Connecting the Stack deck</a></p>
+    <p class="desc">Architecture, shared types, API contracts, production CORS, Express serving React</p>
+    <p class="links"><a href="../fullstack-contracts-workshop.html">Open the Connecting the Stack deck</a> &nbsp;&middot;&nbsp; <a href="fullstack-contracts-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>D2 &mdash; Auth End-to-End</h3>
-    <p class="desc">Register, login, a useAuth hook, token lifecycle, logout.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Trace the complete auth flow across register, login, protected request, and logout, identifying what each operation stores and returns</li>
-      <li>Implement a useAuth hook that updates both localStorage and React state atomically on login and logout</li>
-      <li>Write a LoginPage that stores the token before navigating and shows a uniform error message that does not reveal which credential was wrong</li>
-      <li>Diagnose the six common auth bugs: token key mismatch, wrong Bearer prefix, stale NavBar state, Back-button loop, registration token storage, and email enumeration</li>
-      <li>Explain JWT expiry handling and why window.location.href is used instead of navigate in api.ts</li>
-    </ul>
-    <p class="links"><a href="../auth-end-to-end-workshop.html">Open the Auth End-to-End deck</a></p>
+    <p class="desc">Register, login, useAuth hook, token lifecycle, logout</p>
+    <p class="links"><a href="../auth-end-to-end-workshop.html">Open the Auth End-to-End deck</a> &nbsp;&middot;&nbsp; <a href="auth-end-to-end-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>D3 &mdash; Build &amp; Deploy</h3>
-    <p class="desc">npm run build, Railway, schema setup, environment variables, live testing.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain what npm run build produces and why VITE_ variables are baked in at build time rather than read at runtime</li>
-      <li>Apply the six-point pre-deploy checklist to identify common issues before pushing to Railway</li>
-      <li>Set up a Railway project with a PostgreSQL plugin, configure environment variables, and trigger a deploy via GitHub push</li>
-      <li>Run schema.sql against a Railway PostgreSQL database using the Railway CLI</li>
-      <li>Test a live deployment in layers using curl before testing in the browser</li>
-      <li>Diagnose the six most common Railway deploy failures from logs and error responses</li>
-    </ul>
-    <p class="links"><a href="../deploy-workshop.html">Open the Build &amp; Deploy deck</a></p>
+    <p class="desc">npm run build, Railway, schema setup, env vars, live testing</p>
+    <p class="links"><a href="../deploy-workshop.html">Open the Build &amp; Deploy deck</a> &nbsp;&middot;&nbsp; <a href="deploy-workshop.html">Accessible text version</a></p>
   </div>
 </section>
 
-<section id="track-e-ai-agents-automation" aria-labelledby="track-e-ai-agents-automation-h">
-  <h2 id="track-e-ai-agents-automation-h">Track E — AI Agents &amp; Automation</h2>
-  <p>Build autonomous workflows with n8n and large language model APIs.</p>
+<section id="ai-agents-automation" aria-labelledby="ai-agents-automation-h">
+  <h2 id="ai-agents-automation-h">AI Agents &amp; Automation</h2>
+  <p>Build autonomous workflows with n8n and large language model APIs</p>
   <div class="module">
     <h3>E1 &mdash; What is an Agent?</h3>
-    <p class="desc">LLMs plus tools plus loops; the ReAct pattern; agent vs chatbot.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the four components of an AI agent: LLM, tools, memory, and objective</li>
-      <li>Trace the ReAct loop (Reason → Act → Observe) through a concrete agent interaction</li>
-      <li>Read function-calling code and identify the tool definition, call, and observation pattern</li>
-      <li>Distinguish single-agent, multi-agent, and human-in-the-loop architectures and their trade-offs</li>
-      <li>Identify the four common agent failure modes and describe how to mitigate each</li>
-    </ul>
-    <p class="links"><a href="../ai-agents-workshop.html">Open the What is an Agent? deck</a></p>
+    <p class="desc">LLMs + tools + loops, ReAct pattern, agent vs chatbot</p>
+    <p class="links"><a href="../ai-agents-workshop.html">Open the What is an Agent? deck</a> &nbsp;&middot;&nbsp; <a href="ai-agents-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>E2 &mdash; n8n Fundamentals</h3>
-    <p class="desc">Nodes, expressions, credentials, the item model.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain the node-and-connection model of n8n and describe what a trigger, action, logic, and AI node each do</li>
-      <li>Describe the item model and explain why Split Out is needed when an API returns an array</li>
-      <li>Write n8n expressions to reference data from the current item and from named nodes</li>
-      <li>Configure HTTP Request nodes with Header Auth credentials to call a JWT-protected REST API</li>
-      <li>Set up an AI Agent node with a model, system prompt, and tool nodes</li>
-    </ul>
-    <p class="links"><a href="../n8n-fundamentals-workshop.html">Open the n8n Fundamentals deck</a></p>
+    <p class="desc">Nodes, expressions, credentials, the item model</p>
+    <p class="links"><a href="../n8n-fundamentals-workshop.html">Open the n8n Fundamentals deck</a> &nbsp;&middot;&nbsp; <a href="n8n-fundamentals-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>E3 &mdash; Calling APIs in n8n</h3>
-    <p class="desc">Login for a JWT, full CRUD, data mapping, debugging errors.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Build an n8n workflow that authenticates against a JWT-protected REST API at runtime</li>
-      <li>Carry a JWT through a multi-node workflow using named-node expressions</li>
-      <li>Perform all four CRUD operations via HTTP Request nodes with expressions</li>
-      <li>Use Set, Code, and Aggregate nodes to reshape and summarise item data between nodes</li>
-      <li>Diagnose and fix the four most common n8n API errors: 401, 404, ECONNREFUSED, and expression errors</li>
-    </ul>
-    <p class="links"><a href="../n8n-api-workshop.html">Open the Calling APIs in n8n deck</a></p>
+    <p class="desc">Login for JWT, full CRUD, data mapping, debugging errors</p>
+    <p class="links"><a href="../n8n-api-workshop.html">Open the Calling APIs in n8n deck</a> &nbsp;&middot;&nbsp; <a href="n8n-api-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>E4 &mdash; AI Agent Node</h3>
-    <p class="desc">Tool nodes, system prompts, memory, testing.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Explain what the AI Agent node does internally and how it implements the ReAct loop</li>
-      <li>Configure tool nodes with names, descriptions, and schemas that enable accurate LLM tool routing</li>
-      <li>Write a system prompt with explicit constraints that prevent common agent errors</li>
-      <li>Connect Window Buffer Memory and Postgres Chat Memory and explain when to use each</li>
-      <li>Use the n8n execution log to diagnose incorrect tool routing and hallucinated arguments</li>
-    </ul>
-    <p class="links"><a href="../n8n-agent-node-workshop.html">Open the AI Agent Node deck</a></p>
+    <p class="desc">Tool nodes, system prompts, memory, testing</p>
+    <p class="links"><a href="../n8n-agent-node-workshop.html">Open the AI Agent Node deck</a> &nbsp;&middot;&nbsp; <a href="n8n-agent-node-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>E5 &mdash; Building Agents</h3>
-    <p class="desc">Research; summarise and tag; monitor and notify.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Build a research agent that uses LLM knowledge to generate recommendations and deduplicates against a live API</li>
-      <li>Build an idempotent batch-processing pipeline using IF node filtering and Basic LLM Chain</li>
-      <li>Build a monitor-and-notify workflow using scheduled polling, Code node date arithmetic, and conditional alerting</li>
-      <li>Chain two agents using a Set node to translate the first agent's output into the second agent's input</li>
-      <li>Apply a reversibility framework to classify agent actions and determine appropriate human gate placement</li>
-    </ul>
-    <p class="links"><a href="../n8n-building-agents-workshop.html">Open the Building Agents deck</a></p>
+    <p class="desc">Research, summarise &amp; tag, monitor &amp; notify</p>
+    <p class="links"><a href="../n8n-building-agents-workshop.html">Open the Building Agents deck</a> &nbsp;&middot;&nbsp; <a href="n8n-building-agents-workshop.html">Accessible text version</a></p>
   </div>
   <div class="module">
     <h3>E6 &mdash; Production Patterns</h3>
-    <p class="desc">Error workflows, approval gates, monitoring, cost.</p>
-    <p class="lo-lead">By the end you will be able to:</p>
-    <ul>
-      <li>Set up an n8n Error Workflow that alerts on any execution failure with structured error context</li>
-      <li>Configure retry logic appropriately for transient failures while avoiding retries on permanent errors</li>
-      <li>Implement the Wait node approval pattern to pause a workflow pending human review</li>
-      <li>Use the execution history panel to audit workflow runs and diagnose silent or partial failures</li>
-      <li>Apply at least two cost management strategies to reduce LLM token consumption in a production workflow</li>
-    </ul>
-    <p class="links"><a href="../n8n-production-workshop.html">Open the Production Patterns deck</a></p>
+    <p class="desc">Error workflows, approval gates, monitoring, cost</p>
+    <p class="links"><a href="../n8n-production-workshop.html">Open the Production Patterns deck</a> &nbsp;&middot;&nbsp; <a href="n8n-production-workshop.html">Accessible text version</a></p>
   </div>
 </section>
 
@@ -513,7 +307,6 @@
 <footer class="doc">
   <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
 </footer>
-
 </div>
 </body>
 </html>

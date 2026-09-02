@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building Agents — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">E5 &middot; AI Agents & Automation</p>
+  <h1>Building Agents</h1>
+  <p class="lede">Research, summarise &amp; tag, monitor &amp; notify</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../n8n-building-agents-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#three-agent-patterns-you-will-reuse">Three Agent Patterns You Will Reuse</a></li>
+    <li><a href="#research-agent-book-recommendations">Research Agent: Book Recommendations</a></li>
+    <li><a href="#research-agent-what-to-watch-for">Research Agent: What to Watch For</a></li>
+    <li><a href="#summarise-tag-batch-processing">Summarise &amp; Tag: Batch Processing</a></li>
+    <li><a href="#summarise-tag-the-prompt-and-output">Summarise &amp; Tag: The Prompt and Output</a></li>
+    <li><a href="#monitor-notify-condition-alert">Monitor &amp; Notify: Condition + Alert</a></li>
+    <li><a href="#connecting-pieces-chaining-agents-deciding-when-to-stop">Connecting Pieces: Chaining Agents &amp; Deciding When to Stop</a></li>
+    <li><a href="#chaining-agents">Chaining Agents</a></li>
+    <li><a href="#when-to-stop-and-ask-a-human">When to Stop and Ask a Human</a></li>
+    <li><a href="#testing-strategy-for-agents">Testing Strategy for Agents</a></li>
+    <li><a href="#what-you-built-with-vs-what-you-learned">What You Built With vs What You Learned</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Build a research agent that uses LLM knowledge to generate recommendations and deduplicates against a live API</li>
+    <li>Build an idempotent batch-processing pipeline using IF node filtering and Basic LLM Chain for per-item AI processing</li>
+    <li>Build a monitor-and-notify workflow using scheduled polling, Code node date arithmetic, and conditional alerting</li>
+    <li>Chain two agents using a Set node to translate the first agent's output into the second agent's input</li>
+    <li>Apply a reversibility framework to classify agent actions and determine appropriate human gate placement</li>
+  </ul>
+</section>
+
+<section id="three-agent-patterns-you-will-reuse" aria-labelledby="three-agent-patterns-you-will-reuse-h">
+  <h2 id="three-agent-patterns-you-will-reuse-h">Three Agent Patterns You Will Reuse</h2>
+<p>These three examples are not just isolated demos — they are reusable patterns. Recognise the pattern, and you can apply it to a new domain in minutes.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Pattern</th><th scope="col">Trigger</th><th scope="col">What the agent decides</th><th scope="col">Example</th></tr></thead><tbody><tr><th scope="row"><strong>Research</strong></th><td>User query or webhook</td><td>Which sources to consult and how to synthesise them</td><td>"Recommend CS books not already in my list"</td></tr><tr><th scope="row"><strong>Summarise &amp; Tag</strong></th><td>Schedule or new-item event</td><td>How to categorise and what summary to generate per item</td><td>Add a one-sentence summary and category to each unprocessed book</td></tr><tr><th scope="row"><strong>Monitor &amp; Notify</strong></th><td>Schedule (polling) or webhook</td><td>Whether a condition is met, and who/how to notify</td><td>Alert when ≥3 books have been in "reading" status for over 30 days</td></tr></tbody></table></div>
+<aside class="note"><p>Build each pattern against the Reading List API first. Once it works, the pattern transfers directly to other domains — customer records, support tickets, inventory items.</p></aside>
+</section>
+
+<section id="research-agent-book-recommendations" aria-labelledby="research-agent-book-recommendations-h">
+  <h2 id="research-agent-book-recommendations-h">Research Agent: Book Recommendations</h2>
+<p>Goal: given a topic, recommend books not already in the reading list. The agent uses Claude's training knowledge as its "search" and the API to check for duplicates.</p>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Webhook (topic + genre) → Login (POST /auth/login) → Research Agent (Claude + tools) → Format (Set node) → Respond (Set response)</p></figure>
+<blockquote class="prompt"><span class="note-label">Research Agent — System Prompt</span><p>You are a book recommendation assistant. The user will give you a topic and optional genre. Your task: 1. Call list_books to get the current reading list. 2. Generate 5 book recommendations relevant to the topic from your training knowledge. 3. For each recommendation, check whether it already appears in the list (by title). 4. Return only books NOT already in the list. Include: title, author, year, and one sentence explaining why it fits the topic. Respond in plain text, not JSON.</p></blockquote>
+<aside class="note"><p>Why the agent checks the list before recommending: without this step, it will recommend books already in the list — duplicates. The explicit instruction makes the deduplication step a required reasoning step, not a UI concern.</p></aside>
+</section>
+
+<section id="research-agent-what-to-watch-for" aria-labelledby="research-agent-what-to-watch-for-h">
+  <h2 id="research-agent-what-to-watch-for-h">Research Agent: What to Watch For</h2>
+<aside class="note"><p>It works well when</p></aside>
+<ul>
+<li><strong>✓</strong> &mdash; The topic is specific — "distributed systems databases" gives better recommendations than "books"</li>
+<li><strong>✓</strong> &mdash; The system prompt requires checking the list first — prevents most duplicates</li>
+<li><strong>✓</strong> &mdash; The output format is constrained — plain text with a standard structure</li>
+</ul>
+<aside class="note"><p>Extension: Add an add_books tool and a second step — "Would you like me to add any of these to your list?" — with a human approval before the POST.</p></aside>
+<aside class="note"><p>Common failure modes</p></aside>
+<ul>
+<li><strong>!</strong> &mdash; <strong>Hallucinated books</strong>: Claude may invent plausible-sounding titles. Mitigate: ask for well-known books (publication year before 2022), not obscure ones.</li>
+<li><strong>!</strong> &mdash; <strong>Duplicate check misses</strong>: "DDIA" vs "Designing Data-Intensive Applications" — fuzzy matching in the system prompt helps: "check by both full title and common abbreviations".</li>
+<li><strong>!</strong> &mdash; <strong>No list_books call</strong>: agent skips the first step. Fix: restate it as a constraint: "You MUST call list_books before generating recommendations."</li>
+</ul>
+</section>
+
+<section id="summarise-tag-batch-processing" aria-labelledby="summarise-tag-batch-processing-h">
+  <h2 id="summarise-tag-batch-processing-h">Summarise &amp; Tag: Batch Processing</h2>
+<p>Goal: for each book without a summary, generate a one-sentence description and assign a category. Run on a schedule — any book added since the last run gets processed.</p>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Schedule (Daily 2am) → Login (POST /auth/login) → Get Books (GET /api/books) → Split Out (per book) → IF (no notes yet) → Summarise (Basic LLM Chain) → PATCH (update notes)</p></figure>
+<aside class="note"><p>Basic LLM Chain vs AI Agent Node: this pipeline does not need tools or a loop — the LLM gets a book title and returns a summary. Use Basic LLM Chain here, not the full AI Agent node. Simpler, faster, cheaper.</p></aside>
+<aside class="note"><p>The IF node filters to books where notes is empty or null — idempotent by design. Run the workflow 100 times; only unprocessed books get an API call. Books already summarised are skipped.</p></aside>
+</section>
+
+<section id="summarise-tag-the-prompt-and-output" aria-labelledby="summarise-tag-the-prompt-and-output-h">
+  <h2 id="summarise-tag-the-prompt-and-output-h">Summarise &amp; Tag: The Prompt and Output</h2>
+<blockquote class="prompt"><span class="note-label">Basic LLM Chain — Prompt</span><p>Book title: {{ $json.title }} Author: {{ $json.author }} Year: {{ $json.year }} Return JSON only — no other text: {"summary": "...", "category": "..."} Summary: one sentence describing what the book covers. Category: exactly one of [Computer Science, Systems, Programming, Career, Mathematics, Other].</p></blockquote>
+<aside class="note"><p>JSON-only output is critical here. Without it, the LLM may wrap its answer in prose, breaking the downstream Code node that parses it.</p></aside>
+<aside class="note"><p>Code node: parse + validate output</p></aside>
+<pre><code>const raw = $json.text;  // LLM output
+let parsed;
+try {
+  parsed = JSON.parse(raw);
+} catch(e) {
+  // Strip markdown code fences if present
+  const m = raw.match(/\{[\s\S]*\}/);
+  parsed = m ? JSON.parse(m[0]) : null;
+}
+
+if (!parsed?.summary || !parsed?.category) {
+  throw new Error('Invalid LLM output');
+}
+
+return [{ json: {
+  ...($input.first().json),
+  notes: `${parsed.category}: ${parsed.summary}`
+}}];</code></pre>
+</section>
+
+<section id="monitor-notify-condition-alert" aria-labelledby="monitor-notify-condition-alert-h">
+  <h2 id="monitor-notify-condition-alert-h">Monitor &amp; Notify: Condition + Alert</h2>
+<p>Goal: run daily and alert the user if any book has been in "reading" status for more than 30 days without progress. Forces a habit check — are you still actually reading that?</p>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Schedule (Daily 9am) → Get Books (?status=reading) → Split Out (per book) → Age Check (Code node) → IF stale (&gt;30 days) → Aggregate (collect stale) → Email (Send digest)</p></figure>
+<pre><code>// Age Check — Code node
+const book = $json;
+const updated = new Date(book.updated_at);
+const daysAgo = (Date.now() - updated)
+  / (1000 * 60 * 60 * 24);
+return [{ json: { ...book,
+  days_in_reading: Math.floor(daysAgo)
+}}];</code></pre>
+<aside class="note"><p>IF node condition: {{ $json.days_in_reading }} greater than 30. Only stale books pass through. The Aggregate collects them and formats a digest. If no books are stale, the IF node's false branch goes to a No-op — no email is sent.</p></aside>
+</section>
+
+<section id="connecting-pieces-chaining-agents-deciding-when-to-stop" aria-labelledby="connecting-pieces-chaining-agents-deciding-when-to-stop-h">
+  <h2 id="connecting-pieces-chaining-agents-deciding-when-to-stop-h">Connecting Pieces: Chaining Agents &amp; Deciding When to Stop</h2>
+<p class="lede">When one agent's output becomes another's input — and when to hand control to a human.</p>
+</section>
+
+<section id="chaining-agents" aria-labelledby="chaining-agents-h">
+  <h2 id="chaining-agents-h">Chaining Agents</h2>
+<p>Sometimes the output of one agent becomes the prompt for another. This is multi-agent chaining — not orchestration (which uses an explicit orchestrator node), but sequential specialisation.</p>
+<pre><code>Agent 1 — Researcher
+  Input:  user query ("recommend CS books on distributed systems")
+  Output: list of 5 book recommendations with title, author, year
+                     ↓
+Set node — format Agent 1's output as a prompt string:
+  "Review these book recommendations and rank them by accessibility
+   for a first-year CS student: {{ $json.recommendations }}"
+                     ↓
+Agent 2 — Reviewer
+  Input:  formatted prompt from Set node
+  Output: ranked list with brief justification per book</code></pre>
+<aside class="note"><p>The key is the Set node between agents. It transforms Agent 1's output JSON into a natural-language prompt that Agent 2 can reason over. The Set node is the handoff point — it explicitly controls what context the second agent receives.</p></aside>
+<aside class="note"><p>Keep chain length short. Each agent adds latency and cost. Two agents chained is often the practical maximum before the compounding error rate becomes a problem.</p></aside>
+</section>
+
+<section id="when-to-stop-and-ask-a-human" aria-labelledby="when-to-stop-and-ask-a-human-h">
+  <h2 id="when-to-stop-and-ask-a-human-h">When to Stop and Ask a Human</h2>
+<p>Every agentic workflow has a decision point: at what stage does the agent's confidence justify acting autonomously, and when must it pause for human input?</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Action type</th><th scope="col">Agent autonomy appropriate?</th><th scope="col">Pattern</th></tr></thead><tbody><tr><th scope="row">Read-only: list books, get stats</th><td><strong>Yes</strong></td><td>Full autonomy — no gate needed</td></tr><tr><th scope="row">Low-stakes write: add a notes field</th><td><strong>Usually</strong></td><td>Log the action; allow undo via PATCH</td></tr><tr><th scope="row">Status update: mark a book as read</th><td><strong>Maybe</strong></td><td>Confirm with the user before PATCH if unsure of the ID</td></tr><tr><th scope="row">External communication: send email</th><td><strong>No</strong></td><td>Always require human approval — Wait node + approval link</td></tr><tr><th scope="row">Irreversible: DELETE</th><td><strong>Never</strong></td><td>Hard gate — human must explicitly trigger, not approve</td></tr></tbody></table></div>
+<aside class="note"><p>The rule: reversibility determines autonomy. The easier it is to undo an action, the less supervision it needs. The moment an action becomes hard to reverse, add a gate.</p></aside>
+</section>
+
+<section id="testing-strategy-for-agents" aria-labelledby="testing-strategy-for-agents-h">
+  <h2 id="testing-strategy-for-agents-h">Testing Strategy for Agents</h2>
+<p>Agents are harder to test than deterministic code because the LLM's reasoning varies. Structure your testing to catch the categories of failure, not every possible input.</p>
+<ul>
+<li><strong>1</strong> &mdash; <strong>Happy path first</strong>: the canonical input the system was designed for. Does the agent call the right tools in the right order and return a correct answer?</li>
+<li><strong>2</strong> &mdash; <strong>Tool failure</strong>: deliberately break a tool (wrong URL, missing auth). Does the agent handle the error gracefully, or does it loop? Does it report the failure clearly?</li>
+<li><strong>3</strong> &mdash; <strong>Ambiguous input</strong>: give the agent an under-specified query ("add that book"). Does it ask for clarification or make something up?</li>
+<li><strong>4</strong> &mdash; <strong>Out-of-scope input</strong>: ask the agent to do something outside its tools ("book me a flight"). Does the system prompt constraint apply correctly?</li>
+<li><strong>5</strong> &mdash; <strong>Boundary conditions</strong>: empty reading list, 200-book list, book with no author. These stress the data assumptions baked into your prompts and tool descriptions.</li>
+</ul>
+</section>
+
+<section id="what-you-built-with-vs-what-you-learned" aria-labelledby="what-you-built-with-vs-what-you-learned-h">
+  <h2 id="what-you-built-with-vs-what-you-learned-h">What You Built With vs What You Learned</h2>
+<p>If you used an AI assistant to help build any of these workflows, answer these before moving to E6.</p>
+<blockquote class="prompt"><span class="note-label">Questions to answer without re-reading the AI's explanation</span><ul>
+<li>For each of the three patterns: name the trigger node type and explain why that trigger fits the use case.</li>
+<li>In the Summarise &amp; Tag pattern, why is an IF node needed before the LLM call? What would happen without it after the first run?</li>
+<li>In the Monitor &amp; Notify pattern, what is the Code node computing? Rewrite the logic in plain English.</li>
+<li>Why is the Aggregate node placed before the email node (not after)? What would the email look like without it?</li>
+<li>For the research agent, name one hallucination risk and describe the system prompt change that mitigates it.</li>
+</ul></blockquote>
+<aside class="note"><p>Up next — E6: Production Patterns. Your agents work. E6 covers what happens when they run in the real world: error workflows, retry logic, monitoring executions, cost management, and the patterns that separate a demo from a deployable system.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../n8n-building-agents-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Build the Summarise &amp; Tag pipeline <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Build the complete Summarise &amp; Tag workflow. Trigger on a schedule (or manual run). Fetch all books, split out, filter to books with no notes, call Basic LLM Chain to generate summary and category, parse the JSON output in a Code node, PATCH each book's notes field. Run twice — confirm idempotency (second run makes no API calls for already-tagged books).
+      <ul><li>The IF node filters correctly — books with existing notes are skipped</li><li>The Code node handles malformed LLM output (markdown-wrapped JSON) without crashing</li><li>Running the workflow twice produces no duplicate PATCH calls</li></ul></dd></div>
+    <div><dt>Build the Monitor &amp; Notify workflow <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Build the Monitor &amp; Notify workflow. Filter to books with status="reading". Compute days since last update in a Code node. Use an IF node to select books where days &gt; 30. Aggregate the stale books. Output a formatted alert (console log, email, or Slack — your choice). Test with a book you manually set updated_at to an old date via psql.
+      <ul><li>The Code node correctly computes days since updated_at as a number</li><li>The IF node threshold is configurable (not hardcoded deep in a Code node)</li><li>If no books are stale, the workflow completes without sending an alert</li></ul></dd></div>
+    <div><dt>Reversibility audit <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Review all three workflows you built in E5. For each action node that writes data (PATCH, POST, email, Slack): classify it as reversible, partially reversible, or irreversible. For each irreversible action, describe whether you added a gate and why or why not.
+      <ul><li>You correctly classified each write action by reversibility</li><li>For at least one irreversible action, you described the gate (or explained why one is not needed in this specific context)</li><li>Your reasoning is consistent with the principle from slide 10</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

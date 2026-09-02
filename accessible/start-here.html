@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start Here — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">S0 &middot; Course module</p>
+  <h1>Start Here</h1>
+  <p class="lede">Prompting philosophy, good vs bad prompts, what AI gets wrong, the reading checklist, vibe coding debate</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../start-here.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#start-here">Start Here</a></li>
+    <li><a href="#the-development-loop">The Development Loop</a></li>
+    <li><a href="#the-reading-promise">The Reading Promise</a></li>
+    <li><a href="#two-kinds-of-ai-use">Two Kinds of AI Use</a></li>
+    <li><a href="#anatomy-of-a-good-prompt">Anatomy of a Good Prompt</a></li>
+    <li><a href="#the-four-moves">The Four Moves</a></li>
+    <li><a href="#part-2-what-ai-gets-wrong">Part 2: What AI Gets Wrong</a></li>
+    <li><a href="#how-ai-fails-at-code">How AI Fails at Code</a></li>
+    <li><a href="#the-reading-checklist">The Reading Checklist</a></li>
+    <li><a href="#the-vibe-coding-debate">The Vibe Coding Debate</a></li>
+    <li><a href="#how-to-use-this-course">How to Use This Course</a></li>
+    <li><a href="#before-you-start">Before You Start</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Describe the AI-assisted development loop and identify where reading and understanding fit within it</li>
+    <li>Distinguish between surface-level and directed AI use and explain why the distinction matters for long-term maintainability</li>
+    <li>Write a scaffold prompt that includes stack context, state shape, API contract, error handling requirements, and constraints</li>
+    <li>Identify the four prompt move types — Scaffold, Explain, Debug, Extend — and the appropriate situation for each</li>
+    <li>List at least four failure modes of AI code generation and the corresponding strategy for catching each</li>
+    <li>Apply the five-point reading checklist to evaluate any piece of AI-generated code</li>
+  </ul>
+</section>
+
+<section id="start-here" aria-labelledby="start-here-h">
+  <h2 id="start-here-h">Start Here</h2>
+<aside class="note"><p>This is not a technical module. There is no code to run here — yet. This is the mindset that makes everything else in the course work: how to direct AI effectively, how to read what it produces, and what to do when it is wrong.</p></aside>
+</section>
+
+<section id="the-development-loop" aria-labelledby="the-development-loop-h">
+  <h2 id="the-development-loop-h">The Development Loop</h2>
+<p>Most people assume AI-assisted development looks like: write a prompt, get working code, ship it. The reality is more involved — and that is not a problem.</p>
+<p>What people assume</p>
+<aside class="note"><span class="note-label">Warning</span><p>Write prompt ↓ AI writes code ↓ Ship it ✓</p></aside>
+<p>What actually happens</p>
+<aside class="note"><p>Write a specific prompt ↓ AI generates code ↓ Read every line ↓ Ask questions · Understand patterns ↓ Test edge cases · Fill the gaps ↓ Integrate · Refine · Prompt again</p></aside>
+<p><strong>The prompt is the smallest part.</strong> Reading, understanding, and integrating the output is the work.</p>
+</section>
+
+<section id="the-reading-promise" aria-labelledby="the-reading-promise-h">
+  <h2 id="the-reading-promise-h">The Reading Promise</h2>
+<p>Before you accept any AI-generated code in this course, there is one rule:</p>
+<aside class="note"><p>Read every line before you move on.</p></aside>
+<aside class="note"><p>If you can explain it — you own it. You can debug it, extend it, and defend it to a colleague in a code review.</p></aside>
+<aside class="note"><p>If you can't explain it — flag it. Use the Explain move (covered next), look it up, or cut it out. Do not ship what you cannot explain.</p></aside>
+<aside class="note"><span class="note-label">Warning</span><p>If no one can explain it — it is technical debt, not a feature. Velocity is worthless if the codebase becomes unmaintainable within weeks.</p></aside>
+<p>This is not about being slow. It is about the difference between a developer who <em>owns</em> their code and one who is merely a conduit between AI and production.</p>
+</section>
+
+<section id="two-kinds-of-ai-use" aria-labelledby="two-kinds-of-ai-use-h">
+  <h2 id="two-kinds-of-ai-use-h">Two Kinds of AI Use</h2>
+<p>The same AI tool can be used in two fundamentally different ways. The difference is not the tool — it is the habit that surrounds it.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col"></th><th scope="col">Surface Use</th><th scope="col">Directed Use</th></tr></thead><tbody><tr><th scope="row">Prompt style</th><td>"Build me a login page"</td><td>Stack · state shape · API contract · error handling spec · constraints</td></tr><tr><th scope="row">After generation</th><td>Paste and run immediately</td><td>Read every line before running</td></tr><tr><th scope="row">When it works</th><td>Ship it and move on</td><td>Understand why it works before extending it</td></tr><tr><th scope="row">When it breaks</th><td>Ask the AI to fix it</td><td>Diagnose the cause first, then prompt to fix</td></tr><tr><th scope="row">Long-term outcome</th><td>Fast but fragile — code you do not own</td><td>Slower initially, but you can maintain and extend it</td></tr></tbody></table></div>
+<aside class="note"><p>Most "vibe coding" failures are surface use failures. The developers who get the most from AI use directed mode — they have just internalised it so well it feels fast.</p></aside>
+</section>
+
+<section id="anatomy-of-a-good-prompt" aria-labelledby="anatomy-of-a-good-prompt-h">
+  <h2 id="anatomy-of-a-good-prompt-h">Anatomy of a Good Prompt</h2>
+<p>Specific prompts produce specific code. Vague prompts produce guesses. The difference in output quality is dramatic:</p>
+<p>Without context</p>
+<figure><figcaption>prompt.txt</figcaption><pre><code>Build me a login page in React.</code></pre></figure>
+<aside class="note"><span class="note-label">Warning</span><p>AI will assume a stack, invent state management, choose its own error messages, and probably import a library you do not want.</p></aside>
+<p>With context</p>
+<figure><figcaption>prompt.txt</figcaption><pre><code>Generate a LoginPage component.
+Stack: React 19 + TypeScript + React Router v6.
+State: email, password (strings),
+  error (string | null), loading (boolean).
+On submit: POST /auth/login with { email, password }.
+  Success → store token in localStorage under
+  'token', navigate('/', { replace: true }).
+  401/400 → show 'Invalid credentials' (one message
+  for both — do not reveal which field is wrong).
+Loading: disable submit, show 'Signing in…'.
+No third-party form libraries.</code></pre></figure>
+<aside class="note"><p>AI now has exact state shape, API contract, navigation behaviour, error copy, and constraints. Output matches the actual requirements.</p></aside>
+</section>
+
+<section id="the-four-moves" aria-labelledby="the-four-moves-h">
+  <h2 id="the-four-moves-h">The Four Moves</h2>
+<p>Every useful AI interaction in software development fits one of four patterns. This course uses them throughout — B1 covers them in full depth.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Move</th><th scope="col">Purpose</th><th scope="col">When to use it</th></tr></thead><tbody><tr><th scope="row">Scaffold</th><td>Generate a complete first version of something new</td><td>Starting a new component, route, schema, or service from scratch</td></tr><tr><th scope="row">Explain</th><td>Ask the AI to explain what it just produced</td><td>After every Scaffold — before running the code</td></tr><tr><th scope="row">Debug</th><td>Give the AI an error and ask for a root-cause fix</td><td>When something fails with an error you cannot immediately diagnose</td></tr><tr><th scope="row">Extend</th><td>Add functionality to existing working code</td><td>After you understand and own the current implementation</td></tr></tbody></table></div>
+<aside class="note"><p>Always Explain after you Scaffold. Never Extend code you cannot explain. Debug by diagnosing first — resist the urge to paste the error and ask for a magic fix.</p></aside>
+</section>
+
+<section id="part-2-what-ai-gets-wrong" aria-labelledby="part-2-what-ai-gets-wrong-h">
+  <h2 id="part-2-what-ai-gets-wrong-h">Part 2: What AI Gets Wrong</h2>
+<p class="lede">Understanding limitations before you trust the output</p>
+</section>
+
+<section id="how-ai-fails-at-code" aria-labelledby="how-ai-fails-at-code-h">
+  <h2 id="how-ai-fails-at-code-h">How AI Fails at Code</h2>
+<p>AI models produce confident, plausible-looking code. It can be wrong in several distinct ways — knowing the failure modes lets you look for them.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Failure Type</th><th scope="col">What It Looks Like</th><th scope="col">How to Catch It</th></tr></thead><tbody><tr><th scope="row">API hallucination</th><td><code>res.sendJSON()</code> — function does not exist in Express</td><td>Run it; check the exact function name in the library docs</td></tr><tr><th scope="row">Outdated syntax</th><td>React Router v5 <code>&lt;Switch&gt;</code> in a v6 project</td><td>Know your versions — check <code>package.json</code> before reading output</td></tr><tr><th scope="row">Missing security</th><td>No input validation, no error sanitisation, hardcoded secret</td><td>Ask: where does user data go? Is any secret visible in the code?</td></tr><tr><th scope="row">Incomplete error handling</th><td>Only the happy path — no catch, no finally, no 404 case</td><td>Ask: what happens if the database is down? If the user sends bad data?</td></tr><tr><th scope="row">Confident wrong logic</th><td>Off-by-one in pagination, wrong comparison operator in a filter</td><td>Test with edge cases — empty list, page 0, boundary values, negative numbers</td></tr></tbody></table></div>
+<aside class="note"><p>AI does not know it is wrong. It will not flag uncertainty unless you ask. The confidence of the output is not a signal of its correctness.</p></aside>
+</section>
+
+<section id="the-reading-checklist" aria-labelledby="the-reading-checklist-h">
+  <h2 id="the-reading-checklist-h">The Reading Checklist</h2>
+<p>Before accepting any AI-generated code block — in this course or in any project — work through these five questions:</p>
+<ol>
+<li><strong>Can I explain every line without looking it up?</strong> If not, use the Explain move before moving on. Understanding is the gate.</li>
+<li><strong>Are there security implications?</strong> Look for user input, authentication, SQL queries, environment variables, and hardcoded values.</li>
+<li><strong>Does the error handling cover the likely failure modes?</strong> Check for missing catch blocks, unhandled rejections, and absent status codes.</li>
+<li><strong>Does this pattern match the rest of the codebase?</strong> Inconsistent patterns create maintenance burden. Ask the AI to match your existing conventions if needed.</li>
+<li><strong>If this breaks in production, will I know why?</strong> Adequate logging, clear error messages, and meaningful status codes make future debugging possible.</li>
+</ol>
+<aside class="note"><p>You will see this checklist at the end of every module in this course. Five questions, every time, for every block of generated code.</p></aside>
+</section>
+
+<section id="the-vibe-coding-debate" aria-labelledby="the-vibe-coding-debate-h">
+  <h2 id="the-vibe-coding-debate-h">The Vibe Coding Debate</h2>
+<p>Since the term emerged in early 2025, "vibe coding" has divided the developer community. Both sides have a point — and the real answer is in the habit.</p>
+<aside class="note"><span class="note-label">Warning</span><p>Critics say "You are building technical debt at speed. You ship code you cannot explain. When something breaks at 2am, you will have no idea where to start."</p></aside>
+<aside class="note"><p>Defenders say "The leverage is extraordinary. You can build real products. Architecture and system design matter more than memorising syntax you can always look up."</p></aside>
+<aside class="note"><p>This course's position Both are right. The reading habit is the dividing line. With it, vibe coding is a superpower. Without it, it is technical debt manufactured at speed.</p></aside>
+<p>The critics describe <strong>surface use</strong>. The defenders describe <strong>directed use</strong>. This course is the latter — and the reading habit is what makes the difference.</p>
+</section>
+
+<section id="how-to-use-this-course" aria-labelledby="how-to-use-this-course-h">
+  <h2 id="how-to-use-this-course-h">How to Use This Course</h2>
+<p>Practical advice before you open Track A.</p>
+<ol>
+<li><strong>Follow the track order: A → B → C → D.</strong> Later tracks assume vocabulary from earlier ones. You can skip ahead, but you will hit unexplained terms.</li>
+<li><strong>Take the quizzes seriously.</strong> They reveal gaps. A wrong answer here is cheaper than a wrong assumption in production code.</li>
+<li><strong>Run the demo app yourself.</strong> Reading code and running code are different experiences. The demo app is there — clone it, run it, break it intentionally.</li>
+<li><strong>The prompt reflection at the end of every module is not optional.</strong> It is where learning consolidates. Five minutes of structured reflection is worth an hour of passive reading.</li>
+<li><strong>When stuck, ask for an explanation — not just a fix.</strong> "Explain why this fails and what the correct pattern is" teaches you. "Fix this" teaches the AI.</li>
+</ol>
+</section>
+
+<section id="before-you-start" aria-labelledby="before-you-start-h">
+  <h2 id="before-you-start-h">Before You Start</h2>
+<p>This is the only reflection slide in this course that does not ask you to evaluate a prompt — because you have not used one yet.</p>
+<aside class="note"><p>Write down one assumption you currently hold about AI-assisted coding that you are not yet sure is true. Keep it — we will revisit it after B1.</p></aside>
+<aside class="note"><p>Track A — Foundations No AI prompts yet. Learn the vocabulary: HTTP, the terminal, Git, databases. These are the concepts AI assumes you already know.</p></aside>
+<aside class="note"><p>Track B — Backend API First real prompts. Scaffold a REST API with AI, then read every line of what it produces using the four moves.</p></aside>
+<aside class="note"><p>Tracks C &amp; D — Full Stack Connect a React frontend to the API, handle auth end-to-end, and deploy to production. The stack is complete.</p></aside>
+<p>When you are ready: <strong>open A1 — How the Web Works.</strong></p>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../start-here.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Write a scaffold prompt <span style="font-weight:400;color:var(--muted)">(build)</span></dt><dd>Choose a feature (or pick one: a registration form, a book detail page, a search filter component). Write a scaffold prompt for it that includes: stack with version numbers, state shape with field types, API endpoint and expected response shape, error handling for at least one failure mode, and at least one explicit constraint. Then write the one-sentence "bad" version of the same prompt. Explain what information is lost.
+      <ul><li>Your prompt includes a named stack with explicit version numbers</li><li>The state shape specifies field names and types</li><li>The API contract names the endpoint and expected response shape</li><li>Error handling for at least one failure mode is included</li><li>The bad version is a single sentence without any of this context</li></ul></dd></div>
+    <div><dt>Apply the reading checklist <span style="font-weight:400;color:var(--muted)">(evaluate)</span></dt><dd>Take any piece of AI-generated code — from a previous project, an online example, or the demo app in this course. Apply the five-point reading checklist to it. For each of the five questions, write one sentence stating whether the code passes or fails that check, and why.
+      <ul><li>All five checklist questions are addressed</li><li>Each answer is specific to the code, not a generic observation</li><li>At least one finding is supported with a reference to a specific line or pattern in the code</li><li>You are honest about any lines you cannot fully explain</li></ul></dd></div>
+    <div><dt>Your vibe coding position <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Write 100–200 words on your current position on AI-assisted development. What do you think the single most important safeguard is for someone using AI to write production code? Your answer should reference the distinction between surface use and directed use.
+      <ul><li>Your position is clearly stated in the first two sentences</li><li>You reference at least one specific failure mode or risk</li><li>Your safeguard recommendation is concrete and actionable</li><li>You reference the surface vs directed use distinction from this module</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

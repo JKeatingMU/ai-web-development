@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connecting the Stack — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">D1 &middot; Fullstack</p>
+  <h1>Connecting the Stack</h1>
+  <p class="lede">Architecture, shared types, API contracts, production CORS, Express serving React</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../fullstack-contracts-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#connecting-the-stack">Connecting the Stack</a></li>
+    <li><a href="#the-fullstack-architecture">The Fullstack Architecture</a></li>
+    <li><a href="#the-api-contract">The API Contract</a></li>
+    <li><a href="#shared-typescript-types">Shared TypeScript Types</a></li>
+    <li><a href="#consistent-error-responses">Consistent Error Responses</a></li>
+    <li><a href="#environment-based-cors">Environment-Based CORS</a></li>
+    <li><a href="#the-api-prefix-convention">The /api Prefix Convention</a></li>
+    <li><a href="#part-2-prompting-prompting-for-integration">Part 2 — Prompting: Prompting for Integration</a></li>
+    <li><a href="#scaffold-prompt-fullstack-wiring">Scaffold Prompt — Fullstack Wiring</a></li>
+    <li><a href="#reading-the-generated-wiring">Reading the Generated Wiring</a></li>
+    <li><a href="#testing-the-integration-locally">Testing the Integration Locally</a></li>
+    <li><a href="#common-integration-bugs">Common Integration Bugs</a></li>
+    <li><a href="#prompt-reflection">Prompt Reflection</a></li>
+    <li><a href="#wrap-up">Wrap-up</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the development vs production fullstack architecture and why production eliminates client-side CORS</li>
+    <li>Identify API contract mismatches between frontend and backend by comparing field names, wrapper objects, and error keys</li>
+    <li>Create a shared/types.ts file as a single source of truth for request and response shapes</li>
+    <li>Configure environment-based CORS using CLIENT_ORIGIN rather than a hardcoded origin string</li>
+    <li>Add express.static and a catch-all GET * route in the correct order to serve a React production build from Express</li>
+    <li>Run a local integration test after building the React app to verify API and SPA routing both work on one port</li>
+  </ul>
+</section>
+
+<section id="connecting-the-stack" aria-labelledby="connecting-the-stack-h">
+  <h2 id="connecting-the-stack-h">Connecting the Stack</h2>
+<aside class="note"><p>You have a working backend (Track B) and a working frontend (Track C). This deck connects them as a single deployable application — from environment-aware CORS to Express serving the built React app and a shared type contract that catches mismatches before they reach production.</p></aside>
+</section>
+
+<section id="the-fullstack-architecture" aria-labelledby="the-fullstack-architecture-h">
+  <h2 id="the-fullstack-architecture-h">The Fullstack Architecture</h2>
+<p>In development you run two servers. In production you run one — Express serves both the API and the built React files from the same origin, eliminating CORS entirely for your own frontend.</p>
+<figure><figcaption>Diagram</figcaption><p class="figure-note">DEVELOPMENT → Vite :5173 → React app → Express :3001 → API + PostgreSQL → CORS / proxy → PRODUCTION → Express :3001 (Railway) → GET /api/* → API routes → GET * → React build → same origin — no CORS needed</p></figure>
+<aside class="note"><p>Development CORS or a Vite proxy bridges the port gap between your two dev servers. You learned this in C3.</p></aside>
+<aside class="note"><p>Production — one server: Express serves client/dist/ on all non-API routes. Same origin = no CORS needed for your own app.</p></aside>
+<aside class="note"><p>Third-party consumers (mobile apps, other frontends) still need CORS headers even in production. Keep your CORS config — just tighten the allowed origins.</p></aside>
+</section>
+
+<section id="the-api-contract" aria-labelledby="the-api-contract-h">
+  <h2 id="the-api-contract-h">The API Contract</h2>
+<p>An API contract is an agreement between frontend and backend about request and response shapes. When both sides are built by AI, mismatches are the most common integration bug.</p>
+<p>What can go wrong</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Backend returns</th><th scope="col">Frontend expects</th><th scope="col">Result</th></tr></thead><tbody><tr><th scope="row"><code>{ data: [...] }</code></th><td><code>book[]</code> (array direct)</td><td>Cannot read .map of undefined</td></tr><tr><th scope="row"><code>created_at</code></th><td><code>createdAt</code></td><td>Field is always undefined</td></tr><tr><th scope="row"><code>{ error: "..." }</code></th><td><code>{ message: "..." }</code></td><td>Error message never shown</td></tr><tr><th scope="row"><code>status: "want_to_read"</code></th><td><code>status: "want-to-read"</code></td><td>Dropdown never pre-selects</td></tr><tr><th scope="row">HTTP 201</th><td>Checks for HTTP 200</td><td>Works but logic is fragile</td></tr></tbody></table></div>
+<aside class="note"><p>AI generates each side independently. The backend prompt and frontend prompt don't share context — unless you explicitly paste the API response shape into the frontend prompt (or vice versa).</p></aside>
+<aside class="note"><p>The fastest fix: curl your API endpoint and paste the actual JSON response into your frontend scaffold prompt. "The API returns this exact shape: {"{"} ... {"}"}. Generate the TypeScript type and fetch logic."</p></aside>
+<aside class="note"><p>Naming conventions diverge: databases use snake_case, JavaScript uses camelCase. AI sometimes transforms field names, sometimes doesn't. Always check column names against interface field names.</p></aside>
+</section>
+
+<section id="shared-typescript-types" aria-labelledby="shared-typescript-types-h">
+  <h2 id="shared-typescript-types-h">Shared TypeScript Types</h2>
+<p>The ideal solution is a single source of truth for your data types — defined once and used by both frontend and backend. AI can generate this; the challenge is keeping it in sync.</p>
+<figure><figcaption>shared/types.ts (shared between client + server)</figcaption><pre><code>// Single file imported by both client and server
+// Place in a shared/ directory at the project root
+
+export interface Book {
+  id:         number;
+  title:      string;
+  author:     string;
+  status:     BookStatus;
+  created_at: string;  // ISO 8601 from DB
+}
+
+export type BookStatus =
+  | 'want-to-read'
+  | 'reading'
+  | 'finished';
+
+export interface CreateBookBody {
+  title:  string;
+  author: string;
+  status: BookStatus;
+}
+
+export interface ApiError {
+  error: string;  // always this key — never 'message'
+}
+
+// In client — import from shared types
+import type { Book, CreateBookBody } from '../../shared/types';
+
+// In server (if using TypeScript) — same import
+import type { Book, CreateBookBody } from '../shared/types';</code></pre></figure>
+<aside class="note"><p>Single source of truth: change the interface once and both frontend and backend immediately get a type error if they're out of sync. TypeScript catches contract violations at compile time.</p></aside>
+<aside class="note"><p>Pragmatic alternative: if your backend is plain JavaScript (no TypeScript), duplicate the types in the frontend and treat curl output as the ground truth. Less elegant but common in mixed-language projects.</p></aside>
+<aside class="note"><p>AI prompt tip: paste your schema.sql and ask AI to generate matching TypeScript interfaces. The column names, nullability, and types from SQL map directly to interface fields.</p></aside>
+<aside class="note"><p><code>created_at: string</code> — database timestamps come back as ISO 8601 strings over JSON, not JavaScript Date objects. Use new Date(book.created_at) when you need to format them.</p></aside>
+</section>
+
+<section id="consistent-error-responses" aria-labelledby="consistent-error-responses-h">
+  <h2 id="consistent-error-responses-h">Consistent Error Responses</h2>
+<p>Your frontend's error handling is only as good as your backend's error responses. AI sometimes generates inconsistent error shapes — standardise them once and your <code>api.ts</code> can handle everything uniformly.</p>
+<figure><figcaption>server/middleware/errorHandler.js</figcaption><pre><code>// Centralised error middleware — always last in Express
+export function errorHandler(err, req, res, next) {
+  // Log the full error server-side (not sent to client)
+  console.error(err);
+
+  // Known error types
+  if (err.type === 'validation') {
+    return res.status(422).json({ error: err.message });
+  }
+  if (err.code === '23505') { // PG unique violation
+    return res.status(409).json({ error: 'Already exists' });
+  }
+
+  // Default — never expose internal details
+  res.status(500).json({ error: 'Internal server error' });
+}
+
+// Register after all routes in server/index.js
+app.use(errorHandler);
+
+// ─────────────────────────────────────────────
+// api.ts — reads the standard error key
+if (!res.ok) {
+  const body = await res.json().catch(() =&gt; ({}));
+  throw new Error(body.error ?? `HTTP ${res.status}`);
+}</code></pre></figure>
+<aside class="note"><p>One error key everywhere: use { error: "..." } consistently. If your backend sometimes returns { error } and sometimes { message }, your frontend catch blocks need to handle both — messy and fragile.</p></aside>
+<aside class="note"><p>Never send stack traces to the client. err.stack or err.message from an uncaught exception may expose file paths, library versions, or database structure. Log server-side only.</p></aside>
+<aside class="note"><p>The four error statuses you'll use most: 400 (bad request / validation), 401 (unauthenticated), 403 (authenticated but unauthorised), 404 (not found), 409 (conflict), 422 (unprocessable), 500 (server error).</p></aside>
+</section>
+
+<section id="environment-based-cors" aria-labelledby="environment-based-cors-h">
+  <h2 id="environment-based-cors-h">Environment-Based CORS</h2>
+<p>Development allows <code>localhost:5173</code>. Production allows your deployed domain. Hardcoding one or the other breaks the other environment. The fix is one environment variable.</p>
+<figure><figcaption>server/index.js</figcaption><pre><code>import cors from 'cors';
+import 'dotenv/config';
+
+// In production this is your Railway domain.
+// In development it is http://localhost:5173.
+// Never hardcode either.
+const allowedOrigin = process.env.CLIENT_ORIGIN
+  ?? 'http://localhost:5173';
+
+app.use(cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+// .env (development)
+CLIENT_ORIGIN=http://localhost:5173
+
+// Railway dashboard (production)
+CLIENT_ORIGIN=https://myapp.up.railway.app</code></pre></figure>
+<aside class="note"><p>Never use <code>origin: '*'</code> in production — it allows any website to make authenticated requests to your API using the visitor's credentials. This is a serious security misconfiguration.</p></aside>
+<aside class="note"><p>When Express serves React directly (same origin), your own frontend doesn't need CORS. But you still want CORS configured for API consumers — mobile apps, other frontends, curl tests from other origins.</p></aside>
+<aside class="note"><p><code>credentials: true</code> is required if you ever use cookies. With JWT in localStorage it is optional, but harmless to include and easier than adding it later.</p></aside>
+<aside class="note"><p>The ?? fallback means the server works in development without setting CLIENT_ORIGIN in .env — it just uses localhost:5173 automatically.</p></aside>
+</section>
+
+<section id="the-api-prefix-convention" aria-labelledby="the-api-prefix-convention-h">
+  <h2 id="the-api-prefix-convention-h">The /api Prefix Convention</h2>
+<p>When Express serves both API routes and static React files, you need a way to distinguish them. The <code>/api</code> prefix on every API route is the standard solution.</p>
+<figure><figcaption>server/index.js — route order matters</figcaption><pre><code>// ① API routes — registered first, prefixed /api
+app.use('/api/books', booksRouter);
+app.use('/api/auth',  authRouter);
+app.get('/api/health', (req, res) =&gt;
+  res.json({ ok: true }));
+
+// ② Serve built React files from client/dist
+import { fileURLToPath } from 'url';
+import { join, dirname } from 'path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const clientDist = join(__dirname, '../client/dist');
+
+app.use(express.static(clientDist));
+
+// ③ Catch-all — send index.html for any non-API path
+// This supports React Router's client-side routing
+app.get('*', (req, res) =&gt; {
+  res.sendFile(join(clientDist, 'index.html'));
+});</code></pre></figure>
+<aside class="note"><p>Order is critical. The catch-all GET * must come last — after all API routes and after express.static. If it's first, every API request returns index.html instead of JSON.</p></aside>
+<aside class="note"><p>The catch-all serves <code>index.html</code> for routes like /books and /books/42. The browser loads React, React Router reads the URL, and renders the correct page — no 404 on refresh.</p></aside>
+<aside class="note"><p><code>__dirname</code> in ES modules: import.meta.url replaces the CommonJS __dirname. AI sometimes generates the CommonJS version — check if your server uses "type": "module" in package.json.</p></aside>
+<aside class="note"><p>Dev vs prod: in development the Vite dev server handles index.html — the static serving and catch-all only activate in production (after npm run build ).</p></aside>
+</section>
+
+<section id="part-2-prompting-prompting-for-integration" aria-labelledby="part-2-prompting-prompting-for-integration-h">
+  <h2 id="part-2-prompting-prompting-for-integration-h">Part 2 — Prompting: Prompting for Integration</h2>
+<p class="lede">What to tell AI · What to verify · Reading the wiring</p>
+</section>
+
+<section id="scaffold-prompt-fullstack-wiring" aria-labelledby="scaffold-prompt-fullstack-wiring-h">
+  <h2 id="scaffold-prompt-fullstack-wiring-h">Scaffold Prompt — Fullstack Wiring</h2>
+<p>Give AI both halves at once. Paste the server entry point and ask for the changes needed to serve the React build alongside the existing API.</p>
+<blockquote class="prompt"><span class="note-label">Scaffold prompt — paste into your AI assistant</span><p>I have an Express API (ES modules, "type": "module" ) and a React + Vite frontend in client/. Modify my server/index.js to also serve the React production build. Requirements:</p>
+<ul>
+<li>Serve static files from <em>client/dist</em> using <em>express.static</em></li>
+<li>Add a catch-all <em>GET *</em> route that sends <em>client/dist/index.html</em> — placed after all API routes</li>
+<li>Use ES module path resolution (<em>import.meta.url</em>, not <em>__dirname</em>) to construct the path to <em>client/dist</em></li>
+<li>CORS: read the allowed origin from <em>process.env.CLIENT_ORIGIN</em>, falling back to <em>http://localhost:5173</em></li>
+<li>The catch-all must not intercept routes starting with <em>/api</em> — all <em>/api/*</em> routes are registered before it</li>
+</ul>
+<p>Also create a shared/types.ts file with TypeScript interfaces matching these API response shapes:</p>
+<ul>
+<li><em>Book</em>: id (number), title, author, status (<em>'want-to-read' | 'reading' | 'finished'</em>), created_at (string)</li>
+<li><em>ApiError</em>: error (string)</li>
+<li><em>CreateBookBody</em>: title, author, status</li>
+</ul></blockquote>
+</section>
+
+<section id="reading-the-generated-wiring" aria-labelledby="reading-the-generated-wiring-h">
+  <h2 id="reading-the-generated-wiring-h">Reading the Generated Wiring</h2>
+<p>Five things to verify before testing the integrated app.</p>
+<ol>
+<li><strong>Route order:</strong> API routes must be registered before <code>express.static</code> and the catch-all. Search the generated file top to bottom — if the catch-all appears before any <code>/api</code> route, move it.</li>
+<li><strong>ES module path resolution:</strong> look for <code>import.meta.url</code>. If you see <code>__dirname</code> and your project uses <code>"type": "module"</code>, the path will fail at runtime with "ReferenceError: __dirname is not defined".</li>
+<li><strong>CORS origin source:</strong> confirm <code>cors({ origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173' })</code>. If the origin is hardcoded as a string, it breaks in the other environment.</li>
+<li><strong>Shared types — field names:</strong> compare the interface field names in <code>shared/types.ts</code> against your actual database column names from <code>schema.sql</code>. AI may camelCase them; your DB uses snake_case.</li>
+<li><strong>Error key consistency:</strong> search the generated route handlers for <code>res.json({ message:</code>. Every error response should use <code>error:</code>, not <code>message:</code>, to match what <code>api.ts</code> reads.</li>
+</ol>
+</section>
+
+<section id="testing-the-integration-locally" aria-labelledby="testing-the-integration-locally-h">
+  <h2 id="testing-the-integration-locally-h">Testing the Integration Locally</h2>
+<p>Before deploying, build the React app and confirm Express serves it correctly on port 3001.</p>
+<figure><figcaption>terminal</figcaption><pre><code># Build the React app
+$ cd client &amp;&amp; npm run build
+# → creates client/dist/
+
+# Start Express (serves API + built React)
+$ cd .. &amp;&amp; node server/index.js
+
+# Test API still works
+$ curl http://localhost:3001/api/health
+# → {"ok":true}
+
+# Test React app is served
+$ curl -s http://localhost:3001/ | head -5
+# → &lt;!DOCTYPE html&gt;...
+
+# Test React Router catch-all
+$ curl -s http://localhost:3001/books | head -3
+# → &lt;!DOCTYPE html&gt; (not 404)
+
+# Open in browser
+$ open http://localhost:3001</code></pre></figure>
+<aside class="note"><p>Build before testing. express.static serves files from client/dist — that directory doesn't exist until you run npm run build. Forgetting this produces a silent blank page.</p></aside>
+<aside class="note"><p>If <code>/books</code> returns JSON instead of HTML, your catch-all is matching the API routes. Confirm that /api/books returns JSON and /books returns HTML.</p></aside>
+<aside class="note"><p>Check the Network tab in browser DevTools as you navigate. All API calls should go to /api/... (same origin, no CORS headers needed). If you see requests to localhost:5173, you're still running the Vite dev server.</p></aside>
+<aside class="note"><p>After a successful local test, commit the changes — including any .env.example updates for the new CLIENT_ORIGIN variable — before deploying.</p></aside>
+</section>
+
+<section id="common-integration-bugs" aria-labelledby="common-integration-bugs-h">
+  <h2 id="common-integration-bugs-h">Common Integration Bugs</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Symptom</th><th scope="col">Cause</th><th scope="col">Fix</th></tr></thead><tbody><tr><th scope="row">Blank white page at localhost:3001</th><td><code>client/dist</code> does not exist yet</td><td>Run <code>cd client &amp;&amp; npm run build</code> first</td></tr><tr><th scope="row">API returns HTML instead of JSON</th><td>Catch-all is registered before API routes</td><td>Move <code>app.get('*', ...)</code> to the very end of <code>index.js</code></td></tr><tr><th scope="row">ReferenceError: __dirname is not defined</th><td>Using CommonJS path resolution in an ES module project</td><td>Replace with <code>dirname(fileURLToPath(import.meta.url))</code></td></tr><tr><th scope="row">CORS error in production but not dev</th><td><code>CLIENT_ORIGIN</code> not set in Railway env vars</td><td>Add <code>CLIENT_ORIGIN=https://your-app.up.railway.app</code> in Railway dashboard</td></tr><tr><th scope="row">Field always <code>undefined</code> after fetch</th><td>snake_case DB column vs camelCase interface field</td><td>Align interface field names with actual DB column names</td></tr><tr><th scope="row">Error message never displayed</th><td>Backend returns <code>{ message }</code>, frontend reads <code>body.error</code></td><td>Standardise all error responses to <code>{ error: "..." }</code></td></tr></tbody></table></div>
+</section>
+
+<section id="prompt-reflection" aria-labelledby="prompt-reflection-h">
+  <h2 id="prompt-reflection-h">Prompt Reflection</h2>
+<p>Integration bugs are different from component bugs — they cross boundaries between separately generated pieces of code. Reflect on that here.</p>
+<aside class="note"><p>The context gap: Your backend prompt and your frontend prompt were written at different times. What information would have been useful to share between them? How would you structure a single prompt that generates a consistent contract for both sides?</p></aside>
+<aside class="note"><p>Finding the mismatch: Before testing the integrated app, you read both sides of the contract. Which field name or response shape mismatch did you find? Was it a naming convention issue, a wrapper object, or something else?</p></aside>
+<aside class="note"><p>Route order bug: The catch-all route position is a silent bug — the app still starts, but API calls return HTML. What would you see in the browser Network tab that would help you diagnose this without reading the source code?</p></aside>
+<aside class="note"><p>Shared types value: The shared/types.ts file catches field name mismatches at compile time. Give a concrete example of a mismatch it would have caught — and a mismatch it would not catch (a runtime bug TypeScript can't see).</p></aside>
+</section>
+
+<section id="wrap-up" aria-labelledby="wrap-up-h">
+  <h2 id="wrap-up-h">Wrap-up</h2>
+<p class="lede">What you can now do with fullstack integration</p>
+<ul>
+<li><strong>✓</strong> &mdash; Explain the development vs production architecture — two servers vs one — and why same-origin production eliminates client-side CORS</li>
+<li><strong>✓</strong> &mdash; Identify and fix API contract mismatches — field names, wrapper objects, error keys — by reading both sides before running the app</li>
+<li><strong>✓</strong> &mdash; Create a <code>shared/types.ts</code> file that gives both frontend and backend a single source of truth for request and response shapes</li>
+<li><strong>✓</strong> &mdash; Configure environment-based CORS using <code>CLIENT_ORIGIN</code> rather than hardcoding any origin</li>
+<li><strong>✓</strong> &mdash; Add <code>express.static</code> and a catch-all <code>GET *</code> route in the correct order so Express serves the React build in production</li>
+<li><strong>✓</strong> &mdash; Run a local integration test — build React, start Express, verify API and SPA routing both work on port 3001</li>
+</ul>
+<aside class="note"><p>Next — D2: Auth End-to-End — the complete flow from registration through login to protected API calls and logout, wired across both layers.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../fullstack-contracts-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Wire Express to serve React</dt><dd></dd></div>
+    <div><dt>Create shared/types.ts</dt><dd></dd></div>
+    <div><dt>Prompt reflection write-up</dt><dd></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

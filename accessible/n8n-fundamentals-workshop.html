@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>n8n Fundamentals — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">E2 &middot; AI Agents & Automation</p>
+  <h1>n8n Fundamentals</h1>
+  <p class="lede">Nodes, expressions, credentials, the item model</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../n8n-fundamentals-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#what-is-n8n">What is n8n?</a></li>
+    <li><a href="#nodes-and-connections">Nodes and Connections</a></li>
+    <li><a href="#the-item-model">The Item Model</a></li>
+    <li><a href="#expressions-referencing-data-between-nodes">Expressions: Referencing Data Between Nodes</a></li>
+    <li><a href="#working-with-apis-the-http-request-node-credentials">Working With APIs: The HTTP Request Node &amp; Credentials</a></li>
+    <li><a href="#credentials-storing-auth-securely">Credentials: Storing Auth Securely</a></li>
+    <li><a href="#the-http-request-node">The HTTP Request Node</a></li>
+    <li><a href="#workflow-list-unread-books-format-send-to-slack">Workflow: List Unread Books, Format, Send to Slack</a></li>
+    <li><a href="#the-ai-layer-the-ai-agent-node">The AI Layer: The AI Agent Node</a></li>
+    <li><a href="#the-ai-agent-node-what-it-does">The AI Agent Node: What It Does</a></li>
+    <li><a href="#ai-agent-workflow-summarise-and-categorise">AI Agent Workflow: Summarise and Categorise</a></li>
+    <li><a href="#how-to-read-an-n8n-workflow">How to Read an n8n Workflow</a></li>
+    <li><a href="#what-you-built-with-vs-what-you-learned">What You Built With vs What You Learned</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain the node-and-connection model of n8n and describe what a trigger, action, logic, and AI node each do</li>
+    <li>Describe the item model and explain why Split Out is needed when an API returns an array</li>
+    <li>Write n8n expressions to reference data from the current item and from named nodes</li>
+    <li>Configure HTTP Request nodes with Header Auth credentials to call a JWT-protected REST API</li>
+    <li>Set up an AI Agent node with a model, system prompt, and tool nodes</li>
+  </ul>
+</section>
+
+<section id="what-is-n8n" aria-labelledby="what-is-n8n-h">
+  <h2 id="what-is-n8n-h">What is n8n?</h2>
+<p>n8n (pronounced "n-eight-n") is an open-source workflow automation tool. You build workflows visually by connecting <strong>nodes</strong> — each node does one thing. Nodes pass data between themselves as <strong>items</strong>.</p>
+<aside class="note"><p>What makes n8n relevant here</p>
+<ul>
+<li>Built-in <strong>AI Agent node</strong> — runs the ReAct loop you learned in E1 without writing the loop code yourself</li>
+<li><strong>HTTP Request node</strong> — calls any REST API, including your Reading List API</li>
+<li><strong>400+ integrations</strong> — Slack, Gmail, Postgres, Google Sheets, and more, as pre-built nodes</li>
+<li>Self-hostable — run locally for development, deploy for production</li>
+</ul></aside>
+<aside class="note"><p>n8n vs writing agent code (E1)</p>
+<ul>
+<li>The loop, tool routing, and message history are handled by n8n — you configure, not code</li>
+<li>Human-in-the-loop approval is a node, not a pattern to implement</li>
+<li>Connections between steps are visual — easier to audit and explain</li>
+<li>But: less flexible than code for complex logic; n8n expressions have limits</li>
+</ul></aside>
+</section>
+
+<section id="nodes-and-connections" aria-labelledby="nodes-and-connections-h">
+  <h2 id="nodes-and-connections-h">Nodes and Connections</h2>
+<p>A workflow is a directed graph. Each node receives data, does something, and passes output to the next node. The connection between nodes is the data flow — there is no explicit "pass data" step.</p>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Schedule (Trigger) → HTTP Request (Action) → IF (Logic) → AI Agent (AI) → Send Email (Action)</p></figure>
+<div class="table-scroll"><table><thead><tr><th scope="col">Node type</th><th scope="col">Role</th><th scope="col">Examples</th></tr></thead><tbody><tr><th scope="row"><strong>Trigger</strong></th><td>Starts the workflow — on a schedule, webhook, or event</td><td>Schedule, Webhook, Gmail Trigger</td></tr><tr><th scope="row"><strong>Action</strong></th><td>Reads or writes data in an external service</td><td>HTTP Request, Postgres, Slack</td></tr><tr><th scope="row"><strong>Logic</strong></th><td>Routes or transforms data</td><td>IF, Switch, Merge, Code</td></tr><tr><th scope="row"><strong>AI</strong></th><td>Runs an LLM or agent step</td><td>AI Agent, Basic LLM Chain, Summarise</td></tr></tbody></table></div>
+</section>
+
+<section id="the-item-model" aria-labelledby="the-item-model-h">
+  <h2 id="the-item-model-h">The Item Model</h2>
+<p>n8n passes data as an array of <strong>items</strong> between nodes. Each item is a JSON object with a <code>json</code> field. When a node receives multiple items, it processes each one independently.</p>
+<aside class="note"><p>What one item looks like</p></aside>
+<pre><code>[
+  {
+    json: {
+      id: 1,
+      title: "DDIA",
+      author: "Kleppmann",
+      status: "unread"
+    }
+  },
+  {
+    json: {
+      id: 2,
+      title: "SICP",
+      author: "Abelson",
+      status: "reading"
+    }
+  }
+]</code></pre>
+<aside class="note"><p>Why this matters</p></aside>
+<ul>
+<li><strong>→</strong> &mdash; HTTP Request returns the API response wrapped in an item. To access a field: <code>{{ $json.title }}</code></li>
+<li><strong>→</strong> &mdash; If your API returns an array, n8n wraps the whole array in one item. Use <strong>Split Out</strong> to turn it into multiple items — one per book.</li>
+<li><strong>→</strong> &mdash; A node that receives 5 items runs its logic 5 times — once per item. This is how "process each book" works.</li>
+</ul>
+</section>
+
+<section id="expressions-referencing-data-between-nodes" aria-labelledby="expressions-referencing-data-between-nodes-h">
+  <h2 id="expressions-referencing-data-between-nodes-h">Expressions: Referencing Data Between Nodes</h2>
+<p>Static values are typed directly into a field. Dynamic values — data from previous nodes — are written as <strong>expressions</strong> using double curly braces: <code>{{ }}</code>.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Expression</th><th scope="col">Returns</th><th scope="col">Use case</th></tr></thead><tbody><tr><th scope="row"><code>{{ $json.title }}</code></th><td>The <code>title</code> field from the current item</td><td>Include a book title in a message body</td></tr><tr><th scope="row"><code>{{ $json.id }}</code></th><td>The <code>id</code> field from the current item</td><td>Build a URL: <code>https://api/books/{{ $json.id }}</code></td></tr><tr><th scope="row"><code>{{ $node["HTTP Request"].json.status }}</code></th><td>The <code>status</code> field from a specific named node</td><td>Reference a node that isn't the immediate parent</td></tr><tr><th scope="row"><code>{{ $items().length }}</code></th><td>Number of items in the current batch</td><td>Include item count in a summary message</td></tr><tr><th scope="row"><code>{{ new Date().toISOString() }}</code></th><td>Current timestamp</td><td>Timestamp in a log or email subject</td></tr></tbody></table></div>
+<aside class="note"><p>The expression editor (click the expression icon next to any field) has autocomplete for $json, $node, and built-in n8n variables. Use it — do not guess syntax from memory.</p></aside>
+</section>
+
+<section id="working-with-apis-the-http-request-node-credentials" aria-labelledby="working-with-apis-the-http-request-node-credentials-h">
+  <h2 id="working-with-apis-the-http-request-node-credentials-h">Working With APIs: The HTTP Request Node &amp; Credentials</h2>
+<p class="lede">How to call any REST API from n8n — including your Reading List API.</p>
+</section>
+
+<section id="credentials-storing-auth-securely" aria-labelledby="credentials-storing-auth-securely-h">
+  <h2 id="credentials-storing-auth-securely-h">Credentials: Storing Auth Securely</h2>
+<p>n8n stores API keys, passwords, and tokens in <strong>credentials</strong> — encrypted, named objects you create once and reference in nodes. Never paste secrets directly into node fields.</p>
+<aside class="note"><p>For your Reading List API (JWT)</p>
+<ol>
+<li>Go to <strong>Settings → Credentials → New</strong></li>
+<li>Choose <strong>Header Auth</strong></li>
+<li>Name: <code>Reading List API</code></li>
+<li>Header name: <code>Authorization</code></li>
+<li>Header value: <code>Bearer &lt;your-jwt&gt;</code></li>
+</ol></aside>
+<aside class="note"><p>For Anthropic (Claude)</p>
+<ol>
+<li>Create a <strong>Anthropic</strong> credential (type is built in)</li>
+<li>Paste your <code>sk-ant-...</code> API key</li>
+<li>Reference it in: AI Agent node → Model → Claude → Credential</li>
+<li>n8n encrypts and stores it — never visible in workflow JSON exports</li>
+</ol></aside>
+<aside class="note"><span class="note-label">Warning</span><p>Never export workflow JSON and commit it to git if it contains inline credentials. Always use the Credentials system — the workflow JSON will then contain only a credential reference ID, not the secret itself.</p></aside>
+</section>
+
+<section id="the-http-request-node" aria-labelledby="the-http-request-node-h">
+  <h2 id="the-http-request-node-h">The HTTP Request Node</h2>
+<p>The HTTP Request node calls any REST API. You configure it like a curl command — method, URL, headers, body. Use expressions to make values dynamic.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Field</th><th scope="col">Value for GET /api/books</th></tr></thead><tbody><tr><th scope="row">Method</th><td><code>GET</code></td></tr><tr><th scope="row">URL</th><td><code>http://localhost:3001/api/books</code></td></tr><tr><th scope="row">Authentication</th><td>Header Auth → Reading List API credential</td></tr><tr><th scope="row">Query Parameters</th><td>Optional: <code>status = unread</code></td></tr><tr><th scope="row">Response Format</th><td>JSON (default)</td></tr></tbody></table></div>
+<aside class="note"><p>For POST /api/books : set Method to POST, Body → JSON, and fill the body fields using expressions: {{ $json.title }}</p></aside>
+<aside class="note"><p>Dynamic URL with item ID</p></aside>
+<pre><code>Method: PATCH
+
+URL:
+http://localhost:3001/api/books/
+  {{ $json.id }}
+
+Body (JSON):
+{
+  "status": {{ $json.newStatus }}
+}
+
+← expression evaluates per item
+← $json.id from previous node</code></pre>
+</section>
+
+<section id="workflow-list-unread-books-format-send-to-slack" aria-labelledby="workflow-list-unread-books-format-send-to-slack-h">
+  <h2 id="workflow-list-unread-books-format-send-to-slack-h">Workflow: List Unread Books, Format, Send to Slack</h2>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Schedule (Every morning) → HTTP Request (GET /api/books?status=unread) → Split Out (books array → items) → Code (Format message) → Slack (Send message)</p></figure>
+<aside class="note"><p>Split Out node The API returns { "books": [...] } — one item, one array. Split Out extracts books and turns it into multiple items — one per book. Now downstream nodes process each book independently.</p></aside>
+<aside class="note"><p>Code node (JS) return items.map(item =&gt; ({ json: { text: `📚 ${item.json.title} by ${item.json.author}` } })); Transforms each book item into a formatted message string.</p></aside>
+</section>
+
+<section id="the-ai-layer-the-ai-agent-node" aria-labelledby="the-ai-layer-the-ai-agent-node-h">
+  <h2 id="the-ai-layer-the-ai-agent-node-h">The AI Layer: The AI Agent Node</h2>
+<p class="lede">How n8n implements the ReAct loop from E1 — without writing the loop yourself.</p>
+</section>
+
+<section id="the-ai-agent-node-what-it-does" aria-labelledby="the-ai-agent-node-what-it-does-h">
+  <h2 id="the-ai-agent-node-what-it-does-h">The AI Agent Node: What It Does</h2>
+<p>The AI Agent node runs the Reason → Act → Observe loop internally. You configure: the model, the tools it can use, the memory, and the system prompt. n8n handles the loop.</p>
+<aside class="note"><p>Configuration</p></aside>
+<div class="table-scroll"><table><thead><tr><th scope="col">Setting</th><th scope="col">What to put here</th></tr></thead><tbody><tr><th scope="row">Model</th><td>Claude (Anthropic credential) or OpenAI</td></tr><tr><th scope="row">System Prompt</th><td>The agent's role + constraints</td></tr><tr><th scope="row">Prompt (user)</th><td>The goal — usually from a previous node via expression</td></tr><tr><th scope="row">Tools</th><td>Sub-nodes connected below the agent node</td></tr><tr><th scope="row">Memory</th><td>Buffer Memory node (in-context) or external DB</td></tr></tbody></table></div>
+<aside class="note"><p>Tools are child nodes</p></aside>
+<pre><code>AI Agent
+├── HTTP Request Tool
+│     (GET /api/books)
+├── HTTP Request Tool
+│     (PATCH /api/books/:id)
+└── Code Tool
+      (custom logic)</code></pre>
+<p>Each child node is a tool the agent can call. The agent decides which one to invoke based on the task.</p>
+</section>
+
+<section id="ai-agent-workflow-summarise-and-categorise" aria-labelledby="ai-agent-workflow-summarise-and-categorise-h">
+  <h2 id="ai-agent-workflow-summarise-and-categorise-h">AI Agent Workflow: Summarise and Categorise</h2>
+<p>Goal: "For each unread book, look it up, summarise in one sentence what it covers, and suggest which category it belongs to."</p>
+<figure><figcaption>Workflow</figcaption><p class="figure-note">Webhook (Manual trigger) → HTTP Request (GET /api/books?status=unread) → Split Out (One item per book) → AI Agent (Claude + tools) → HTTP Request (PATCH /api/books/:id)</p></figure>
+<blockquote class="prompt"><span class="note-label">AI Agent — System Prompt</span><p>You are a reading assistant. For each book title given, write a one-sentence summary of what the book covers and suggest one category from: [Computer Science, Systems, Programming, Career, Other]. Return only JSON: {"summary": "...", "category": "..."}. Do not search the web — use your training knowledge.</p></blockquote>
+</section>
+
+<section id="how-to-read-an-n8n-workflow" aria-labelledby="how-to-read-an-n8n-workflow-h">
+  <h2 id="how-to-read-an-n8n-workflow-h">How to Read an n8n Workflow</h2>
+<p>When you open an unfamiliar workflow — or review one an AI has generated — work through these questions.</p>
+<ul>
+<li><strong>1</strong> &mdash; <strong>Where does it start?</strong> Find the trigger node (green border, leftmost). Is it a webhook, schedule, or manual trigger? What starts the workflow?</li>
+<li><strong>2</strong> &mdash; <strong>What data flows?</strong> Trace the item structure from the first HTTP Request node. Is the API response an array that needs Split Out? What fields does downstream logic reference?</li>
+<li><strong>3</strong> &mdash; <strong>Where are the credentials?</strong> Check each action node — is authentication configured via a credential, or is a key pasted inline? Inline keys are a problem.</li>
+<li><strong>4</strong> &mdash; <strong>What does the AI Agent do?</strong> Find the system prompt. List the tool nodes connected below it. Identify what the agent can read vs what it can modify.</li>
+<li><strong>5</strong> &mdash; <strong>Is there a human gate?</strong> For any irreversible action (send email, PATCH/DELETE a record), is there a "Wait for Approval" node before it executes?</li>
+</ul>
+</section>
+
+<section id="what-you-built-with-vs-what-you-learned" aria-labelledby="what-you-built-with-vs-what-you-learned-h">
+  <h2 id="what-you-built-with-vs-what-you-learned-h">What You Built With vs What You Learned</h2>
+<p>If you used an AI assistant to generate an n8n workflow (or asked it to explain one), answer these before moving to E3.</p>
+<blockquote class="prompt"><span class="note-label">Questions to answer without re-reading the AI's explanation</span><ul>
+<li>Name every node in the workflow. For each: what type is it, and what does it do?</li>
+<li>Find one expression in the workflow. Explain what data it reads and from where.</li>
+<li>Does the workflow handle multiple items at once? If so, where does it split or merge them?</li>
+<li>Where are credentials stored? Confirm no secrets appear in the workflow's node configuration fields.</li>
+<li>Is there any irreversible action? If so, is there a human gate before it?</li>
+</ul></blockquote>
+<aside class="note"><p>The goal is fluency, not memorisation. You should be able to look at any n8n workflow and narrate what it does — node by node — in plain English. That is the skill E3 and E4 build on.</p></aside>
+<aside class="note"><p>Up next — E3: Calling APIs in n8n. You will build the Reading List API connection hands-on: HTTP Request node, credential setup, expressions, Split Out, and a working CRUD workflow from trigger to result.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../n8n-fundamentals-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Build a Reading List workflow <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Build an n8n workflow that: (1) triggers on a schedule or manual run, (2) calls GET /api/books?status=unread on your Reading List API, (3) splits the result into individual items, and (4) logs each book title to n8n's output. Use a Header Auth credential — no inline tokens.
+      <ul><li>The HTTP Request node uses a credential, not an inline JWT</li><li>Split Out correctly turns the books array into individual items</li><li>The output of the workflow shows one item per book with the title field accessible</li></ul></dd></div>
+    <div><dt>Add an AI Agent node <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Extend your workflow from Assessment 1. After the Split Out node, add an AI Agent node that reads the book title and returns a one-sentence summary of what the book likely covers. Connect Claude via Anthropic credentials. Display the summary in the workflow output.
+      <ul><li>The AI Agent system prompt specifies the task clearly and constrains the output format</li><li>The Anthropic credential is configured — no API key visible in node fields</li><li>The agent output (summary) is accessible as a JSON field in the next node</li></ul></dd></div>
+    <div><dt>n8n vs code: when would you choose each? <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Compare building the "list unread books" workflow in n8n vs in Node.js (as you would have done in Track B). What does n8n make easier? What does it make harder or less flexible? Give a specific example of a task that belongs in code rather than n8n.
+      <ul><li>You named at least two concrete advantages of n8n for this task</li><li>You named at least one concrete limitation (not just "it's different")</li><li>Your code-preferred example is specific — you named the task and explained why code is better</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adding Authentication — accessible text version — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:44rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.9rem 1.1rem; border-radius:4px; margin:1.25rem 0; font-size:.97rem; }
+  .note p { margin:.4rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  .note .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.25rem; }
+  nav.toc { margin:1.5rem 0 2.5rem; }
+  nav.toc h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border:0; margin:0 0 .5rem; padding:0; }
+  nav.toc ol { margin:0; padding-left:1.4rem; } nav.toc li { margin:.3rem 0; }
+  section { margin:2.75rem 0; }
+  h2 { font-size:1.4rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  section:first-of-type h2 { border-top:0; padding-top:0; }
+  h3 { font-size:1.08rem; margin:1.5rem 0 .5rem; }
+  p { margin:.85rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.35rem 0; }
+  .narration { color:var(--text); }
+  figure { margin:1.1rem 0; }
+  figcaption { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
+  .figure-note { font-size:.9rem; color:var(--muted); font-style:italic; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.9rem; line-height:1.6; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.92em; }
+  blockquote.prompt { margin:1.1rem 0; padding:.8rem 1.1rem; border-left:4px solid var(--accent); background:var(--card-bg); border-radius:4px; }
+  blockquote.prompt .note-label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:30rem; font-size:.95rem; }
+  caption { text-align:left; font-weight:600; margin-bottom:.5rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  .checkpoint { border:1px dashed var(--rule); border-radius:4px; padding:.7rem 1rem; color:var(--muted); font-size:.95rem; margin:1.25rem 0; }
+  dl.tasks div { padding:.7rem 0; border-bottom:1px solid var(--rule); }
+  dl.tasks dt { font-weight:700; }
+  dl.tasks dd { margin:.3rem 0 0; color:var(--muted); }
+  dl.tasks ul { margin:.3rem 0 0; }
+  footer.doc { margin-top:3.5rem; padding-top:1.5rem; border-top:2px solid var(--rule); font-size:.92rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">B3 &middot; Backend API</p>
+  <h1>Adding Authentication</h1>
+  <p class="lede">JWT, bcrypt, middleware, protected routes</p>
+</header>
+
+<div class="note">
+  <span class="note-label">Accessible text version</span>
+  <p>This is the plain, linear text version of an interactive slide deck: no slideshow controls, no scripted animation. It responds normally to browser zoom and to screen readers.</p>
+  <p><a href="../auth-workshop.html">Open the interactive deck</a> &nbsp;&middot;&nbsp; <a href="./">All accessible versions</a> &nbsp;&middot;&nbsp; <a href="../index.html">Course home</a></p>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <h2>On this page</h2>
+  <ol>
+    <li><a href="#authentication-vs-authorisation">Authentication vs Authorisation</a></li>
+    <li><a href="#four-ways-to-authenticate-an-api">Four Ways to Authenticate an API</a></li>
+    <li><a href="#part-1-understanding-jwt">Part 1: Understanding JWT</a></li>
+    <li><a href="#a-jwt-is-three-base64-strings-joined-by-dots">A JWT is Three Base64 Strings Joined by Dots</a></li>
+    <li><a href="#what-goes-inside-claims">What Goes Inside — Claims</a></li>
+    <li><a href="#how-jwt-authentication-works-end-to-end">How JWT Authentication Works End-to-End</a></li>
+    <li><a href="#part-2-building-it-the-code">Part 2: Building It — The Code</a></li>
+    <li><a href="#five-changes-to-the-existing-app">Five Changes to the Existing App</a></li>
+    <li><a href="#the-users-table">The Users Table</a></li>
+    <li><a href="#bcrypt-why-we-hash-passwords">bcrypt — Why We Hash Passwords</a></li>
+    <li><a href="#the-register-route">The Register Route</a></li>
+    <li><a href="#the-login-route">The Login Route</a></li>
+    <li><a href="#the-middleware-function">The Middleware Function</a></li>
+    <li><a href="#wiring-it-all-together">Wiring It All Together</a></li>
+    <li><a href="#part-3-testing-auth-with-curl">Part 3: Testing Auth with curl</a></li>
+    <li><a href="#register-login-capture-the-token">Register, Login, Capture the Token</a></li>
+    <li><a href="#the-authorization-bearer-pattern">The Authorization: Bearer Pattern</a></li>
+    <li><a href="#verify-every-failure-mode">Verify Every Failure Mode</a></li>
+    <li><a href="#decoding-a-jwt-it-s-just-base64">Decoding a JWT — It's Just Base64</a></li>
+    <li><a href="#part-4-the-alternatives">Part 4: The Alternatives</a></li>
+    <li><a href="#session-tokens-simple-and-revokable">Session Tokens — Simple and Revokable</a></li>
+    <li><a href="#api-keys-for-machine-to-machine">API Keys — For Machine-to-Machine</a></li>
+    <li><a href="#oauth-2-0-openid-connect-delegated-identity">OAuth 2.0 / OpenID Connect — Delegated Identity</a></li>
+    <li><a href="#when-to-use-which">When to Use Which</a></li>
+    <li><a href="#jwt-security-what-to-get-right">JWT Security — What to Get Right</a></li>
+    <li><a href="#key-takeaways">Key Takeaways</a></li>
+    <li><a href="#where-to-go-from-here">Where to Go From Here</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+<section id="objectives" aria-labelledby="objectives-h">
+  <h2 id="objectives-h">What you'll be able to do</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul>
+    <li>Explain how JWT works: structure (header, payload, signature), signing, and verification</li>
+    <li>Implement user registration with bcrypt password hashing and safe, uniform error messages</li>
+    <li>Build an Express authentication middleware that verifies JWTs and attaches the payload to req.user</li>
+    <li>Protect routes by composing middleware and trace the full auth flow from request to response</li>
+    <li>Apply JWT security best practices: secret management, token expiry, payload content, and revocation limitations</li>
+  </ul>
+</section>
+
+<section id="authentication-vs-authorisation" aria-labelledby="authentication-vs-authorisation-h">
+  <h2 id="authentication-vs-authorisation-h">Authentication vs Authorisation</h2>
+<p>These two words are often confused. They solve different problems and live in different parts of your code.</p>
+<aside class="note"><p>Authentication "Who are you?"</p>
+<p>Verifying identity. The user proves they are who they claim to be — typically with a password, a token, or a biometric.</p>
+<p><strong>Examples:</strong> logging in with email + password, OAuth with Google, a hardware security key.</p>
+<p><strong>In our app:</strong> <code>POST /auth/login</code> — verify password, issue a JWT.</p></aside>
+<aside class="note"><p>Authorisation "What are you allowed to do?"</p>
+<p>Determining what an authenticated identity is permitted to access or modify. You can be logged in but not permitted to do everything.</p>
+<p><strong>Examples:</strong> admin vs regular user, read-only vs read-write, your books vs other users' books.</p>
+<p><strong>In our app:</strong> future work — for now, any authenticated user can do everything.</p></aside>
+<aside class="note"><p>This workshop covers authentication only. Authorisation (roles, permissions, ownership) is the natural next step once auth is working.</p></aside>
+</section>
+
+<section id="four-ways-to-authenticate-an-api" aria-labelledby="four-ways-to-authenticate-an-api-h">
+  <h2 id="four-ways-to-authenticate-an-api-h">Four Ways to Authenticate an API</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Approach</th><th scope="col">How it works</th><th scope="col">Best for</th><th scope="col">Used in this workshop</th></tr></thead><tbody><tr><th scope="row"><strong>Session tokens</strong></th><td>Server generates a random token, stores it in the database with an expiry. Client sends it in a header on every request. Server looks it up.</td><td>Traditional web apps, admin dashboards, anywhere you need instant revocation</td><td>Vibe Coding Study admin API — <code>x-admin-token</code> header</td></tr><tr><th scope="row"><strong>JSON Web Tokens (JWT)</strong></th><td>Server signs a token containing the user's identity. Client sends it in <code>Authorization: Bearer</code>. Server verifies the signature — no DB lookup needed.</td><td>Scalable APIs, microservices, mobile apps, SPAs</td><td><strong>← This workshop</strong></td></tr><tr><th scope="row"><strong>API keys</strong></th><td>Long-lived credentials, often stored as a hash in the database. Client sends them in a header or query parameter.</td><td>Machine-to-machine (server to server), developer APIs (Stripe, GitHub)</td><td>—</td></tr><tr><th scope="row"><strong>OAuth 2.0 / OIDC</strong></th><td>"Sign in with Google/GitHub." You delegate identity verification to a trusted third party. You receive an access token.</td><td>Consumer apps where users already have Google/GitHub accounts</td><td>—</td></tr></tbody></table></div>
+</section>
+
+<section id="part-1-understanding-jwt" aria-labelledby="part-1-understanding-jwt-h">
+  <h2 id="part-1-understanding-jwt-h">Part 1: Understanding JWT</h2>
+<p class="lede">Before writing a line of code — understand exactly what a JWT is, what it contains, and why it can be trusted.</p>
+</section>
+
+<section id="a-jwt-is-three-base64-strings-joined-by-dots" aria-labelledby="a-jwt-is-three-base64-strings-joined-by-dots-h">
+  <h2 id="a-jwt-is-three-base64-strings-joined-by-dots-h">A JWT is Three Base64 Strings Joined by Dots</h2>
+<p>Every JWT looks like this — three sections, each separately encoded, joined by <code>.</code></p>
+<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTcwOTU1MjAwMCwiZXhwIjoxNzA5NjM4NDAwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</code></pre>
+<aside class="note"><p>Header Algorithm + token type. Decodes to: {"alg":"HS256","typ":"JWT"}</p></aside>
+<aside class="note"><p>Payload The claims — who you are, when the token expires. Decodes to: {"sub":1,"email":"user@example.com","exp":...}</p></aside>
+<aside class="note"><p>Signature HMAC of header + payload, signed with the server's JWT_SECRET. Cannot be faked without the secret.</p></aside>
+</section>
+
+<section id="what-goes-inside-claims" aria-labelledby="what-goes-inside-claims-h">
+  <h2 id="what-goes-inside-claims-h">What Goes Inside — Claims</h2>
+<p>The payload is a JSON object of <em>claims</em> — statements about the user and the token itself. Standard claim names are short for compactness.</p>
+<figure><figcaption>JWT payload (decoded)</figcaption><pre><code>{
+  "sub":   1,                    // subject — the user's id in your database
+  "email": "user@example.com",  // custom claim we added
+  "iat":   1709552000,           // issued at — Unix timestamp
+  "exp":   1709638400            // expires at — 24 hours after iat
+}</code></pre></figure>
+<aside class="note"><span class="note-label">Gotcha</span><p>⚠ The payload is NOT encrypted It is only Base64-encoded — anyone can decode it and read it. Never put passwords, credit card numbers, or secrets in a JWT payload. Only put data that is safe to be public: user id, email, role.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>The signature IS tamper-proof If anyone modifies the payload (e.g., changes sub: 1 to sub: 99 ), the signature no longer matches. jwt.verify() throws an error and the request is rejected.</p></aside>
+</section>
+
+<section id="how-jwt-authentication-works-end-to-end" aria-labelledby="how-jwt-authentication-works-end-to-end-h">
+  <h2 id="how-jwt-authentication-works-end-to-end-h">How JWT Authentication Works End-to-End</h2>
+<pre><code>Registration (once)
+  POST /auth/register { email, password }
+  → Server hashes password with bcrypt → stores in users table
+  → Returns { id, email, created_at }       ← no token yet
+
+Login
+  POST /auth/login { email, password }
+  → Server fetches user from DB, runs bcrypt.compare()
+  → If valid: jwt.sign({ sub: id, email }, JWT_SECRET, { expiresIn: '24h' })
+  → Returns { token: "eyJ..." }             ← client stores this token
+
+Every protected request
+  GET /api/books
+  Authorization: Bearer eyJ...
+  → Middleware calls jwt.verify(token, JWT_SECRET)
+  → If valid: attaches payload to req.user, calls next()
+  → Route handler runs                      ← response returned
+
+  The server never stores the token. No DB lookup on every request.
+  The secret is the only thing that must be kept safe.</code></pre>
+</section>
+
+<section id="part-2-building-it-the-code" aria-labelledby="part-2-building-it-the-code-h">
+  <h2 id="part-2-building-it-the-code-h">Part 2: Building It — The Code</h2>
+<p class="lede">Five changes to the Reading List API. Every file, every line, explained.</p>
+</section>
+
+<section id="five-changes-to-the-existing-app" aria-labelledby="five-changes-to-the-existing-app-h">
+  <h2 id="five-changes-to-the-existing-app-h">Five Changes to the Existing App</h2>
+<pre><code>reading-list-api/
+├── package.json              ← add bcrypt + jsonwebtoken
+├── .env.example             ← add JWT_SECRET
+├── schema.sql               ← add users table
+├── db.js                    (unchanged)
+├── auth.js                  ← NEW: register + login routes
+├── middleware/
+│   └── authenticate.js      ← NEW: JWT verification middleware
+└── server.js               ← add authenticate to book routes</code></pre>
+<aside class="note"><p>Two new packages:</p>
+<ul>
+<li><code>bcrypt</code> — hashes passwords before storing</li>
+<li>One-way: verify a password against a hash, but cannot reverse</li>
+<li><code>jsonwebtoken</code> — signs and verifies JWTs using your secret</li>
+</ul></aside>
+<aside class="note"><p>The middleware pattern:</p>
+<ul>
+<li>Runs <em>between</em> receiving a request and the route handler</li>
+<li>Verifies the JWT and attaches the user to <code>req.user</code></li>
+<li>Calls <code>next()</code> to proceed, or returns 401 to reject</li>
+</ul></aside>
+</section>
+
+<section id="the-users-table" aria-labelledby="the-users-table-h">
+  <h2 id="the-users-table-h">The Users Table</h2>
+<figure><figcaption>schema.sql — users table</figcaption><pre><code>CREATE TABLE IF NOT EXISTS users (
+  id            SERIAL PRIMARY KEY,
+  email         TEXT  UNIQUE NOT NULL,
+  password_hash TEXT  NOT NULL,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre></figure>
+<ul>
+<li><strong>UNIQUE</strong> &mdash; <strong>Unique constraint</strong> on email — the database rejects duplicate registrations with error code <code>23505</code>. Our register route catches this and returns 409 Conflict.</li>
+<li><strong>password_hash</strong> &mdash; <strong>Never store passwords.</strong> We store only the bcrypt hash. Even if the database is compromised, an attacker cannot recover the original passwords.</li>
+<li><strong>NOT password</strong> &mdash; The column is deliberately named <code>password_hash</code> to make it obvious in code reviews that this is a hash, not a plaintext password.</li>
+</ul>
+<aside class="note"><span class="note-label">Warning</span><p>Run the migration: psql $DATABASE_URL -c "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());"</p></aside>
+</section>
+
+<section id="bcrypt-why-we-hash-passwords" aria-labelledby="bcrypt-why-we-hash-passwords-h">
+  <h2 id="bcrypt-why-we-hash-passwords-h">bcrypt — Why We Hash Passwords</h2>
+<figure><figcaption>How bcrypt works</figcaption><pre><code>import bcrypt from 'bcrypt';
+
+// On registration — hash once, store forever
+const hash = await bcrypt.hash('my-password', 12);
+// → "$2b$12$X9fKh3mN..." (60 characters)
+
+// On login — compare, never reverse
+const valid = await bcrypt.compare('my-password', hash);
+// → true (correct password)
+
+const valid2 = await bcrypt.compare('wrong', hash);
+// → false (wrong password)</code></pre></figure>
+<aside class="note"><span class="note-label">Key concept</span><p>The salt rounds (12): bcrypt deliberately runs slowly — 2¹² = 4096 iterations. This means an attacker brute-forcing millions of password guesses per second is slowed to a few hundred per second. Higher rounds = more security, but slower login.</p></aside>
+<aside class="note"><p>Salted by default: bcrypt automatically generates a random salt and embeds it in the hash. Two users with the same password will have different hashes. You never handle the salt explicitly.</p></aside>
+<aside class="note"><span class="note-label">Gotcha</span><p>bcrypt is one-way. You cannot recover a password from a hash. If a user forgets their password, you must let them reset it — you cannot "look it up".</p></aside>
+</section>
+
+<section id="the-register-route" aria-labelledby="the-register-route-h">
+  <h2 id="the-register-route-h">The Register Route</h2>
+<figure><figcaption>auth.js — POST /auth/register</figcaption><pre><code>router.post('/register', async (req, res) =&gt; {
+  const { email, password } = req.body;
+
+  // Validate inputs
+  if (!email || !password)
+    return res.status(400).json({ error: 'email and password required' });
+  if (password.length &lt; 8)
+    return res.status(400).json({ error: 'password must be ≥ 8 characters' });
+
+  // Hash the password — never store the plaintext
+  const hash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  try {
+    const result = await query(
+      `INSERT INTO users (email, password_hash)
+       VALUES ($1, $2) RETURNING id, email, created_at`,
+      [email, hash]
+    );
+    res.status(201).json(result.rows[0]);
+
+  } catch (err) {
+    // PostgreSQL unique constraint violation = duplicate email
+    if (err.code === '23505')
+      return res.status(409).json({ error: 'email already registered' });
+    throw err;
+  }
+});</code></pre></figure>
+<ul>
+<li><strong>400</strong> &mdash; <strong>Bad Request</strong> for missing fields or weak password — client error, client should fix it</li>
+<li><strong>409</strong> &mdash; <strong>Conflict</strong> for duplicate email — the resource already exists</li>
+<li><strong>err.code 23505</strong> &mdash; PostgreSQL's error code for UNIQUE constraint violation — we catch it to return a helpful message instead of a 500</li>
+<li><strong>RETURNING</strong> &mdash; Returns id, email, created_at — but <strong>never</strong> password_hash</li>
+</ul>
+</section>
+
+<section id="the-login-route" aria-labelledby="the-login-route-h">
+  <h2 id="the-login-route-h">The Login Route</h2>
+<figure><figcaption>auth.js — POST /auth/login</figcaption><pre><code>router.post('/login', async (req, res) =&gt; {
+  const { email, password } = req.body;
+
+  // Fetch user by email
+  const result = await query(
+    'SELECT * FROM users WHERE email = $1', [email]
+  );
+  if (result.rows.length === 0)
+    return res.status(401).json({ error: 'Invalid credentials' });
+
+  // Verify password against stored hash
+  const user = result.rows[0];
+  const valid = await bcrypt.compare(password, user.password_hash);
+  if (!valid)
+    return res.status(401).json({ error: 'Invalid credentials' });
+
+  // Sign a JWT — valid for 24 hours
+  const token = jwt.sign(
+    { sub: user.id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+  res.json({ token });
+});</code></pre></figure>
+<ul>
+<li><strong>401</strong> &mdash; <strong>Same error message</strong> for "user not found" and "wrong password" — never reveal which one is true, or an attacker can enumerate valid emails</li>
+<li><strong>jwt.sign</strong> &mdash; Creates the token. Payload: <code>{sub, email}</code>. Secret from env. Expiry: 24h. The library encodes, signs, and base64-encodes automatically.</li>
+<li><strong>JWT_SECRET</strong> &mdash; Must be a long, random, kept-private string. If an attacker learns it, they can forge tokens for any user.</li>
+</ul>
+</section>
+
+<section id="the-middleware-function" aria-labelledby="the-middleware-function-h">
+  <h2 id="the-middleware-function-h">The Middleware Function</h2>
+<figure><figcaption>middleware/authenticate.js</figcaption><pre><code>import jwt from 'jsonwebtoken';
+
+export function authenticate(req, res, next) {
+
+  // 1. Extract token from Authorization header
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  // 2. Strip "Bearer " prefix to get the token string
+  const token = authHeader.slice(7);
+
+  try {
+    // 3. Verify signature + expiry
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // 4. Attach user info to request for route handlers to use
+    req.user = payload;
+    next();  // ← pass control to the route handler
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+}</code></pre></figure>
+<ul>
+<li><strong>next()</strong> &mdash; The Express middleware signature is always <code>(req, res, next)</code>. Calling <code>next()</code> tells Express to proceed to the next handler. Not calling it stops the chain.</li>
+<li><strong>req.user</strong> &mdash; After verification, we attach the decoded payload to <code>req</code>. Route handlers can then read <code>req.user.sub</code> (the user id) or <code>req.user.email</code>.</li>
+<li><strong>jwt.verify</strong> &mdash; Throws if the signature is invalid or the token has expired. The catch block returns 401 in both cases.</li>
+</ul>
+</section>
+
+<section id="wiring-it-all-together" aria-labelledby="wiring-it-all-together-h">
+  <h2 id="wiring-it-all-together-h">Wiring It All Together</h2>
+<figure><figcaption>server.js — changes only</figcaption><pre><code>// Add two new imports at the top
+import authRouter     from './auth.js';
+import { authenticate } from './middleware/authenticate.js';
+
+// Mount the auth router — no authentication required on these routes
+app.use('/auth', authRouter);     // POST /auth/register, POST /auth/login
+
+// Add authenticate as the second argument to every books route
+app.get('/api/books',        authenticate, async (req, res) =&gt; { ... });
+app.get('/api/books/stats',  authenticate, async (req, res) =&gt; { ... });
+app.get('/api/books/:id',    authenticate, async (req, res) =&gt; { ... });
+app.post('/api/books',       authenticate, async (req, res) =&gt; { ... });
+app.patch('/api/books/:id',  authenticate, async (req, res) =&gt; { ... });
+app.delete('/api/books/:id', authenticate, async (req, res) =&gt; { ... });</code></pre></figure>
+<aside class="note"><span class="note-label">Tip</span><p>The middleware pattern: Express route handlers accept (method, path, ...handlers). By inserting authenticate before the async function, Express runs it first. If authenticate calls next(), the async function runs. If it returns 401, the async function never runs.</p></aside>
+</section>
+
+<section id="part-3-testing-auth-with-curl" aria-labelledby="part-3-testing-auth-with-curl-h">
+  <h2 id="part-3-testing-auth-with-curl-h">Part 3: Testing Auth with curl</h2>
+<p class="lede">Register, log in, capture the JWT, use it — and verify every error case.</p>
+</section>
+
+<section id="register-login-capture-the-token" aria-labelledby="register-login-capture-the-token-h">
+  <h2 id="register-login-capture-the-token-h">Register, Login, Capture the Token</h2>
+<figure><figcaption>bash — register + login</figcaption><pre><code># Register a new user
+$ curl -s -X POST http://localhost:3001/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"correct-horse-battery"}' \
+  | jq .
+{ "id": 1, "email": "alice@example.com", "created_at": "2026-03-04T..." }
+
+# Login and capture the JWT in one step
+$ TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"correct-horse-battery"}' \
+  | jq -r '.token')
+
+# Confirm token was captured (first 50 chars)
+$ echo ${TOKEN:0:50}
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE...</code></pre></figure>
+<aside class="note"><p>The token is stored in $TOKEN for the rest of the shell session. No copy-pasting. Every subsequent request reuses it automatically.</p></aside>
+</section>
+
+<section id="the-authorization-bearer-pattern" aria-labelledby="the-authorization-bearer-pattern-h">
+  <h2 id="the-authorization-bearer-pattern-h">The Authorization: Bearer Pattern</h2>
+<figure><figcaption>bash — authenticated requests</figcaption><pre><code># Add a book — note Authorization: Bearer header
+$ curl -s -X POST http://localhost:3001/api/books \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"The Pragmatic Programmer","author":"Hunt &amp; Thomas"}' \
+  | jq {id,title,status}'
+{ "id": 1, "title": "The Pragmatic Programmer", "status": "want-to-read" }
+
+# Fetch books
+$ curl -s http://localhost:3001/api/books \
+  -H "Authorization: Bearer $TOKEN" \
+  | jq '.[].title'
+"The Pragmatic Programmer"
+
+# Mark it as done with a rating
+$ curl -s -X PATCH http://localhost:3001/api/books/1 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"done","rating":5}' \
+  | jq '{status,rating}'
+{ "status": "done", "rating": 5 }</code></pre></figure>
+</section>
+
+<section id="verify-every-failure-mode" aria-labelledby="verify-every-failure-mode-h">
+  <h2 id="verify-every-failure-mode-h">Verify Every Failure Mode</h2>
+<figure><figcaption>bash — auth error cases</figcaption><pre><code># No token at all
+$ curl -s http://localhost:3001/api/books | jq .
+{ "error": "No token provided" }   ← 401
+
+# Malformed token
+$ curl -s http://localhost:3001/api/books \
+  -H "Authorization: Bearer not-a-real-jwt" | jq .
+{ "error": "Invalid or expired token" }   ← 401
+
+# Duplicate email registration
+$ curl -s -X POST http://localhost:3001/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"another-password"}' | jq .
+{ "error": "email already registered" }   ← 409
+
+# Wrong password
+$ curl -s -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"wrong"}' | jq .
+{ "error": "Invalid credentials" }   ← 401 (same message as "user not found")</code></pre></figure>
+</section>
+
+<section id="decoding-a-jwt-it-s-just-base64" aria-labelledby="decoding-a-jwt-it-s-just-base64-h">
+  <h2 id="decoding-a-jwt-it-s-just-base64-h">Decoding a JWT — It's Just Base64</h2>
+<p>The payload is not encrypted — only signed. You can decode and read it without the secret.</p>
+<figure><figcaption>bash — decode JWT payload</figcaption><pre><code># A JWT has three parts: header.payload.signature
+# Extract the payload (part 2) and base64-decode it
+$ echo $TOKEN | cut -d. -f2 | base64 -d 2&gt;/dev/null | jq .
+
+{
+  "sub": 1,
+  "email": "alice@example.com",
+  "iat": 1709552000,
+  "exp": 1709638400
+}
+
+# Convert exp to a human-readable date
+$ date -r 1709638400
+Wed  5 Mar 2026 10:00:00 GMT   ← 24 hours after login</code></pre></figure>
+<aside class="note"><span class="note-label">Gotcha</span><p>⚠ The payload is visible to anyone who has the token. The token travels over the network (HTTPS encrypts it in transit, but not at rest). Never put anything sensitive in the payload.</p></aside>
+<aside class="note"><span class="note-label">Key concept</span><p>But nobody can forge it. Changing "sub": 1 to "sub": 99 would invalidate the signature. jwt.verify() would throw and the request would get 401.</p></aside>
+</section>
+
+<section id="part-4-the-alternatives" aria-labelledby="part-4-the-alternatives-h">
+  <h2 id="part-4-the-alternatives-h">Part 4: The Alternatives</h2>
+<p class="lede">JWT is not always the right choice. Understanding the tradeoffs helps you pick the right tool.</p>
+</section>
+
+<section id="session-tokens-simple-and-revokable" aria-labelledby="session-tokens-simple-and-revokable-h">
+  <h2 id="session-tokens-simple-and-revokable-h">Session Tokens — Simple and Revokable</h2>
+<aside class="note"><p>How it works:</p>
+<ol>
+<li>User logs in → server generates a 32-byte random token</li>
+<li>Token stored in <code>sessions</code> table with <code>user_id</code> + <code>expires_at</code></li>
+<li>Client sends token in header: <code>x-session-token: abc123</code></li>
+<li>Server does <code>SELECT * FROM sessions WHERE token=$1 AND expires_at &gt; NOW()</code></li>
+</ol></aside>
+<aside class="note"><p>Instant revocation: delete the row from the sessions table and the token stops working immediately — no need to wait for expiry.</p></aside>
+<aside class="note"><p>Advantages over JWT:</p>
+<ul>
+<li>Can revoke a specific session instantly (logout, security breach)</li>
+<li>Simpler to reason about — it's just a database lookup</li>
+<li>Payload is not visible to the client</li>
+</ul></aside>
+<aside class="note"><p>Disadvantages vs JWT:</p>
+<ul>
+<li>Database lookup on <em>every</em> request (slower at scale)</li>
+<li>Doesn't work across multiple servers without a shared DB</li>
+</ul></aside>
+<aside class="note"><p>Used in: the Vibe Coding Study admin API — admin_sessions table, x-admin-token header.</p></aside>
+</section>
+
+<section id="api-keys-for-machine-to-machine" aria-labelledby="api-keys-for-machine-to-machine-h">
+  <h2 id="api-keys-for-machine-to-machine-h">API Keys — For Machine-to-Machine</h2>
+<aside class="note"><p>How it works:</p>
+<ul>
+<li>Admin generates a long random key: <code>sk-abc123...</code></li>
+<li>Key (or its hash) stored in the database</li>
+<li>Client sends it in every request: <code>Authorization: Bearer sk-abc123...</code> or <code>X-API-Key: sk-abc123...</code></li>
+<li>Server looks it up in the DB</li>
+</ul></aside>
+<aside class="note"><p>Best for: server-to-server communication where a human doesn't log in. A cronjob hitting your API. A CI pipeline deploying your app. A third-party service calling a webhook.</p></aside>
+<aside class="note"><p>Limitations: keys are usually long-lived (no automatic expiry) — if leaked, they must be manually rotated. Not suitable for end-user authentication.</p></aside>
+<aside class="note"><p>You've seen this pattern everywhere: Stripe sk_live_..., OpenAI sk-proj-..., Anthropic sk-ant-... — all API keys.</p></aside>
+</section>
+
+<section id="oauth-2-0-openid-connect-delegated-identity" aria-labelledby="oauth-2-0-openid-connect-delegated-identity-h">
+  <h2 id="oauth-2-0-openid-connect-delegated-identity-h">OAuth 2.0 / OpenID Connect — Delegated Identity</h2>
+<pre><code>User            Your App           Google
+
+  1. Click "Sign in with Google"
+         ↓
+  2.                ──redirect──▶
+  3.                             User logs in at Google
+  4.                ◀──code─────
+  5. Exchange code for tokens ──▶
+  6.                ◀──id_token──
+  7. Verify token, extract email
+  8. Create/find user in your DB
+  9. Issue your own JWT/session
+  ↑ your app never sees the password</code></pre>
+<aside class="note"><p>Advantages:</p>
+<ul>
+<li>You never handle passwords at all</li>
+<li>Users trust Google/GitHub more than you</li>
+<li>MFA comes free (if the user has it on Google)</li>
+<li>No "forgot password" flow to build</li>
+</ul></aside>
+<aside class="note"><p>Complexity cost: OAuth involves redirect flows, PKCE, token exchange, and handling multiple providers. Libraries like passport.js or lucia-auth do the heavy lifting, but there is still significant setup.</p></aside>
+<aside class="note"><p>When to use it: consumer-facing apps where users have Google/GitHub accounts. Not worth the complexity for internal tools or research platforms.</p></aside>
+</section>
+
+<section id="when-to-use-which" aria-labelledby="when-to-use-which-h">
+  <h2 id="when-to-use-which-h">When to Use Which</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Approach</th><th scope="col">Revokable?</th><th scope="col">DB lookup per request?</th><th scope="col">Best for</th></tr></thead><tbody><tr><th scope="row"><strong>JWT</strong> ← this workshop</th><td>Not without a denylist</td><td>No — stateless</td><td>Scalable APIs, mobile apps, SPAs, microservices</td></tr><tr><th scope="row"><strong>Session tokens</strong></th><td>Yes — delete the row</td><td>Yes — every request</td><td>Admin tools, anything needing instant logout/revoke</td></tr><tr><th scope="row"><strong>API keys</strong></th><td>Yes — delete the row</td><td>Yes</td><td>Machine-to-machine, developer APIs, CI/CD pipelines</td></tr><tr><th scope="row"><strong>OAuth 2.0 / OIDC</strong></th><td>Depends on provider</td><td>No (token-based)</td><td>Consumer apps — "Sign in with Google/GitHub"</td></tr></tbody></table></div>
+<aside class="note"><p>Practical rule: JWT for new APIs where scalability matters. Session tokens if you need instant revocation or are building something simple. OAuth when your users are consumers who already have Google/GitHub. API keys for machine-to-machine only.</p></aside>
+</section>
+
+<section id="jwt-security-what-to-get-right" aria-labelledby="jwt-security-what-to-get-right-h">
+  <h2 id="jwt-security-what-to-get-right-h">JWT Security — What to Get Right</h2>
+<ul>
+<li><strong>!</strong> &mdash; <strong>Keep JWT_SECRET secret and long.</strong> At least 32 random characters. Generate with: <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code>. Never commit it.</li>
+<li><strong>!</strong> &mdash; <strong>Always verify with jwt.verify(), never jwt.decode().</strong> <code>decode()</code> skips signature verification — it just base64-decodes. Using it for auth is like accepting a passport without checking if it's real.</li>
+<li><strong>!</strong> &mdash; <strong>Set a short expiry.</strong> <code>expiresIn: '24h'</code> is reasonable. Avoid "never expires" tokens — if one is leaked, the damage is unbounded.</li>
+<li><strong>~</strong> &mdash; <strong>Use HTTPS in production.</strong> JWT tokens in headers are encrypted by TLS — but only in transit. If you use HTTP, tokens can be intercepted.</li>
+<li><strong>✓</strong> &mdash; <strong>Never put sensitive data in the payload.</strong> It is readable by anyone who has the token. User id and email are fine. Passwords, credit card numbers, admin flags — never.</li>
+<li><strong>✓</strong> &mdash; <strong>Same error message for wrong email and wrong password.</strong> Returning different messages lets attackers enumerate valid accounts.</li>
+</ul>
+</section>
+
+<section id="key-takeaways" aria-labelledby="key-takeaways-h">
+  <h2 id="key-takeaways-h">Key Takeaways</h2>
+<ol>
+<li><strong>Authentication = who you are. Authorisation = what you can do.</strong> They are separate problems solved separately.</li>
+<li><strong>Never store plaintext passwords.</strong> Always hash with bcrypt using at least 12 salt rounds. You can never reverse a bcrypt hash.</li>
+<li><strong>A JWT is signed, not encrypted.</strong> The payload is readable by anyone. Put only non-sensitive identity data inside (<code>sub</code>, <code>email</code>).</li>
+<li><strong>Middleware is the right place for auth.</strong> One function, added to every protected route as a second argument. Routes stay clean.</li>
+<li><strong>Return the same error for wrong email and wrong password.</strong> Different messages let attackers enumerate valid accounts.</li>
+<li><strong>JWT_SECRET must be secret, long, and random.</strong> It is the only thing protecting every user account in your system.</li>
+</ol>
+</section>
+
+<section id="where-to-go-from-here" aria-labelledby="where-to-go-from-here-h">
+  <h2 id="where-to-go-from-here-h">Where to Go From Here</h2>
+<aside class="note"><p>Authorisation — per-user data Add <code>user_id</code> to the books table. Use <code>req.user.sub</code> in queries so users only see their own books: <code>WHERE user_id = $1</code>. Return 403 if someone tries to modify another user's book.</p></aside>
+<aside class="note"><p>Refresh tokens Short-lived access tokens (15 min) + long-lived refresh tokens (30 days, stored in DB). Better security: a leaked access token expires quickly. Clients use the refresh token to get a new access token silently.</p></aside>
+<aside class="note"><p>Rate limiting Protect <code>/auth/login</code> from brute-force attacks. Add <code>express-rate-limit</code>: max 5 login attempts per IP per 15 minutes. Prompt: "Add rate limiting to the auth routes using express-rate-limit."</p></aside>
+<aside class="note"><p>Next up — Workshop 3: Testing the fully authenticated Reading List API end-to-end with curl. Register → login → CRUD cycle → error verification → stats.</p></aside>
+</section>
+<p class="checkpoint">This deck has 2 checkpoint quizzes. The questions are interactive and randomised &mdash; take them in the <a href="../auth-workshop.html">interactive deck</a>.</p>
+<section id="practical" aria-labelledby="practical-h">
+  <h2 id="practical-h">Practical work</h2>
+  <dl class="tasks">
+    <div><dt>Extend JWT middleware <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Add a role field to your JWT payload (user or admin). Create a requireAdmin middleware that returns 403 if role !== "admin". Add one admin-only route and test it with curl using both token types.
+      <ul><li>Both token types (user and admin) are tested with curl and return the correct status codes</li><li>The admin route returns 403 (not 401) for a valid but non-admin token</li><li>You can explain why the role check happens after signature verification, not before</li></ul></dd></div>
+    <div><dt>Test token rejection <span style="font-weight:400;color:var(--muted)">(practical)</span></dt><dd>Using curl: (1) make a request with no token, (2) with a tampered token, (3) with a correctly expired token. Confirm your middleware returns 401 in all three cases.
+      <ul><li>You tested all three cases and can show the curl commands you used</li><li>All three return 401 (not 500, not 200)</li><li>You know which part of the middleware catches each type of failure</li></ul></dd></div>
+    <div><dt>bcrypt and security <span style="font-weight:400;color:var(--muted)">(reflect)</span></dt><dd>Why do we store a bcrypt hash rather than the original password? What would an attacker need to crack it? What does the work factor (salt rounds) control, and what are the trade-offs?
+      <ul><li>You explained what a rainbow table attack is and why bcrypt prevents it</li><li>You described what the work factor controls (iterations / compute time per hash)</li><li>You identified the trade-off: a higher work factor makes login deliberately slower</li></ul></dd></div>
+  </dl>
+</section>
+</main>
+
+<footer class="doc">
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+</footer>
+</div>
+</body>
+</html>
