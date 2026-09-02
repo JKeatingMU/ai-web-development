@@ -1,6 +1,6 @@
 ---
 name: course-deck
-description: Scaffold a new slide deck for the "Learning Web Development by Building with AI" course - a standalone HTML file wired to the shared deck-extras engine (quizzes, learning objectives, assessments, narration, accessibility) and registered in index.html. Use when adding a module to Track A-E, especially the unbuilt Track C (Frontend) and Track D (Full-Stack) decks.
+description: Scaffold a new slide deck for the "Learning Web Development by Building with AI" course - a standalone HTML file wired to the shared deck-extras engine (quizzes, learning objectives, assessments, narration, accessibility, mobile) and registered in index.html. Use when adding a module - e.g. the planned B7 Deployment deck, or extra modules in any track.
 ---
 
 # course-deck
@@ -11,15 +11,20 @@ root that loads `deck-extras.js` / `deck-extras.css`, plus its `index.html` card
 
 This is **not** the general-purpose `/deck` command (blue/teal talk decks). Course
 decks are dark GitHub-style, 15-30 slides, one running example (the Reading List
-API), checkpoint quizzes, and a prompt-reflection slide.
+API), exactly 2 checkpoint quizzes, and a prompt-reflection slide.
+
+The shared engine (`deck-extras.js` / `.css`) adds everything else automatically —
+quiz rendering, LO/assessment panels, narration player, text-size + theme controls,
+keyboard + screen-reader support, the mobile layout, and the "Built with AI
+Assistance · Maynooth University" credit line. **The deck HTML contains none of that.**
 
 ## When invoked
 
 1. If no topic given, ask for: track (A-E), module number, title, and a
    one-line description.
-2. Propose a slide list — title slide, 12-28 content slides, 1-2 quiz checkpoints,
-   an "AI assumes / verify" slide, a Key Terms slide, and a prompt-reflection
-   slide — and confirm before writing.
+2. Propose a slide list — title slide, 12-28 content slides, 2 quiz checkpoints
+   (~50% and ~82% through), an "AI assumes / verify" slide, a Key Terms slide, and
+   a prompt-reflection slide — and confirm before writing.
 3. Write `<slug>-workshop.html` in the repo root from the skeleton below.
 4. Add the card + `MODULE_LOS` entry to `index.html`.
 5. Run the verification checklist.
@@ -184,6 +189,16 @@ window.DECK_NAME = 'SLUG-workshop';
 </script>
 
 <script>
+window.DECK_OBJECTIVES = [
+  'Learning objective 1 — action verb + measurable outcome',
+  'Learning objective 2',
+  'Learning objective 3',
+  'Learning objective 4',
+  'Learning objective 5',
+];
+</script>
+
+<script>
 window.DECK_ASSESSMENTS = [
   { id: 'xN-1', type: 'practical', title: 'Task title',
     desc: 'What to build, in full.',
@@ -198,12 +213,13 @@ window.DECK_QUESTIONS = [
   { checkpoint: 1, type: 'mcq',
     q: 'Question?',
     options: ['A', 'B', 'C', 'D'],
-    correct: 0,
-    explanation: 'Why A is correct.',
+    correct: 0,                                  // 0-indexed
+    explanation: 'Why the correct option is correct.',
     reviewSlide: 'Slide title to jump back to' },
   { checkpoint: 1, type: 'self',
     q: 'Self-reflection question?',
-    prompt: 'Consider...' },
+    model: 'A model answer to reveal for comparison.' },
+  // ... repeat with checkpoint: 2
 ];
 </script>
 
@@ -239,29 +255,48 @@ planned placeholder to:
 ```
 
 `file:` must equal `window.DECK_NAME` exactly (both without `.html`).
+Keep the `los:` array here identical to `window.DECK_OBJECTIVES` in the deck.
+
+## Track accent
+
+The skeleton `:root` is blue (Track B). For another track, override in `:root`:
+
+| Track | `--accent` | also set |
+|-------|-----------|----------|
+| A | `#3fb950` | — |
+| C | `#bc8cff` | — |
+| D | `#d29922` | — |
+| E | `#ffa657` | `--highlight:#8a3800; --prompt-border:#c4621a;` + part-slide gradient `linear-gradient(135deg,#200e02 0%,#150901 100%)` |
+
+Card class is `card-a` / `card-b` / … matching the track.
 
 ## Rules
 
-- **Accessibility:** keep to the standard font sizes above (h1 40 / h2 29 /
-  p 15 / callout 14 / table 13 / code 12). The engine's global text-size control
-  scales these selectors; custom inline sizes will not scale in step.
-- **No red/green adjacency.** Use `callout-orange` where red would traditionally
-  signal danger. Never carry meaning by colour alone — pair it with a word or icon.
+- **Font sizes:** keep to the standard sizes above (h1 40 / h2 29 / p 15 /
+  callout 14 / table 13 / code 12). The engine's text-size control and the
+  accessible-version generator both assume these; custom inline sizes will not
+  scale in step.
+- **No red/green adjacency.** Use `callout-orange` where red would signal danger.
+  Never carry meaning by colour alone — pair it with a word or icon.
 - **Scrollable code:** every `.terminal-body` / `.diagram` / `.filetree` needs
   `overflow:auto; max-height:min(55vh,400px)`.
-- **Counter** text `1 / N` must match the real slide count (content slides +
-  quiz slides + reflection slide).
+- **Counter** `1 / N` must match the real slide count (content + 2 quiz slides +
+  reflection).
 - Running example is always the **Reading List API**. Don't invent a new domain.
 - One prompt-reflection slide, second from last.
 - No inline explanatory comments in the generated JS unless genuinely non-obvious.
+- Do NOT hand-add any accessibility, mobile, credit, or nav-chrome CSS/JS beyond
+  the skeleton — the engine owns all of it.
 
 ## Verification checklist
 
 - [ ] `window.DECK_NAME` matches the `file:` key in `MODULE_LOS`
-- [ ] Card `href` matches the filename; card moved from `planned` to `available`
+- [ ] `window.DECK_OBJECTIVES` matches the `los:` array in `MODULE_LOS`
+- [ ] Card `href` matches the filename; card is `available` (not `planned`)
 - [ ] `#counter` start value matches slide count
-- [ ] Every `quiz-slide` has a matching `checkpoint` in `DECK_QUESTIONS`
+- [ ] Exactly 2 `quiz-slide` divs; each `data-checkpoint` has questions in `DECK_QUESTIONS`
 - [ ] `DECK_ASSESSMENTS` has at least one `practical` and one `reflect`
-- [ ] Opens with no console errors when served over http
-- [ ] Track colour classes (`card-x`, `--accent` override for E) are correct
-- [ ] Prompt-reflection slide present
+- [ ] `--accent` + `card-x` class match the track
+- [ ] Prompt-reflection slide present, second from last
+- [ ] Opens with no console errors when served over http; quizzes render
+- [ ] Ran `npm run build:accessible` (adds the accessible version + manifest entry)
