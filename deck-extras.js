@@ -2233,18 +2233,14 @@
       var accPath = 'accessible/' + deckFile + '.html';
       fetch(accPath, { method: 'HEAD' }).then(function (r) {
         if (!r.ok) return;
-        var hint = document.getElementById('hint');
         var a = document.createElement('a');
         a.href = accPath;
         a.id = 'a11y-longform';
         a.textContent = 'Accessible version';
-        if (hint) {
-          hint.appendChild(document.createTextNode(' · '));
-          hint.appendChild(a);
-        } else {
-          a.style.cssText = 'position:fixed;top:18px;right:38px;font-size:11px;';
-          document.body.appendChild(a);
-        }
+        // Sits beside the deck controls (top-left), matching the course home page.
+        var controls = document.getElementById('deck-controls');
+        if (controls) controls.appendChild(a);
+        else document.body.appendChild(a);
       }).catch(function () {});
     }
   }

@@ -55,6 +55,7 @@
   top: 28px;
   left: 28px;
   display: flex;
+  align-items: center;
   gap: 6px;
   z-index: 200;
 }
@@ -1615,12 +1616,89 @@ body.text-xl .slide .terminal-body { font-size: 16px; }
 }
 
 /* "Accessible version" link in the hint bar */
-#a11y-longform { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+#a11y-longform {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: #8b949e;
+  text-decoration: none;
+  padding: 0 4px;
+  white-space: nowrap;
+}
 #a11y-longform:hover,
-#a11y-longform:focus-visible { color: #58a6ff; }
+#a11y-longform:focus-visible { color: #58a6ff; text-decoration: underline; text-underline-offset: 2px; }
+body.light-theme #a11y-longform { color: #6e6660; }
 
 /* Light-theme variants for a11y controls */
 body.light-theme #textsize-ctrl { background: #faf8f4; border-color: #d8cfc0; }
 body.light-theme #textsize-ctrl button { color: #6e6660; }
 body.light-theme #textsize-ctrl button:hover:not(:disabled) { color: #1d6fe8; }
 body.light-theme #textsize-label { color: #b5afa8; }
+
+/* ═══════════════════════════════════════════════════════════════
+   NARROW SCREENS (phones)
+   The decks are built for a wide canvas. On a phone, let each slide
+   scroll instead of clipping, stack side-by-side columns, shrink the
+   headings and chrome, and keep the nav reachable.
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 720px) {
+  .slide {
+    margin: 6px;
+    width: calc(100% - 12px);
+    height: calc(100% - 12px);
+    padding: 84px 14px 64px;
+    justify-content: flex-start;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .slide h1 { font-size: 26px; line-height: 1.2; }
+  .slide h2 { font-size: 21px; }
+  .slide h3 { font-size: 16px; }
+  .slide .subtitle { font-size: 16px; margin-bottom: 14px; }
+  .slide p, .slide li { font-size: 14px; }
+  .slide .callout { font-size: 13px; padding: 12px 14px; }
+
+  .slide .cols { flex-direction: column; gap: 12px; align-items: stretch; }
+  .slide .cols > * { flex: 1 1 auto !important; min-width: 0; width: 100%; }
+
+  .slide table { font-size: 12px; }
+  .slide td, .slide th { padding: 6px 8px; }
+  .slide td:first-child { white-space: normal; }
+
+  .slide .terminal-body { font-size: 12px; max-height: 46vh; }
+  .slide .part-num { font-size: 44px; }
+
+  /* Controls: wrap the top-left cluster, drop the instructor-only tools */
+  #deck-controls {
+    top: 8px; left: 8px;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 16px);
+    gap: 5px;
+  }
+  #deck-controls button { width: 30px; height: 30px; }
+  #deck-controls #annot-src-btn,
+  #deck-controls #annot-btn,
+  #deck-controls #rec-btn { display: none; }
+  #textsize-ctrl { height: 30px; }
+  #hint { display: none; }
+
+  #nav { bottom: 10px; right: 10px; gap: 6px; }
+  #nav-first, #nav-last { display: none; }
+  .nav-btn { width: 40px; height: 40px; }          /* comfortable touch target */
+  #app-link { display: none; }                       /* localhost link is useless on a phone */
+  #index-link { bottom: 14px; left: 10px; transform: none; }
+  #progress { height: 4px; }
+
+  #a11y-skip { font-size: 14px; padding: 10px 16px; }
+
+  /* Slide-out panels span the viewport instead of a fixed pixel width */
+  #assess-panel, #lo-panel, #scripts-panel, #notes-panel, #rec-panel {
+    top: 100px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - 116px);
+  }
+}
