@@ -11,6 +11,17 @@
     document.body.classList.add('light-theme');
   }
 
+  // Apply saved text size immediately (avoids a flash of default-size content)
+  var savedTextSize = localStorage.getItem('svl_textsize');
+  if (savedTextSize === 'lg' || savedTextSize === 'xl') {
+    document.body.classList.add('text-' + savedTextSize);
+  }
+
+  // Detect reduced-motion preference once, for JS-driven animation guards
+  var prefersReducedMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window._reduceMotion = !!prefersReducedMotion;
+
   /* ── Progress persistence (localStorage) ──────────────────── */
   function getDeckKey() {
     return 'svl_' + window.location.pathname.split('/').pop().replace('.html', '');
@@ -2087,6 +2098,136 @@
   // deck-extras.js loads at end of <body> — DOM is already ready, run immediately
   initCodeLines();
 
+  /* ── Text size control (A− / A+) ──────────────────────────────
+     Three global levels applied as a body class; deck-extras.css
+     enlarges the shared slide selectors and lets slides scroll.   */
+  function initTextSize() {
+    var LEVELS = ['', 'lg', 'xl'];
+    var LABELS = { '': '100%', 'lg': '125%', 'xl': '150%' };
+
+    function current() {
+      if (document.body.classList.contains('text-xl')) return 2;
+      if (document.body.classList.contains('text-lg')) return 1;
+      return 0;
+    }
+    function apply(i) {
+      i = Math.max(0, Math.min(LEVELS.length - 1, i));
+      document.body.classList.remove('text-lg', 'text-xl');
+      if (LEVELS[i]) document.body.classList.add('text-' + LEVELS[i]);
+      try { localStorage.setItem('svl_textsize', LEVELS[i]); } catch (e) {}
+      var pct = LABELS[LEVELS[i]];
+      minus.disabled = (i === 0);
+      plus.disabled = (i === LEVELS.length - 1);
+      label.textContent = pct;
+      live.textContent = 'Text size ' + pct;
+      // Keep the current slide in view after reflow
+      var act = document.querySelector('.slide.active');
+      if (act) act.scrollTop = 0;
+    }
+
+    var wrap = document.createElement('div');
+    wrap.id = 'textsize-ctrl';
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', 'Text size');
+
+    var minus = document.createElement('button');
+    minus.type = 'button';
+    minus.id = 'textsize-minus';
+    minus.textContent = 'A−';
+    minus.setAttribute('aria-label', 'Decrease text size');
+
+    var label = document.createElement('span');
+    label.id = 'textsize-label';
+    label.setAttribute('aria-hidden', 'true');
+
+    var plus = document.createElement('button');
+    plus.type = 'button';
+    plus.id = 'textsize-plus';
+    plus.textContent = 'A+';
+    plus.setAttribute('aria-label', 'Increase text size');
+
+    var live = document.createElement('span');
+    live.className = 'sr-only';
+    live.setAttribute('aria-live', 'polite');
+
+    minus.addEventListener('click', function () { apply(current() - 1); });
+    plus.addEventListener('click', function () { apply(current() + 1); });
+
+    wrap.appendChild(minus);
+    wrap.appendChild(label);
+    wrap.appendChild(plus);
+    wrap.appendChild(live);
+
+    var controls = document.getElementById('deck-controls');
+    if (controls) controls.appendChild(wrap);
+    apply(current());
+  }
+
+  /* ── Screen-reader / keyboard accessibility scaffolding ─────── */
+  function initA11y() {
+    var slides = document.querySelectorAll('.slide');
+    if (!slides.length) return;
+    var total = slides.length;
+
+    // Each slide is a labelled group and programmatically focusable
+    slides.forEach(function (s, i) {
+      s.setAttribute('role', 'group');
+      s.setAttribute('aria-roledescription', 'slide');
+      if (!s.hasAttribute('tabindex')) s.setAttribute('tabindex', '-1');
+      if (!s.id) s.id = 'slide-' + (i + 1);
+    });
+
+    // Navigation landmark + button labels
+    var nav = document.getElementById('nav');
+    if (nav) {
+      nav.setAttribute('role', 'navigation');
+      nav.setAttribute('aria-label', 'Slide navigation');
+    }
+    var LBL = {
+      'prev': 'Previous slide', 'next': 'Next slide',
+      'nav-first': 'First slide', 'nav-last': 'Last slide'
+    };
+    Object.keys(LBL).forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b) { b.setAttribute('aria-label', LBL[id]); }
+    });
+
+    // Live region: announces "Slide N of T: <heading>" on change
+    var live = document.createElement('div');
+    live.id = 'a11y-live';
+    live.className = 'sr-only';
+    live.setAttribute('aria-live', 'polite');
+    live.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(live);
+
+    // Skip link: jump keyboard focus straight to the active slide
+    var skip = document.createElement('a');
+    skip.id = 'a11y-skip';
+    skip.href = '#';
+    skip.textContent = 'Skip to slide content';
+    skip.addEventListener('click', function (e) {
+      e.preventDefault();
+      var act = document.querySelector('.slide.active');
+      if (act) act.focus();
+    });
+    document.body.insertBefore(skip, document.body.firstChild);
+
+    window._announceSlide = function (idx) {
+      var s = slides[idx];
+      if (!s) return;
+      var h = s.querySelector('h1, h2, h3');
+      var lbl = s.querySelector('.slide-label');
+      var name = (h && h.textContent.trim()) ||
+                 (lbl && lbl.textContent.trim()) || '';
+      live.textContent = 'Slide ' + (idx + 1) + ' of ' + total +
+                         (name ? ': ' + name : '');
+    };
+
+    // Announce whichever slide is active now
+    var act = document.querySelector('.slide.active');
+    if (act) window._announceSlide(Array.prototype.indexOf.call(slides, act));
+  }
+
   /* ── Initialise on DOMContentLoaded ───────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initHUD();
@@ -2101,6 +2242,7 @@
     initNotes();
     initRecorder();
     initQuiz();
+    initTextSize();
 
     // ── "Demo App" link text ──────────────────────────────────
     var appLink = document.getElementById('app-link');
@@ -2132,6 +2274,8 @@
       nav.appendChild(lastBtn);
     }
 
+    initA11y();
+
     document.addEventListener('keydown', function (e) {
       var tag = document.activeElement && document.activeElement.tagName;
       if (tag === 'TEXTAREA' || tag === 'INPUT') return;
@@ -2155,6 +2299,7 @@
 
       function startDwell(idx) {
         saveProgress(idx);
+        if (window._announceSlide) window._announceSlide(idx);
         if (window._updateScriptPanel) window._updateScriptPanel(idx);
         if (window._playAudioSlide) window._playAudioSlide(idx);
         if (dwellTimer) clearTimeout(dwellTimer);

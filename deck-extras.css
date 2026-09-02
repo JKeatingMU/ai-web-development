@@ -1476,3 +1476,144 @@ body.light-theme #rec-dl-all:hover { background: rgba(29,111,232,.15); }
 
 /* ── Theme button ─────────────────────────────────────────────── */
 #theme-btn { font-size: 15px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+═══════════════════════════════════════════════════════════════ */
+
+/* Visually hidden but available to screen readers */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — hidden until focused */
+#a11y-skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 8px 14px;
+  background: #1f6feb;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  text-decoration: none;
+  transform: translateY(-150%);
+  transition: transform .15s ease;
+}
+#a11y-skip:focus { transform: translateY(0); outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Visible keyboard focus */
+.slide:focus-visible,
+.slide:focus {
+  outline: 3px solid #58a6ff;
+  outline-offset: -6px;
+}
+#deck-controls button:focus-visible,
+.nav-btn:focus-visible,
+#textsize-ctrl button:focus-visible,
+#app-link:focus-visible,
+#index-link:focus-visible {
+  outline: 3px solid #58a6ff;
+  outline-offset: 2px;
+}
+
+/* ── Text-size control (in #deck-controls) ─────────────────────── */
+#textsize-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 6px;
+  background: rgba(22,27,34,.9);
+  border: 1px solid #30363d;
+  border-radius: 16px;
+}
+#textsize-ctrl button {
+  width: auto;
+  height: auto;
+  min-width: 24px;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: #8b949e;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+#textsize-ctrl button:hover:not(:disabled) { color: #58a6ff; border-color: transparent; }
+#textsize-ctrl button:disabled { opacity: .35; cursor: default; }
+#textsize-label {
+  font-size: 10px;
+  font-family: 'SF Mono','Fira Code',monospace;
+  color: #6e7681;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* ── Global slide text scaling ─────────────────────────────────── */
+/* Enlarged text must be allowed to reflow and scroll, not clip. */
+body.text-lg .slide.active,
+body.text-xl .slide.active {
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding-top: 46px;
+  padding-bottom: 84px;
+}
+body.text-xl .slide .cols { flex-direction: column; }
+
+body.text-lg .slide-label   { font-size: 13px; }
+body.text-lg .slide h1      { font-size: 48px; }
+body.text-lg .slide h2      { font-size: 35px; }
+body.text-lg .slide h3      { font-size: 22px; }
+body.text-lg .slide .subtitle { font-size: 23px; }
+body.text-lg .slide p,
+body.text-lg .slide li      { font-size: 18px; }
+body.text-lg .slide .callout { font-size: 17px; }
+body.text-lg .slide table,
+body.text-lg .slide th,
+body.text-lg .slide td      { font-size: 15px; }
+body.text-lg .slide code    { font-size: 13px; }
+body.text-lg .slide .terminal-body { font-size: 14px; }
+
+body.text-xl .slide-label   { font-size: 14px; }
+body.text-xl .slide h1      { font-size: 56px; }
+body.text-xl .slide h2      { font-size: 41px; }
+body.text-xl .slide h3      { font-size: 25px; }
+body.text-xl .slide .subtitle { font-size: 27px; }
+body.text-xl .slide p,
+body.text-xl .slide li      { font-size: 21px; }
+body.text-xl .slide .callout { font-size: 20px; }
+body.text-xl .slide table,
+body.text-xl .slide th,
+body.text-xl .slide td      { font-size: 17px; }
+body.text-xl .slide code    { font-size: 14px; }
+body.text-xl .slide .terminal-body { font-size: 15px; }
+
+/* ── Reduced motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .spotlight-dimmed { filter: none; }
+  #progress { transition: none; }
+}
+
+/* Light-theme variants for a11y controls */
+body.light-theme #textsize-ctrl { background: #faf8f4; border-color: #d8cfc0; }
+body.light-theme #textsize-ctrl button { color: #6e6660; }
+body.light-theme #textsize-ctrl button:hover:not(:disabled) { color: #1d6fe8; }
+body.light-theme #textsize-label { color: #b5afa8; }
