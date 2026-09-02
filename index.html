@@ -165,7 +165,6 @@
   .card-assess-chip { font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; color: #484f58; white-space: nowrap; }
   .card-assess-chip.has-done { color: #e3b341; }
   #cert-link { color: var(--accent) !important; border-color: rgba(88,166,255,.4) !important; }
-  #a11y-nav-link { color: var(--accent) !important; border-color: rgba(88,166,255,.4) !important; }
 
   /* ── LO Popover (module card click) ── */
   #lo-backdrop { display: none; position: fixed; inset: 0; background: rgba(1,4,9,.55); z-index: 1000; }
@@ -235,8 +234,10 @@
   body.text-lg { zoom: 1.15; }
   body.text-xl { zoom: 1.30; }
 
-  #a11y-controls { position: fixed; top: 18px; right: 22px; display: flex; align-items: center; gap: 8px; z-index: 500; }
+  #a11y-controls { position: fixed; top: 18px; right: 22px; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; z-index: 500; max-width: min(70vw, 360px); }
   #a11y-controls #theme-toggle { position: static; }
+  #a11y-version-link { font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; padding: 2px 4px; white-space: nowrap; }
+  #a11y-version-link:hover, #a11y-version-link:focus-visible { color: var(--accent); text-decoration: underline; }
   #textsize-ctrl {
     display: flex; align-items: center; gap: 4px; height: 36px; padding: 0 8px;
     background: #21262d; border: 1px solid #58a6ff; border-radius: 18px;
@@ -283,7 +284,6 @@
     <a href="setup-guide.html">Setup Guide</a>
     <a href="resources.html">Resources</a>
     <a href="crud-demo/">Demo App</a>
-    <a href="accessible/" id="a11y-nav-link">Accessible version</a>
     <a href="certificate.html" id="cert-link">My Certificate &#8594;</a>
   </nav>
 
@@ -1057,6 +1057,13 @@ document.addEventListener('DOMContentLoaded', function() {
     syncThemeBtn();
   });
 
+  // Link to the accessible text version of this page
+  var accLink = document.createElement('a');
+  accLink.id = 'a11y-version-link';
+  accLink.href = 'accessible/';
+  accLink.textContent = 'Accessible version';
+
+  a11yBar.appendChild(accLink);
   a11yBar.appendChild(tsWrap);
   a11yBar.appendChild(themeBtn);
   document.body.appendChild(a11yBar);
