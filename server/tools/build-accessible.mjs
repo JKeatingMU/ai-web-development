@@ -508,7 +508,7 @@ ${tasks}
 </main>
 
 <footer class="doc">
-  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Built with AI Assistance &nbsp;&middot;&nbsp; Maynooth University &nbsp;&middot;&nbsp; CC BY 4.0</p>
 </footer>`;
 
   const out = page({ title: `${title} — accessible text version — Learning Web Development by Building with AI`, body });
@@ -606,7 +606,7 @@ ${trackSecs}
 </main>
 
 <footer class="doc">
-  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Learning Web Development by Building with AI &nbsp;&middot;&nbsp; CC BY 4.0</p>
+  <p><a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp; Built with AI Assistance &nbsp;&middot;&nbsp; Maynooth University &nbsp;&middot;&nbsp; CC BY 4.0</p>
 </footer>`;
 
   const extraCss = `

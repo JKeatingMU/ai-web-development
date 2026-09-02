@@ -1636,6 +1636,22 @@ body.light-theme #textsize-ctrl button { color: #6e6660; }
 body.light-theme #textsize-ctrl button:hover:not(:disabled) { color: #1d6fe8; }
 body.light-theme #textsize-label { color: #b5afa8; }
 
+/* ── Standing credit line ─────────────────────────────────────── */
+#deck-credit {
+  position: fixed;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: #484f58;
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+body.light-theme #deck-credit { color: #b5afa8; }
+
 /* ═══════════════════════════════════════════════════════════════
    NARROW SCREENS (phones)
    The decks are built for a wide canvas. On a phone, let each slide
@@ -1682,6 +1698,7 @@ body.light-theme #textsize-label { color: #b5afa8; }
   #deck-controls #rec-btn { display: none; }
   #textsize-ctrl { height: 30px; }
   #hint { display: none; }
+  #deck-credit { display: none; }   /* nav chrome already tight on phones */
 
   #nav { bottom: 10px; right: 10px; gap: 6px; }
   #nav-first, #nav-last { display: none; }

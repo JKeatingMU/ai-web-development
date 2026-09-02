@@ -2265,6 +2265,14 @@
     var appLink = document.getElementById('app-link');
     if (appLink) appLink.textContent = 'Demo App \u2197';
 
+    // \u2500\u2500 Standing credit line (transparency: this course is AI-assisted) \u2500\u2500
+    if (!document.getElementById('deck-credit')) {
+      var credit = document.createElement('div');
+      credit.id = 'deck-credit';
+      credit.textContent = 'Built with AI Assistance \u00b7 Maynooth University';
+      document.body.appendChild(credit);
+    }
+
     // ── First/last slide buttons in nav ──────────────────────
     var nav = document.getElementById('nav');
     if (nav) {
