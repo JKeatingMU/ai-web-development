@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REST &amp; HTTP APIs — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1e0e 0%,#091409 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+  .terminal-body .sql    { color: var(--purple); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: var(--accent); border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-red    { background: rgba(248,81,73,.15);   color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h1><span class="accent">REST</span> &amp; HTTP APIs</h1>
+  <div class="subtitle">Track A — Foundations · Module 6</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <span class="badge badge-blue">rest</span>
+    <span class="badge badge-blue">http</span>
+    <span class="badge badge-blue">api</span>
+    <span class="badge badge-blue">json</span>
+    <span class="badge badge-blue">stateless</span>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">The design principles behind every API you've used in this course</p>
+  <div class="callout callout-blue">In this course, you've already built and consumed a REST API. This module explains <em>why</em> it's designed the way it is.</div>
+</div>
+
+<!-- Slide 2 — What is an API? -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>What is an API?</h2>
+  <p style="margin-bottom:10px;"><strong>API</strong> = Application Programming Interface — a defined contract for how software talks to software. A <strong>Web API</strong> is an API that communicates over HTTP.</p>
+  <p style="margin-bottom:12px;color:var(--muted);font-size:14px;">Think of a restaurant menu: it's a contract — you don't go into the kitchen, you order from the menu. The chef doesn't ask how you want the dish cooked beyond what the menu specifies. The API is the menu.</p>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+    <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:12px 16px;">
+      <span class="badge badge-blue" style="flex-shrink:0;margin-top:2px;">GitHub API</span>
+      <span style="font-size:14px;color:var(--muted);">Your code can create repos, open issues, read commit history — all via HTTP requests to GitHub's defined endpoints.</span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:12px 16px;">
+      <span class="badge badge-green" style="flex-shrink:0;margin-top:2px;">Stripe API</span>
+      <span style="font-size:14px;color:var(--muted);">Charge cards, create subscriptions, issue refunds — your app sends HTTP requests; Stripe handles the banking.</span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:12px 16px;">
+      <span class="badge badge-yellow" style="flex-shrink:0;margin-top:2px;">Reading List API</span>
+      <span style="font-size:14px;color:var(--muted);">Create books, update reading status, query by filter — the API you built in the B-track.</span>
+    </div>
+  </div>
+  <div class="callout callout-blue">In this course, you've already built and consumed a REST API. This module explains <em>why</em> it's designed the way it is.</div>
+</div>
+
+<!-- Slide 3 — REST: six constraints -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>REST: Six Constraints</h2>
+  <p style="margin-bottom:10px;">REST (Representational State Transfer) is an architectural <em>style</em> defined by 6 constraints — not a standard or a protocol.</p>
+  <ul class="annot-list" style="margin-bottom:10px;">
+    <li><span class="badge badge-blue" style="flex-shrink:0;">1 · Client–server</span><span>UI and data storage are separated; each can evolve independently.</span></li>
+    <li><span class="badge badge-blue" style="flex-shrink:0;">2 · Stateless</span><span>Every request contains all information needed; server stores no session state.</span></li>
+    <li><span class="badge badge-blue" style="flex-shrink:0;">3 · Cacheable</span><span>Responses can declare themselves cacheable; improves performance at scale.</span></li>
+    <li><span class="badge badge-blue" style="flex-shrink:0;">4 · Uniform interface</span><span>Consistent, predictable URLs and methods — the core of REST.</span></li>
+    <li><span class="badge badge-blue" style="flex-shrink:0;">5 · Layered system</span><span>Client can't tell if it's talking to the real server or a proxy/load balancer.</span></li>
+    <li><span class="badge badge-blue" style="flex-shrink:0;">6 · Code on demand</span><span>(Optional) Server can send executable code (e.g. JavaScript) to the client.</span></li>
+  </ul>
+  <div class="callout callout-yellow icon-key">Most 'REST APIs' only implement constraints 1, 2, and 4. That's still fine — REST is a spectrum, not a binary.</div>
+</div>
+
+<!-- Slide 4 — The Uniform Interface in practice -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>The Uniform Interface in Practice</h2>
+  <p style="margin-bottom:10px;">Constraint 4 is the one that matters most day-to-day. It has four sub-constraints:</p>
+  <ul class="annot-list" style="margin-bottom:10px;">
+    <li>
+      <span class="badge badge-orange" style="flex-shrink:0;white-space:nowrap;">Resource IDs</span>
+      <span>Resources are identified by URI — <code>/api/books/123</code>, not <code>/getBook?id=123</code>.</span>
+    </li>
+    <li>
+      <span class="badge badge-orange" style="flex-shrink:0;white-space:nowrap;">Representations</span>
+      <span>You receive a JSON representation of a book; you send a modified JSON to update it — you never manipulate the resource directly.</span>
+    </li>
+    <li>
+      <span class="badge badge-orange" style="flex-shrink:0;white-space:nowrap;">Self-descriptive</span>
+      <span>Each request/response includes enough information to describe how to process it (Content-Type, status codes, etc.).</span>
+    </li>
+    <li>
+      <span class="badge badge-orange" style="flex-shrink:0;white-space:nowrap;">HATEOAS</span>
+      <span>Hypermedia as the Engine of Application State — responses include links to related actions. Most APIs skip this.</span>
+    </li>
+  </ul>
+  <div class="callout callout-blue icon-key">The reason your API uses <code>/api/books</code> (plural noun) and HTTP verbs rather than <code>/api/getBooks</code> or <code>/api/createBook</code> — that's the Uniform Interface constraint.</div>
+</div>
+
+<!-- Slide 5 — Resources and URIs -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Resources and URIs</h2>
+  <p style="margin-bottom:10px;">Resource design is the first design decision when building an API.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;gap:20px;">
+    <div style="overflow:auto;max-height:min(60vh,450px);">
+      <table>
+        <thead><tr><th>&#10003; Good</th><th>&#10007; Avoid</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /api/books</code></td><td style="color:var(--muted);font-family:'SF Mono',monospace;font-size:12px;white-space:nowrap;"><code>GET /api/getBooks</code></td></tr>
+          <tr><td><code>POST /api/books</code></td><td style="color:var(--muted);font-family:'SF Mono',monospace;font-size:12px;white-space:nowrap;"><code>POST /api/createBook</code></td></tr>
+          <tr><td><code>GET /api/books/123</code></td><td style="color:var(--muted);font-family:'SF Mono',monospace;font-size:12px;white-space:nowrap;"><code>GET /api/book?id=123</code></td></tr>
+          <tr><td><code>PATCH /api/books/123</code></td><td style="color:var(--muted);font-family:'SF Mono',monospace;font-size:12px;white-space:nowrap;"><code>POST /api/updateBook/123</code></td></tr>
+          <tr><td><code>DELETE /api/books/123</code></td><td style="color:var(--muted);font-family:'SF Mono',monospace;font-size:12px;white-space:nowrap;"><code>POST /api/deleteBook</code></td></tr>
+          <tr><td><code>GET /api/users/42/books</code></td><td style="color:var(--muted);font-family:'SF Mono',monospace;font-size:12px;white-space:nowrap;"><code>GET /api/getUserBooks?userId=42</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <ul class="annot-list">
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Nouns</span><span>Not verbs — the HTTP method IS the verb.</span></li>
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Plural</span><span>Collections use plural: <code>/books</code>, <code>/users</code>.</span></li>
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Nested</span><span>Use nesting for ownership: <code>/users/42/books</code>.</span></li>
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Lowercase</span><span>Hyphens not underscores: <code>/reading-sessions</code>.</span></li>
+      </ul>
+      <div class="callout callout-green icon-tip" style="margin-top:6px;">AI prompt: <em>Design the URI structure for a REST API that manages users, their reading lists, and reading sessions. Follow REST conventions.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — HTTP methods in depth -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>HTTP Methods in Depth</h2>
+  <div style="overflow:auto;max-height:min(60vh,450px);margin-bottom:10px;">
+    <table>
+      <thead><tr><th>Method</th><th>Safe?</th><th>Idempotent?</th><th>Body?</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>GET</code></td>
+          <td><span class="badge badge-green">&#10003;</span></td>
+          <td><span class="badge badge-green">&#10003;</span></td>
+          <td style="color:var(--muted);">No</td>
+          <td style="color:var(--muted);">Retrieve a resource or collection</td>
+        </tr>
+        <tr>
+          <td><code>POST</code></td>
+          <td><span class="badge badge-orange">&#10007;</span></td>
+          <td><span class="badge badge-orange">&#10007;</span></td>
+          <td style="color:var(--muted);">Yes</td>
+          <td style="color:var(--muted);">Create a new resource</td>
+        </tr>
+        <tr>
+          <td><code>PUT</code></td>
+          <td><span class="badge badge-orange">&#10007;</span></td>
+          <td><span class="badge badge-green">&#10003;</span></td>
+          <td style="color:var(--muted);">Yes</td>
+          <td style="color:var(--muted);">Replace a resource entirely</td>
+        </tr>
+        <tr>
+          <td><code>PATCH</code></td>
+          <td><span class="badge badge-orange">&#10007;</span></td>
+          <td style="color:var(--muted);">&#10007;*</td>
+          <td style="color:var(--muted);">Yes</td>
+          <td style="color:var(--muted);">Partial update (modify specific fields)</td>
+        </tr>
+        <tr>
+          <td><code>DELETE</code></td>
+          <td><span class="badge badge-orange">&#10007;</span></td>
+          <td><span class="badge badge-green">&#10003;</span></td>
+          <td style="color:var(--muted);">Rarely</td>
+          <td style="color:var(--muted);">Delete a resource</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="cols cols-2" style="gap:12px;margin-bottom:8px;">
+    <div class="callout callout-blue"><strong>Safe</strong>: doesn't modify server state — can be called freely, cached, prefetched by browsers.</div>
+    <div class="callout callout-blue"><strong>Idempotent</strong>: calling it N times has the same effect as calling it once — important for retry logic.</div>
+  </div>
+  <div class="callout callout-yellow icon-gotcha">Your Reading List API uses <code>PATCH</code> for updates (not <code>PUT</code>) because it only updates the fields you send — thanks to <code>COALESCE($2, title)</code> in PostgreSQL or <code>$set</code> in MongoDB.</div>
+</div>
+
+<!-- Slide 7 — Status codes: the full picture -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Status Codes: The Full Picture</h2>
+  <div style="overflow:auto;max-height:min(60vh,450px);">
+    <p style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">2xx — Success</p>
+    <table style="margin-bottom:10px;">
+      <tbody>
+        <tr><td><span class="badge badge-green">200 OK</span></td><td style="color:var(--muted);">GET, PATCH, DELETE succeeded</td></tr>
+        <tr><td><span class="badge badge-green">201 Created</span></td><td style="color:var(--muted);">POST created a resource — include <code>Location</code> header with the new URL</td></tr>
+        <tr><td><span class="badge badge-green">204 No Content</span></td><td style="color:var(--muted);">Success with no body — common for DELETE</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">3xx — Redirection</p>
+    <table style="margin-bottom:10px;">
+      <tbody>
+        <tr><td><span class="badge badge-blue">301 Moved Permanently</span></td><td style="color:var(--muted);">Resource has a new permanent URL</td></tr>
+        <tr><td><span class="badge badge-blue">304 Not Modified</span></td><td style="color:var(--muted);">Cached response is still valid</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">4xx — Client Errors</p>
+    <table style="margin-bottom:10px;">
+      <tbody>
+        <tr><td><span class="badge badge-orange">400 Bad Request</span></td><td style="color:var(--muted);">Malformed body or missing required field</td></tr>
+        <tr><td><span class="badge badge-orange">401 Unauthorized</span></td><td style="color:var(--muted);">Not authenticated — no or invalid token</td></tr>
+        <tr><td><span class="badge badge-orange">403 Forbidden</span></td><td style="color:var(--muted);">Authenticated but not allowed</td></tr>
+        <tr><td><span class="badge badge-orange">404 Not Found</span></td><td style="color:var(--muted);">Resource doesn't exist</td></tr>
+        <tr><td><span class="badge badge-orange">409 Conflict</span></td><td style="color:var(--muted);">Duplicate unique field (email already registered)</td></tr>
+        <tr><td><span class="badge badge-orange">422 Unprocessable Entity</span></td><td style="color:var(--muted);">Syntactically valid but semantically wrong (failed validation)</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">5xx — Server Errors</p>
+    <table style="margin-bottom:10px;">
+      <tbody>
+        <tr><td><span class="badge badge-red">500 Internal Server Error</span></td><td style="color:var(--muted);">Unhandled exception — something crashed</td></tr>
+        <tr><td><span class="badge badge-red">503 Service Unavailable</span></td><td style="color:var(--muted);">DB connection failed, rate limited, overloaded</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-blue">The distinction between 401 and 403 matters: 401 = "who are you?", 403 = "I know who you are but no".</div>
+</div>
+
+<!-- Slide 8 — Request & response anatomy -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Request &amp; Response Anatomy</h2>
+  <div class="cols cols-2" style="margin-top:8px;gap:16px;">
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">HTTP Request</p>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">POST /api/books</span></div>
+        <div class="terminal-body" style="max-height:min(55vh,380px);"><span class="kw">POST</span> <span class="url">/api/books</span> <span class="out">HTTP/1.1</span>
+<span class="out">Host: </span><span class="str">api.example.com</span>
+<span class="out">Content-Type: </span><span class="str">application/json</span>
+<span class="out">Authorization: </span><span class="str">Bearer eyJhbGci...</span>
+
+<span class="out">{</span>
+  <span class="key">"title"</span><span class="out">:</span> <span class="str">"The Pragmatic Programmer"</span><span class="out">,</span>
+  <span class="key">"author"</span><span class="out">:</span> <span class="str">"Hunt &amp; Thomas"</span>
+<span class="out">}</span>
+<span class="comment">
+↑ method + path + version
+↑ headers
+↑ blank line separates headers/body
+↑ body (JSON)</span></div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">HTTP Response</p>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">201 Created</span></div>
+        <div class="terminal-body" style="max-height:min(55vh,380px);"><span class="gr">HTTP/1.1 201 Created</span>
+<span class="out">Content-Type: </span><span class="str">application/json</span>
+<span class="out">Location: </span><span class="url">/api/books/64f2a3b8</span>
+
+<span class="out">{</span>
+  <span class="key">"id"</span><span class="out">:</span> <span class="str">"64f2a3b8"</span><span class="out">,</span>
+  <span class="key">"title"</span><span class="out">:</span> <span class="str">"The Pragmatic Programmer"</span><span class="out">,</span>
+  <span class="key">"author"</span><span class="out">:</span> <span class="str">"Hunt &amp; Thomas"</span><span class="out">,</span>
+  <span class="key">"status"</span><span class="out">:</span> <span class="str">"unread"</span><span class="out">,</span>
+  <span class="key">"createdAt"</span><span class="out">:</span> <span class="str">"2026-03-08T10:00:00Z"</span>
+<span class="out">}</span>
+<span class="comment">
+↑ status line
+↑ headers
+↑ body</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-yellow">The <code>Location</code> header on a 201 tells the client where to find the newly created resource — often omitted but technically required by the spec.</div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- Slide 9 — Query strings, filtering & pagination -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Query Strings, Filtering &amp; Pagination</h2>
+  <p style="margin-bottom:8px;">Query strings carry optional parameters — <code>?key=value&amp;key2=value2</code></p>
+  <div class="cols cols-55-45" style="margin-top:4px;gap:16px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">filter + pagination pattern</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">-- filter by status</span>
+<span class="kw">GET</span> <span class="url">/api/books?status=reading</span>
+
+<span class="comment">-- first page of 10</span>
+<span class="kw">GET</span> <span class="url">/api/books?limit=10&amp;offset=0</span>
+
+<span class="comment">-- second page</span>
+<span class="kw">GET</span> <span class="url">/api/books?limit=10&amp;offset=10</span>
+
+<span class="comment">-- sorted descending</span>
+<span class="kw">GET</span> <span class="url">/api/books?sort=createdAt&amp;order=desc</span>
+
+<span class="comment">-- response envelope (collection endpoint)</span>
+<span class="out">{</span>
+  <span class="key">"data"</span><span class="out">: [ ... ],</span>
+  <span class="key">"total"</span><span class="out">:</span> <span class="val">47</span><span class="out">,</span>
+  <span class="key">"limit"</span><span class="out">:</span> <span class="val">10</span><span class="out">,</span>
+  <span class="key">"offset"</span><span class="out">:</span> <span class="val">0</span>
+<span class="out">}</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <div class="callout callout-blue">Never return unlimited results from a collection endpoint — always paginate. Even if you only have 5 records now.</div>
+      <div class="callout callout-green icon-tip">AI prompt: <em>Add pagination to my Express GET /api/books route. Use limit/offset query params with a response envelope that includes total count.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Statelessness in practice -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Statelessness in Practice</h2>
+  <p style="margin-bottom:10px;">The most important — and most misunderstood — REST constraint.</p>
+  <div class="cols cols-2" style="margin-top:4px;gap:16px;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">What stateless means</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-blue" style="flex-shrink:0;">No session</span><span>The server stores no session data between requests.</span></li>
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Self-contained</span><span>Every request must carry its own authentication, context, and intent.</span></li>
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Stateless</span><span>The server doesn't remember the previous request.</span></li>
+      </ul>
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-top:8px;margin-bottom:4px;">How it's implemented in the course API</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-green" style="flex-shrink:0;">JWT</span><span><code>Authorization: Bearer &lt;token&gt;</code> carries user identity on every request.</span></li>
+        <li><span class="badge badge-green" style="flex-shrink:0;">No sessions</span><span>No <code>req.session</code>, no server-side session store.</span></li>
+        <li><span class="badge badge-green" style="flex-shrink:0;">Scale</span><span>Any server instance can handle any request — horizontal scaling works.</span></li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">What would break statelessness</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-orange" style="flex-shrink:0;">Server sessions</span><span>Storing session data in memory or a DB per login — sticky session problem.</span></li>
+        <li><span class="badge badge-orange" style="flex-shrink:0;">"Remember me"</span><span>"Remember what I said last request" — the server doesn't, by design.</span></li>
+      </ul>
+      <div class="callout callout-yellow icon-key" style="margin-top:8px;">Statelessness is why your API can scale to multiple server instances without a sticky session problem. The token IS the state — it travels with every request.</div>
+      <div class="callout callout-blue">Sessions (like express-session) aren't "wrong" — they're a deliberate trade-off. They're stateful by design. That makes them non-RESTful, but perfectly valid.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — Content negotiation & headers -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Content Negotiation &amp; Headers</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;gap:16px;">
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Key Request Headers</p>
+      <ul class="annot-list" style="margin-bottom:12px;">
+        <li><code>Content-Type: application/json</code><span style="flex:1;font-size:13px;">Tells the server what format the body is in.</span></li>
+        <li><code>Accept: application/json</code><span style="flex:1;font-size:13px;">Tells the server what format the client wants back.</span></li>
+        <li><code>Authorization: Bearer &lt;token&gt;</code><span style="flex:1;font-size:13px;">Authentication credential.</span></li>
+        <li><code>Cache-Control: no-cache</code><span style="flex:1;font-size:13px;">Skip the cache — always fetch fresh.</span></li>
+      </ul>
+      <p style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Key Response Headers</p>
+      <ul class="annot-list">
+        <li><code>Content-Type: application/json; charset=utf-8</code><span style="flex:1;font-size:13px;">Format of the response body.</span></li>
+        <li><code>Location: /api/books/123</code><span style="flex:1;font-size:13px;">Where the new resource is (after 201).</span></li>
+        <li><code>X-Total-Count: 47</code><span style="flex:1;font-size:13px;">Total records for pagination (alternative to envelope).</span></li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">Express sets headers for you</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">// Express does this for you:</span>
+<span class="fn">res</span><span class="out">.</span><span class="fn">status</span><span class="out">(</span><span class="val">201</span><span class="out">).</span><span class="fn">json</span><span class="out">({</span> <span class="key">id</span><span class="out">,</span> <span class="key">title</span><span class="out">,</span> <span class="key">author</span> <span class="out">});</span>
+<span class="comment">// Sets: Content-Type: application/json; charset=utf-8
+//       Status: 201 Created</span></div>
+      </div>
+      <div class="callout callout-blue">Always use <code>res.json()</code> not <code>res.send()</code> for API responses — it sets Content-Type correctly and serialises the object.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Error response design -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Error Response Design</h2>
+  <p style="margin-bottom:8px;">Consistent error responses are as important as successful ones.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;gap:16px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">error response formats</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">// Detailed validation error</span>
+<span class="out">{</span>
+  <span class="key">"error"</span><span class="out">:</span> <span class="str">"Validation failed"</span><span class="out">,</span>
+  <span class="key">"details"</span><span class="out">: [</span>
+    <span class="out">{</span> <span class="key">"field"</span><span class="out">:</span> <span class="str">"title"</span><span class="out">,</span>   <span class="key">"message"</span><span class="out">:</span> <span class="str">"Title is required"</span>     <span class="out">},</span>
+    <span class="out">{</span> <span class="key">"field"</span><span class="out">:</span> <span class="str">"author"</span><span class="out">,</span>  <span class="key">"message"</span><span class="out">:</span> <span class="str">"Author must be a string"</span> <span class="out">}</span>
+  <span class="out">]</span>
+<span class="out">}</span>
+
+<span class="comment">// Minimal error for simpler cases</span>
+<span class="out">{</span> <span class="key">"error"</span><span class="out">:</span> <span class="str">"Book not found"</span> <span class="out">}</span>
+
+<span class="comment">// Express centralised error handler</span>
+<span class="fn">app</span><span class="out">.</span><span class="fn">use</span><span class="out">((</span><span class="kw">err</span><span class="out">,</span> <span class="kw">req</span><span class="out">,</span> <span class="kw">res</span><span class="out">,</span> <span class="kw">next</span><span class="out">) => {</span>
+  <span class="fn">console</span><span class="out">.</span><span class="fn">error</span><span class="out">(</span><span class="kw">err</span><span class="out">);</span>
+  <span class="kw">res</span><span class="out">.</span><span class="fn">status</span><span class="out">(</span><span class="kw">err</span><span class="out">.</span><span class="key">status</span> <span class="out">||</span> <span class="val">500</span><span class="out">).</span><span class="fn">json</span><span class="out">({</span>
+    <span class="key">error</span><span class="out">:</span> <span class="kw">err</span><span class="out">.</span><span class="key">message</span> <span class="out">||</span> <span class="str">'Internal server error'</span>
+  <span class="out">});</span>
+<span class="out">});</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <div class="callout callout-orange icon-gotcha">Never expose stack traces or internal error messages to API clients in production — they reveal your implementation and can be a security risk.</div>
+      <div class="callout callout-blue icon-tip">AI prompt: <em>Add a centralised error handling middleware to my Express app that always returns JSON errors with appropriate status codes.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- Slide 13 — REST vs alternatives -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>REST vs Alternatives</h2>
+  <p style="margin-bottom:10px;">Brief comparative overview — you'll encounter these in the wild.</p>
+  <div style="overflow:auto;max-height:min(60vh,450px);margin-bottom:10px;">
+    <table>
+      <thead><tr><th>Approach</th><th>Transport</th><th>Format</th><th>When used</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>REST</strong></td>
+          <td style="color:var(--muted);">HTTP</td>
+          <td style="color:var(--muted);">JSON/XML</td>
+          <td style="color:var(--muted);">Most web APIs — simple, widely understood</td>
+        </tr>
+        <tr>
+          <td><strong>GraphQL</strong></td>
+          <td style="color:var(--muted);">HTTP</td>
+          <td style="color:var(--muted);">JSON</td>
+          <td style="color:var(--muted);">Complex data needs; client controls shape of response</td>
+        </tr>
+        <tr>
+          <td><strong>gRPC</strong></td>
+          <td style="color:var(--muted);">HTTP/2</td>
+          <td style="color:var(--muted);">Protocol Buffers</td>
+          <td style="color:var(--muted);">Internal microservices, high performance</td>
+        </tr>
+        <tr>
+          <td><strong>WebSocket</strong></td>
+          <td style="color:var(--muted);">WS</td>
+          <td style="color:var(--muted);">Any</td>
+          <td style="color:var(--muted);">Real-time: chat, live dashboards, collaborative tools</td>
+        </tr>
+        <tr>
+          <td><strong>tRPC</strong></td>
+          <td style="color:var(--muted);">HTTP</td>
+          <td style="color:var(--muted);">JSON</td>
+          <td style="color:var(--muted);">TypeScript full-stack — type-safe end-to-end</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-yellow" style="margin-bottom:6px;">REST is the right default for public APIs and most web applications. Consider GraphQL when clients need to request exactly the fields they want across multiple resources in one call.</div>
+  <div class="callout callout-blue">AI prompt: <em>My app needs real-time notifications when another user updates a shared reading list. Should I use WebSockets, Server-Sent Events, or polling? Compare the trade-offs.</em></div>
+</div>
+
+<!-- Slide 14 — Versioning & documentation -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Versioning &amp; Documentation</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;gap:16px;">
+    <div>
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">API Versioning — two common approaches</p>
+      <div class="terminal" style="margin-bottom:8px;">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">URI versioning (preferred)</span></div>
+        <div class="terminal-body" style="max-height:min(55vh,380px);"><span class="url">/api/v1/books</span>
+<span class="url">/api/v2/books</span>   <span class="comment">← breaking change? bump the version</span>
+
+<span class="comment">// Header versioning (cleaner URLs, less common)</span>
+<span class="out">Accept: </span><span class="str">application/vnd.myapi.v2+json</span></div>
+      </div>
+      <div class="callout callout-yellow" style="margin-bottom:8px;">URI versioning is more common because it's explicit and easy to test in a browser. Use it.</div>
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">OpenAPI / Swagger snippet</p>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">openapi.yaml</span></div>
+        <div class="terminal-body" style="max-height:min(28vh,200px);overflow:auto;"><span class="key">paths</span><span class="out">:</span>
+  <span class="url">/api/books</span><span class="out">:</span>
+    <span class="key">get</span><span class="out">:</span>
+      <span class="key">summary</span><span class="out">:</span> <span class="str">List all books</span>
+      <span class="key">parameters</span><span class="out">:</span>
+        <span class="out">-</span> <span class="key">name</span><span class="out">:</span> <span class="str">status</span>
+          <span class="key">in</span><span class="out">:</span> <span class="str">query</span>
+          <span class="key">schema</span><span class="out">: {</span> <span class="key">type</span><span class="out">:</span> <span class="str">string</span> <span class="out">}</span>
+      <span class="key">responses</span><span class="out">:</span>
+        <span class="str">'200'</span><span class="out">:</span>
+          <span class="key">description</span><span class="out">:</span> <span class="str">Array of books</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">What every API needs</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-blue" style="flex-shrink:0;">OpenAPI</span><span>Machine-readable API spec — describes every endpoint, parameters, schemas, auth.</span></li>
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Swagger UI</span><span>Interactive browser UI generated from your OpenAPI spec — clients can try endpoints.</span></li>
+        <li><span class="badge badge-blue" style="flex-shrink:0;">Postman</span><span>Import your spec, create collections, share with your team.</span></li>
+      </ul>
+      <div class="callout callout-blue" style="margin-top:6px;">AI prompt: <em>Generate an OpenAPI 3.0 spec for my Reading List API. Include all endpoints, request bodies, and response schemas.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 15 — Prompt reflection -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>REST is a design language — AI helps you speak it</h2>
+  <div class="cols cols-3" style="margin-top:12px;gap:16px;">
+    <div class="callout callout-blue" style="margin:0;display:flex;flex-direction:column;gap:6px;">
+      <strong>URI design</strong>
+      <span style="font-size:13px;color:var(--muted);">When starting a new API, describe your domain to AI: "I'm building an app that manages X, Y, Z with these relationships." Ask it to design the URI structure following REST conventions — then push back: "Why plural? Why nested here? What if Z belongs to both X and Y?"</span>
+    </div>
+    <div class="callout callout-green" style="margin:0;display:flex;flex-direction:column;gap:6px;">
+      <strong>Status codes as communication</strong>
+      <span style="font-size:13px;color:var(--muted);">Your API's status codes are a contract with its clients. When AI generates route handlers, check every <code>res.status()</code> call — are 400s used for client errors? Is 201 returned (not 200) for POST? Is 404 returned when a resource isn't found? These details matter.</span>
+    </div>
+    <div class="callout callout-yellow" style="margin:0;display:flex;flex-direction:column;gap:6px;">
+      <strong>Error design</strong>
+      <span style="font-size:13px;color:var(--muted);">Ask AI: "Review my error handling — are all error responses JSON? Do 4xx and 5xx errors have consistent structure? Am I leaking any stack traces?" Error design is where most APIs cut corners.</span>
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:14px;">REST is learnable from reading. Fielding's original dissertation is freely available. The HTTP spec (RFC 9110) is dense but authoritative. AI can summarise both — but reading primary sources deepens understanding.</div>
+</div>
+
+<!-- Slide 16 — Quick reference -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 6</div>
+  <h2>Quick Reference</h2>
+  <div class="cols cols-2" style="margin-top:10px;gap:24px;">
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">HTTP Methods</p>
+      <div style="overflow:auto;max-height:min(60vh,450px);">
+        <table>
+          <thead><tr><th>Method</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET</code></td><td style="color:var(--muted);">Read resource or collection</td></tr>
+            <tr><td><code>POST</code></td><td style="color:var(--muted);">Create new resource</td></tr>
+            <tr><td><code>PUT</code></td><td style="color:var(--muted);">Replace resource entirely</td></tr>
+            <tr><td><code>PATCH</code></td><td style="color:var(--muted);">Partial update</td></tr>
+            <tr><td><code>DELETE</code></td><td style="color:var(--muted);">Delete resource</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Status Codes</p>
+      <div style="overflow:auto;max-height:min(60vh,450px);">
+        <table>
+          <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>200</code></td><td style="color:var(--muted);">OK</td></tr>
+            <tr><td><code>201</code></td><td style="color:var(--muted);">Created</td></tr>
+            <tr><td><code>204</code></td><td style="color:var(--muted);">No Content</td></tr>
+            <tr><td><code>400</code></td><td style="color:var(--muted);">Bad Request</td></tr>
+            <tr><td><code>401</code></td><td style="color:var(--muted);">Unauthorized</td></tr>
+            <tr><td><code>403</code></td><td style="color:var(--muted);">Forbidden</td></tr>
+            <tr><td><code>404</code></td><td style="color:var(--muted);">Not Found</td></tr>
+            <tr><td><code>409</code></td><td style="color:var(--muted);">Conflict</td></tr>
+            <tr><td><code>422</code></td><td style="color:var(--muted);">Unprocessable Entity</td></tr>
+            <tr><td><code>500</code></td><td style="color:var(--muted);">Internal Server Error</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:10px;">
+    Nouns not verbs &middot; Plural collections &middot; Nested for ownership<br>
+    <code>/users/42/books</code> not <code>/getUserBooks?userId=42</code><br>
+    HTTP method IS the verb
+  </div>
+</div>
+
+</div>
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 16</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F fullscreen</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'rest-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'a6-1', type: 'practical', title: 'Design a REST API',
+    desc: 'Design the URL structure and HTTP methods for a task-tracking API with tasks, users, and projects. Write at least 6 routes. Apply REST naming conventions: no verbs in URLs, plural nouns.',
+    criteria: [
+      'All route URLs use plural nouns and contain no verbs',
+      'HTTP methods are correctly assigned (GET reads, POST creates, PATCH/PUT updates, DELETE removes)',
+      'You included at least one nested resource URL (e.g. /projects/:id/tasks)'
+    ] },
+  { id: 'a6-2', type: 'practical', title: 'Spot a REST violation',
+    desc: "Find an API you've used (or invent one) that violates a REST constraint. Describe the violation, which constraint it breaks, and how you would redesign that endpoint.",
+    criteria: [
+      'You named the specific REST constraint being violated (not just "it is wrong")',
+      'Your redesign fixes the violation without introducing a new one',
+      'You tested your redesign mentally: would a new client understand it without docs?'
+    ] },
+  { id: 'a6-3', type: 'reflect', title: 'REST vs just HTTP',
+    desc: "What makes an API 'RESTful' rather than just 'HTTP'? In your own words, explain the statelessness constraint and why it matters for scaling.",
+    criteria: [
+      'You explained statelessness in your own words, not copied from the slides',
+      'You connected statelessness to a concrete consequence (horizontal scaling, token auth, etc.)',
+      'Your explanation distinguishes REST constraints from HTTP mechanics'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain the six REST constraints and their practical implications for API design',
+  'Design clean, resource-oriented URI structures following REST conventions',
+  'Select appropriate HTTP methods and status codes for each API operation',
+  'Explain statelessness and its implications for session management and scalability',
+  'Design consistent, informative error responses that distinguish client from server errors'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'rest-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which of the following is the correct REST-style URI for deleting the book with id 42?',
+    options: [
+      'POST /api/deleteBook?id=42',
+      'DELETE /api/book/42',
+      'DELETE /api/books/42',
+      'GET /api/books/delete/42'
+    ],
+    correct: 2,
+    explanation: 'REST uses plural nouns for collections (/api/books) and the HTTP method as the verb. DELETE /api/books/42 is correct — no verb in the path, plural collection name.',
+    reviewSlide: 'Resources and URIs'
+  },
+  {
+    id: 'rest-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which HTTP method is both safe AND idempotent?',
+    options: ['POST', 'PATCH', 'DELETE', 'GET'],
+    correct: 3,
+    explanation: 'GET is the only standard method that is both safe (does not modify state) and idempotent (calling it multiple times has the same effect). DELETE is idempotent but not safe. POST is neither.',
+    reviewSlide: 'HTTP Methods in Depth'
+  },
+  {
+    id: 'rest-1-3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'An API returns 403 when a request comes in with a valid JWT but the user is trying to access another user\'s private data. Is this correct?',
+    options: [
+      'No — it should return 401 because authentication failed',
+      'No — it should return 404 to avoid leaking that the resource exists',
+      'Yes — 403 Forbidden means authenticated but not permitted',
+      'No — it should return 400 Bad Request'
+    ],
+    correct: 2,
+    explanation: '403 Forbidden is correct here. The user is authenticated (JWT is valid, so 401 does not apply) but is not authorised to access that specific resource. 401 means "who are you?" — the server does not know. 403 means "I know who you are, but no."',
+    reviewSlide: 'Status Codes: The Full Picture'
+  },
+  {
+    id: 'rest-1-4',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'A POST /api/books request succeeds and creates a new book. Which status code should the response return?',
+    options: ['200 OK', '201 Created', '204 No Content', '202 Accepted'],
+    correct: 1,
+    explanation: '201 Created is the correct status for a successful POST that creates a new resource. 200 OK is for general success (GET, PATCH). 204 is for success with no response body (often DELETE). 202 means the request was accepted but processing is not yet complete.',
+    reviewSlide: 'Status Codes: The Full Picture'
+  },
+  {
+    id: 'rest-1-5',
+    checkpoint: 1,
+    type: 'self',
+    q: 'In your own words, explain the difference between the safe and idempotent properties of HTTP methods. Give one example of a method that is idempotent but not safe.',
+    model: 'Safe means the method does not modify server state — it can be called freely, cached, or prefetched without side effects. GET and HEAD are safe. Idempotent means calling the method N times produces the same result as calling it once — retry logic is safe. DELETE is idempotent (deleting a resource twice leaves it deleted both times) but not safe, because the first call does modify state.',
+    reviewSlide: 'HTTP Methods in Depth'
+  },
+  {
+    id: 'rest-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Which of the following correctly describes statelessness in a REST API?',
+    options: [
+      'The server stores session data in a database between requests',
+      'Every request contains all information needed; the server stores no per-client session state',
+      'The client caches responses to avoid repeated requests',
+      'The server uses cookies to track which user is logged in'
+    ],
+    correct: 1,
+    explanation: 'Statelessness means each request is self-contained — it carries its own authentication (e.g. a JWT) and context. The server stores no session data. This enables horizontal scaling because any server instance can handle any request.',
+    reviewSlide: 'Statelessness in Practice'
+  },
+  {
+    id: 'rest-2-2',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Your Express error handler includes this line: res.status(500).json({ error: err.message, stack: err.stack }). What is wrong with this?',
+    options: [
+      'Nothing — detailed errors help clients debug their requests',
+      'The status code should be 400, not 500',
+      'Exposing err.stack reveals implementation details and is a security risk in production',
+      'res.json() cannot accept an object with two keys'
+    ],
+    correct: 2,
+    explanation: 'Exposing stack traces in production responses reveals your file paths, library versions, and internal code structure. This is valuable information for an attacker. In production, log the full error server-side and return only a safe, generic message to the client.',
+    reviewSlide: 'Error Response Design'
+  },
+  {
+    id: 'rest-2-3',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Which alternative to REST would you recommend for a feature requiring real-time collaborative editing, where multiple users see each other\'s changes instantly?',
+    options: ['GraphQL', 'gRPC', 'WebSocket', 'tRPC'],
+    correct: 2,
+    explanation: 'WebSocket maintains a persistent bidirectional connection, making it ideal for real-time collaborative features. REST uses one-off request/response cycles — the server cannot push updates to the client. GraphQL and tRPC still use HTTP and share this limitation for real-time use cases.',
+    reviewSlide: 'REST vs Alternatives'
+  },
+  {
+    id: 'rest-2-4',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'An API currently has /api/books. You need to make a breaking change to the response format. What is the recommended approach?',
+    options: [
+      'Modify /api/books in place and update all clients simultaneously',
+      'Add a version header: X-API-Version: 2',
+      'Create /api/v2/books and keep /api/books (v1) running in parallel',
+      'Add a query parameter: /api/books?version=2'
+    ],
+    correct: 2,
+    explanation: 'URI versioning (/api/v2/books) is the most common and explicit approach. It allows v1 clients to continue working while v2 is rolled out. Header versioning is technically cleaner but less visible and harder to test in a browser. Query parameters are sometimes used but not conventional for versioning.',
+    reviewSlide: 'Versioning & Documentation'
+  },
+  {
+    id: 'rest-2-5',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Describe what a well-designed error response JSON body should contain. What should it never include, and why?',
+    model: 'A well-designed error response should include: a consistent "error" key with a human-readable message, optionally a "details" array for validation errors listing field and message pairs, and an appropriate HTTP status code. It should never include stack traces, internal file paths, raw database error messages, or library-specific error objects — these reveal implementation details that can be exploited by attackers and provide no useful information to API consumers.',
+    reviewSlide: 'Error Response Design'
+  }
+];
+</script>
+</body>
+</html>

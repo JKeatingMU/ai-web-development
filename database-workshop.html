@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Concepts — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1e0e 0%,#091409 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+  .terminal-body .sql    { color: var(--purple); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: var(--accent); border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-red    { background: rgba(248,81,73,.15);   color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h1><span class="accent">Database</span> Concepts</h1>
+  <div class="subtitle">Track A — Foundations · Module 4</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <span class="badge badge-blue">postgresql</span>
+    <span class="badge badge-blue">sql</span>
+    <span class="badge badge-blue">relational</span>
+    <span class="badge badge-blue">psql</span>
+    <span class="badge badge-blue">schema</span>
+  </div>
+  <div class="callout callout-blue">When AI generates a schema or writes a query, it assumes you can read SQL, understand what a foreign key enforces, and know when a JOIN is needed. This deck builds that foundation.</div>
+</div>
+
+<!-- Slide 2 — Why databases? -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Why Databases?</h2>
+  <p style="margin-bottom:10px;">Flat files (JSON, CSV, text) seem simple — until things go wrong.</p>
+  <div class="cols cols-2" style="margin-top:4px;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>Problems with files</strong><br>
+        No concurrent access — two users writing at once corrupt the file.<br>
+        No querying — to find one record you read the whole file.<br>
+        No referential integrity — nothing stops you deleting a record that others depend on.<br>
+        No rollback — a crash mid-write leaves partial data permanently.
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-blue icon-key"><strong>ACID guarantees — what a database gives you</strong><br>
+        <strong>Atomicity</strong> — a transaction is all-or-nothing; partial writes never happen.<br>
+        <strong>Consistency</strong> — constraints are always enforced; invalid data is rejected.<br>
+        <strong>Isolation</strong> — concurrent transactions don't interfere with each other.<br>
+        <strong>Durability</strong> — once committed, data survives crashes and restarts.
+      </div>
+      <div class="callout callout-green">PostgreSQL is the database used throughout this course — free, open source, production-grade.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3 — The relational model -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>The Relational Model</h2>
+  <p style="margin-bottom:10px;">Data is organised into <strong>tables</strong> (relations). Each table has named <strong>columns</strong> (fields/attributes). Each <strong>row</strong> is one record (tuple). Tables are linked by <strong>foreign keys</strong>.</p>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" style="width:100%;height:auto;display:block;border:1px solid #30363d;border-radius:8px;background:#010409;margin:10px 0;">
+    <defs>
+      <marker id="fk-arrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+        <polygon points="0,0 10,4 0,8" fill="#ffa657"/>
+      </marker>
+    </defs>
+    <!-- books table -->
+    <rect x="8" y="8" width="190" height="162" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+    <rect x="8" y="8" width="190" height="30" rx="6" fill="#0d2044"/>
+    <rect x="8" y="30" width="190" height="8" fill="#0d2044"/>
+    <line x1="8" y1="38" x2="198" y2="38" stroke="#58a6ff" stroke-width="1"/>
+    <text x="103" y="28" text-anchor="middle" font-family="'SF Mono',monospace" font-size="13" font-weight="bold" fill="#58a6ff">books</text>
+    <text x="16" y="54" font-family="'SF Mono',monospace" font-size="12" fill="#d29922">id        UUID  PRIMARY KEY</text>
+    <line x1="8" y1="59" x2="198" y2="59" stroke="#21262d" stroke-width="1"/>
+    <text x="16" y="75" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">title      TEXT NOT NULL</text>
+    <text x="16" y="92" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">author     TEXT NOT NULL</text>
+    <text x="16" y="109" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">status     TEXT NOT NULL</text>
+    <text x="16" y="126" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">created_at TIMESTAMPTZ</text>
+    <!-- reading_sessions table -->
+    <rect x="322" y="8" width="190" height="180" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+    <rect x="322" y="8" width="190" height="30" rx="6" fill="#0d2416"/>
+    <rect x="322" y="30" width="190" height="8" fill="#0d2416"/>
+    <line x1="322" y1="38" x2="512" y2="38" stroke="#3fb950" stroke-width="1"/>
+    <text x="417" y="28" text-anchor="middle" font-family="'SF Mono',monospace" font-size="12" font-weight="bold" fill="#3fb950">reading_sessions</text>
+    <text x="330" y="54" font-family="'SF Mono',monospace" font-size="12" fill="#d29922">id        UUID  PRIMARY KEY</text>
+    <line x1="322" y1="59" x2="512" y2="59" stroke="#21262d" stroke-width="1"/>
+    <text x="330" y="75" font-family="'SF Mono',monospace" font-size="12" fill="#ffa657">book_id   UUID  FK</text>
+    <text x="330" y="92" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">started_at   TIMESTAMPTZ</text>
+    <text x="330" y="109" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">finished_at  TIMESTAMPTZ</text>
+    <!-- FK arrow: reading_sessions.book_id → books.id -->
+    <polyline points="322,70 270,70 270,49 200,49" stroke="#ffa657" stroke-width="1.5" fill="none" marker-end="url(#fk-arrow)"/>
+    <text x="230" y="44" font-family="'SF Mono',monospace" font-size="11" fill="#ffa657">1</text>
+    <text x="308" y="66" font-family="'SF Mono',monospace" font-size="11" fill="#ffa657">N</text>
+  </svg>
+  <div class="callout callout-yellow">Every table should have a primary key — a column (or set of columns) that uniquely identifies each row.</div>
+</div>
+
+<!-- Slide 4 — PostgreSQL data types -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>PostgreSQL Data Types</h2>
+  <div class="cols cols-2" style="margin-top:8px;gap:24px;">
+    <div>
+      <table>
+        <thead><tr><th>Category</th><th>Types</th></tr></thead>
+        <tbody>
+          <tr><td>Text</td><td><code>TEXT</code>, <code>VARCHAR(n)</code>, <code>CHAR(n)</code></td></tr>
+          <tr><td>Numbers</td><td><code>INTEGER</code>, <code>BIGINT</code>, <code>NUMERIC(p,s)</code>, <code>REAL</code></td></tr>
+          <tr><td>Boolean</td><td><code>BOOLEAN</code> — <code>true</code> / <code>false</code></td></tr>
+          <tr><td>Date / time</td><td><code>TIMESTAMPTZ</code>, <code>DATE</code></td></tr>
+          <tr><td>Special</td><td><code>UUID</code>, <code>JSONB</code>, <code>ARRAY</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-blue icon-gotcha">
+        Use <code>TIMESTAMPTZ</code> not <code>TIMESTAMP</code> — always store time with timezone. Without timezone information, timestamps become ambiguous when servers move regions or clocks change.<br><br>
+        Use <code>TEXT</code> not <code>VARCHAR</code> — PostgreSQL handles them identically internally and <code>TEXT</code> is simpler. Only use <code>VARCHAR(n)</code> if you specifically need to enforce a length limit.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — Primary keys -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Primary Keys</h2>
+  <p style="margin-bottom:8px;">Two common strategies for generating unique IDs:</p>
+  <div class="cols cols-55-45" style="margin-top:4px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">primary key options</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">-- Auto-incrementing integer (simple)</span>
+<span class="sql">id</span> <span class="kw">SERIAL PRIMARY KEY</span>
+
+<span class="comment">-- UUID (better for distributed systems / APIs)</span>
+<span class="sql">id</span> <span class="kw">UUID PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span><span class="out">()</span>
+
+<span class="comment">-- Complete minimal CREATE TABLE</span>
+<span class="kw">CREATE TABLE</span> <span class="fn">books</span> <span class="out">(</span>
+  <span class="sql">id</span>         <span class="kw">UUID PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span><span class="out">(),</span>
+  <span class="sql">title</span>      <span class="kw">TEXT NOT NULL</span><span class="out">,</span>
+  <span class="sql">author</span>     <span class="kw">TEXT NOT NULL</span><span class="out">,</span>
+  <span class="sql">status</span>     <span class="kw">TEXT NOT NULL DEFAULT</span> <span class="str">'unread'</span><span class="out">,</span>
+  <span class="sql">created_at</span> <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">NOW</span><span class="out">()</span>
+<span class="out">);</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">SERIAL</span><span>Integer, auto-incremented by the DB. Simple. Leaks row count — avoid exposing directly in URLs.</span></li>
+        <li><span class="badge badge-blue">UUID</span><span>Globally unique. Doesn't leak row count. Safe to expose in public URLs. Best choice for APIs.</span></li>
+      </ul>
+      <div class="callout callout-orange icon-tip">AI prompt: <em>Design a PostgreSQL schema for a reading list app with user accounts. Include appropriate constraints and indexes.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — SELECT & WHERE -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>SELECT &amp; WHERE</h2>
+  <p style="margin-bottom:8px;">The most common SQL operation — reading data from a table.</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">SELECT examples</span></div>
+    <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">-- All columns, all rows</span>
+<span class="kw">SELECT</span> <span class="out">*</span> <span class="kw">FROM</span> <span class="fn">books</span><span class="out">;</span>
+
+<span class="comment">-- Specific columns with a filter</span>
+<span class="kw">SELECT</span> <span class="sql">title</span><span class="out">,</span> <span class="sql">author</span> <span class="kw">FROM</span> <span class="fn">books</span> <span class="kw">WHERE</span> <span class="sql">status</span> <span class="out">=</span> <span class="str">'reading'</span><span class="out">;</span>
+
+<span class="comment">-- Most recent 10 books</span>
+<span class="kw">SELECT</span> <span class="out">*</span> <span class="kw">FROM</span> <span class="fn">books</span> <span class="kw">ORDER BY</span> <span class="sql">created_at</span> <span class="kw">DESC LIMIT</span> <span class="val">10</span><span class="out">;</span></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;">
+    <span class="badge badge-blue">=</span>
+    <span class="badge badge-blue">!=</span>
+    <span class="badge badge-blue">&lt;</span>
+    <span class="badge badge-blue">&gt;</span>
+    <span class="badge badge-blue">&lt;=</span>
+    <span class="badge badge-blue">&gt;=</span>
+    <span class="badge badge-yellow">LIKE</span>
+    <span class="badge badge-yellow">ILIKE</span>
+    <span class="badge badge-yellow">IN</span>
+    <span class="badge badge-yellow">IS NULL</span>
+  </div>
+  <div class="callout callout-blue"><code>SELECT *</code> is fine for learning but in production code name your columns explicitly — it prevents surprises when the schema changes and a new column appears unexpectedly in your JSON output.</div>
+</div>
+
+<!-- Slide 7 — INSERT, UPDATE, DELETE -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>INSERT, UPDATE, DELETE</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">write operations</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">-- INSERT a new row</span>
+<span class="kw">INSERT INTO</span> <span class="fn">books</span> <span class="out">(</span><span class="sql">title</span><span class="out">,</span> <span class="sql">author</span><span class="out">,</span> <span class="sql">status</span><span class="out">)</span>
+<span class="kw">VALUES</span> <span class="out">(</span><span class="str">'The Pragmatic Programmer'</span><span class="out">,</span> <span class="str">'Hunt &amp; Thomas'</span><span class="out">,</span> <span class="str">'unread'</span><span class="out">)</span>
+<span class="kw">RETURNING</span> <span class="out">*;</span>
+
+<span class="comment">-- UPDATE with COALESCE (partial update pattern)</span>
+<span class="kw">UPDATE</span> <span class="fn">books</span>
+<span class="kw">SET</span>   <span class="sql">title</span>  <span class="out">=</span> <span class="fn">COALESCE</span><span class="out">(</span><span class="val">$2</span><span class="out">,</span> <span class="sql">title</span><span class="out">),</span>
+      <span class="sql">status</span> <span class="out">=</span> <span class="fn">COALESCE</span><span class="out">(</span><span class="val">$3</span><span class="out">,</span> <span class="sql">status</span><span class="out">)</span>
+<span class="kw">WHERE</span> <span class="sql">id</span> <span class="out">=</span> <span class="val">$1</span>
+<span class="kw">RETURNING</span> <span class="out">*;</span>
+
+<span class="comment">-- DELETE a row</span>
+<span class="kw">DELETE FROM</span> <span class="fn">books</span> <span class="kw">WHERE</span> <span class="sql">id</span> <span class="out">=</span> <span class="val">$1</span> <span class="kw">RETURNING</span> <span class="sql">id</span><span class="out">;</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <div class="callout callout-green icon-key"><code>RETURNING *</code> gives you back the modified row without a second SELECT — use it in every INSERT and UPDATE.</div>
+      <ul class="annot-list" style="margin-top:4px;">
+        <li><span class="badge badge-blue">COALESCE($2, title)</span><span>Returns <code>$2</code> if not null, otherwise keeps the existing <code>title</code>. This enables partial PATCH updates.</span></li>
+        <li><span class="badge badge-yellow">$1, $2, $3</span><span>Parameterised placeholders — prevents SQL injection. Your driver fills these in safely.</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — Constraints -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Constraints</h2>
+  <p style="margin-bottom:8px;">Constraints are rules enforced by the database on every write operation.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;">
+    <div>
+      <table>
+        <thead><tr><th>Constraint</th><th>What it enforces</th></tr></thead>
+        <tbody>
+          <tr><td>NOT NULL</td><td>Column must have a value — never empty</td></tr>
+          <tr><td>UNIQUE</td><td>No two rows may have the same value in this column</td></tr>
+          <tr><td>CHECK</td><td>A boolean condition must be true: <code>CHECK (status IN ('unread','reading','done'))</code></td></tr>
+          <tr><td>FOREIGN KEY</td><td>Value must exist in the referenced table</td></tr>
+          <tr><td>PRIMARY KEY</td><td>Implies NOT NULL + UNIQUE; identifies each row</td></tr>
+        </tbody>
+      </table>
+      <div class="terminal" style="margin-top:10px;">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">foreign key with ON DELETE</span></div>
+        <div class="terminal-body"><span class="sql">book_id</span> <span class="kw">UUID NOT NULL REFERENCES</span> <span class="fn">books</span><span class="out">(</span><span class="sql">id</span><span class="out">) </span><span class="kw">ON DELETE CASCADE</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <ul class="annot-list">
+        <li><span class="badge badge-orange">CASCADE</span><span>Delete child rows automatically when the parent is deleted</span></li>
+        <li><span class="badge badge-yellow">RESTRICT</span><span>Block the parent delete if any children exist</span></li>
+        <li><span class="badge badge-blue">SET NULL</span><span>Set the FK column to NULL when the parent is deleted</span></li>
+      </ul>
+      <div class="callout callout-yellow icon-key">Constraints are enforced by the database — not your application code. This is your last line of defence against invalid data.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — JOINs -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>JOINs</h2>
+  <p style="margin-bottom:8px;">JOINs combine rows from two tables based on a matching column — typically a foreign key.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">LEFT JOIN example</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">-- List books with their session count</span>
+<span class="kw">SELECT</span> <span class="sql">b</span><span class="out">.</span><span class="sql">title</span><span class="out">,</span> <span class="fn">COUNT</span><span class="out">(</span><span class="sql">rs</span><span class="out">.</span><span class="sql">id</span><span class="out">)</span> <span class="kw">AS</span> <span class="sql">session_count</span>
+<span class="kw">FROM</span>   <span class="fn">books</span> <span class="sql">b</span>
+<span class="kw">LEFT JOIN</span> <span class="fn">reading_sessions</span> <span class="sql">rs</span>
+       <span class="kw">ON</span> <span class="sql">rs</span><span class="out">.</span><span class="sql">book_id</span> <span class="out">=</span> <span class="sql">b</span><span class="out">.</span><span class="sql">id</span>
+<span class="kw">GROUP BY</span> <span class="sql">b</span><span class="out">.</span><span class="sql">id</span><span class="out">,</span> <span class="sql">b</span><span class="out">.</span><span class="sql">title</span><span class="out">;</span></div>
+      </div>
+      <div class="callout callout-blue" style="margin-top:8px;">Use <code>LEFT JOIN</code> when you want all rows from the left table even if there are no matching rows in the right table.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 130" style="width:100%;max-width:240px;height:auto;display:block;">
+        <!-- INNER JOIN diagram: two overlapping circles -->
+        <circle cx="88" cy="65" r="52" fill="rgba(88,166,255,0.15)" stroke="#58a6ff" stroke-width="1.5"/>
+        <circle cx="152" cy="65" r="52" fill="rgba(63,185,80,0.15)" stroke="#3fb950" stroke-width="1.5"/>
+        <!-- INNER overlap fill -->
+        <text x="120" y="62" text-anchor="middle" font-family="'SF Mono',monospace" font-size="10" fill="#e6edf3">INNER</text>
+        <text x="120" y="76" text-anchor="middle" font-family="'SF Mono',monospace" font-size="10" fill="#e6edf3">JOIN</text>
+        <text x="66" y="62" text-anchor="middle" font-family="'SF Mono',monospace" font-size="11" fill="#58a6ff">books</text>
+        <text x="174" y="62" text-anchor="middle" font-family="'SF Mono',monospace" font-size="10" fill="#3fb950">sessions</text>
+        <text x="68" y="122" text-anchor="middle" font-family="'SF Mono',monospace" font-size="10" fill="#58a6ff">LEFT JOIN</text>
+        <text x="68" y="134" text-anchor="middle" font-family="'SF Mono',monospace" font-size="9" fill="#8b949e">all books + matches</text>
+      </svg>
+      <ul class="annot-list" style="margin-top:4px;">
+        <li><span class="badge badge-blue">INNER JOIN</span><span>Only rows that match in both tables</span></li>
+        <li><span class="badge badge-green">LEFT JOIN</span><span>All left rows + matching right rows (nulls for non-matches)</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Transactions -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Transactions</h2>
+  <p style="margin-bottom:8px;"><strong>Atomicity</strong> means all or nothing. Without a transaction, a crash between two related writes leaves the database inconsistent.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">transaction syntax</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="kw">BEGIN</span><span class="out">;</span>
+  <span class="kw">UPDATE</span> <span class="fn">accounts</span>
+    <span class="kw">SET</span> <span class="sql">balance</span> <span class="out">=</span> <span class="sql">balance</span> <span class="out">-</span> <span class="val">100</span>
+    <span class="kw">WHERE</span> <span class="sql">id</span> <span class="out">=</span> <span class="val">1</span><span class="out">;</span>
+
+  <span class="kw">UPDATE</span> <span class="fn">accounts</span>
+    <span class="kw">SET</span> <span class="sql">balance</span> <span class="out">=</span> <span class="sql">balance</span> <span class="out">+</span> <span class="val">100</span>
+    <span class="kw">WHERE</span> <span class="sql">id</span> <span class="out">=</span> <span class="val">2</span><span class="out">;</span>
+
+<span class="kw">COMMIT</span><span class="out">;</span>
+<span class="comment">-- or ROLLBACK; if something went wrong</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <ul class="annot-list">
+        <li><span class="badge badge-blue">BEGIN</span><span>Start a transaction — all subsequent statements are grouped</span></li>
+        <li><span class="badge badge-green">COMMIT</span><span>Apply all grouped statements permanently</span></li>
+        <li><span class="badge badge-orange">ROLLBACK</span><span>Discard all grouped statements — as if they never happened</span></li>
+      </ul>
+      <div class="callout callout-green">In pg (the Node.js driver), use <code>client.query('BEGIN')</code> / <code>client.query('COMMIT')</code> from a checked-out pool client — not <code>pool.query()</code>. Pool queries run in auto-commit mode.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- Slide 11 — Indexes -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Indexes</h2>
+  <p style="margin-bottom:8px;">An index is a pre-sorted data structure that speeds up WHERE and JOIN lookups. Without one, PostgreSQL reads the entire table (O(n)). With a B-tree index, it jumps to the match (~O(log n)).</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">creating indexes</span></div>
+    <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="kw">CREATE INDEX ON</span> <span class="fn">books</span><span class="out">(</span><span class="sql">status</span><span class="out">);</span>                   <span class="comment">-- frequently filtered column</span>
+<span class="kw">CREATE INDEX ON</span> <span class="fn">reading_sessions</span><span class="out">(</span><span class="sql">book_id</span><span class="out">);</span>       <span class="comment">-- FK column (always index FKs)</span>
+<span class="kw">CREATE UNIQUE INDEX ON</span> <span class="fn">users</span><span class="out">(</span><span class="sql">email</span><span class="out">);</span>             <span class="comment">-- enforce uniqueness + speed</span></div>
+  </div>
+  <div class="cols cols-2" style="margin-top:8px;">
+    <div class="callout callout-orange icon-gotcha">Don't index everything — indexes slow down INSERT and UPDATE because the index must be updated too. Index FKs and columns you filter or sort on frequently.</div>
+    <div class="callout callout-blue"><code>EXPLAIN ANALYSE SELECT ...</code> shows you what PostgreSQL is actually doing — use it to confirm your indexes are being used and to spot full table scans.</div>
+  </div>
+</div>
+
+<!-- Slide 12 — psql -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>psql: Your Command-Line Client</h2>
+  <p style="margin-bottom:8px;">Connect directly to a PostgreSQL database and run SQL interactively.</p>
+  <div class="terminal" style="margin-bottom:10px;">
+    <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">connect</span></div>
+    <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">psql</span> <span class="url">$DATABASE_URL</span></div>
+  </div>
+  <div class="cols cols-2" style="margin-top:4px;">
+    <table>
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>\l</td><td>List databases</td></tr>
+        <tr><td>\c mydb</td><td>Connect to a database</td></tr>
+        <tr><td>\dt</td><td>List tables</td></tr>
+        <tr><td>\d books</td><td>Describe a table (columns, constraints, indexes)</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>\i schema.sql</td><td>Run a SQL file</td></tr>
+        <tr><td>\x</td><td>Toggle expanded display (one column per line)</td></tr>
+        <tr><td>\q</td><td>Quit</td></tr>
+        <tr><td>\copy</td><td>Import/export CSV data</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-yellow icon-hands-on" style="margin-top:8px;">AI prompt: <em>I'm in psql and see this error: [paste error]. What does it mean and how do I fix it?</em> — <a href="https://www.postgresql.org/docs/current/app-psql.html" target="_blank" class="breakout-link">psql docs &#8599;</a></div>
+</div>
+
+<!-- Slide 13 — Schema design with AI -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Schema Design with AI</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">prompt pattern for schema design</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);">I'm building a reading list app with Node.js and PostgreSQL.
+I need tables for: users, books (per user), and reading
+sessions (start/end dates per book). Include appropriate
+data types, primary keys, foreign keys, constraints, and
+any useful indexes. Return a single schema.sql file ready
+to run in psql.</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <p style="color:var(--text);font-weight:600;font-size:14px;margin-bottom:4px;">What to check in AI-generated schemas:</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-blue">PK</span><span>Primary key on every table?</span></li>
+        <li><span class="badge badge-orange">FK</span><span>Foreign keys declared with <code>ON DELETE</code> behaviour?</span></li>
+        <li><span class="badge badge-yellow">TIMESTAMPTZ</span><span>Timestamps using timezone-aware type?</span></li>
+        <li><span class="badge badge-green">Names</span><span>Constraint names sensible and consistent?</span></li>
+      </ul>
+      <div class="callout callout-blue icon-tip">Paste the schema back to the AI: <em>Review this schema for any issues with normalisation, missing constraints, or security concerns.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 14 — Migrations -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Migrations: Evolving Your Schema</h2>
+  <p style="margin-bottom:8px;">A production database already has data — you cannot re-run <code>schema.sql</code> from scratch. Migrations apply incremental, safe changes.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">safe migration pattern</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">-- Always use IF NOT EXISTS / IF EXISTS</span>
+<span class="kw">ALTER TABLE</span> <span class="fn">books</span>
+  <span class="kw">ADD COLUMN IF NOT EXISTS</span> <span class="sql">page_count</span> <span class="kw">INTEGER</span><span class="out">;</span>
+
+<span class="kw">CREATE INDEX IF NOT EXISTS</span> <span class="sql">idx_books_status</span>
+  <span class="kw">ON</span> <span class="fn">books</span><span class="out">(</span><span class="sql">status</span><span class="out">);</span></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:10px;margin-bottom:4px;"><strong style="color:var(--text);">Dangerous without a backup first:</strong></p>
+      <ul class="annot-list">
+        <li><span class="badge badge-orange">DROP TABLE</span><span>Deletes all data permanently</span></li>
+        <li><span class="badge badge-orange">DROP COLUMN</span><span>Column and all its data gone</span></li>
+        <li><span class="badge badge-orange">ALTER TYPE</span><span>May fail or silently lose data</span></li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <div class="callout callout-orange icon-gotcha">Always take a backup before running any migration:<br><code>pg_dump $DATABASE_URL &gt; backup-$(date +%Y%m%d).sql</code></div>
+      <div class="callout callout-blue icon-tip">AI prompt: <em>Write a migration to add a <code>page_count</code> column to the books table. Use IF NOT EXISTS and include a rollback comment.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- Slide 15 — Prompt reflection -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Using AI to Reason About Data</h2>
+  <div class="cols cols-3" style="margin-top:12px;gap:16px;">
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px;">Schema design</div>
+      <p style="font-size:13px;">AI generates schemas quickly. Your job is to read every column and ask: why this type? why this constraint? Could this constraint cause a problem at scale?</p>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">Query writing</div>
+      <p style="font-size:13px;">AI writes JOIN queries fluently. Paste the query back and ask: <em>"explain this query to me as if I'm learning SQL"</em> — then verify the explanation matches what the code does.</p>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">Debugging</div>
+      <p style="font-size:13px;">Paste psql error messages directly into the AI. PostgreSQL error codes (like <code>23505</code> for UNIQUE violation) are well-known and AI diagnoses them accurately.</p>
+    </div>
+  </div>
+  <div class="callout callout-green icon-key" style="margin-top:16px;">Every time you use AI to write SQL, run it, understand the result, then ask AI to explain any part that's unclear. Never merge SQL you cannot read.</div>
+</div>
+
+<!-- Slide 16 — Quick reference -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 4</div>
+  <h2>Quick Reference</h2>
+  <div class="cols cols-2" style="margin-top:10px;gap:24px;">
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">SQL Verbs</p>
+      <table>
+        <thead><tr><th>Verb</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>SELECT</td><td>Read rows from a table</td></tr>
+          <tr><td>INSERT</td><td>Add a new row</td></tr>
+          <tr><td>UPDATE</td><td>Modify existing rows</td></tr>
+          <tr><td>DELETE</td><td>Remove rows</td></tr>
+          <tr><td>CREATE TABLE</td><td>Define a new table</td></tr>
+          <tr><td>ALTER TABLE</td><td>Modify a table's structure</td></tr>
+          <tr><td>DROP TABLE</td><td>Delete a table and all its data</td></tr>
+          <tr><td>CREATE INDEX</td><td>Speed up lookups on a column</td></tr>
+          <tr><td>BEGIN / COMMIT / ROLLBACK</td><td>Transaction control</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">psql Commands</p>
+      <table>
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>\l</td><td>List databases</td></tr>
+          <tr><td>\c</td><td>Connect to a database</td></tr>
+          <tr><td>\dt</td><td>List tables</td></tr>
+          <tr><td>\d</td><td>Describe a table</td></tr>
+          <tr><td>\i</td><td>Run a SQL file</td></tr>
+          <tr><td>\x</td><td>Toggle expanded display</td></tr>
+          <tr><td>\q</td><td>Quit</td></tr>
+          <tr><td>\copy</td><td>Import / export CSV</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:10px;">The full Reading List schema is at <code>docs/crud-demo/schema.sql</code></div>
+</div>
+
+</div>
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 16</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F fullscreen</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'database-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'a4-1', type: 'practical', title: 'Write a JOIN query',
+    desc: 'Using the demo app schema (or any two related tables), write a SQL query that JOINs them and filters with WHERE. Explain what INNER JOIN vs LEFT JOIN would return differently for the same data.',
+    criteria: [
+      'Your query runs without error and returns the rows you expected',
+      'You can explain why INNER JOIN excludes rows with no match on the other side',
+      'You can explain what LEFT JOIN would return differently for the same dataset'
+    ] },
+  { id: 'a4-2', type: 'practical', title: 'Add a CHECK constraint',
+    desc: 'Alter the books table in the demo app schema to add a CHECK constraint on a column (e.g. rating BETWEEN 1 AND 5). Test it by attempting to INSERT an invalid value via psql.',
+    criteria: [
+      'The constraint was added with ALTER TABLE ... ADD CONSTRAINT syntax',
+      'Inserting an invalid value was rejected with a constraint violation error',
+      'You can name the PostgreSQL error code for a CHECK constraint violation (23514)'
+    ] },
+  { id: 'a4-3', type: 'reflect', title: 'When not to use SQL',
+    desc: 'When would you choose NOT to use a relational database for a project? What alternative would you reach for, and what trade-offs would you accept?',
+    criteria: [
+      'You named a specific alternative (MongoDB, Redis, DynamoDB, etc.) not just "NoSQL"',
+      'You gave a concrete use case where that alternative fits better than a relational DB',
+      'You acknowledged at least one trade-off of your chosen alternative'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain the relational model: tables, rows, columns, primary keys, and foreign keys',
+  'Write SQL queries to create, read, update, and delete records',
+  'Apply database constraints (NOT NULL, UNIQUE, CHECK, FK) to enforce data integrity',
+  'Construct JOIN queries to retrieve related data from multiple tables',
+  'Apply safe migration discipline: extend schemas without dropping existing data'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'db-cp1-q1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which PostgreSQL data type should you always use for storing timestamps?',
+    options: ['TIMESTAMP', 'TIMESTAMPTZ', 'DATE', 'VARCHAR'],
+    correct: 1,
+    explanation: 'TIMESTAMPTZ stores the timezone alongside the timestamp, preventing ambiguity when servers move regions or clocks change. Plain TIMESTAMP discards timezone information.'
+  },
+  {
+    id: 'db-cp1-q2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What does RETURNING * do in an INSERT or UPDATE statement?',
+    options: [
+      'Returns the number of rows affected',
+      'Rolls back the transaction if something went wrong',
+      'Returns the modified row without needing a second SELECT',
+      'Locks the row for future reads'
+    ],
+    correct: 2,
+    explanation: 'RETURNING * gives you back the inserted or updated row in the same query response, avoiding a second round-trip to the database.'
+  },
+  {
+    id: 'db-cp1-q3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'A foreign key with ON DELETE CASCADE means:',
+    options: [
+      'The parent row cannot be deleted if child rows exist',
+      'Child rows are automatically deleted when the parent is deleted',
+      'The FK column is set to NULL when the parent is deleted',
+      'The transaction rolls back if the parent is deleted'
+    ],
+    correct: 1,
+    explanation: 'ON DELETE CASCADE automatically deletes all child rows when the parent row is deleted. ON DELETE RESTRICT blocks the deletion; ON DELETE SET NULL nulls the FK column instead.'
+  },
+  {
+    id: 'db-cp1-q4',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'When should you use LEFT JOIN instead of INNER JOIN?',
+    options: [
+      'When you want only rows that match in both tables',
+      'When you want all rows from the left table, even if there are no matching rows on the right',
+      'When the right table has more rows than the left',
+      'When you need to combine more than two tables'
+    ],
+    correct: 1,
+    explanation: 'LEFT JOIN returns all rows from the left table plus any matching rows from the right. Non-matching right rows produce NULLs. INNER JOIN returns only rows that match in both tables.'
+  },
+  {
+    id: 'db-cp1-q5',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Explain what ACID means and why it matters. Give one concrete example of a problem you would have without the Atomicity guarantee.',
+    model: 'ACID stands for Atomicity (all-or-nothing writes), Consistency (constraints always enforced), Isolation (concurrent transactions don\'t interfere), Durability (committed data survives crashes). Without Atomicity, a bank transfer that deducts from one account but crashes before crediting the other would leave the database in an inconsistent state — money would have disappeared.',
+    reviewSlide: 'Why Databases?'
+  },
+  {
+    id: 'db-cp2-q1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What is the purpose of CREATE INDEX IF NOT EXISTS in a migration script?',
+    options: [
+      'It prevents duplicate indexes from slowing down queries',
+      'It makes the migration idempotent — safe to run multiple times without errors',
+      'It automatically drops the old index before creating the new one',
+      'It creates the index only if the table has more than 1000 rows'
+    ],
+    correct: 1,
+    explanation: 'IF NOT EXISTS makes the migration idempotent. Running it twice won\'t throw an error — if the index already exists, the statement is a no-op. This is critical for production migrations that may be re-run.'
+  },
+  {
+    id: 'db-cp2-q2',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Which psql meta-command shows you the columns, constraints, and indexes of a specific table?',
+    options: ['\\dt', '\\l', '\\d books', '\\i'],
+    correct: 2,
+    explanation: '\\d tablename describes a table — it shows all columns with their types, constraints, and any indexes. \\dt lists all tables; \\l lists databases; \\i runs a SQL file.'
+  },
+  {
+    id: 'db-cp2-q3',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Why should you avoid indexing every column?',
+    options: [
+      'PostgreSQL limits the number of indexes per table to 8',
+      'Indexes consume disk space and slow down INSERT and UPDATE operations',
+      'Indexes only work with UUID primary keys',
+      'Indexed columns cannot have NULL values'
+    ],
+    correct: 1,
+    explanation: 'Each index must be updated on every INSERT and UPDATE, adding write overhead. Index selectively: foreign key columns, frequently filtered columns, and frequently sorted columns.'
+  },
+  {
+    id: 'db-cp2-q4',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'You want to connect to a PostgreSQL database and inspect its tables from the command line. Which command do you run first?',
+    options: [
+      'psql --list',
+      'pg_dump $DATABASE_URL',
+      'psql $DATABASE_URL',
+      'node psql.js'
+    ],
+    correct: 2,
+    explanation: 'psql $DATABASE_URL opens an interactive session with the database. From there you can run \\dt to list tables, \\d tablename to inspect a table, and execute any SQL.'
+  },
+  {
+    id: 'db-cp2-q5',
+    checkpoint: 2,
+    type: 'self',
+    q: 'You are about to add a new column to a production table that already has 50,000 rows. Describe the safe steps you would follow, including the SQL you would write.',
+    model: 'First, take a backup: pg_dump $DATABASE_URL > backup-$(date +%Y%m%d).sql. Then write the migration using ADD COLUMN IF NOT EXISTS so it is safe to re-run: ALTER TABLE books ADD COLUMN IF NOT EXISTS page_count INTEGER; Test on a staging database first. Deploy during low-traffic hours. After running, verify the column appears with \\d books in psql.',
+    reviewSlide: 'Migrations: Evolving Your Schema'
+  }
+];
+</script>
+</body>
+</html>

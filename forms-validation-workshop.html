@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forms &amp; Validation — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #bc8cff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #6e40c9; --prompt-border: #9d71e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#1a1040 0%,#0f0a2a 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;       color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);    color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple); color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange); color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-60-40 > *:first-child { flex: 60; }
+  .cols-60-40 > *:last-child  { flex: 40; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(157,113,232,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(157,113,232,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="forms-validation-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track C · Frontend</div>
+  <h1>Forms &amp; <span class="accent">Validation</span></h1>
+  <div class="subtitle">Controlled inputs · Submission · Error display · TypeScript form types</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-purple">controlled input</span>
+    <span class="badge badge-purple">onChange</span>
+    <span class="badge badge-purple">validation</span>
+    <span class="badge badge-purple">aria-describedby</span>
+  </div>
+  <div class="callout callout-purple">Forms are where your UI meets your API. React's controlled-input model is different from plain HTML — the AI will generate it correctly most of the time, but you need to understand exactly why it works the way it does so you can fix it when it doesn't.</div>
+</div>
+
+<!-- Slide 2 — Controlled vs Uncontrolled -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Controlled vs Uncontrolled Inputs</h2>
+  <p>HTML forms manage their own state by default. React lets you take control — or leave it to the DOM.</p>
+  <div class="cols cols-2" style="margin-top:10px;">
+    <div>
+      <p style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:6px;">Uncontrolled — DOM owns the value</p>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">uncontrolled.tsx</span></div>
+        <div class="terminal-body"><span class="comment">// Value lives in the DOM — you read it on submit</span>
+<span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;<span class="hi">HTMLInputElement</span>&gt;(<span class="kw">null</span>);
+
+<span class="kw">function</span> <span class="fn">handleSubmit</span>(e: <span class="hi">FormEvent</span>) {
+  e.<span class="fn">preventDefault</span>();
+  <span class="fn">console</span>.<span class="fn">log</span>(ref.current?.<span class="key">value</span>); <span class="comment">// pull from DOM</span>
+}
+
+<span class="kw">return</span> &lt;<span class="fn">input</span> <span class="key">ref</span>={ref} /&gt;;</div>
+      </div>
+      <div class="callout callout-yellow" style="margin-top:4px;font-size:13px;">Simpler for one-off reads, but React can't react to changes — no live validation, no conditional UI.</div>
+    </div>
+    <div>
+      <p style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:6px;">Controlled — React owns the value</p>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">controlled.tsx</span></div>
+        <div class="terminal-body"><span class="comment">// Value lives in state — always in sync</span>
+<span class="kw">const</span> [<span class="key">title</span>, <span class="fn">setTitle</span>] = <span class="fn">useState</span>(<span class="str">''</span>);
+
+<span class="kw">function</span> <span class="fn">handleSubmit</span>(e: <span class="hi">FormEvent</span>) {
+  e.<span class="fn">preventDefault</span>();
+  <span class="fn">console</span>.<span class="fn">log</span>(title); <span class="comment">// already in state</span>
+}
+
+<span class="kw">return</span> (
+  &lt;<span class="fn">input</span>
+    <span class="key">value</span>={title}
+    <span class="key">onChange</span>={e =&gt; <span class="fn">setTitle</span>(e.target.<span class="key">value</span>)}
+  /&gt;
+);</div>
+      </div>
+      <div class="callout callout-green" style="margin-top:4px;font-size:13px;">React re-renders on every keystroke. The displayed value and the state value are always the same. This is the standard pattern.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3 — Multiple Fields with One State Object -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Multiple Fields — One State Object</h2>
+  <p>Managing one <code>useState</code> per field gets repetitive fast. AI typically generates a single state object with a generic <code>onChange</code> handler — understand this pattern before accepting it.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">AddBookForm.tsx</span></div>
+        <div class="terminal-body"><span class="kw">interface</span> <span class="hi">FormFields</span> {
+  title:  <span class="hi">string</span>;
+  author: <span class="hi">string</span>;
+  status: <span class="hi">string</span>;
+}
+
+<span class="kw">const</span> [<span class="key">form</span>, <span class="fn">setForm</span>] = <span class="fn">useState</span>&lt;<span class="hi">FormFields</span>&gt;({
+  title: <span class="str">''</span>, author: <span class="str">''</span>, status: <span class="str">'want-to-read'</span>,
+});
+
+<span class="comment">// One handler for all fields — reads e.target.name</span>
+<span class="kw">function</span> <span class="fn">handleChange</span>(
+  e: <span class="hi">ChangeEvent</span>&lt;<span class="hi">HTMLInputElement</span> | <span class="hi">HTMLSelectElement</span>&gt;
+) {
+  <span class="kw">const</span> { <span class="key">name</span>, <span class="key">value</span> } = e.target;
+  <span class="fn">setForm</span>(prev =&gt; ({ ...prev, [<span class="key">name</span>]: <span class="key">value</span> }));
+}
+
+<span class="comment">// Each input needs a matching name= attribute</span>
+<span class="kw">return</span> (
+  &lt;&gt;
+    &lt;<span class="fn">input</span> <span class="key">name</span>=<span class="str">"title"</span>  <span class="key">value</span>={form.<span class="key">title</span>}
+           <span class="key">onChange</span>={<span class="fn">handleChange</span>} /&gt;
+    &lt;<span class="fn">input</span> <span class="key">name</span>=<span class="str">"author"</span> <span class="key">value</span>={form.<span class="key">author</span>}
+           <span class="key">onChange</span>={<span class="fn">handleChange</span>} /&gt;
+    &lt;<span class="fn">select</span> <span class="key">name</span>=<span class="str">"status"</span> <span class="key">value</span>={form.<span class="key">status</span>}
+            <span class="key">onChange</span>={<span class="fn">handleChange</span>}&gt;...&lt;/<span class="fn">select</span>&gt;
+  &lt;/&gt;
+);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>The spread trick:</strong> <code>{ ...prev, [name]: value }</code> copies all existing fields and overwrites just the one that changed. This prevents clearing the other fields on every keystroke.</div>
+      <div class="callout callout-blue"><strong>name= must match the key:</strong> if the input's <code>name</code> attribute doesn't match the state key, the wrong field updates. This is the most common AI-generated bug in this pattern.</div>
+      <div class="callout callout-yellow"><strong>TypeScript check:</strong> the interface enforces that <code>name</code> is always a valid key. Without it, a typo silently adds a new field to state.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — Form Submission -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Form Submission</h2>
+  <p>Submitting a form calls your API. Three things must happen: prevent the page reload, track loading state, and catch errors. AI generates all three — check that it does.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">AddBookForm.tsx</span></div>
+        <div class="terminal-body"><span class="kw">const</span> [<span class="key">loading</span>, <span class="fn">setLoading</span>] = <span class="fn">useState</span>(<span class="kw">false</span>);
+<span class="kw">const</span> [<span class="key">error</span>,   <span class="fn">setError</span>]   = <span class="fn">useState</span>(<span class="str">''</span>);
+
+<span class="kw">async function</span> <span class="fn">handleSubmit</span>(e: <span class="hi">FormEvent</span>) {
+  e.<span class="fn">preventDefault</span>(); <span class="comment">// ① stop page reload</span>
+  <span class="fn">setLoading</span>(<span class="kw">true</span>);   <span class="comment">// ② disable button</span>
+  <span class="fn">setError</span>(<span class="str">''</span>);        <span class="comment">// ③ clear previous error</span>
+
+  <span class="kw">try</span> {
+    <span class="kw">await</span> api.<span class="fn">post</span>(<span class="str">'/api/books'</span>, form);
+    <span class="fn">onSuccess</span>(); <span class="comment">// callback from parent</span>
+  } <span class="kw">catch</span> (err) {
+    <span class="fn">setError</span>(err <span class="kw">instanceof</span> <span class="hi">Error</span>
+      ? err.<span class="key">message</span> : <span class="str">'Something went wrong'</span>);
+  } <span class="kw">finally</span> {
+    <span class="fn">setLoading</span>(<span class="kw">false</span>); <span class="comment">// ④ re-enable either way</span>
+  }
+}
+
+<span class="kw">return</span> (
+  &lt;<span class="fn">form</span> <span class="key">onSubmit</span>={<span class="fn">handleSubmit</span>}&gt;
+    {error &amp;&amp; &lt;<span class="fn">p</span> <span class="key">role</span>=<span class="str">"alert"</span>&gt;{error}&lt;/<span class="fn">p</span>&gt;}
+    &lt;<span class="fn">button</span> <span class="key">disabled</span>={<span class="key">loading</span>}&gt;
+      {<span class="key">loading</span> ? <span class="str">'Saving…'</span> : <span class="str">'Add book'</span>}
+    &lt;/<span class="fn">button</span>&gt;
+  &lt;/<span class="fn">form</span>&gt;
+);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>Always use a <code>&lt;form&gt;</code> element.</strong> Putting <code>onClick</code> on a button instead of <code>onSubmit</code> on the form means Enter key submission doesn't work — a common AI shortcut that breaks accessibility.</div>
+      <div class="callout callout-yellow"><strong><code>finally</code> is non-negotiable.</strong> If you put <code>setLoading(false)</code> only in the try block, a network error will leave the button permanently disabled.</div>
+      <div class="callout callout-green"><strong>Reset form on success:</strong> call <code>setForm(initialState)</code> inside the try block after a successful API call so the fields clear for the next entry.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — Client-Side Validation -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Client-Side Validation</h2>
+  <p>Validation runs in the browser before the API call. It improves the experience — but it is not a security measure. Your API must always validate on the server side too.</p>
+  <div class="cols cols-2" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">validate.ts</span></div>
+        <div class="terminal-body"><span class="comment">// Validation function returns an errors object</span>
+<span class="kw">function</span> <span class="fn">validate</span>(form: <span class="hi">FormFields</span>) {
+  <span class="kw">const</span> errors: <span class="hi">Partial</span>&lt;<span class="hi">Record</span>&lt;<span class="kw">keyof</span> <span class="hi">FormFields</span>, <span class="hi">string</span>&gt;&gt; = {};
+
+  <span class="kw">if</span> (!form.<span class="key">title</span>.<span class="fn">trim</span>()) {
+    errors.<span class="key">title</span> = <span class="str">'Title is required'</span>;
+  }
+  <span class="kw">if</span> (!form.<span class="key">author</span>.<span class="fn">trim</span>()) {
+    errors.<span class="key">author</span> = <span class="str">'Author is required'</span>;
+  }
+  <span class="kw">if</span> (form.<span class="key">title</span>.<span class="fn">trim</span>().<span class="key">length</span> &gt; 200) {
+    errors.<span class="key">title</span> = <span class="str">'Title must be 200 characters or fewer'</span>;
+  }
+
+  <span class="kw">return</span> errors;
+}
+
+<span class="comment">// In handleSubmit — validate before calling API</span>
+<span class="kw">async function</span> <span class="fn">handleSubmit</span>(e: <span class="hi">FormEvent</span>) {
+  e.<span class="fn">preventDefault</span>();
+  <span class="kw">const</span> errs = <span class="fn">validate</span>(form);
+  <span class="kw">if</span> (<span class="hi">Object</span>.<span class="fn">keys</span>(errs).<span class="key">length</span> &gt; 0) {
+    <span class="fn">setFieldErrors</span>(errs);  <span class="comment">// show inline errors</span>
+    <span class="kw">return</span>;                 <span class="comment">// don't call API</span>
+  }
+  <span class="comment">// … proceed with fetch</span>
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>Client validation ≠ server validation.</strong> Anyone can disable JavaScript or call your API directly with curl. Always validate on both sides.</div>
+      <div class="callout callout-purple"><strong>Validate only what the UI knows about:</strong> format, length, required. Don't try to check uniqueness or business rules client-side — those belong on the server where you have the database.</div>
+      <div class="callout callout-blue"><strong>The errors object pattern</strong> is what AI typically generates. Each key is a field name, each value is an error message string. An empty object means valid.</div>
+      <div class="callout callout-yellow"><strong>Note <code>.trim()</code>:</strong> a field containing only spaces would pass a simple <code>!form.title</code> check. Always trim before checking required fields.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — Submit vs Blur Validation -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>When to Show Errors</h2>
+  <p>Showing errors at the wrong moment is more frustrating than not showing them at all. Two common strategies — both have trade-offs.</p>
+  <table style="margin-top:10px;">
+    <thead>
+      <tr><th>Strategy</th><th>When errors appear</th><th>Pros</th><th>Cons</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>On submit</td>
+        <td>After first submit attempt</td>
+        <td>No premature errors while typing. Simple to implement.</td>
+        <td>User must submit before knowing about any error. Can be jarring with many errors at once.</td>
+      </tr>
+      <tr>
+        <td>On blur</td>
+        <td>When field loses focus (<code>onBlur</code>)</td>
+        <td>Feedback per field as user moves through form. Feels responsive.</td>
+        <td>More state to manage (which fields have been touched). Error on first visit to a field can feel aggressive.</td>
+      </tr>
+      <tr>
+        <td>Hybrid</td>
+        <td>On submit first; on change after first submit</td>
+        <td>Best of both: no premature errors, live feedback once user is aware of the form.</td>
+        <td>Requires a <code>submitted</code> flag in state. AI may not generate this correctly.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div class="callout callout-purple"><strong>The hybrid pattern is the industry default</strong> for most forms — submit to reveal errors, then live feedback as the user corrects them. Ask AI for this explicitly: <em>"validate on submit, then update errors on change."</em></div>
+    <div class="callout callout-yellow"><strong>Never validate on <code>onChange</code> alone.</strong> Showing "Title is required" the moment a user clicks an empty field — before they've typed anything — is an anti-pattern that erodes trust in the form.</div>
+  </div>
+</div>
+
+<!-- Slide 7 — Displaying Field Errors Accessibly -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Displaying Errors Accessibly</h2>
+  <p>Error messages need to be visible and machine-readable. Screen readers need to know which message belongs to which field.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">FormField.tsx</span></div>
+        <div class="terminal-body"><span class="kw">interface</span> <span class="hi">FieldErrors</span> {
+  title?:  <span class="hi">string</span>;
+  author?: <span class="hi">string</span>;
+}
+<span class="kw">const</span> [<span class="key">fieldErrors</span>, <span class="fn">setFieldErrors</span>] =
+  <span class="fn">useState</span>&lt;<span class="hi">FieldErrors</span>&gt;({});
+
+<span class="comment">// In JSX — link input to its error with aria-describedby</span>
+&lt;<span class="fn">div</span>&gt;
+  &lt;<span class="fn">label</span> <span class="key">htmlFor</span>=<span class="str">"title"</span>&gt;Title&lt;/<span class="fn">label</span>&gt;
+  &lt;<span class="fn">input</span>
+    <span class="key">id</span>=<span class="str">"title"</span>
+    <span class="key">name</span>=<span class="str">"title"</span>
+    <span class="key">value</span>={form.<span class="key">title</span>}
+    <span class="key">onChange</span>={<span class="fn">handleChange</span>}
+    <span class="key">aria-describedby</span>={
+      fieldErrors.<span class="key">title</span> ? <span class="str">"title-error"</span> : <span class="kw">undefined</span>
+    }
+    <span class="key">aria-invalid</span>={!!fieldErrors.<span class="key">title</span>}
+  /&gt;
+  {fieldErrors.<span class="key">title</span> &amp;&amp; (
+    &lt;<span class="fn">p</span> <span class="key">id</span>=<span class="str">"title-error"</span> <span class="key">role</span>=<span class="str">"alert"</span>
+       <span class="key">style</span>={{ color: <span class="str">'var(--red)'</span>, fontSize: <span class="str">'13px'</span> }}&gt;
+      {fieldErrors.<span class="key">title</span>}
+    &lt;/<span class="fn">p</span>&gt;
+  )}
+&lt;/<span class="fn">div</span>&gt;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-blue"><strong><code>aria-describedby</code></strong> connects the input to its error paragraph by ID. A screen reader announces the error message when the field receives focus.</div>
+      <div class="callout callout-purple"><strong><code>aria-invalid="true"</code></strong> signals to assistive technology that the field has a validation error — browsers may also add visual styling.</div>
+      <div class="callout callout-orange"><strong><code>role="alert"</code></strong> on the error paragraph causes screen readers to announce it immediately when it appears in the DOM, without waiting for the user to focus the paragraph.</div>
+      <div class="callout callout-yellow"><strong>Check AI-generated forms</strong> for <code>htmlFor</code> / <code>id</code> pairs. AI often omits the <code>label htmlFor</code> linkage — a label that is not programmatically linked to its input is invisible to screen readers.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — TypeScript Form Types -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>TypeScript Form Event Types</h2>
+  <p>React's TypeScript generics for form events are verbose. AI handles them correctly most of the time — recognise the pattern so you can fix it when it doesn't.</p>
+  <div class="cols cols-2" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">form-types.tsx</span></div>
+        <div class="terminal-body"><span class="kw">import</span> {
+  <span class="hi">FormEvent</span>,
+  <span class="hi">ChangeEvent</span>,
+} <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="comment">// Form submission — always FormEvent&lt;HTMLFormElement&gt;</span>
+<span class="kw">function</span> <span class="fn">handleSubmit</span>(e: <span class="hi">FormEvent</span>&lt;<span class="hi">HTMLFormElement</span>&gt;) {
+  e.<span class="fn">preventDefault</span>();
+  <span class="comment">// ...</span>
+}
+
+<span class="comment">// Text input change</span>
+<span class="kw">function</span> <span class="fn">handleChange</span>(
+  e: <span class="hi">ChangeEvent</span>&lt;<span class="hi">HTMLInputElement</span>&gt;
+) {
+  <span class="fn">setValue</span>(e.target.<span class="key">value</span>);
+}
+
+<span class="comment">// Multiple element types (input + select + textarea)</span>
+<span class="kw">function</span> <span class="fn">handleChange</span>(
+  e: <span class="hi">ChangeEvent</span>&lt;
+    <span class="hi">HTMLInputElement</span> |
+    <span class="hi">HTMLSelectElement</span> |
+    <span class="hi">HTMLTextAreaElement</span>
+  &gt;
+) {
+  <span class="kw">const</span> { <span class="key">name</span>, <span class="key">value</span> } = e.target;
+  <span class="fn">setForm</span>(prev =&gt; ({ ...prev, [<span class="key">name</span>]: <span class="key">value</span> }));
+}
+
+<span class="comment">// Checkbox needs e.target.checked, not value</span>
+<span class="kw">function</span> <span class="fn">handleCheck</span>(
+  e: <span class="hi">ChangeEvent</span>&lt;<span class="hi">HTMLInputElement</span>&gt;
+) {
+  <span class="fn">setChecked</span>(e.target.<span class="key">checked</span>);
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>The generic tells TypeScript</strong> what kind of element fired the event. Without it you get <code>EventTarget</code> — which has no <code>value</code> property, causing a type error.</div>
+      <div class="callout callout-orange"><strong>Checkbox gotcha:</strong> checkboxes use <code>e.target.checked</code> (a boolean), not <code>e.target.value</code>. This is the most common checkbox bug in AI-generated forms.</div>
+      <div class="callout callout-blue"><strong>AI shortcut you'll see:</strong> <code>e: any</code> on event handlers. This silences TypeScript but loses all safety. Push back: ask AI to provide the correct generic type for each handler.</div>
+      <div class="callout callout-yellow">You rarely need to import <code>React</code> explicitly in modern React (17+). The JSX transform handles it. But event types like <code>FormEvent</code> still need a named import from <code>'react'</code>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — Section Header: Prompting -->
+<div class="slide section-header">
+  <div class="pill">Part 2 — Prompting</div>
+  <h1>Prompting for <span class="accent">Forms</span></h1>
+  <div class="subtitle">What to ask for · What to read · What AI typically gets wrong</div>
+</div>
+
+<!-- Slide 10 — Scaffold Prompt -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Scaffold Prompt — Add Book Form</h2>
+  <p>A good scaffold prompt specifies fields, validation rules, state shape, submission behaviour, and accessibility. Vague prompts produce forms that work but are hard to maintain.</p>
+  <div class="prompt-block" style="margin-top:8px;">
+    <div class="prompt-bar">&#9998; Scaffold prompt — paste into your AI assistant</div>
+    <div class="prompt-body">Create a React TypeScript component called <em>AddBookForm</em> that submits a new book to my Reading List API.
+
+<strong>Fields:</strong>
+<ul>
+  <li><em>title</em> — text input, required, max 200 characters</li>
+  <li><em>author</em> — text input, required</li>
+  <li><em>status</em> — select with options: want-to-read, reading, finished</li>
+</ul>
+
+<strong>Requirements:</strong>
+<ul>
+  <li>Use a single state object with a generic onChange handler (name attribute pattern)</li>
+  <li>Validate on submit first; then update errors on change after first submit attempt</li>
+  <li>Show per-field error messages linked with <em>aria-describedby</em> and <em>aria-invalid</em></li>
+  <li>Show a loading state on the submit button while the request is in flight</li>
+  <li>Show a general error message if the API call fails</li>
+  <li>Call an <em>onSuccess</em> prop (no arguments) when the book is added successfully</li>
+  <li>Use the <em>api.post</em> function from <em>../api/api.ts</em> for the request</li>
+  <li>Reset all fields to their initial values after a successful submit</li>
+  <li>Use correct TypeScript types for all event handlers — no <em>any</em></li>
+  <li>Every input must have a <em>label</em> linked with <em>htmlFor</em> and matching <em>id</em></li>
+</ul></div>
+  </div>
+</div>
+
+<!-- Slide 11 — Reading the Generated Form -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Reading the AI-Generated Form</h2>
+  <p>Before using the component, verify these five things. AI gets most of them right — but each is a source of real bugs when it doesn't.</p>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span class="badge badge-num">1</span><span><strong>Label linkage:</strong> every <code>&lt;label htmlFor="x"&gt;</code> must have a matching <code>&lt;input id="x"&gt;</code>. If these don't match, the label is decorative only — not accessible.</span></li>
+    <li><span class="badge badge-num">2</span><span><strong>State key = name attribute:</strong> if the generic <code>handleChange</code> uses <code>e.target.name</code>, every input's <code>name</code> attribute must exactly match the key in the state object. A mismatch creates a silent new key.</span></li>
+    <li><span class="badge badge-num">3</span><span><strong><code>finally</code> block:</strong> <code>setLoading(false)</code> must be in <code>finally</code>, not just in <code>try</code>. Check this first — it's the most common omission.</span></li>
+    <li><span class="badge badge-num">4</span><span><strong>Reset on success:</strong> check that <code>setForm(initialState)</code> is called after a successful API call. If not, the form retains the last submission's values.</span></li>
+    <li><span class="badge badge-num">5</span><span><strong>Error type narrowing:</strong> <code>catch (err)</code> gives you <code>unknown</code> in TypeScript. Check that AI narrows it — <code>err instanceof Error ? err.message : 'Something went wrong'</code> — rather than casting with <code>as Error</code>.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 12 — Real-Time Validation with Debounce -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Real-Time Validation — and When to Debounce</h2>
+  <p>Running validation on every keystroke is fine for simple rules. For anything async (checking username availability) you need to debounce — delay the call until the user pauses typing.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">useDebounce.ts</span></div>
+        <div class="terminal-body"><span class="comment">// Custom hook — returns a debounced value</span>
+<span class="kw">function</span> <span class="fn">useDebounce</span>&lt;T&gt;(value: T, delay: <span class="hi">number</span>): T {
+  <span class="kw">const</span> [<span class="key">debounced</span>, <span class="fn">setDebounced</span>] = <span class="fn">useState</span>(value);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> timer = <span class="fn">setTimeout</span>(
+      () =&gt; <span class="fn">setDebounced</span>(value), delay
+    );
+    <span class="kw">return</span> () =&gt; <span class="fn">clearTimeout</span>(timer); <span class="comment">// cleanup</span>
+  }, [value, delay]);
+
+  <span class="kw">return</span> debounced;
+}
+
+<span class="comment">// Usage in a component</span>
+<span class="kw">const</span> [<span class="key">username</span>, <span class="fn">setUsername</span>] = <span class="fn">useState</span>(<span class="str">''</span>);
+<span class="kw">const</span> debouncedUsername = <span class="fn">useDebounce</span>(username, 400);
+
+<span class="comment">// This effect only fires 400ms after the last keystroke</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">if</span> (!debouncedUsername) <span class="kw">return</span>;
+  <span class="comment">// check username availability via API</span>
+}, [debouncedUsername]);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Without debounce:</strong> a username field fires a network request on every single character typed — potentially 20+ requests for a short username. This is expensive and confusing.</div>
+      <div class="callout callout-blue"><strong>The cleanup function</strong> cancels the previous timer on every render. Only the final timer (400ms after the last keystroke) fires. This is the same <code>useEffect</code> cleanup pattern as AbortController.</div>
+      <div class="callout callout-green"><strong>400–500ms</strong> is the conventional debounce delay for search and validation inputs. Lower feels jittery; higher feels sluggish.</div>
+      <div class="callout callout-yellow"><strong>For simple sync validation</strong> (required, max length), debouncing adds complexity without benefit. Only reach for it when the validation involves a network call.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 13 — Using the Form in a Page -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Using the Form in a Page Component</h2>
+  <p>The form component is controlled entirely by its parent. The parent passes <code>onSuccess</code> and reacts to it — typically by refreshing the book list or showing a confirmation.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">BooksPage.tsx</span></div>
+        <div class="terminal-body"><span class="kw">function</span> <span class="fn">BooksPage</span>() {
+  <span class="kw">const</span> [<span class="key">showForm</span>, <span class="fn">setShowForm</span>] = <span class="fn">useState</span>(<span class="kw">false</span>);
+  <span class="kw">const</span> [<span class="key">refresh</span>, <span class="fn">setRefresh</span>] = <span class="fn">useState</span>(<span class="kw">0</span>);
+
+  <span class="kw">function</span> <span class="fn">handleSuccess</span>() {
+    <span class="fn">setShowForm</span>(<span class="kw">false</span>);
+    <span class="fn">setRefresh</span>(n =&gt; n + <span class="kw">1</span>); <span class="comment">// trigger list reload</span>
+  }
+
+  <span class="kw">return</span> (
+    &lt;<span class="fn">div</span>&gt;
+      &lt;<span class="fn">button</span> <span class="key">onClick</span>={() =&gt; <span class="fn">setShowForm</span>(v =&gt; !v)}&gt;
+        {showForm ? <span class="str">'Cancel'</span> : <span class="str">'+ Add book'</span>}
+      &lt;/<span class="fn">button</span>&gt;
+
+      {showForm &amp;&amp; (
+        &lt;<span class="fn">AddBookForm</span> <span class="key">onSuccess</span>={<span class="fn">handleSuccess</span>} /&gt;
+      )}
+
+      <span class="comment">// BookList re-fetches when refresh changes</span>
+      &lt;<span class="fn">BookList</span> <span class="key">key</span>={refresh} /&gt;
+    &lt;/<span class="fn">div</span>&gt;
+  );
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>The refresh counter trick:</strong> changing the <code>key</code> prop on <code>BookList</code> unmounts and remounts it, which triggers its <code>useEffect</code> to re-fetch. Simpler than lifting the list state up or using a shared store.</div>
+      <div class="callout callout-blue"><strong>Toggle pattern:</strong> <code>v =&gt; !v</code> as the setter argument ensures you're always toggling the current value — not a stale closure over the initial render's value.</div>
+      <div class="callout callout-yellow"><strong>Conditional mount:</strong> <code>{showForm &amp;&amp; &lt;AddBookForm /&gt;}</code> unmounts the form when hidden. This resets all form state automatically — no need to manually clear fields on cancel.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 14 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Prompt Reflection</h2>
+  <p>Before moving on, take five minutes to think through what you observed in this session.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-purple">
+        <strong>What did the AI get right?</strong><br>
+        Which parts of the generated form matched the patterns in this deck without you having to correct them? Which assumptions did the AI make that happened to be reasonable?
+      </div>
+      <div class="callout callout-blue">
+        <strong>What did you have to fix?</strong><br>
+        Was the <code>finally</code> block present? Were label-input pairs linked correctly? Did event handlers use <code>any</code> or proper generics? What was the first thing you noticed was wrong?
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-yellow">
+        <strong>What would you add to your next prompt?</strong><br>
+        Based on the gaps you found, what constraint would you add to the scaffold prompt so the AI gets it right next time? Write one extra requirement in your own words.
+      </div>
+      <div class="callout callout-orange">
+        <strong>Accessibility check:</strong><br>
+        Tab through your form with the keyboard only. Does focus move logically from field to field? Are error messages announced? Does pressing Enter submit the form? If not — what would you ask the AI to fix?
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 15 — Wrap-up -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Wrap-up</h2>
+  <div class="subtitle">What you can now do with forms in React</div>
+  <ul class="annot-list" style="margin-top:12px;">
+    <li><span class="badge badge-green">&#10003;</span><span>Use controlled inputs — the <code>value</code> + <code>onChange</code> pattern — and explain why uncontrolled inputs are limited</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Manage multiple fields with a single state object and a generic <code>handleChange</code> that reads <code>e.target.name</code></span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Write async submit handlers with <code>loading</code> / <code>error</code> state and a <code>finally</code> block that always re-enables the button</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Validate on submit, then update errors on change — and display them accessibly using <code>aria-describedby</code> and <code>role="alert"</code></span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Recognise the correct TypeScript types for form events (<code>FormEvent</code>, <code>ChangeEvent&lt;HTMLInputElement&gt;</code>) and fix AI's tendency to use <code>any</code></span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Know when to use a debounced effect for async validation and how the cleanup function prevents redundant network calls</span></li>
+  </ul>
+  <div class="callout callout-purple" style="margin-top:14px;"><strong>Next:</strong> C5 — Routing — React Router, protected routes, and navigating between pages without a full page reload.</div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <span id="counter">1 / 15</span>
+  <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
+  <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
+</div>
+<div id="progress"></div>
+<span id="hint">← → keys to navigate</span>
+<a href="http://localhost:3001/api/health" id="app-link" target="_blank" rel="noopener">localhost:3001 &#8599;</a>
+<a href="index.html" id="index-link">&#8962; Course</a>
+
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_NAME = 'forms-validation-workshop';
+window.DECK_OBJECTIVES = [
+  'Use controlled inputs with value and onChange to manage form field values in React state',
+  'Manage multiple form fields with a single state object and a generic onChange handler',
+  'Write async submit handlers with loading/error state and a finally block',
+  'Implement client-side validation and display field errors accessibly using aria-describedby',
+  'Apply the correct TypeScript generics for form and change event handlers',
+  'Choose between submit-time and blur-time validation and explain the trade-offs',
+  'Use a debounce hook to rate-limit async validation effects'
+];
+window.DECK_ASSESSMENTS = [
+  {
+    id: 'a1',
+    title: 'Build a controlled form',
+    description: 'Add an AddBookForm component to your Reading List app. Use the scaffold prompt from slide 10 and verify all five checklist items from slide 11 before connecting it to your API.',
+    points: 3
+  },
+  {
+    id: 'a2',
+    title: 'Accessibility audit',
+    description: 'Tab through your completed form using only the keyboard. Verify that: (1) all labels are linked to inputs, (2) error messages are announced, (3) Enter submits the form. Fix any issues and document what you changed.',
+    points: 2
+  },
+  {
+    id: 'a3',
+    title: 'Prompt engineering reflection',
+    description: 'Write the extra requirement you identified in the Prompt Reflection slide. Add it to your scaffold prompt, regenerate the form, and compare the output. What changed? What still needed manual adjustment?',
+    points: 2
+  }
+];
+window.DECK_QUESTIONS = [
+  {
+    id: 'q1', type: 'mcq',
+    question: 'What is the key difference between a controlled and an uncontrolled input in React?',
+    options: [
+      'Controlled inputs use a ref; uncontrolled inputs use state',
+      'Controlled inputs have their value managed by React state; uncontrolled inputs have their value managed by the DOM',
+      'Controlled inputs require TypeScript; uncontrolled inputs do not',
+      'Controlled inputs cannot be used inside a form element'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q2', type: 'mcq',
+    question: 'In the generic onChange handler pattern, what attribute on each input element determines which state field gets updated?',
+    options: ['id', 'value', 'name', 'type'],
+    answer: 2
+  },
+  {
+    id: 'q3', type: 'mcq',
+    question: 'Why must setLoading(false) be placed in a finally block rather than at the end of the try block?',
+    options: [
+      'finally runs before catch, ensuring faster re-enabling',
+      'try blocks do not execute when an async function is used',
+      'If the API call throws, the try block exits early and setLoading(false) would never run',
+      'React requires finally for all async state updates'
+    ],
+    answer: 2
+  },
+  {
+    id: 'q4', type: 'mcq',
+    question: 'Which HTML attribute links an input to its associated error message for screen readers?',
+    options: ['aria-label', 'aria-describedby', 'aria-live', 'aria-required'],
+    answer: 1
+  },
+  {
+    id: 'q5', type: 'self',
+    question: 'A checkbox input uses e.target.checked instead of e.target.value. Why? What would happen if you used e.target.value for a checkbox?'
+  },
+  {
+    id: 'q6', type: 'self',
+    question: 'Explain the validate-on-submit-first, then-on-change hybrid pattern. Why is this preferable to validating on onChange from the start?'
+  },
+  {
+    id: 'q7', type: 'mcq',
+    question: 'What does the useDebounce hook\'s cleanup function (returning clearTimeout) actually prevent?',
+    options: [
+      'It prevents the state from being set after the component unmounts',
+      'It cancels the pending timer when the value changes again before the delay expires, so only the final timer fires',
+      'It clears the input field when the user stops typing',
+      'It resets the debounced value to an empty string on unmount'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q8', type: 'self',
+    question: 'The key={refresh} trick on the BookList component causes it to remount when refresh increments. What is the downside of this approach compared to lifting the book list state up to the parent?'
+  }
+];
+
+(function() {
+  var slides = document.querySelectorAll('.slide');
+  var total  = slides.length;
+  var idx    = 0;
+
+  function show(n) {
+    slides[idx].classList.remove('active');
+    idx = Math.max(0, Math.min(n, total - 1));
+    slides[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((idx / (total - 1)) * 100) + '%';
+    if (window.localStorage) localStorage.setItem('svl_forms-validation-workshop', idx);
+    if (window.localStorage) localStorage.setItem('svl_forms-validation-workshop_total', total);
+    if (idx > parseInt(localStorage.getItem('svl_forms-validation-workshop_max') || '0'))
+      localStorage.setItem('svl_forms-validation-workshop_max', idx);
+  }
+
+  document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
+  document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') show(idx + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   show(idx - 1);
+  });
+
+  var saved = window.localStorage ? parseInt(localStorage.getItem('svl_forms-validation-workshop') || '0') : 0;
+  if (saved > 0 && saved < total) show(saved);
+  else show(0);
+
+  if (window.initHUD)        initHUD();
+  if (window.initLO)         initLO();
+  if (window.initAssessments) initAssessments();
+  if (window.initAudio)      initAudio();
+  if (window.initAnnotation) initAnnotation();
+  if (window.initScripts)    initScripts();
+  if (window.initQuiz)       initQuiz();
+})();
+</script>
+</body>
+</html>

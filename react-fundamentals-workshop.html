@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Fundamentals — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #bc8cff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #6e40c9; --prompt-border: #9d71e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#1a1040 0%,#0f0a2a 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;       color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);    color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple); color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange); color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-60-40 > *:first-child { flex: 60; }
+  .cols-60-40 > *:last-child  { flex: 40; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(157,113,232,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(157,113,232,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="react-fundamentals-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track C · Frontend</div>
+  <h1>React <span class="accent">Fundamentals</span></h1>
+  <div class="subtitle">Components · State · Props · Events · Forms</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-purple">JSX</span>
+    <span class="badge badge-purple">useState</span>
+    <span class="badge badge-purple">Components</span>
+    <span class="badge badge-purple">Vite</span>
+  </div>
+  <div class="callout callout-purple">You already have a working API. This deck builds the front end — a React app that talks to it. We prompt AI to generate the UI, then read every line to understand what was built and why.</div>
+</div>
+
+<!-- Slide 2 — What is React? -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>What is React — and Why Does It Exist?</h2>
+  <p>Traditional HTML + JavaScript updates the page by directly manipulating DOM elements. This works but gets messy fast. React introduces a better mental model: <strong>describe what the UI should look like</strong>, and let the library figure out what to change.</p>
+  <div class="cols cols-3" style="margin-top:10px;">
+    <div class="callout callout-purple"><strong>Components</strong> — the UI is split into small, reusable pieces. A button, a card, a form are each their own component. Compose them to build a page.</div>
+    <div class="callout callout-yellow"><strong>State</strong> — when data changes, React automatically re-renders only the parts of the page that depend on that data. No manual DOM updates.</div>
+    <div class="callout callout-green"><strong>Declarative</strong> — you write what the UI should look like for a given state. React handles the how. This is what AI generates — declarative component trees.</div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:8px;font-size:13px;">React is not magic — it compiles JSX to JavaScript function calls. When you understand the output, you understand the tool. That is this deck's goal.</div>
+</div>
+
+<!-- Slide 3 — Vite Setup -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Setting Up — Vite + React + TypeScript</h2>
+  <p>We use Vite: a fast build tool that handles JSX compilation, hot module replacement, and bundling. One command scaffolds everything.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">npm create vite@latest my-app</span>
+<span class="comment">  ✔ Select a framework › React</span>
+<span class="comment">  ✔ Select a variant  › TypeScript</span>
+
+<span class="prompt">$</span> <span class="cmd">cd my-app</span>
+<span class="prompt">$</span> <span class="cmd">npm install</span>
+<span class="prompt">$</span> <span class="cmd">npm run dev</span>
+<span class="out">  VITE ready on http://localhost:5173</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Why TypeScript?</strong> AI-generated React is almost always TypeScript. It catches prop type errors before they become runtime bugs.</div>
+      <div class="callout callout-yellow"><strong>Port 5173</strong> — Vite's dev server. Your Express API runs on 3001. Two servers, two ports — they will need to talk to each other in C3.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — Reading the Scaffold -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Reading What Vite Generated</h2>
+  <p>Before writing a line, understand the files Vite created. AI will reference these constantly.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">file structure</span></div>
+        <div class="terminal-body"><span class="gr">my-app/</span>
+├── <span class="or">index.html</span>        <span class="comment">← entry point for the browser</span>
+├── <span class="or">vite.config.ts</span>    <span class="comment">← build config</span>
+├── <span class="or">tsconfig.json</span>     <span class="comment">← TypeScript settings</span>
+├── <span class="or">package.json</span>
+└── <span class="gr">src/</span>
+    ├── <span class="hi">main.tsx</span>          <span class="comment">← mounts React into index.html</span>
+    ├── <span class="hi">App.tsx</span>           <span class="comment">← root component</span>
+    └── <span class="hi">App.css</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>main.tsx</strong> — finds the <code>&lt;div id="root"&gt;</code> in index.html and renders your React app into it. You rarely touch this file.</div>
+      <div class="callout callout-blue"><strong>App.tsx</strong> — where you start. Everything you build will either live here or be imported here.</div>
+      <div class="callout callout-yellow"><strong>.tsx</strong> means TypeScript with JSX. Files without JSX use <strong>.ts</strong>. AI will always use the right extension — now you know why.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — JSX -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>JSX — HTML Inside JavaScript</h2>
+  <p>JSX is not HTML. It looks like it, but it compiles to JavaScript function calls. Understanding this explains most AI-generated React patterns.</p>
+  <div class="cols cols-50-50" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">JSX (what you write)</span></div>
+        <div class="terminal-body"><span class="kw">function</span> <span class="fn">Greeting</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="hi">div</span> <span class="key">className</span>=<span class="str">"card"</span>&gt;
+      &lt;<span class="hi">h1</span>&gt;Hello, world!&lt;/<span class="hi">h1</span>&gt;
+      &lt;<span class="hi">p</span>&gt;Welcome to React.&lt;/<span class="hi">p</span>&gt;
+    &lt;/<span class="hi">div</span>&gt;
+  );
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>className not class</strong> — <code>class</code> is a reserved word in JavaScript. AI always uses <code>className</code>. If you see <code>class=</code> in JSX it is a bug.</div>
+      <div class="callout callout-yellow"><strong>One root element</strong> — JSX must return a single parent. AI wraps multiple elements in <code>&lt;div&gt;</code> or an empty fragment <code>&lt;&gt;...&lt;/&gt;</code>.</div>
+      <div class="callout callout-green"><strong>Expressions in { }</strong> — any JavaScript expression inside curly braces is evaluated. <code>{2 + 2}</code> renders 4. <code>{name}</code> renders the variable.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — Components -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Function Components — The Building Block</h2>
+  <p>A React component is just a JavaScript function that returns JSX. When AI generates a component, it is generating one of these — nothing more mysterious.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">BookCard.tsx</span></div>
+        <div class="terminal-body"><span class="comment">// A component for one book</span>
+<span class="kw">function</span> <span class="fn">BookCard</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="hi">div</span> <span class="key">className</span>=<span class="str">"card"</span>&gt;
+      &lt;<span class="hi">h2</span>&gt;Clean Code&lt;/<span class="hi">h2</span>&gt;
+      &lt;<span class="hi">p</span>&gt;Robert C. Martin&lt;/<span class="hi">p</span>&gt;
+    &lt;/<span class="hi">div</span>&gt;
+  );
+}
+
+<span class="kw">export default</span> BookCard;
+
+<span class="comment">// Use it in App.tsx like an HTML tag:</span>
+&lt;<span class="fn">BookCard</span> /&gt;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Capital letter matters</strong> — React distinguishes HTML tags (<code>div</code>, <code>p</code>) from components (<code>BookCard</code>) by the first letter. AI always capitalises component names.</div>
+      <div class="callout callout-green"><strong>export default</strong> — makes the component available to import from other files. AI adds this automatically.</div>
+      <div class="callout callout-yellow"><strong>Self-closing</strong> — components with no children can be written <code>&lt;BookCard /&gt;</code>. This is JSX syntax, not HTML.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — Props -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Props — Passing Data into Components</h2>
+  <p>A hardcoded component is not very useful. Props let the parent pass data down to the child, making components reusable.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">BookCard.tsx — with props</span></div>
+        <div class="terminal-body"><span class="comment">// TypeScript: define the shape of props</span>
+<span class="kw">interface</span> <span class="fn">BookCardProps</span> {
+  title: <span class="hi">string</span>;
+  author: <span class="hi">string</span>;
+  status: <span class="hi">string</span>;
+}
+
+<span class="kw">function</span> <span class="fn">BookCard</span>({ title, author, status }: <span class="fn">BookCardProps</span>) {
+  <span class="kw">return</span> (
+    &lt;<span class="hi">div</span> <span class="key">className</span>=<span class="str">"card"</span>&gt;
+      &lt;<span class="hi">h2</span>&gt;{title}&lt;/<span class="hi">h2</span>&gt;
+      &lt;<span class="hi">p</span>&gt;{author} · {status}&lt;/<span class="hi">p</span>&gt;
+    &lt;/<span class="hi">div</span>&gt;
+  );
+}
+
+<span class="comment">// Passing props from parent:</span>
+&lt;<span class="fn">BookCard</span> <span class="key">title</span>=<span class="str">"Clean Code"</span>
+          <span class="key">author</span>=<span class="str">"Martin"</span>
+          <span class="key">status</span>=<span class="str">"read"</span> /&gt;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Destructuring in the parameter</strong> — AI almost always writes <code>({ title, author })</code> rather than <code>(props)</code>. Both work; destructuring is cleaner.</div>
+      <div class="callout callout-blue"><strong>interface</strong> — TypeScript's way of describing the shape of an object. If you pass the wrong prop type, TypeScript tells you before the browser does.</div>
+      <div class="callout callout-yellow"><strong>Props flow one way</strong> — parent to child only. A child cannot modify its own props. If data needs to go up, you pass a callback function as a prop.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — useState -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>useState — Local Component State</h2>
+  <p>Props carry data in from outside. State is data that lives inside the component and can change over time. When state changes, React re-renders the component automatically.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">Counter.tsx</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="comment">// [current value, setter function]</span>
+  <span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="val">0</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="hi">div</span>&gt;
+      &lt;<span class="hi">p</span>&gt;Count: {count}&lt;/<span class="hi">p</span>&gt;
+      &lt;<span class="hi">button</span> <span class="key">onClick</span>={() =&gt; <span class="fn">setCount</span>(count + <span class="val">1</span>)}&gt;
+        Add
+      &lt;/<span class="hi">button</span>&gt;
+    &lt;/<span class="hi">div</span>&gt;
+  );
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>useState(0)</strong> — the argument is the initial value. AI will use <code>useState('')</code> for strings, <code>useState([])</code> for arrays, <code>useState(false)</code> for booleans.</div>
+      <div class="callout callout-orange"><strong>Never mutate state directly</strong> — <code>count++</code> will not trigger a re-render. Always call the setter: <code>setCount(count + 1)</code>. AI knows this; if you see direct mutation it is a bug.</div>
+      <div class="callout callout-yellow"><strong>Array destructuring</strong> — <code>[count, setCount]</code> is a convention. The names are yours to choose; the order matters. First = value, second = setter.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — Event Handlers -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Event Handlers — Responding to User Actions</h2>
+  <p>React events are the same browser events you know — click, submit, change — wrapped in React's synthetic event system. AI generates these as arrow functions or references to named handlers.</p>
+  <div class="cols cols-50-50" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">event handler patterns</span></div>
+        <div class="terminal-body"><span class="comment">// Inline arrow function (simple actions)</span>
+&lt;<span class="hi">button</span> <span class="key">onClick</span>={() =&gt; <span class="fn">setCount</span>(count + <span class="val">1</span>)}&gt;
+  Add
+&lt;/<span class="hi">button</span>&gt;
+
+<span class="comment">// Named handler (complex logic)</span>
+<span class="kw">function</span> <span class="fn">handleDelete</span>(id: <span class="hi">number</span>) {
+  <span class="comment">// validation, API call, state update</span>
+  <span class="fn">setBooks</span>(books.<span class="fn">filter</span>(b =&gt; b.id !== id));
+}
+
+&lt;<span class="hi">button</span> <span class="key">onClick</span>={() =&gt; <span class="fn">handleDelete</span>(book.id)}&gt;
+  Delete
+&lt;/<span class="hi">button</span>&gt;
+
+<span class="comment">// Form submission — always prevent default!</span>
+<span class="kw">function</span> <span class="fn">handleSubmit</span>(e: React.<span class="hi">FormEvent</span>) {
+  e.<span class="fn">preventDefault</span>();
+  <span class="comment">// handle the form</span>
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>onClick not onclick</strong> — React events use camelCase. <code>onClick</code>, <code>onChange</code>, <code>onSubmit</code>. HTML uses lowercase. AI always uses camelCase in JSX.</div>
+      <div class="callout callout-orange"><strong>e.preventDefault()</strong> — without this, form submit triggers a full page reload. AI always includes it on form handlers. Understand why before removing it.</div>
+      <div class="callout callout-yellow">Pass a <strong>function reference</strong>, not a call: <code>onClick={handleDelete}</code> not <code>onClick={handleDelete()}</code>. The second runs immediately on render.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Lists and .map() -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Rendering Lists — .map() and the key Prop</h2>
+  <p>Real UIs show lists of things. React renders arrays of JSX — so you transform your data array into a JSX array using <code>.map()</code>. This is one of the most common patterns AI generates.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">BookList.tsx</span></div>
+        <div class="terminal-body"><span class="kw">const</span> books = [
+  { id: <span class="val">1</span>, title: <span class="str">'Clean Code'</span>,   author: <span class="str">'Martin'</span> },
+  { id: <span class="val">2</span>, title: <span class="str">'The Pragmatic'</span>, author: <span class="str">'Hunt'</span>   },
+];
+
+<span class="kw">function</span> <span class="fn">BookList</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="hi">ul</span>&gt;
+      {books.<span class="fn">map</span>(book =&gt; (
+        &lt;<span class="hi">li</span> <span class="key">key</span>={book.id}&gt;
+          {book.title} — {book.author}
+        &lt;/<span class="hi">li</span>&gt;
+      ))}
+    &lt;/<span class="hi">ul</span>&gt;
+  );
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>key is required</strong> — React uses <code>key</code> to track which items changed. Use a stable unique ID from your data, never the array index. AI uses <code>key={item.id}</code> — verify this is a real ID, not an index.</div>
+      <div class="callout callout-purple"><strong>.map() returns JSX</strong> — whatever you return inside <code>.map()</code> becomes a rendered element. The arrow function body is JSX, not a string.</div>
+      <div class="callout callout-yellow">Each <code>.map()</code> callback must return one root element. AI wraps multiple elements in a fragment <code>&lt;&gt;...&lt;/&gt;</code> when needed, adding <code>key</code> to the fragment.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — Controlled Forms -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Controlled Inputs — Forms in React</h2>
+  <p>In plain HTML, an input manages its own value. In React, you keep the value in state and sync it with <code>onChange</code>. This is called a <em>controlled input</em> — the standard pattern AI generates for all form fields.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">AddBookForm.tsx</span></div>
+        <div class="terminal-body"><span class="kw">function</span> <span class="fn">AddBookForm</span>() {
+  <span class="kw">const</span> [title,  setTitle]  = <span class="fn">useState</span>(<span class="str">''</span>);
+  <span class="kw">const</span> [author, setAuthor] = <span class="fn">useState</span>(<span class="str">''</span>);
+
+  <span class="kw">function</span> <span class="fn">handleSubmit</span>(e: React.<span class="hi">FormEvent</span>) {
+    e.<span class="fn">preventDefault</span>();
+    console.<span class="fn">log</span>({ title, author });
+    <span class="fn">setTitle</span>(<span class="str">''</span>);   <span class="comment">// reset after submit</span>
+    <span class="fn">setAuthor</span>(<span class="str">''</span>);
+  }
+
+  <span class="kw">return</span> (
+    &lt;<span class="hi">form</span> <span class="key">onSubmit</span>={handleSubmit}&gt;
+      &lt;<span class="hi">input</span> <span class="key">value</span>={title}
+             <span class="key">onChange</span>={e =&gt; <span class="fn">setTitle</span>(e.target.value)}
+             <span class="key">placeholder</span>=<span class="str">"Title"</span> /&gt;
+      &lt;<span class="hi">input</span> <span class="key">value</span>={author}
+             <span class="key">onChange</span>={e =&gt; <span class="fn">setAuthor</span>(e.target.value)}
+             <span class="key">placeholder</span>=<span class="str">"Author"</span> /&gt;
+      &lt;<span class="hi">button</span> <span class="key">type</span>=<span class="str">"submit"</span>&gt;Add Book&lt;/<span class="hi">button</span>&gt;
+    &lt;/<span class="hi">form</span>&gt;
+  );
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>value + onChange</strong> — the pair that makes an input controlled. Without <code>onChange</code>, the input will appear read-only. AI always generates both together.</div>
+      <div class="callout callout-yellow"><strong>e.target.value</strong> — the current value of the input element. <code>e</code> is the event, <code>target</code> is the DOM element, <code>value</code> is its current text.</div>
+      <div class="callout callout-green">Reset by calling <code>setState('')</code> after submit. This clears the input because React drives the displayed value from state.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Conditional Rendering -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Conditional Rendering — Show or Hide UI</h2>
+  <p>React renders whatever you return. If a condition is false, return nothing. AI uses three patterns — learn to recognise all of them in generated code.</p>
+  <div class="cols cols-50-50" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">three patterns</span></div>
+        <div class="terminal-body"><span class="comment">// 1. && operator — render if true</span>
+{isLoading &amp;&amp; &lt;<span class="hi">p</span>&gt;Loading…&lt;/<span class="hi">p</span>&gt;}
+
+<span class="comment">// 2. Ternary — show one or the other</span>
+{books.length &gt; <span class="val">0</span>
+  ? &lt;<span class="fn">BookList</span> books={books} /&gt;
+  : &lt;<span class="hi">p</span>&gt;No books yet.&lt;/<span class="hi">p</span>&gt;
+}
+
+<span class="comment">// 3. Early return — simplest for full blocks</span>
+<span class="kw">function</span> <span class="fn">Page</span>() {
+  <span class="kw">if</span> (error) <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;Error: {error}&lt;/<span class="hi">p</span>&gt;;
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;Loading…&lt;/<span class="hi">p</span>&gt;;
+  <span class="kw">return</span> &lt;<span class="fn">BookList</span> books={books} /&gt;;
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>0 &amp;&amp; ...</strong> is a gotcha — if the left side evaluates to <code>0</code>, React renders the number 0 on screen. Use <code>arr.length &gt; 0 &amp;&amp;</code> or <code>!!arr.length &amp;&amp;</code> instead. AI sometimes gets this wrong.</div>
+      <div class="callout callout-purple">AI almost always generates the <strong>early return</strong> pattern for loading and error states at the top of a component. This is idiomatic React.</div>
+      <div class="callout callout-yellow">You can <strong>return null</strong> to render nothing. A component that returns null is valid — it hides itself completely.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 13 — Section header: Build Together -->
+<div class="slide section-header">
+  <span class="pill">Prompt Walkthrough</span>
+  <h1>Building a <span class="accent">BookList UI</span></h1>
+  <div class="subtitle">One prompt. Read every line of the output.</div>
+</div>
+
+<!-- Slide 14 — The Prompt -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Prompt Type: Scaffold</div>
+  <h2>Prompting AI to Build the Component</h2>
+  <p>A good scaffold prompt names the technology, describes the data shape, lists the features wanted, and asks for explanation of key choices.</p>
+  <div class="prompt-block">
+    <div class="prompt-bar"><span>✦</span> Prompt — React BookList scaffold</div>
+    <div class="prompt-body">
+      I'm building a React + TypeScript front end with Vite. I have an Express API at
+      <em>http://localhost:3001/api/books</em> that returns an array of book objects with the shape:
+      <code>{ id, title, author, status }</code> where status is one of "to-read", "reading", or "read".<br><br>
+      Please generate a <em>BookList</em> component that:<br>
+      <ul>
+        <li>Fetches books from the API using useEffect and fetch</li>
+        <li>Shows a loading message while fetching and an error message if it fails</li>
+        <li>Renders each book as a card showing title, author, and a coloured badge for status</li>
+        <li>Accepts an optional onDelete prop (a callback) that shows a Delete button per card</li>
+      </ul>
+      Use a TypeScript interface for the Book type. Explain why you used useEffect here.
+    </div>
+  </div>
+  <div class="callout callout-purple" style="margin-top:8px;font-size:13px;"><strong>What makes this prompt effective:</strong> it provides the data shape (so AI generates a matching interface), lists concrete features, and asks for explanation — forcing AI to be deliberate about useEffect rather than just pattern-matching.</div>
+</div>
+
+<!-- Slide 15 — Reading the Generated Output -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Prompt Type: Explain</div>
+  <h2>Reading What Was Generated — Line by Line</h2>
+  <p>AI generates a working component. Your job is to understand every decision before you run it.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">key patterns to find in the output</span></div>
+        <div class="terminal-body"><span class="comment">// 1. Type safety — does this match our API?</span>
+<span class="kw">interface</span> <span class="fn">Book</span> {
+  id: <span class="hi">number</span>; title: <span class="hi">string</span>;
+  author: <span class="hi">string</span>; status: <span class="hi">string</span>;
+}
+
+<span class="comment">// 2. State initialisation — three states</span>
+<span class="kw">const</span> [books,     setBooks]     = <span class="fn">useState</span>&lt;<span class="fn">Book</span>[]&gt;([]);
+<span class="kw">const</span> [isLoading, setIsLoading] = <span class="fn">useState</span>(<span class="val">true</span>);
+<span class="kw">const</span> [error,     setError]     = <span class="fn">useState</span>&lt;<span class="hi">string</span> | <span class="hi">null</span>&gt;(<span class="val">null</span>);
+
+<span class="comment">// 3. useEffect dependency array</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="comment">// fetch runs once — [] means "on mount only"</span>
+}, []);
+
+<span class="comment">// 4. Early returns before main render</span>
+<span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;Loading…&lt;/<span class="hi">p</span>&gt;;
+<span class="kw">if</span> (error)     <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;{error}&lt;/<span class="hi">p</span>&gt;;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Three state variables</strong> — data, loading, error. AI always generates this trio for async operations. Understand each before removing one.</div>
+      <div class="callout callout-yellow"><strong>Empty dependency array []</strong> — useEffect runs once after mount. Without it, the effect runs on every render — infinite fetch loop. Ask AI to explain this if it is not in the output.</div>
+      <div class="callout callout-orange"><strong>string | null</strong> — TypeScript union type. Error is either a string message or null (no error). If AI uses <code>any</code>, ask it to use a specific type instead.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 16 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Reflection</div>
+  <h2>Reflect — What Did AI Choose and Why?</h2>
+  <p>AI made decisions on your behalf. The critical question is not just "does it work?" but "do you agree with these choices, and do you understand the trade-offs?"</p>
+  <div class="cols cols-3" style="margin-top:10px;">
+    <div class="callout callout-purple">
+      <strong>Fetch vs Axios</strong><br>
+      AI often uses the native <code>fetch</code> API. Ask: <em>"Why fetch and not axios? When would axios be better?"</em> Understanding the choice makes you a better architect, not just a copy-paste developer.
+    </div>
+    <div class="callout callout-yellow">
+      <strong>Error handling depth</strong><br>
+      Did AI catch network errors? HTTP error status codes? Both? Ask: <em>"What happens if the server returns 401?"</em> If the error state does not catch it, prompt a fix and understand why it was missing.
+    </div>
+    <div class="callout callout-green">
+      <strong>Component granularity</strong><br>
+      Did AI generate one large component or split into BookCard + BookList? Ask: <em>"What is the benefit of extracting BookCard into its own file?"</em> There is no single right answer — the discussion is the learning.
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:10px;font-size:13px;">
+    <strong>The habit to build:</strong> for every non-trivial line AI generates, be able to answer — what does this do, why is it here, and what would break if I removed it? If you cannot answer, that is your next prompt.
+  </div>
+</div>
+
+<!-- Slide 17 — Section header: Wiring Up -->
+<div class="slide section-header">
+  <span class="pill">Next Steps</span>
+  <h1>From Component<br>to <span class="accent">Full Interface</span></h1>
+  <div class="subtitle">You have the pieces — now connect them.</div>
+</div>
+
+<!-- Slide 18 — Component Architecture -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Component Architecture — Thinking in Trees</h2>
+  <p>A React app is a tree of components. Each node is a component; data flows down via props, events bubble up via callback props. AI generates this tree — you need to read it as a structure, not just code.</p>
+  <svg viewBox="0 0 620 160" width="100%" height="auto" style="display:block;margin:14px 0;">
+    <rect x="240" y="4"  width="140" height="38" rx="6" fill="#1a1040" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="310" y="28" fill="#bc8cff" font-size="13" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">App</text>
+    <line x1="310" y1="42" x2="310" y2="60" stroke="#30363d" stroke-width="1.5"/>
+    <line x1="120" y1="60" x2="500" y2="60" stroke="#30363d" stroke-width="1.5"/>
+    <line x1="120" y1="60" x2="120" y2="78" stroke="#30363d" stroke-width="1.5"/>
+    <line x1="310" y1="60" x2="310" y2="78" stroke="#30363d" stroke-width="1.5"/>
+    <line x1="500" y1="60" x2="500" y2="78" stroke="#30363d" stroke-width="1.5"/>
+    <rect x="40"  y="78" width="160" height="38" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="120" y="102" fill="#3fb950" font-size="12" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">AddBookForm</text>
+    <rect x="230" y="78" width="160" height="38" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="310" y="102" fill="#58a6ff" font-size="12" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">BookList</text>
+    <rect x="420" y="78" width="160" height="38" rx="6" fill="#161b22" stroke="#d29922" stroke-width="1.5"/>
+    <text x="500" y="102" fill="#d29922" font-size="12" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">StatusFilter</text>
+    <line x1="310" y1="116" x2="310" y2="130" stroke="#30363d" stroke-width="1.5"/>
+    <line x1="230" y1="130" x2="390" y2="130" stroke="#30363d" stroke-width="1.5"/>
+    <line x1="230" y1="130" x2="230" y2="144" stroke="#30363d" stroke-width="1.5"/>
+    <line x1="390" y1="130" x2="390" y2="144" stroke="#30363d" stroke-width="1.5"/>
+    <rect x="160" y="144" width="140" height="14" rx="4" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
+    <text x="230" y="155" fill="#8b949e" font-size="10" text-anchor="middle" font-family="'SF Mono',monospace">BookCard ×n</text>
+    <rect x="320" y="144" width="140" height="14" rx="4" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
+    <text x="390" y="155" fill="#8b949e" font-size="10" text-anchor="middle" font-family="'SF Mono',monospace">BookCard ×n</text>
+  </svg>
+  <div class="callout callout-purple" style="font-size:13px;"><strong>State lives at the lowest common ancestor.</strong> If both BookList and AddBookForm need the books array, it lives in App — and flows down as props. AI understands this; ask it to explain where it placed state and why.</div>
+</div>
+
+<!-- Slide 19 — Prompt Reflection on Architecture -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Reflect</div>
+  <h2>Reflecting on What AI Built With You</h2>
+  <p>You have now generated a React UI with AI assistance. The reflection questions below are not optional extras — they are the learning. Vibe coding without reflection is just copying.</p>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span style="color:var(--purple);font-weight:700;">01</span><span><strong>Can you explain each useState call?</strong> For every piece of state, describe what triggers a change and what re-renders when it changes. If you cannot, that state is not yet understood.</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">02</span><span><strong>What would happen if you removed the key prop from your .map()?</strong> Try it. Observe the console warning. Understand why React needs it for reconciliation.</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">03</span><span><strong>What does AI do differently from what you would have written?</strong> This is the most interesting comparison. Every difference is a prompt: "Why did you use X here instead of Y?"</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">04</span><span><strong>What is the next thing you do not know how to do?</strong> Name it specifically. That becomes your next prompt, your next search, your next step.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 20 — Wrap-up -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>What You Built — and What Comes Next</h2>
+  <p>You now have the React vocabulary to read and reason about AI-generated front-end code. This is the foundation everything else builds on.</p>
+  <div class="cols cols-50-50" style="margin-top:10px;">
+    <div>
+      <p style="color:var(--text);font-weight:600;margin-bottom:8px;">Covered in this deck:</p>
+      <ul class="annot-list">
+        <li><span>✓</span><span>Vite + React + TypeScript setup</span></li>
+        <li><span>✓</span><span>JSX, components, props, interfaces</span></li>
+        <li><span>✓</span><span>useState — local state management</span></li>
+        <li><span>✓</span><span>Event handlers — click, change, submit</span></li>
+        <li><span>✓</span><span>Lists with .map() and the key prop</span></li>
+        <li><span>✓</span><span>Controlled form inputs</span></li>
+        <li><span>✓</span><span>Conditional rendering patterns</span></li>
+        <li><span>✓</span><span>Component tree architecture</span></li>
+      </ul>
+    </div>
+    <div>
+      <p style="color:var(--text);font-weight:600;margin-bottom:8px;">Coming up:</p>
+      <div class="callout callout-blue" style="margin-bottom:8px;"><strong>C2 — State &amp; Effects</strong> useEffect in depth, async data fetching, loading patterns, custom hooks</div>
+      <div class="callout callout-green" style="margin-bottom:8px;"><strong>C3 — API Integration</strong> Connecting your React app to your Express API — fetch, JWT auth headers, CORS</div>
+      <div class="callout callout-yellow"><strong>C4 — Auth in the Browser</strong> Login form, token storage, protected routes, logout</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <span id="counter">1 / 20</span>
+  <button class="nav-btn" id="prev">&#8592;</button>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → navigate &nbsp;|&nbsp; F fullscreen</div>
+<a id="app-link" href="http://localhost:3001/api/health" target="_blank">localhost:3001 ↗</a>
+<a id="index-link" href="index.html">&#8962; Course</a>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'c1-1', type: 'practical', title: 'Scaffold and explore',
+    desc: 'Run: npm create vite@latest my-books -- --template react-ts\nOpen the project in your editor. Find main.tsx and trace how App is mounted into index.html. Delete the default content of App.tsx and write a BookCard component that accepts title and author as props and renders them in a div.',
+    criteria: [
+      'You can locate and explain the role of main.tsx and index.html',
+      'Your BookCard uses a TypeScript interface for props',
+      'The component renders correctly when used in App.tsx with hardcoded prop values'
+    ] },
+  { id: 'c1-2', type: 'practical', title: 'State and interaction',
+    desc: 'Add a "Read it!" button to your BookCard. Clicking it should toggle a "read" boolean in local state and change the button label to "Mark unread". Use useState.',
+    criteria: [
+      'State is initialised with useState(false)',
+      'The setter is called in the onClick handler — not state mutated directly',
+      'The button label reflects the current state correctly'
+    ] },
+  { id: 'c1-3', type: 'reflect', title: 'AI generation review',
+    desc: 'Ask an AI to generate a controlled search input that filters a hardcoded list of books by title. Read the output carefully. What pattern did it use for the filter? What would happen with a very large list?',
+    criteria: [
+      'You can identify the useState variables for the search term and filtered list',
+      'You can explain what e.target.value returns in the onChange handler',
+      'You identified at least one question about the generated code and asked AI to explain it'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Set up a Vite + React + TypeScript project and explain the purpose of each generated file',
+  'Write function components with typed props using TypeScript interfaces',
+  'Manage local component state with useState and explain why direct mutation does not work',
+  'Build controlled form inputs using the value and onChange pattern',
+  'Render lists using .map() with stable key props and explain why keys are required',
+  'Apply conditional rendering using &&, ternary, and early return patterns',
+  'Read and critically evaluate AI-generated React components'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  /* ── Checkpoint 1 (after props, slide 7) ─── */
+  {
+    id: 'jsx-classname',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Why does AI-generated JSX use className instead of class?',
+    options: [
+      'React invented its own attribute names',
+      'class is a reserved word in JavaScript',
+      'className performs better in the browser',
+      'HTML5 deprecated the class attribute'
+    ],
+    correct: 1,
+    explanation: 'JSX compiles to JavaScript. class is a reserved keyword in JS (used for ES6 classes), so JSX uses className to avoid the conflict.',
+    reviewSlide: 'JSX'
+  },
+  {
+    id: 'props-direction',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In React, props flow in which direction?',
+    options: [
+      'Child to parent only',
+      'Both directions simultaneously',
+      'Parent to child only',
+      'Between sibling components directly'
+    ],
+    correct: 2,
+    explanation: 'Props flow one way: parent to child. To send data up, a parent passes a callback function as a prop and the child calls it.',
+    reviewSlide: 'Props'
+  },
+  {
+    id: 'usestate-mutation',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You have const [count, setCount] = useState(0). Which of these correctly increments count?',
+    options: ['count++', 'count = count + 1', 'setCount(count + 1)', 'useState(count + 1)'],
+    correct: 2,
+    explanation: 'You must call the setter function. Direct mutation (count++ or count = ...) does not trigger a re-render. useState() creates new state — it does not update existing state.',
+    reviewSlide: 'useState'
+  },
+  {
+    id: 'key-prop',
+    checkpoint: 1,
+    type: 'self',
+    q: 'You are rendering a list of books with .map(). What is the key prop for, and what value should you use?',
+    model: 'React uses key to identify which list items changed, were added, or removed — this is called reconciliation. Without it, React re-renders all items on every change. Use a stable, unique value from your data (e.g. book.id). Never use the array index as key — if the list reorders, the indexes change and React gets confused.',
+    reviewSlide: 'Lists and .map()'
+  },
+  /* ── Checkpoint 2 (after conditional rendering, slide 12) ─── */
+  {
+    id: 'controlled-input',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What makes an input "controlled" in React?',
+    options: [
+      'It has a required attribute',
+      'Its value is driven by state and synced via onChange',
+      'It is inside a form element',
+      'It uses useRef instead of useState'
+    ],
+    correct: 1,
+    explanation: 'A controlled input has its value tied to a state variable and an onChange handler that updates that state. React then drives the displayed value — the DOM does not manage it independently.',
+    reviewSlide: 'Controlled Inputs'
+  },
+  {
+    id: 'conditional-gotcha',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'You write: {books.length && <BookList />}. What renders when books is an empty array?',
+    options: ['Nothing', 'BookList with empty data', 'The number 0', 'An error'],
+    correct: 2,
+    explanation: 'books.length is 0, which is falsy — but React renders 0 as a text node. Use books.length > 0 && <BookList /> to render truly nothing.',
+    reviewSlide: 'Conditional Rendering'
+  },
+  {
+    id: 'useeffect-deps',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'AI generates useEffect(() => { fetchBooks(); }, []). What does the empty array [] mean?',
+    options: [
+      'The effect never runs',
+      'The effect runs on every render',
+      'The effect runs once after the component mounts',
+      'The effect runs only when the component unmounts'
+    ],
+    correct: 2,
+    explanation: 'The dependency array tells React when to re-run the effect. Empty [] means "no dependencies" — run once after the initial render (mount). Without [], it runs after every render — causing an infinite fetch loop.',
+    reviewSlide: 'Reading the Generated Output'
+  },
+  {
+    id: 'component-tree',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Both your AddBookForm and BookList components need to show the same list of books. Where should the books state live, and how does each component access it?',
+    model: 'State should live in the nearest common ancestor — in this case, App. App holds the books array in useState and passes it down as a prop to BookList. It also passes a callback (e.g. onBookAdded) as a prop to AddBookForm. When the form submits, it calls the callback, which updates state in App, which re-renders both children with the new data. This pattern is called "lifting state up".',
+    reviewSlide: 'Component Architecture'
+  }
+];
+</script>
+</body>
+</html>

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connecting the Stack — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #d29922; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #7d5a00; --prompt-border: #c49b2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#1a1200 0%,#0f0b00 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: #ffd059; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: #58a6ff; }
+  .terminal-body .hi     { color: #58a6ff; }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;       color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);    color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple); color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange); color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-60-40 > *:first-child { flex: 60; }
+  .cols-60-40 > *:last-child  { flex: 40; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-num    { background: var(--highlight); color: #ffd059; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(196,155,42,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(196,155,42,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="fullstack-contracts-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h1>Connecting <span class="accent">the Stack</span></h1>
+  <div class="subtitle">Architecture · Shared types · API contracts · Production CORS · Express serving React</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-yellow">shared types</span>
+    <span class="badge badge-yellow">API contract</span>
+    <span class="badge badge-yellow">CORS origins</span>
+    <span class="badge badge-yellow">catch-all route</span>
+  </div>
+  <div class="callout callout-yellow">You have a working backend (Track B) and a working frontend (Track C). This deck connects them as a single deployable application — from environment-aware CORS to Express serving the built React app and a shared type contract that catches mismatches before they reach production.</div>
+</div>
+
+<!-- Slide 2 — The Fullstack Architecture -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>The Fullstack Architecture</h2>
+  <p>In development you run two servers. In production you run one — Express serves both the API and the built React files from the same origin, eliminating CORS entirely for your own frontend.</p>
+  <svg viewBox="0 0 700 200" width="100%" height="auto" style="display:block;margin:14px 0;">
+    <!-- Dev -->
+    <text x="155" y="18" fill="#8b949e" font-size="11" font-weight="600" text-anchor="middle" font-family="system-ui,sans-serif">DEVELOPMENT</text>
+    <rect x="10"  y="28" width="130" height="50" rx="6" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="75"  y="50" fill="#bc8cff" font-size="11" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">Vite :5173</text>
+    <text x="75"  y="66" fill="#8b949e" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">React app</text>
+    <rect x="180" y="28" width="130" height="50" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="245" y="50" fill="#3fb950" font-size="11" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">Express :3001</text>
+    <text x="245" y="66" fill="#8b949e" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">API + PostgreSQL</text>
+    <line x1="142" y1="53" x2="178" y2="53" stroke="#d29922" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#yarr)"/>
+    <text x="160" y="46" fill="#d29922" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">CORS / proxy</text>
+    <!-- Prod -->
+    <text x="520" y="18" fill="#8b949e" font-size="11" font-weight="600" text-anchor="middle" font-family="system-ui,sans-serif">PRODUCTION</text>
+    <rect x="390" y="28" width="260" height="110" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="520" y="52" fill="#3fb950" font-size="12" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">Express :3001 (Railway)</text>
+    <rect x="410" y="62" width="100" height="36" rx="4" fill="rgba(88,166,255,.1)" stroke="#58a6ff" stroke-width="1"/>
+    <text x="460" y="78" fill="#58a6ff" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">GET /api/*</text>
+    <text x="460" y="91" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">API routes</text>
+    <rect x="530" y="62" width="100" height="36" rx="4" fill="rgba(188,140,255,.1)" stroke="#bc8cff" stroke-width="1"/>
+    <text x="580" y="78" fill="#bc8cff" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">GET *</text>
+    <text x="580" y="91" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">React build</text>
+    <text x="520" y="128" fill="#3fb950" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">same origin — no CORS needed</text>
+    <defs>
+      <marker id="yarr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#d29922"/></marker>
+    </defs>
+  </svg>
+  <div class="cols cols-3" style="margin-top:4px;">
+    <div class="callout callout-blue"><strong>Development CORS</strong> or a Vite proxy bridges the port gap between your two dev servers. You learned this in C3.</div>
+    <div class="callout callout-green"><strong>Production — one server:</strong> Express serves <code>client/dist/</code> on all non-API routes. Same origin = no CORS needed for your own app.</div>
+    <div class="callout callout-orange"><strong>Third-party consumers</strong> (mobile apps, other frontends) still need CORS headers even in production. Keep your CORS config — just tighten the allowed origins.</div>
+  </div>
+</div>
+
+<!-- Slide 3 — The API Contract -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>The API Contract</h2>
+  <p>An API contract is an agreement between frontend and backend about request and response shapes. When both sides are built by AI, mismatches are the most common integration bug.</p>
+  <div class="cols cols-2" style="margin-top:8px;">
+    <div>
+      <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:6px;">What can go wrong</p>
+      <table>
+        <thead><tr><th>Backend returns</th><th>Frontend expects</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td><code>{ data: [...] }</code></td><td><code>book[]</code> (array direct)</td><td style="color:var(--red);">Cannot read .map of undefined</td></tr>
+          <tr><td><code>created_at</code></td><td><code>createdAt</code></td><td style="color:var(--red);">Field is always undefined</td></tr>
+          <tr><td><code>{ error: "..." }</code></td><td><code>{ message: "..." }</code></td><td style="color:var(--red);">Error message never shown</td></tr>
+          <tr><td><code>status: "want_to_read"</code></td><td><code>status: "want-to-read"</code></td><td style="color:var(--red);">Dropdown never pre-selects</td></tr>
+          <tr><td>HTTP 201</td><td>Checks for HTTP 200</td><td style="color:var(--yellow);">Works but logic is fragile</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>AI generates each side independently.</strong> The backend prompt and frontend prompt don't share context — unless you explicitly paste the API response shape into the frontend prompt (or vice versa).</div>
+      <div class="callout callout-orange"><strong>The fastest fix:</strong> curl your API endpoint and paste the actual JSON response into your frontend scaffold prompt. "The API returns this exact shape: <code>{"{"} ... {"}"}</code>. Generate the TypeScript type and fetch logic."</div>
+      <div class="callout callout-blue"><strong>Naming conventions diverge:</strong> databases use <code>snake_case</code>, JavaScript uses <code>camelCase</code>. AI sometimes transforms field names, sometimes doesn't. Always check column names against interface field names.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — Shared TypeScript Types -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Shared TypeScript Types</h2>
+  <p>The ideal solution is a single source of truth for your data types — defined once and used by both frontend and backend. AI can generate this; the challenge is keeping it in sync.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">shared/types.ts  (shared between client + server)</span></div>
+        <div class="terminal-body"><span class="comment">// Single file imported by both client and server</span>
+<span class="comment">// Place in a shared/ directory at the project root</span>
+
+<span class="kw">export interface</span> <span class="hi">Book</span> {
+  id:         <span class="hi">number</span>;
+  title:      <span class="hi">string</span>;
+  author:     <span class="hi">string</span>;
+  status:     <span class="hi">BookStatus</span>;
+  created_at: <span class="hi">string</span>;  <span class="comment">// ISO 8601 from DB</span>
+}
+
+<span class="kw">export type</span> <span class="hi">BookStatus</span> =
+  | <span class="str">'want-to-read'</span>
+  | <span class="str">'reading'</span>
+  | <span class="str">'finished'</span>;
+
+<span class="kw">export interface</span> <span class="hi">CreateBookBody</span> {
+  title:  <span class="hi">string</span>;
+  author: <span class="hi">string</span>;
+  status: <span class="hi">BookStatus</span>;
+}
+
+<span class="kw">export interface</span> <span class="hi">ApiError</span> {
+  error: <span class="hi">string</span>;  <span class="comment">// always this key — never 'message'</span>
+}
+
+<span class="comment">// In client — import from shared types</span>
+<span class="kw">import type</span> { <span class="hi">Book</span>, <span class="hi">CreateBookBody</span> } <span class="kw">from</span> <span class="str">'../../shared/types'</span>;
+
+<span class="comment">// In server (if using TypeScript) — same import</span>
+<span class="kw">import type</span> { <span class="hi">Book</span>, <span class="hi">CreateBookBody</span> } <span class="kw">from</span> <span class="str">'../shared/types'</span>;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>Single source of truth:</strong> change the interface once and both frontend and backend immediately get a type error if they're out of sync. TypeScript catches contract violations at compile time.</div>
+      <div class="callout callout-blue"><strong>Pragmatic alternative:</strong> if your backend is plain JavaScript (no TypeScript), duplicate the types in the frontend and treat curl output as the ground truth. Less elegant but common in mixed-language projects.</div>
+      <div class="callout callout-orange"><strong>AI prompt tip:</strong> paste your schema.sql and ask AI to generate matching TypeScript interfaces. The column names, nullability, and types from SQL map directly to interface fields.</div>
+      <div class="callout callout-purple"><strong><code>created_at: string</code></strong> — database timestamps come back as ISO 8601 strings over JSON, not JavaScript <code>Date</code> objects. Use <code>new Date(book.created_at)</code> when you need to format them.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — Consistent Error Responses -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Consistent Error Responses</h2>
+  <p>Your frontend's error handling is only as good as your backend's error responses. AI sometimes generates inconsistent error shapes — standardise them once and your <code>api.ts</code> can handle everything uniformly.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">server/middleware/errorHandler.js</span></div>
+        <div class="terminal-body"><span class="comment">// Centralised error middleware — always last in Express</span>
+<span class="kw">export function</span> <span class="fn">errorHandler</span>(err, req, res, next) {
+  <span class="comment">// Log the full error server-side (not sent to client)</span>
+  console.<span class="fn">error</span>(err);
+
+  <span class="comment">// Known error types</span>
+  <span class="kw">if</span> (err.<span class="key">type</span> === <span class="str">'validation'</span>) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">422</span>).<span class="fn">json</span>({ error: err.<span class="key">message</span> });
+  }
+  <span class="kw">if</span> (err.<span class="key">code</span> === <span class="str">'23505'</span>) { <span class="comment">// PG unique violation</span>
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">409</span>).<span class="fn">json</span>({ error: <span class="str">'Already exists'</span> });
+  }
+
+  <span class="comment">// Default — never expose internal details</span>
+  res.<span class="fn">status</span>(<span class="val">500</span>).<span class="fn">json</span>({ error: <span class="str">'Internal server error'</span> });
+}
+
+<span class="comment">// Register after all routes in server/index.js</span>
+app.<span class="fn">use</span>(errorHandler);
+
+<span class="comment">// ─────────────────────────────────────────────</span>
+<span class="comment">// api.ts — reads the standard error key</span>
+<span class="kw">if</span> (!res.<span class="key">ok</span>) {
+  <span class="kw">const</span> body = <span class="kw">await</span> res.<span class="fn">json</span>().<span class="fn">catch</span>(() =&gt; ({}));
+  <span class="kw">throw new</span> <span class="hi">Error</span>(body.<span class="key">error</span> ?? <span class="str">`HTTP ${res.status}`</span>);
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>One error key everywhere:</strong> use <code>&#123; error: "..." &#125;</code> consistently. If your backend sometimes returns <code>&#123; error &#125;</code> and sometimes <code>&#123; message &#125;</code>, your frontend catch blocks need to handle both — messy and fragile.</div>
+      <div class="callout callout-orange"><strong>Never send stack traces to the client.</strong> <code>err.stack</code> or <code>err.message</code> from an uncaught exception may expose file paths, library versions, or database structure. Log server-side only.</div>
+      <div class="callout callout-blue"><strong>The four error statuses you'll use most:</strong> 400 (bad request / validation), 401 (unauthenticated), 403 (authenticated but unauthorised), 404 (not found), 409 (conflict), 422 (unprocessable), 500 (server error).</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — Environment-Based CORS -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Environment-Based CORS</h2>
+  <p>Development allows <code>localhost:5173</code>. Production allows your deployed domain. Hardcoding one or the other breaks the other environment. The fix is one environment variable.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">server/index.js</span></div>
+        <div class="terminal-body"><span class="kw">import</span> cors <span class="kw">from</span> <span class="str">'cors'</span>;
+<span class="kw">import</span> <span class="str">'dotenv/config'</span>;
+
+<span class="comment">// In production this is your Railway domain.
+// In development it is http://localhost:5173.
+// Never hardcode either.</span>
+<span class="kw">const</span> allowedOrigin = process.env.<span class="key">CLIENT_ORIGIN</span>
+  ?? <span class="str">'http://localhost:5173'</span>;
+
+app.<span class="fn">use</span>(<span class="fn">cors</span>({
+  origin: allowedOrigin,
+  methods: [<span class="str">'GET'</span>, <span class="str">'POST'</span>, <span class="str">'PATCH'</span>, <span class="str">'DELETE'</span>],
+  allowedHeaders: [<span class="str">'Content-Type'</span>, <span class="str">'Authorization'</span>],
+  credentials: <span class="kw">true</span>,
+}));
+
+<span class="comment">// .env (development)</span>
+<span class="str">CLIENT_ORIGIN=http://localhost:5173</span>
+
+<span class="comment">// Railway dashboard (production)</span>
+<span class="str">CLIENT_ORIGIN=https://myapp.up.railway.app</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>Never use <code>origin: '*'</code> in production</strong> — it allows any website to make authenticated requests to your API using the visitor's credentials. This is a serious security misconfiguration.</div>
+      <div class="callout callout-yellow"><strong>When Express serves React directly</strong> (same origin), your own frontend doesn't need CORS. But you still want CORS configured for API consumers — mobile apps, other frontends, curl tests from other origins.</div>
+      <div class="callout callout-blue"><strong><code>credentials: true</code></strong> is required if you ever use cookies. With JWT in localStorage it is optional, but harmless to include and easier than adding it later.</div>
+      <div class="callout callout-green">The <code>??</code> fallback means the server works in development without setting <code>CLIENT_ORIGIN</code> in <code>.env</code> — it just uses <code>localhost:5173</code> automatically.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — The /api Prefix Convention -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>The <code>/api</code> Prefix Convention</h2>
+  <p>When Express serves both API routes and static React files, you need a way to distinguish them. The <code>/api</code> prefix on every API route is the standard solution.</p>
+  <div class="cols cols-2" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">server/index.js — route order matters</span></div>
+        <div class="terminal-body"><span class="comment">// ① API routes — registered first, prefixed /api</span>
+app.<span class="fn">use</span>(<span class="str">'/api/books'</span>, booksRouter);
+app.<span class="fn">use</span>(<span class="str">'/api/auth'</span>,  authRouter);
+app.<span class="fn">get</span>(<span class="str">'/api/health'</span>, (req, res) =&gt;
+  res.<span class="fn">json</span>({ ok: <span class="kw">true</span> }));
+
+<span class="comment">// ② Serve built React files from client/dist</span>
+<span class="kw">import</span> { fileURLToPath } <span class="kw">from</span> <span class="str">'url'</span>;
+<span class="kw">import</span> { join, dirname } <span class="kw">from</span> <span class="str">'path'</span>;
+
+<span class="kw">const</span> __dirname = <span class="fn">dirname</span>(<span class="fn">fileURLToPath</span>(import.meta.url));
+<span class="kw">const</span> clientDist = <span class="fn">join</span>(__dirname, <span class="str">'../client/dist'</span>);
+
+app.<span class="fn">use</span>(express.<span class="fn">static</span>(clientDist));
+
+<span class="comment">// ③ Catch-all — send index.html for any non-API path
+// This supports React Router's client-side routing</span>
+app.<span class="fn">get</span>(<span class="str">'*'</span>, (req, res) =&gt; {
+  res.<span class="fn">sendFile</span>(<span class="fn">join</span>(clientDist, <span class="str">'index.html'</span>));
+});</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>Order is critical.</strong> The catch-all <code>GET *</code> must come last — after all API routes and after <code>express.static</code>. If it's first, every API request returns <code>index.html</code> instead of JSON.</div>
+      <div class="callout callout-orange"><strong>The catch-all serves <code>index.html</code></strong> for routes like <code>/books</code> and <code>/books/42</code>. The browser loads React, React Router reads the URL, and renders the correct page — no 404 on refresh.</div>
+      <div class="callout callout-blue"><strong><code>__dirname</code> in ES modules:</strong> <code>import.meta.url</code> replaces the CommonJS <code>__dirname</code>. AI sometimes generates the CommonJS version — check if your server uses <code>"type": "module"</code> in <code>package.json</code>.</div>
+      <div class="callout callout-purple"><strong>Dev vs prod:</strong> in development the Vite dev server handles <code>index.html</code> — the static serving and catch-all only activate in production (after <code>npm run build</code>).</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — Section Header -->
+<div class="slide section-header">
+  <div class="pill">Part 2 — Prompting</div>
+  <h1>Prompting for <span class="accent">Integration</span></h1>
+  <div class="subtitle">What to tell AI · What to verify · Reading the wiring</div>
+</div>
+
+<!-- Slide 9 — Scaffold Prompt -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Scaffold Prompt — Fullstack Wiring</h2>
+  <p>Give AI both halves at once. Paste the server entry point and ask for the changes needed to serve the React build alongside the existing API.</p>
+  <div class="prompt-block" style="margin-top:8px;">
+    <div class="prompt-bar">&#9998; Scaffold prompt — paste into your AI assistant</div>
+    <div class="prompt-body">I have an Express API (ES modules, <em>"type": "module"</em>) and a React + Vite frontend in <em>client/</em>. Modify my <em>server/index.js</em> to also serve the React production build.
+
+<strong>Requirements:</strong>
+<ul>
+  <li>Serve static files from <em>client/dist</em> using <em>express.static</em></li>
+  <li>Add a catch-all <em>GET *</em> route that sends <em>client/dist/index.html</em> — placed after all API routes</li>
+  <li>Use ES module path resolution (<em>import.meta.url</em>, not <em>__dirname</em>) to construct the path to <em>client/dist</em></li>
+  <li>CORS: read the allowed origin from <em>process.env.CLIENT_ORIGIN</em>, falling back to <em>http://localhost:5173</em></li>
+  <li>The catch-all must not intercept routes starting with <em>/api</em> — all <em>/api/*</em> routes are registered before it</li>
+</ul>
+
+Also create a <em>shared/types.ts</em> file with TypeScript interfaces matching these API response shapes:
+<ul>
+  <li><em>Book</em>: id (number), title, author, status (<em>'want-to-read' | 'reading' | 'finished'</em>), created_at (string)</li>
+  <li><em>ApiError</em>: error (string)</li>
+  <li><em>CreateBookBody</em>: title, author, status</li>
+</ul></div>
+  </div>
+</div>
+
+<!-- Slide 10 — Reading the Generated Wiring -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Reading the Generated Wiring</h2>
+  <p>Five things to verify before testing the integrated app.</p>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span class="badge badge-num">1</span><span><strong>Route order:</strong> API routes must be registered before <code>express.static</code> and the catch-all. Search the generated file top to bottom — if the catch-all appears before any <code>/api</code> route, move it.</span></li>
+    <li><span class="badge badge-num">2</span><span><strong>ES module path resolution:</strong> look for <code>import.meta.url</code>. If you see <code>__dirname</code> and your project uses <code>"type": "module"</code>, the path will fail at runtime with "ReferenceError: __dirname is not defined".</span></li>
+    <li><span class="badge badge-num">3</span><span><strong>CORS origin source:</strong> confirm <code>cors({ origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173' })</code>. If the origin is hardcoded as a string, it breaks in the other environment.</span></li>
+    <li><span class="badge badge-num">4</span><span><strong>Shared types — field names:</strong> compare the interface field names in <code>shared/types.ts</code> against your actual database column names from <code>schema.sql</code>. AI may camelCase them; your DB uses snake_case.</span></li>
+    <li><span class="badge badge-num">5</span><span><strong>Error key consistency:</strong> search the generated route handlers for <code>res.json(&#123; message:</code>. Every error response should use <code>error:</code>, not <code>message:</code>, to match what <code>api.ts</code> reads.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 11 — Testing the Integration -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Testing the Integration Locally</h2>
+  <p>Before deploying, build the React app and confirm Express serves it correctly on port 3001.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">terminal</span></div>
+        <div class="terminal-body"><span class="comment"># Build the React app</span>
+<span class="prompt">$</span> <span class="fn">cd</span> client &amp;&amp; npm run build
+<span class="comment"># → creates client/dist/</span>
+
+<span class="comment"># Start Express (serves API + built React)</span>
+<span class="prompt">$</span> <span class="fn">cd</span> .. &amp;&amp; node server/index.js
+
+<span class="comment"># Test API still works</span>
+<span class="prompt">$</span> curl http://localhost:3001/api/health
+<span class="comment"># → {"ok":true}</span>
+
+<span class="comment"># Test React app is served</span>
+<span class="prompt">$</span> curl -s http://localhost:3001/ | head -5
+<span class="comment"># → &lt;!DOCTYPE html&gt;...</span>
+
+<span class="comment"># Test React Router catch-all</span>
+<span class="prompt">$</span> curl -s http://localhost:3001/books | head -3
+<span class="comment"># → &lt;!DOCTYPE html&gt; (not 404)</span>
+
+<span class="comment"># Open in browser</span>
+<span class="prompt">$</span> open http://localhost:3001</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>Build before testing.</strong> <code>express.static</code> serves files from <code>client/dist</code> — that directory doesn't exist until you run <code>npm run build</code>. Forgetting this produces a silent blank page.</div>
+      <div class="callout callout-blue"><strong>If <code>/books</code> returns JSON</strong> instead of HTML, your catch-all is matching the API routes. Confirm that <code>/api/books</code> returns JSON and <code>/books</code> returns HTML.</div>
+      <div class="callout callout-green"><strong>Check the Network tab</strong> in browser DevTools as you navigate. All API calls should go to <code>/api/...</code> (same origin, no CORS headers needed). If you see requests to <code>localhost:5173</code>, you're still running the Vite dev server.</div>
+      <div class="callout callout-orange"><strong>After a successful local test</strong>, commit the changes — including any <code>.env.example</code> updates for the new <code>CLIENT_ORIGIN</code> variable — before deploying.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Common Integration Bugs -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Common Integration Bugs</h2>
+  <table style="margin-top:10px;">
+    <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Blank white page at localhost:3001</td>
+        <td><code>client/dist</code> does not exist yet</td>
+        <td>Run <code>cd client &amp;&amp; npm run build</code> first</td>
+      </tr>
+      <tr>
+        <td>API returns HTML instead of JSON</td>
+        <td>Catch-all is registered before API routes</td>
+        <td>Move <code>app.get('*', ...)</code> to the very end of <code>index.js</code></td>
+      </tr>
+      <tr>
+        <td>ReferenceError: __dirname is not defined</td>
+        <td>Using CommonJS path resolution in an ES module project</td>
+        <td>Replace with <code>dirname(fileURLToPath(import.meta.url))</code></td>
+      </tr>
+      <tr>
+        <td>CORS error in production but not dev</td>
+        <td><code>CLIENT_ORIGIN</code> not set in Railway env vars</td>
+        <td>Add <code>CLIENT_ORIGIN=https://your-app.up.railway.app</code> in Railway dashboard</td>
+      </tr>
+      <tr>
+        <td>Field always <code>undefined</code> after fetch</td>
+        <td>snake_case DB column vs camelCase interface field</td>
+        <td>Align interface field names with actual DB column names</td>
+      </tr>
+      <tr>
+        <td>Error message never displayed</td>
+        <td>Backend returns <code>&#123; message &#125;</code>, frontend reads <code>body.error</code></td>
+        <td>Standardise all error responses to <code>&#123; error: "..." &#125;</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Slide 13 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Prompt Reflection</h2>
+  <p>Integration bugs are different from component bugs — they cross boundaries between separately generated pieces of code. Reflect on that here.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-yellow">
+        <strong>The context gap:</strong><br>
+        Your backend prompt and your frontend prompt were written at different times. What information would have been useful to share between them? How would you structure a single prompt that generates a consistent contract for both sides?
+      </div>
+      <div class="callout callout-blue">
+        <strong>Finding the mismatch:</strong><br>
+        Before testing the integrated app, you read both sides of the contract. Which field name or response shape mismatch did you find? Was it a naming convention issue, a wrapper object, or something else?
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-orange">
+        <strong>Route order bug:</strong><br>
+        The catch-all route position is a silent bug — the app still starts, but API calls return HTML. What would you see in the browser Network tab that would help you diagnose this without reading the source code?
+      </div>
+      <div class="callout callout-purple">
+        <strong>Shared types value:</strong><br>
+        The <code>shared/types.ts</code> file catches field name mismatches at compile time. Give a concrete example of a mismatch it would have caught — and a mismatch it would not catch (a runtime bug TypeScript can't see).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 14 — Wrap-up -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Wrap-up</h2>
+  <div class="subtitle">What you can now do with fullstack integration</div>
+  <ul class="annot-list" style="margin-top:12px;">
+    <li><span class="badge badge-green">&#10003;</span><span>Explain the development vs production architecture — two servers vs one — and why same-origin production eliminates client-side CORS</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Identify and fix API contract mismatches — field names, wrapper objects, error keys — by reading both sides before running the app</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Create a <code>shared/types.ts</code> file that gives both frontend and backend a single source of truth for request and response shapes</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Configure environment-based CORS using <code>CLIENT_ORIGIN</code> rather than hardcoding any origin</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Add <code>express.static</code> and a catch-all <code>GET *</code> route in the correct order so Express serves the React build in production</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Run a local integration test — build React, start Express, verify API and SPA routing both work on port 3001</span></li>
+  </ul>
+  <div class="callout callout-yellow" style="margin-top:14px;"><strong>Next — D2:</strong> Auth End-to-End — the complete flow from registration through login to protected API calls and logout, wired across both layers.</div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <span id="counter">1 / 14</span>
+  <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
+  <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
+</div>
+<div id="progress"></div>
+<span id="hint">← → keys to navigate</span>
+<a href="http://localhost:3001/api/health" id="app-link" target="_blank" rel="noopener">localhost:3001 &#8599;</a>
+<a href="index.html" id="index-link">&#8962; Course</a>
+
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_NAME = 'fullstack-contracts-workshop';
+window.DECK_OBJECTIVES = [
+  'Explain the development vs production fullstack architecture and why production eliminates client-side CORS',
+  'Identify API contract mismatches between frontend and backend by comparing field names, wrapper objects, and error keys',
+  'Create a shared/types.ts file as a single source of truth for request and response shapes',
+  'Configure environment-based CORS using CLIENT_ORIGIN rather than a hardcoded origin string',
+  'Add express.static and a catch-all GET * route in the correct order to serve a React production build from Express',
+  'Run a local integration test after building the React app to verify API and SPA routing both work on one port'
+];
+window.DECK_ASSESSMENTS = [
+  {
+    id: 'a1',
+    title: 'Wire Express to serve React',
+    description: 'Add express.static and the catch-all route to your server/index.js. Build the React app and test at localhost:3001 — confirm the API still returns JSON and React Router works on page refresh.',
+    points: 3
+  },
+  {
+    id: 'a2',
+    title: 'Create shared/types.ts',
+    description: 'Generate shared TypeScript interfaces from your schema.sql. Import Book and ApiError into both your frontend BookList component and your backend route handler. Fix any field name mismatches TypeScript reveals.',
+    points: 2
+  },
+  {
+    id: 'a3',
+    title: 'Prompt reflection write-up',
+    description: 'Answer the four reflection questions from slide 13. Focus on the "shared types value" question — give one concrete example of a mismatch TypeScript catches and one it cannot.',
+    points: 2
+  }
+];
+window.DECK_QUESTIONS = [
+  {
+    id: 'q1', type: 'mcq',
+    question: 'In production, why does serving React from Express eliminate the need for CORS on your own frontend?',
+    options: [
+      'Express automatically disables CORS for known clients',
+      'Both the frontend and API share the same origin, so the browser does not apply CORS restrictions',
+      'Railway provides a CORS proxy between the two services',
+      'The React build process removes all fetch calls that would trigger CORS'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q2', type: 'mcq',
+    question: 'Your Express server returns { message: "Not found" } for 404s but api.ts reads body.error. What do users see when a book is not found?',
+    options: [
+      'The text "Not found"',
+      'The text "HTTP 404"',
+      'An empty error message or undefined',
+      'A JavaScript exception with the full response body'
+    ],
+    answer: 2
+  },
+  {
+    id: 'q3', type: 'mcq',
+    question: 'The catch-all GET * route is registered before the /api/books route. What happens when the frontend calls GET /api/books?',
+    options: [
+      'Express still matches /api/books correctly because it is more specific',
+      'The catch-all intercepts the request and returns index.html instead of JSON',
+      'Express throws a routing conflict error at startup',
+      'The request is rejected with a 405 Method Not Allowed'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q4', type: 'self',
+    question: 'Your database column is created_at (snake_case) but your TypeScript interface has createdAt (camelCase). The app compiles with no errors. Describe two runtime symptoms you would see — one in the UI and one in the browser DevTools.'
+  },
+  {
+    id: 'q5', type: 'mcq',
+    question: 'You see ReferenceError: __dirname is not defined when starting the server. What is the cause?',
+    options: [
+      'The path module is not imported',
+      'The project uses ES modules ("type": "module") where __dirname does not exist',
+      'Express 5 removed support for __dirname',
+      'The server/index.js file is not in the project root'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q6', type: 'self',
+    question: 'You build the React app, start Express, and open localhost:3001/books in the browser — you see a blank white page. List three things you would check, in order, to diagnose the problem.'
+  }
+];
+
+(function() {
+  var slides = document.querySelectorAll('.slide');
+  var total  = slides.length;
+  var idx    = 0;
+
+  function show(n) {
+    slides[idx].classList.remove('active');
+    idx = Math.max(0, Math.min(n, total - 1));
+    slides[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((idx / (total - 1)) * 100) + '%';
+    if (window.localStorage) localStorage.setItem('svl_fullstack-contracts-workshop', idx);
+    if (window.localStorage) localStorage.setItem('svl_fullstack-contracts-workshop_total', total);
+    if (idx > parseInt(localStorage.getItem('svl_fullstack-contracts-workshop_max') || '0'))
+      localStorage.setItem('svl_fullstack-contracts-workshop_max', idx);
+  }
+
+  document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
+  document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') show(idx + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   show(idx - 1);
+  });
+
+  var saved = window.localStorage ? parseInt(localStorage.getItem('svl_fullstack-contracts-workshop') || '0') : 0;
+  if (saved > 0 && saved < total) show(saved);
+  else show(0);
+
+  if (window.initHUD)        initHUD();
+  if (window.initLO)         initLO();
+  if (window.initAssessments) initAssessments();
+  if (window.initAudio)      initAudio();
+  if (window.initAnnotation) initAnnotation();
+  if (window.initScripts)    initScripts();
+  if (window.initQuiz)       initQuiz();
+})();
+</script>
+</body>
+</html>

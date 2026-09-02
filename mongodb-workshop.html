@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document Databases &amp; MongoDB — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1e0e 0%,#091409 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--accent); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+  .terminal-body .sql    { color: var(--purple); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: var(--accent); border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-red    { background: rgba(248,81,73,.15);   color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* pipeline stages */
+  .pipeline { display: flex; align-items: center; gap: 0; margin: 12px 0; flex-wrap: nowrap; }
+  .pipeline-stage { background: rgba(88,166,255,.1); border: 1px solid var(--accent); border-radius: 6px; padding: 7px 14px; font-family: 'SF Mono',monospace; font-size: 12px; color: var(--accent); white-space: nowrap; }
+  .pipeline-arrow { color: var(--muted); font-size: 18px; padding: 0 6px; flex-shrink: 0; }
+
+  /* comparison table tick alignment */
+  .tc { text-align: center; color: var(--green); font-size: 15px; }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h1><span class="accent">Document Databases</span> &amp; MongoDB</h1>
+  <div class="subtitle">Track A — Foundations · Module 5</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <span class="badge badge-green">mongodb</span>
+    <span class="badge badge-green">nosql</span>
+    <span class="badge badge-green">mongoose</span>
+    <span class="badge badge-green">bson</span>
+    <span class="badge badge-green">aggregation</span>
+  </div>
+  <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">A different philosophy — built on JSON, designed for flexibility</p>
+  <div class="callout callout-blue">You just finished A4 — you can model data in tables, write SQL queries, and think in joins. This module asks: what if you didn't need to? MongoDB stores data as JSON documents. Everything changes — and some things get simpler.</div>
+</div>
+
+<!-- Slide 2 — Two philosophies -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>Two Philosophies</h2>
+  <div class="cols cols-2" style="margin-top:10px;gap:20px;">
+    <div class="callout callout-blue" style="padding:18px 20px;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Relational (PostgreSQL)</div>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text);">
+        <li>&#8250; Organises data into <strong>tables</strong>, rows, columns</li>
+        <li>&#8250; <strong>Fixed schema</strong> — change it with <code>ALTER TABLE</code></li>
+        <li>&#8250; Relations via <strong>foreign keys</strong> and <strong>JOINs</strong></li>
+        <li>&#8250; Strong consistency and <strong>ACID</strong> by default</li>
+      </ul>
+    </div>
+    <div class="callout callout-green" style="padding:18px 20px;">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Document (MongoDB)</div>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text);">
+        <li>&#8250; Organises data into <strong>collections</strong> of documents (JSON objects)</li>
+        <li>&#8250; <strong>Flexible schema</strong> — documents in the same collection can differ</li>
+        <li>&#8250; Relations via <strong>embedding</strong> or <strong>references</strong></li>
+        <li>&#8250; Horizontally scalable, schema <strong>evolves with your app</strong></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:12px;">Neither is universally better — they solve different problems. This module is about understanding when each fits. The best developers know both.</div>
+</div>
+
+<!-- Slide 3 — What a document looks like -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>What a Document Looks Like</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">books collection — one document</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="out">{</span>
+  <span class="key">"_id"</span><span class="out">:</span>        <span class="str">"64f2a3b8c91e2d4f1a7b3c2d"</span><span class="out">,</span>
+  <span class="key">"title"</span><span class="out">:</span>      <span class="str">"The Pragmatic Programmer"</span><span class="out">,</span>
+  <span class="key">"author"</span><span class="out">:</span>     <span class="str">"Hunt &amp; Thomas"</span><span class="out">,</span>
+  <span class="key">"status"</span><span class="out">:</span>     <span class="str">"reading"</span><span class="out">,</span>
+  <span class="key">"pageCount"</span><span class="out">:</span>  <span class="val">352</span><span class="out">,</span>
+  <span class="key">"tags"</span><span class="out">:</span>       <span class="out">[</span><span class="str">"engineering"</span><span class="out">,</span> <span class="str">"career"</span><span class="out">],</span>
+  <span class="key">"reviews"</span><span class="out">:</span>    <span class="out">[</span>
+    <span class="out">{</span>
+      <span class="key">"rating"</span><span class="out">:</span> <span class="val">5</span><span class="out">,</span>
+      <span class="key">"note"</span><span class="out">:</span>   <span class="str">"Essential reading"</span><span class="out">,</span>
+      <span class="key">"date"</span><span class="out">:</span>   <span class="str">"2026-01-15"</span>
+    <span class="out">}</span>
+  <span class="out">],</span>
+  <span class="key">"createdAt"</span><span class="out">:</span>  <span class="str">"2026-03-01T09:00:00Z"</span>
+<span class="out">}</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <p style="font-size:13px;color:var(--muted);">In PostgreSQL, this would need:</p>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-blue">books</span><span>core fields table</span></li>
+        <li><span class="badge badge-blue">book_tags</span><span>join table for the tags array</span></li>
+        <li><span class="badge badge-blue">reviews</span><span>separate table for the nested reviews</span></li>
+      </ul>
+      <p style="font-size:13px;color:var(--muted);">Reassembling the full record: <strong style="color:var(--text);">2 JOINs</strong>.</p>
+      <div class="callout callout-green" style="margin-top:4px;">In MongoDB, the data you store <strong>is</strong> the shape of your API response. No column-by-column assembly, no JOIN — return the document directly.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — JSON → BSON → JSON -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>JSON &#8594; BSON &#8594; JSON</h2>
+  <p style="margin-bottom:14px;">MongoDB stores data as <strong>BSON</strong> (Binary JSON) — a binary-encoded superset of JSON. The driver handles the conversion invisibly.</p>
+
+  <!-- Round-trip diagram -->
+  <div style="background:var(--term-bg);border:1px solid var(--border);border-radius:8px;padding:18px 24px;margin-bottom:14px;overflow-x:auto;">
+    <div style="display:flex;align-items:center;gap:0;flex-wrap:nowrap;justify-content:center;">
+      <div style="background:rgba(88,166,255,.12);border:1px solid var(--accent);border-radius:6px;padding:8px 16px;font-family:'SF Mono',monospace;font-size:12px;color:var(--accent);white-space:nowrap;">Your JS Object</div>
+      <div style="color:var(--muted);font-size:11px;padding:0 8px;text-align:center;white-space:nowrap;">&#8594;<br><span style="font-size:10px;">driver</span></div>
+      <div style="background:rgba(210,153,34,.12);border:1px solid var(--yellow);border-radius:6px;padding:8px 16px;font-family:'SF Mono',monospace;font-size:12px;color:var(--yellow);white-space:nowrap;">BSON (binary)</div>
+      <div style="color:var(--muted);font-size:11px;padding:0 8px;text-align:center;white-space:nowrap;">&#8594;<br><span style="font-size:10px;">MongoDB stores</span></div>
+      <div style="background:rgba(210,153,34,.12);border:1px solid var(--yellow);border-radius:6px;padding:8px 16px;font-family:'SF Mono',monospace;font-size:12px;color:var(--yellow);white-space:nowrap;">BSON (binary)</div>
+      <div style="color:var(--muted);font-size:11px;padding:0 8px;text-align:center;white-space:nowrap;">&#8594;<br><span style="font-size:10px;">driver reads</span></div>
+      <div style="background:rgba(88,166,255,.12);border:1px solid var(--accent);border-radius:6px;padding:8px 16px;font-family:'SF Mono',monospace;font-size:12px;color:var(--accent);white-space:nowrap;">Your JS Object</div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">What BSON adds over plain JSON:</p>
+  <ul class="annot-list" style="margin-top:0;margin-bottom:12px;">
+    <li><span class="badge badge-blue">ISODate</span><span>Typed dates — <code>ISODate("2026-03-01")</code> not a string. Stored and compared as actual timestamps.</span></li>
+    <li><span class="badge badge-yellow">ObjectId</span><span>Compact 12-byte unique ID — encodes a timestamp + process ID + counter. Fast to generate and index.</span></li>
+    <li><span class="badge badge-green">Int32/Int64</span><span>Explicit integer sizes — no ambiguity between integers and floats.</span></li>
+    <li><span class="badge badge-orange">Binary</span><span>Raw bytes — store files, hashes, or encrypted fields natively.</span></li>
+  </ul>
+  <div class="callout callout-blue">You never write BSON — the MongoDB Node.js driver converts automatically. You work with plain JS objects throughout. <code>new Date()</code> stays a Date; no ISO string parsing needed.</div>
+</div>
+
+<!-- Slide 5 — MongoDB Atlas: free cloud setup -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>MongoDB Atlas: Free Cloud Setup</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;gap:20px;">
+    <div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;"><strong style="color:var(--text);">MongoDB Atlas</strong> — managed cloud MongoDB. Free M0 cluster: 512 MB, never expires.</p>
+      <ul class="annot-list" style="margin-top:0;margin-bottom:10px;">
+        <li><span class="badge badge-num">1</span><span>Create account at <strong style="color:var(--accent);">cloud.mongodb.com</strong></span></li>
+        <li><span class="badge badge-num">2</span><span>New Project &#8594; Build a Database &#8594; <strong>Free tier</strong></span></li>
+        <li><span class="badge badge-num">3</span><span>Choose region &#8594; Connect &#8594; Allow IP &#8594; Copy connection string</span></li>
+      </ul>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">connection string anatomy</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);font-size:12px;"><span class="comment">mongodb+srv://</span><span class="str">username</span><span class="comment">:</span><span class="or">password</span><span class="comment">@</span><span class="url">cluster.mongodb.net</span><span class="comment">/</span><span class="ye">mydb</span><span class="out">?retryWrites=true</span>
+
+<span class="comment">│             │         │          │               │        └─ options</span>
+<span class="comment">│             │         │          │               └─── database name</span>
+<span class="comment">│             │         │          └──────────────────── host (Atlas cluster)</span>
+<span class="comment">│             │         └─────────────────────────────── password</span>
+<span class="comment">│             └───────────────────────────────────────── username</span>
+<span class="comment">└─────────────────────────────────────────────────────── protocol (SRV)</span>
+
+<span class="comment">-- Alternative: local install</span>
+<span class="prompt">$</span> <span class="cmd">brew install mongodb-community</span>
+<span class="prompt">$</span> <span class="cmd">brew services start mongodb-community</span>
+
+<span class="comment">-- .env</span>
+<span class="str">MONGODB_URI</span><span class="out">=mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster.mongodb.net/readinglist</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <div class="callout callout-orange icon-gotcha">Never hard-code your connection string. Add <code>MONGODB_URI</code> to <code>.env</code> and add <code>.env</code> to <code>.gitignore</code> before your first commit.</div>
+      <div class="callout callout-blue icon-hands-on">AI prompt: <em>I've set up a MongoDB Atlas free tier cluster. Write the Mongoose connection code for a Node.js Express app that reads MONGODB_URI from .env.</em> — <a href="https://www.mongodb.com/docs/atlas/getting-started/" target="_blank" class="breakout-link">Atlas docs &#8599;</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — Mongoose: adding schema to flexibility -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>Mongoose: Adding Schema to Flexibility</h2>
+  <p style="margin-bottom:8px;">MongoDB is schema-flexible, but your app usually isn't. Mongoose adds <strong>validation</strong>, <strong>type coercion</strong>, and <strong>middleware</strong> on top of the raw driver.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">models/Book.js</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="kw">import</span> <span class="fn">mongoose</span> <span class="kw">from</span> <span class="str">'mongoose'</span><span class="out">;</span>
+
+<span class="kw">const</span> <span class="fn">bookSchema</span> <span class="out">=</span> <span class="kw">new</span> <span class="fn">mongoose.Schema</span><span class="out">({</span>
+  <span class="fn">title</span><span class="out">:</span>     <span class="out">{</span> <span class="fn">type</span><span class="out">:</span> <span class="fn">String</span><span class="out">,</span>  <span class="fn">required</span><span class="out">:</span> <span class="val">true</span> <span class="out">},</span>
+  <span class="fn">author</span><span class="out">:</span>    <span class="out">{</span> <span class="fn">type</span><span class="out">:</span> <span class="fn">String</span><span class="out">,</span>  <span class="fn">required</span><span class="out">:</span> <span class="val">true</span> <span class="out">},</span>
+  <span class="fn">status</span><span class="out">:</span>    <span class="out">{</span> <span class="fn">type</span><span class="out">:</span> <span class="fn">String</span><span class="out">,</span>  <span class="fn">enum</span><span class="out">:</span> <span class="out">[</span><span class="str">'unread'</span><span class="out">,</span> <span class="str">'reading'</span><span class="out">,</span> <span class="str">'done'</span><span class="out">],</span>
+               <span class="fn">default</span><span class="out">:</span> <span class="str">'unread'</span> <span class="out">},</span>
+  <span class="fn">pageCount</span><span class="out">:</span> <span class="out">{</span> <span class="fn">type</span><span class="out">:</span> <span class="fn">Number</span><span class="out">,</span>  <span class="fn">min</span><span class="out">:</span> <span class="val">1</span> <span class="out">},</span>
+  <span class="fn">tags</span><span class="out">:</span>      <span class="out">[</span><span class="fn">String</span><span class="out">],</span>
+  <span class="fn">reviews</span><span class="out">:</span>   <span class="out">[{</span>
+    <span class="fn">rating</span><span class="out">:</span> <span class="out">{</span> <span class="fn">type</span><span class="out">:</span> <span class="fn">Number</span><span class="out">,</span> <span class="fn">min</span><span class="out">:</span> <span class="val">1</span><span class="out">,</span> <span class="fn">max</span><span class="out">:</span> <span class="val">5</span><span class="out">,</span> <span class="fn">required</span><span class="out">:</span> <span class="val">true</span> <span class="out">},</span>
+    <span class="fn">note</span><span class="out">:</span>   <span class="fn">String</span>
+  <span class="out">}]</span>
+<span class="out">},</span> <span class="out">{</span> <span class="fn">timestamps</span><span class="out">:</span> <span class="val">true</span> <span class="out">});</span>
+
+<span class="kw">export const</span> <span class="fn">Book</span> <span class="out">=</span> <span class="fn">mongoose.model</span><span class="out">(</span><span class="str">'Book'</span><span class="out">,</span> <span class="fn">bookSchema</span><span class="out">);</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <div class="callout callout-yellow icon-key"><code>{ timestamps: true }</code> automatically adds <code>createdAt</code> and <code>updatedAt</code> fields — you don't need to manage them manually.</div>
+      <div class="callout callout-blue">Mongoose generates <code>_id</code> (ObjectId) automatically. The model name <code>'Book'</code> maps to the collection <code>books</code> (lowercased + pluralised).</div>
+      <div class="callout callout-green">Compare to A4: <code>enum</code> here replaces PostgreSQL's <code>CHECK (status IN (...))</code> constraint — same intent, different syntax.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — CRUD: Create & Read -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>CRUD: Create &amp; Read</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">create and read</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">// Create</span>
+<span class="kw">const</span> <span class="fn">book</span> <span class="out">=</span> <span class="kw">await</span> <span class="fn">Book.create</span><span class="out">({</span> <span class="fn">title</span><span class="out">,</span> <span class="fn">author</span><span class="out">,</span> <span class="fn">status</span> <span class="out">});</span>
+<span class="comment">// → returns the saved document including _id and timestamps</span>
+
+<span class="comment">// Read all (with optional filter)</span>
+<span class="kw">const</span> <span class="fn">books</span> <span class="out">=</span> <span class="kw">await</span> <span class="fn">Book.find</span><span class="out">({</span> <span class="fn">status</span><span class="out">:</span> <span class="str">'reading'</span> <span class="out">});</span>
+<span class="kw">const</span> <span class="fn">books</span> <span class="out">=</span> <span class="kw">await</span> <span class="fn">Book.find</span><span class="out">({</span> <span class="fn">status</span><span class="out">:</span> <span class="str">'reading'</span> <span class="out">})</span>
+                   <span class="out">.</span><span class="fn">sort</span><span class="out">({</span> <span class="fn">createdAt</span><span class="out">:</span> <span class="val">-1</span> <span class="out">});</span>
+
+<span class="comment">// Read one</span>
+<span class="kw">const</span> <span class="fn">book</span> <span class="out">=</span> <span class="kw">await</span> <span class="fn">Book.findById</span><span class="out">(</span><span class="fn">id</span><span class="out">);</span>
+<span class="kw">if</span> <span class="out">(!</span><span class="fn">book</span><span class="out">)</span> <span class="kw">return</span> <span class="fn">res.status</span><span class="out">(</span><span class="val">404</span><span class="out">).</span><span class="fn">json</span><span class="out">({</span> <span class="fn">error</span><span class="out">:</span> <span class="str">'Not found'</span> <span class="out">});</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <div class="callout callout-green"><code>Book.find()</code> returns plain JS objects — you can pass them directly to <code>res.json()</code>. No row-to-object mapping needed.</div>
+      <div class="callout callout-blue">Compare to PostgreSQL from A4:<br><code>const {'{ rows }'} = await pool.query('SELECT * FROM books WHERE status=$1', ['reading'])</code><br>— notice you had to unwrap <code>rows</code>. With Mongoose, the result IS your array.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — CRUD: Update & Delete -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>CRUD: Update &amp; Delete</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">update and delete</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">// Partial update — only change fields present in req.body</span>
+<span class="kw">const</span> <span class="fn">book</span> <span class="out">=</span> <span class="kw">await</span> <span class="fn">Book.findByIdAndUpdate</span><span class="out">(</span>
+  <span class="fn">id</span><span class="out">,</span>
+  <span class="out">{</span> <span class="fn">$set</span><span class="out">:</span> <span class="fn">req.body</span> <span class="out">},</span>
+  <span class="out">{</span> <span class="fn">new</span><span class="out">:</span> <span class="val">true</span><span class="out">,</span> <span class="fn">runValidators</span><span class="out">:</span> <span class="val">true</span> <span class="out">}</span>
+<span class="out">);</span>
+
+<span class="comment">// Delete</span>
+<span class="kw">const</span> <span class="fn">book</span> <span class="out">=</span> <span class="kw">await</span> <span class="fn">Book.findByIdAndDelete</span><span class="out">(</span><span class="fn">id</span><span class="out">);</span>
+<span class="kw">if</span> <span class="out">(!</span><span class="fn">book</span><span class="out">)</span> <span class="kw">return</span> <span class="fn">res.status</span><span class="out">(</span><span class="val">404</span><span class="out">).</span><span class="fn">json</span><span class="out">({</span> <span class="fn">error</span><span class="out">:</span> <span class="str">'Not found'</span> <span class="out">});</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <div class="callout callout-blue"><code>{ new: true }</code> returns the updated document — equivalent to <code>RETURNING *</code> in PostgreSQL.</div>
+      <div class="callout callout-orange icon-gotcha">Always use <code>$set</code> in updates. Without it, MongoDB <strong>replaces the entire document</strong> with your update object — you'd lose all other fields.</div>
+      <div class="callout callout-yellow icon-gotcha"><code>runValidators: true</code> runs your Mongoose schema validators on update — they don't run by default on <code>findByIdAndUpdate</code>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- Slide 9 — Embed vs Reference -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>Embed vs Reference</h2>
+  <p style="margin-bottom:8px;">This is <strong>the</strong> key design decision in MongoDB. Unlike PostgreSQL — where relationships always live in separate tables — you choose.</p>
+  <div class="cols cols-2" style="margin-top:6px;gap:16px;">
+    <div class="callout callout-blue" style="padding:16px 18px;">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Embed (reviews inside book)</div>
+      <div style="background:var(--term-bg);border-radius:6px;padding:10px 14px;font-family:'SF Mono',monospace;font-size:11px;color:var(--term-text);margin-bottom:10px;white-space:pre;"><span class="out">{</span>
+  <span class="key">"title"</span><span class="out">:</span> <span class="str">"Pragmatic Programmer"</span><span class="out">,</span>
+  <span class="key">"reviews"</span><span class="out">: [{</span>
+    <span class="key">"rating"</span><span class="out">:</span> <span class="val">5</span><span class="out">,</span> <span class="key">"note"</span><span class="out">:</span> <span class="str">"Great"</span>
+  <span class="out">}]</span>
+<span class="out">}</span></div>
+      <ul style="list-style:none;padding:0;font-size:12px;line-height:1.8;">
+        <li><span style="color:var(--green);">&#10003;</span> One database read gets everything</li>
+        <li><span style="color:var(--green);">&#10003;</span> Atomic updates</li>
+        <li><span style="color:var(--red);">&#10007;</span> Document grows over time</li>
+        <li><span style="color:var(--red);">&#10007;</span> Can't query reviews independently</li>
+      </ul>
+    </div>
+    <div class="callout callout-green" style="padding:16px 18px;">
+      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Reference (sessions as separate collection)</div>
+      <div style="background:var(--term-bg);border-radius:6px;padding:10px 14px;font-family:'SF Mono',monospace;font-size:11px;color:var(--term-text);margin-bottom:10px;white-space:pre;"><span class="comment">// books collection</span>
+<span class="out">{</span> <span class="key">"_id"</span><span class="out">:</span> <span class="str">"abc123"</span><span class="out">,</span> <span class="key">"title"</span><span class="out">:</span> <span class="str">"Pragmatic..."</span> <span class="out">}</span>
+<span class="comment">// readingsessions collection</span>
+<span class="out">{</span> <span class="key">"bookId"</span><span class="out">:</span> <span class="str">"abc123"</span><span class="out">,</span> <span class="key">"startedAt"</span><span class="out">:</span> <span class="str">"2026-01"</span> <span class="out">}</span></div>
+      <ul style="list-style:none;padding:0;font-size:12px;line-height:1.8;">
+        <li><span style="color:var(--green);">&#10003;</span> Sessions grow independently</li>
+        <li><span style="color:var(--green);">&#10003;</span> Query sessions without loading books</li>
+        <li><span style="color:var(--red);">&#10007;</span> Needs <code>$lookup</code> (JOIN equivalent)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-yellow icon-tip" style="margin-top:10px;font-size:13px;"><strong>Rule of thumb:</strong> <strong>Embed</strong> when data is always read together, bounded size (&lt; ~100 items), one-to-few relationship. <strong>Reference</strong> when data grows unboundedly, queried independently, or many-to-many.<br><br><strong>AI prompt:</strong> <em>My reading list app has books and reading sessions (one book can have many sessions over time). Should I embed sessions in the book document or use a separate collection? What are the trade-offs for this specific case?</em></div>
+</div>
+
+<!-- Slide 10 — $lookup: joining collections -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>$lookup: Joining Collections</h2>
+  <p style="margin-bottom:8px;">When you use references, <code>$lookup</code> is MongoDB's JOIN equivalent — it runs inside an aggregation pipeline.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">$lookup aggregation</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="kw">await</span> <span class="fn">Book.aggregate</span><span class="out">([</span>
+  <span class="out">{</span>
+    <span class="fn">$lookup</span><span class="out">:</span> <span class="out">{</span>
+      <span class="fn">from</span><span class="out">:</span>         <span class="str">'readingsessions'</span><span class="out">,</span>  <span class="comment">// collection name</span>
+      <span class="fn">localField</span><span class="out">:</span>   <span class="str">'_id'</span><span class="out">,</span>
+      <span class="fn">foreignField</span><span class="out">:</span> <span class="str">'bookId'</span><span class="out">,</span>
+      <span class="fn">as</span><span class="out">:</span>           <span class="str">'sessions'</span>   <span class="comment">// array field added to each book</span>
+    <span class="out">}</span>
+  <span class="out">},</span>
+  <span class="out">{</span>
+    <span class="fn">$addFields</span><span class="out">:</span> <span class="out">{</span>
+      <span class="fn">sessionCount</span><span class="out">:</span> <span class="out">{</span> <span class="fn">$size</span><span class="out">:</span> <span class="str">'$sessions'</span> <span class="out">}</span>
+    <span class="out">}</span>
+  <span class="out">},</span>
+  <span class="out">{</span>
+    <span class="fn">$project</span><span class="out">:</span> <span class="out">{</span>
+      <span class="fn">title</span><span class="out">:</span> <span class="val">1</span><span class="out">,</span> <span class="fn">author</span><span class="out">:</span> <span class="val">1</span><span class="out">,</span> <span class="fn">sessionCount</span><span class="out">:</span> <span class="val">1</span><span class="out">,</span> <span class="fn">_id</span><span class="out">:</span> <span class="val">0</span>
+    <span class="out">}</span>
+  <span class="out">}</span>
+<span class="out">]);</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <div class="callout callout-yellow icon-gotcha">If you find yourself writing <code>$lookup</code> for most of your queries, that's a signal your data might be better modelled in a relational database.</div>
+      <div class="callout callout-blue icon-tip">AI prompt: <em>Write a MongoDB aggregation that returns each book with the number of reading sessions and the total pages read across all sessions.</em></div>
+      <div class="callout callout-green">Compare to A4: PostgreSQL's <code>LEFT JOIN reading_sessions rs ON rs.book_id = b.id</code> is the same idea — match a foreign key to a local field.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — Aggregation pipelines -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>Aggregation Pipelines</h2>
+  <p style="margin-bottom:10px;">Documents flow through <strong>stages</strong>. Each stage transforms the set and passes it to the next.</p>
+
+  <!-- Pipeline visual -->
+  <div style="display:flex;align-items:center;gap:0;margin:0 0 14px;overflow-x:auto;padding:12px 0;">
+    <div style="background:rgba(88,166,255,.1);border:1px solid var(--accent);border-radius:6px;padding:8px 14px;font-family:'SF Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;">Collection</div>
+    <div style="color:var(--muted);font-size:18px;padding:0 6px;">&#8594;</div>
+    <div style="background:rgba(88,166,255,.12);border:1px solid var(--accent);border-radius:6px;padding:8px 14px;text-align:center;white-space:nowrap;">
+      <div style="font-family:'SF Mono',monospace;font-size:12px;color:var(--accent);">$match</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">filter</div>
+    </div>
+    <div style="color:var(--muted);font-size:18px;padding:0 6px;">&#8594;</div>
+    <div style="background:rgba(63,185,80,.1);border:1px solid var(--green);border-radius:6px;padding:8px 14px;text-align:center;white-space:nowrap;">
+      <div style="font-family:'SF Mono',monospace;font-size:12px;color:var(--green);">$group</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">group + calculate</div>
+    </div>
+    <div style="color:var(--muted);font-size:18px;padding:0 6px;">&#8594;</div>
+    <div style="background:rgba(210,153,34,.1);border:1px solid var(--yellow);border-radius:6px;padding:8px 14px;text-align:center;white-space:nowrap;">
+      <div style="font-family:'SF Mono',monospace;font-size:12px;color:var(--yellow);">$sort</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">order</div>
+    </div>
+    <div style="color:var(--muted);font-size:18px;padding:0 6px;">&#8594;</div>
+    <div style="background:rgba(255,166,87,.1);border:1px solid var(--orange);border-radius:6px;padding:8px 14px;text-align:center;white-space:nowrap;">
+      <div style="font-family:'SF Mono',monospace;font-size:12px;color:var(--orange);">$project</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">shape output</div>
+    </div>
+    <div style="color:var(--muted);font-size:18px;padding:0 6px;">&#8594;</div>
+    <div style="background:rgba(88,166,255,.1);border:1px solid var(--accent);border-radius:6px;padding:8px 14px;font-family:'SF Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;">Result</div>
+  </div>
+
+  <div class="cols cols-55-45" style="gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">books by status</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="kw">await</span> <span class="fn">Book.aggregate</span><span class="out">([</span>
+  <span class="out">{</span> <span class="fn">$match</span><span class="out">:</span>  <span class="out">{</span> <span class="fn">userId</span><span class="out">:</span> <span class="fn">currentUserId</span> <span class="out">}</span> <span class="out">},</span>  <span class="comment">// filter first — fast</span>
+  <span class="out">{</span> <span class="fn">$group</span><span class="out">:</span>  <span class="out">{</span>
+      <span class="fn">_id</span><span class="out">:</span>      <span class="str">'$status'</span><span class="out">,</span>
+      <span class="fn">count</span><span class="out">:</span>    <span class="out">{</span> <span class="fn">$sum</span><span class="out">:</span>  <span class="val">1</span> <span class="out">},</span>
+      <span class="fn">avgPages</span><span class="out">:</span> <span class="out">{</span> <span class="fn">$avg</span><span class="out">:</span>  <span class="str">'$pageCount'</span> <span class="out">}</span>
+  <span class="out">}},</span>
+  <span class="out">{</span> <span class="fn">$sort</span><span class="out">:</span>   <span class="out">{</span> <span class="fn">count</span><span class="out">:</span> <span class="val">-1</span> <span class="out">}</span> <span class="out">}</span>
+<span class="out">]);</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <div class="callout callout-orange icon-tip">Aggregation pipelines are the most complex part of MongoDB. This is where AI saves the most time — but always read each stage and ask why it's there.</div>
+      <div class="callout callout-blue">AI prompt: <em>Explain this MongoDB aggregation pipeline to me stage by stage:</em> [paste pipeline]</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Indexes in MongoDB -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>Indexes in MongoDB</h2>
+  <p style="margin-bottom:8px;">Same concept as PostgreSQL — a pre-sorted structure for fast lookups. Without an index, MongoDB scans every document in the collection.</p>
+  <div class="cols cols-55-45" style="margin-top:4px;gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">defining indexes</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="comment">// On the schema (recommended — keeps indexes with the model)</span>
+<span class="fn">bookSchema</span><span class="out">.</span><span class="fn">index</span><span class="out">({</span> <span class="fn">status</span><span class="out">:</span> <span class="val">1</span> <span class="out">});</span>                <span class="comment">// ascending</span>
+<span class="fn">bookSchema</span><span class="out">.</span><span class="fn">index</span><span class="out">({</span> <span class="fn">author</span><span class="out">:</span> <span class="val">1</span><span class="out">,</span> <span class="fn">title</span><span class="out">:</span> <span class="val">1</span> <span class="out">});</span>    <span class="comment">// compound</span>
+<span class="fn">bookSchema</span><span class="out">.</span><span class="fn">index</span><span class="out">({</span> <span class="fn">title</span><span class="out">:</span> <span class="str">'text'</span> <span class="out">});</span>           <span class="comment">// full-text search</span>
+
+<span class="comment">// Or directly on the collection</span>
+<span class="kw">await</span> <span class="fn">Book.collection.createIndex</span><span class="out">({</span> <span class="fn">userId</span><span class="out">:</span> <span class="val">1</span> <span class="out">});</span>
+
+<span class="comment">// Check if index is being used</span>
+<span class="kw">await</span> <span class="fn">Book.find</span><span class="out">({</span> <span class="fn">status</span><span class="out">:</span> <span class="str">'reading'</span> <span class="out">})</span>
+           <span class="out">.</span><span class="fn">explain</span><span class="out">(</span><span class="str">'executionStats'</span><span class="out">);</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-blue">1</span><span>Ascending index</span></li>
+        <li><span class="badge badge-blue">-1</span><span>Descending index</span></li>
+        <li><span class="badge badge-green">'text'</span><span>Full-text search index — supports <code>$text: { $search: "..." }</code></span></li>
+      </ul>
+      <div class="callout callout-yellow icon-key">Always index foreign reference fields (e.g. <code>bookId</code> in readingsessions) and fields you filter or sort on frequently.</div>
+      <div class="callout callout-blue"><code>.explain('executionStats')</code> shows whether your index is being used — equivalent to <code>EXPLAIN ANALYSE</code> in PostgreSQL.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- Slide 13 — When to choose MongoDB vs PostgreSQL -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>When to Choose MongoDB vs PostgreSQL</h2>
+  <div style="margin-top:10px;overflow:auto;max-height:min(72vh,560px);">
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th style="text-align:center;width:130px;">PostgreSQL</th>
+          <th style="text-align:center;width:130px;">MongoDB</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Fixed, well-understood schema</td><td class="tc">&#10003;</td><td></td></tr>
+        <tr><td>Rapidly evolving schema</td><td></td><td class="tc">&#10003;</td></tr>
+        <tr><td>Complex multi-table JOINs</td><td class="tc">&#10003;</td><td></td></tr>
+        <tr><td>Hierarchical / nested data</td><td></td><td class="tc">&#10003;</td></tr>
+        <tr><td>Financial / transactional data</td><td class="tc">&#10003;</td><td></td></tr>
+        <tr><td>Content, catalogs, CMS</td><td></td><td class="tc">&#10003;</td></tr>
+        <tr><td>Team strong in SQL</td><td class="tc">&#10003;</td><td></td></tr>
+        <tr><td>Node.js API + JSON throughout</td><td></td><td class="tc">&#10003;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="cols cols-2" style="margin-top:10px;gap:14px;">
+    <div class="callout callout-blue">PostgreSQL also has <code>JSONB</code> columns — a powerful middle ground. You get relational structure for most fields, with schema-free flexibility for a specific field.</div>
+    <div class="callout callout-green">Many production systems use both. User accounts + billing in PostgreSQL; product catalog + content in MongoDB.</div>
+  </div>
+</div>
+
+<!-- Slide 14 — Schema design with AI -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>Schema Design with AI</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;gap:20px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">prompt pattern for Mongoose schema design</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);">I'm building a reading list app with Node.js,
+Express, and MongoDB (Mongoose).
+
+I need:
+- Users (email, hashed password, created date)
+- Books per user (title, author, status, page count, tags)
+- Reading sessions (which book, start date, end date, notes)
+
+Books can have embedded reviews (max ~20 per book).
+Should I embed reading sessions in the book document
+or use a separate collection?
+
+Provide Mongoose schemas with: required fields, enums
+for constrained values, timestamps, appropriate indexes,
+and a brief explanation of your embed/reference decisions.</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+      <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">What to check in AI-generated Mongoose schemas:</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-blue">required</span><span><code>required: true</code> on every mandatory field?</span></li>
+        <li><span class="badge badge-yellow">enum</span><span><code>enum</code> used for status/type fields?</span></li>
+        <li><span class="badge badge-green">timestamps</span><span><code>{ timestamps: true }</code> set on the schema options?</span></li>
+        <li><span class="badge badge-orange">indexes</span><span>Indexes defined for userId and other filtered fields?</span></li>
+        <li><span class="badge badge-blue">embed/ref</span><span>Embed vs reference decision matches the stated access patterns?</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 15 — Prompt reflection -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>MongoDB and AI: a Natural Partnership</h2>
+  <div class="cols cols-3" style="margin-top:12px;gap:16px;">
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px;">JSON all the way down</div>
+      <p style="font-size:13px;">Your API receives JSON. MongoDB stores JSON. AI thinks in JSON. Schema design prompts feel natural — paste a sample document and ask "write a Mongoose schema for this". The language of your stack and the language of your AI tool are the same.</p>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">Aggregation pipelines</div>
+      <p style="font-size:13px;">The most powerful — and most complex — feature of MongoDB. AI generates correct pipelines quickly. Your job: read each <code>$stage</code>, understand what it does to the data, and ask "what would happen if I removed this stage?" Active engagement beats passive acceptance.</p>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">Embed vs reference is a design conversation</div>
+      <p style="font-size:13px;">This isn't a syntax question — it's a judgement about access patterns and growth. Describe your app's query patterns to AI and ask it to reason through the trade-offs. Push back: "What if the number of sessions per book grows to thousands?"</p>
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:16px;">Every AI-generated schema encodes assumptions about your data. Find those assumptions. If they're wrong, the schema is wrong — even if it looks correct.</div>
+</div>
+
+<!-- Slide 16 — Quick reference -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundations · Module 5</div>
+  <h2>Quick Reference</h2>
+  <div class="cols cols-2" style="margin-top:10px;gap:24px;">
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Mongoose Methods</p>
+      <table>
+        <thead><tr><th>Method</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>Model.create(data)</td><td>Insert document</td></tr>
+          <tr><td>Model.find(filter)</td><td>Find many</td></tr>
+          <tr><td>Model.findById(id)</td><td>Find by _id</td></tr>
+          <tr><td>Model.findOne(filter)</td><td>Find first match</td></tr>
+          <tr><td>Model.findByIdAndUpdate(id, {$set:…}, {new:true})</td><td>Partial update</td></tr>
+          <tr><td>Model.findByIdAndDelete(id)</td><td>Delete</td></tr>
+          <tr><td>Model.countDocuments(filter)</td><td>Count matching</td></tr>
+          <tr><td>Model.aggregate([…])</td><td>Run pipeline</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <p style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Common Operators</p>
+      <table>
+        <thead><tr><th>Operator</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>$set</td><td>Update specific fields</td></tr>
+          <tr><td>$push</td><td>Add item to array</td></tr>
+          <tr><td>$pull</td><td>Remove from array</td></tr>
+          <tr><td>$match</td><td>Filter (in pipeline)</td></tr>
+          <tr><td>$group</td><td>Group + aggregate</td></tr>
+          <tr><td>$lookup</td><td>Join collection</td></tr>
+          <tr><td>$sort</td><td>Sort documents</td></tr>
+          <tr><td>$project</td><td>Shape output fields</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 &#8599;</a>
+<a href="index.html" id="index-link">&#8962; Course</a>
+<div id="nav">
+  <span id="counter">1 / 16</span>
+  <button class="nav-btn" id="prev">&#8249;</button>
+  <button class="nav-btn" id="next">&#8250;</button>
+</div>
+<div id="progress"></div>
+<div id="hint">&#8592; &#8594; to navigate &middot; F fullscreen</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'mongodb-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'a5-1', type: 'practical', title: 'Design a Mongoose schema',
+    desc: "Design a Mongoose schema for a blog post (title, body, author, tags, publishedAt). Add validation: title required, publishedAt defaults to now. How would you model comments — embed or reference?",
+    criteria: [
+      'Your schema compiles without errors in Mongoose',
+      'At least two fields have explicit validation rules (required, min, max, enum, etc.)',
+      'You gave a reasoned answer about embed vs reference for comments with a trade-off'
+    ] },
+  { id: 'a5-2', type: 'practical', title: 'Aggregation pipeline',
+    desc: 'Write a MongoDB aggregation that groups documents by a field and counts them. Use Compass or mongosh. What does $group do, and how does it compare to SQL GROUP BY?',
+    criteria: [
+      'Your pipeline produces the correct grouped output',
+      'You can explain what $group and $sum do in isolation',
+      'You can name one meaningful difference between MongoDB aggregation and SQL GROUP BY'
+    ] },
+  { id: 'a5-3', type: 'reflect', title: 'SQL vs document model',
+    desc: 'For the same data (e.g. a product catalogue with variants), sketch both a relational schema and a MongoDB document structure. What is the main trade-off between the two approaches?',
+    criteria: [
+      'You drew (even roughly) both data structures for the same domain',
+      'You identified the main trade-off (schema flexibility vs join efficiency, or similar)',
+      'Your answer goes beyond "MongoDB is flexible" to a concrete scenario'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain the document model and contrast it with the relational model',
+  'Design MongoDB schemas using Mongoose with appropriate field types and validation',
+  'Perform CRUD operations on a MongoDB collection using Mongoose methods',
+  'Choose between embedding and referencing related data in document schemas',
+  'Construct basic aggregation pipelines to filter, group, and transform documents'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'mg-cp1-q1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In MongoDB, what is a "collection"?',
+    options: [
+      'A single JSON document stored on disk',
+      'A named group of documents — analogous to a table in PostgreSQL',
+      'A binary-encoded format for storing data',
+      'An index built on a set of fields'
+    ],
+    correct: 1,
+    explanation: 'A collection is MongoDB\'s equivalent of a relational table — a named group of documents. Documents in the same collection can have different shapes, unlike rows in a table.'
+  },
+  {
+    id: 'mg-cp1-q2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What does { timestamps: true } do in a Mongoose schema?',
+    options: [
+      'Stores timestamps as Unix epoch integers instead of ISO strings',
+      'Automatically adds createdAt and updatedAt fields managed by Mongoose',
+      'Validates that all date fields are in ISO 8601 format',
+      'Indexes the createdAt field automatically'
+    ],
+    correct: 1,
+    explanation: '{ timestamps: true } in the schema options tells Mongoose to automatically add and manage createdAt and updatedAt fields — you don\'t need to define or update them manually.'
+  },
+  {
+    id: 'mg-cp1-q3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You call Book.findByIdAndUpdate(id, req.body, { new: true }). What is the critical problem with this code?',
+    options: [
+      'findByIdAndUpdate does not accept an options object',
+      'Without $set, MongoDB replaces the entire document with req.body, losing all other fields',
+      'The { new: true } option causes the old document to be returned instead',
+      'req.body cannot be used directly because it contains strings instead of ObjectIds'
+    ],
+    correct: 1,
+    explanation: 'Without $set, MongoDB treats the update object as a full document replacement. You should write { $set: req.body } to update only the supplied fields while leaving the rest intact.'
+  },
+  {
+    id: 'mg-cp1-q4',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What does { new: true } do in findByIdAndUpdate?',
+    options: [
+      'Creates a new document if no match is found (upsert)',
+      'Returns the document as it looked before the update',
+      'Returns the updated document after the update is applied',
+      'Runs schema validators on the updated fields'
+    ],
+    correct: 2,
+    explanation: '{ new: true } tells Mongoose to return the document after the update has been applied — equivalent to RETURNING * in PostgreSQL. Without it, Mongoose returns the pre-update document.'
+  },
+  {
+    id: 'mg-cp1-q5',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Explain the difference between BSON and JSON. Why does MongoDB use BSON internally, and does that change how you write your Node.js code?',
+    model: 'JSON is a text-based format. BSON (Binary JSON) is a binary-encoded superset that adds typed dates (ISODate), compact 12-byte ObjectIds, explicit integer sizes (Int32/Int64), and binary data. MongoDB stores data as BSON for efficiency and richer types. The Node.js driver converts transparently: you write plain JS objects (new Date(), strings, numbers) and the driver handles BSON encoding/decoding. You never write BSON directly.',
+    reviewSlide: 'JSON → BSON → JSON'
+  },
+  {
+    id: 'mg-cp2-q1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'When should you embed related data inside a document rather than using a separate collection?',
+    options: [
+      'When the related data grows unboundedly over time',
+      'When the related data is always read with the parent and has a bounded size (one-to-few)',
+      'When you need to query the related data independently without the parent',
+      'When multiple parent documents share the same related data'
+    ],
+    correct: 1,
+    explanation: 'Embed when: data is always read together (saves a lookup), the relationship is one-to-few (document stays small), and items don\'t grow unboundedly. Reference when data grows, is queried independently, or is shared across multiple parents.'
+  },
+  {
+    id: 'mg-cp2-q2',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'In a MongoDB aggregation pipeline, what does the $match stage do?',
+    options: [
+      'Groups documents by a specified field and calculates aggregates',
+      'Filters documents — equivalent to a WHERE clause in SQL',
+      'Shapes the output by including or excluding specific fields',
+      'Joins documents from another collection'
+    ],
+    correct: 1,
+    explanation: '$match filters the document set passing through the pipeline — it\'s equivalent to SQL\'s WHERE clause. Placing $match early in a pipeline is important for performance because it reduces the number of documents subsequent stages must process.'
+  },
+  {
+    id: 'mg-cp2-q3',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'You notice your app runs $lookup in almost every query. What does this suggest?',
+    options: [
+      'You need to add more indexes to the referenced collection',
+      'Your data might be better modelled as embedded documents',
+      'Your data might be better suited to a relational database',
+      'You should upgrade to MongoDB Atlas for better join performance'
+    ],
+    correct: 2,
+    explanation: 'Frequent $lookup is a design smell in MongoDB — it means you\'re working against the document model. If your access patterns constantly require joining collections, the relational model (PostgreSQL) may be a better fit.'
+  },
+  {
+    id: 'mg-cp2-q4',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'How do you define an index in a Mongoose schema on the status field in ascending order?',
+    options: [
+      'bookSchema.index({ status: "asc" })',
+      'bookSchema.createIndex("status")',
+      'bookSchema.index({ status: 1 })',
+      'mongoose.index(Book, { status: true })'
+    ],
+    correct: 2,
+    explanation: 'bookSchema.index({ status: 1 }) creates an ascending index. Use -1 for descending. Defining indexes on the schema keeps them co-located with the model definition and ensures they\'re created when the app starts.'
+  },
+  {
+    id: 'mg-cp2-q5',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Describe the aggregation pipeline stages $match, $group, $sort, and $project. Give a concrete example of a pipeline that counts books by status and returns the results in descending count order.',
+    model: '$match filters documents (like WHERE). $group aggregates groups (like GROUP BY + aggregate functions). $sort orders the results. $project shapes the output fields. Example: Book.aggregate([ { $match: { userId: id } }, { $group: { _id: "$status", count: { $sum: 1 } } }, { $sort: { count: -1 } }, { $project: { status: "$_id", count: 1, _id: 0 } } ])',
+    reviewSlide: 'Aggregation Pipelines'
+  }
+];
+</script>
+</body>
+</html>

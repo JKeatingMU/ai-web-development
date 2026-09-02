@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; line-height: 1.7; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 56px 32px 96px; }
+
+  /* ── Header ── */
+  .site-header { text-align: center; padding-bottom: 48px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+  .site-header h1 { font-size: 2.6rem; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+  .site-header h1 span { color: var(--accent); }
+  .site-header .subtitle { font-size: 1.1rem; color: var(--muted); margin-top: 10px; }
+  .site-header .tagline { font-size: 14px; color: var(--muted); margin-top: 6px; font-style: italic; }
+
+  /* ── Quick links ── */
+  .quick-links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 44px; }
+  .quick-links a { font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: var(--surface); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; transition: color .15s, border-color .15s; }
+  .quick-links a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Philosophy block ── */
+  .philosophy { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; padding: 24px 28px; margin-bottom: 52px; }
+  .philosophy p { font-size: 15px; color: var(--text); line-height: 1.8; }
+
+  /* ── Legend ── */
+  .legend { display: flex; gap: 20px; align-items: center; margin-bottom: 40px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+  .badge-avail { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.35); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+  .badge-planned { background: rgba(139,148,158,.1); color: var(--muted); border: 1px solid var(--border); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+
+  /* ── Track section ── */
+  .track { margin-bottom: 52px; }
+  .track-header { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-radius: 10px 10px 0 0; border: 1px solid var(--border); border-bottom: none; }
+  .track-id { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: .7; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .track-title { font-size: 1.05rem; font-weight: 700; }
+  .track-desc { font-size: 13px; color: var(--muted); margin-left: auto; max-width: 380px; text-align: right; }
+  .track-note { font-size: 13px; color: var(--muted); padding: 10px 20px 10px; background: var(--surface); border: 1px solid var(--border); border-bottom: none; border-top: 1px solid var(--border); }
+  .track-note strong { color: var(--text); }
+
+  /* track colour headers */
+  .track-a .track-header { background: rgba(63,185,80,.08); border-color: rgba(63,185,80,.3); }
+  .track-a .track-id, .track-a .track-title { color: #3fb950; }
+  .track-b .track-header { background: rgba(88,166,255,.08); border-color: rgba(88,166,255,.3); }
+  .track-b .track-id, .track-b .track-title { color: #58a6ff; }
+  .track-c .track-header { background: rgba(188,140,255,.08); border-color: rgba(188,140,255,.3); }
+  .track-c .track-id, .track-c .track-title { color: #bc8cff; }
+  .track-d .track-header { background: rgba(210,153,34,.08); border-color: rgba(210,153,34,.3); }
+  .track-d .track-id, .track-d .track-title { color: #d29922; }
+  .track-e .track-header { background: rgba(255,166,87,.08); border-color: rgba(255,166,87,.3); }
+  .track-e .track-id, .track-e .track-title { color: #ffa657; }
+
+  /* ── Topic card row ── */
+  .card-row { display: flex; gap: 12px; flex-wrap: wrap; padding: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 10px 10px; }
+
+  /* ── Topic card ── */
+  .card { position: relative; border: 1px solid var(--border); border-radius: 8px; padding: 16px 16px 14px; background: var(--bg); width: 200px; flex-shrink: 0; transition: border-color .15s; }
+  .card.available { text-decoration: none; cursor: pointer; }
+  .card.planned { cursor: default; opacity: .6; }
+
+  .card-a.available { border-color: rgba(63,185,80,.25); }
+  .card-a.available:hover { border-color: #3fb950; }
+  .card-b.available { border-color: rgba(88,166,255,.25); }
+  .card-b.available:hover { border-color: #58a6ff; }
+  .card-c.available { border-color: rgba(188,140,255,.25); }
+  .card-c.available:hover { border-color: #bc8cff; }
+  .card-d.available { border-color: rgba(210,153,34,.25); }
+  .card-d.available:hover { border-color: #d29922; }
+  .card-start.available { border-color: rgba(86,212,228,.25); }
+  .card-start.available:hover { border-color: #56d4e4; }
+  .card-e.available { border-color: rgba(255,166,87,.25); }
+  .card-e.available:hover { border-color: #ffa657; }
+
+  .card-code { font-size: 10px; font-family: 'SF Mono', 'Fira Code', monospace; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .card-a .card-code { color: #3fb950; }
+  .card-b .card-code { color: #58a6ff; }
+  .card-c .card-code { color: #bc8cff; }
+  .card-d .card-code { color: #d29922; }
+  .card-e .card-code { color: #ffa657; }
+
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; line-height: 1.4; }
+  .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .card-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+  .card.available .card-badge { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.35); }
+  .card.planned .card-badge { background: rgba(139,148,158,.1); color: var(--muted); border: 1px solid var(--border); }
+
+  .card-reflect { font-size: 10px; color: var(--muted); margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .card-reflect::before { content: ''; display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--muted); flex-shrink: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='4.5' r='2' fill='none' stroke='%238b949e' stroke-width='1'/%3E%3Ccircle cx='6' cy='4.5' r='.5' fill='%238b949e'/%3E%3Cline x1='6' y1='7' x2='6' y2='9.5' stroke='%238b949e' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat; }
+
+  /* ── Dependency note ── */
+  .dep-note { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; margin-bottom: 52px; font-size: 13px; color: var(--muted); line-height: 1.8; }
+  .dep-note strong { color: var(--text); }
+  .dep-note .dep-chain { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .dep-pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .dep-arrow { color: var(--muted); font-size: 14px; }
+  .dep-a { background: rgba(63,185,80,.12); color: #3fb950; border: 1px solid rgba(63,185,80,.3); }
+  .dep-b { background: rgba(88,166,255,.12); color: #58a6ff; border: 1px solid rgba(88,166,255,.3); }
+  .dep-c { background: rgba(188,140,255,.12); color: #bc8cff; border: 1px solid rgba(188,140,255,.3); }
+  .dep-d { background: rgba(210,153,34,.12); color: #d29922; border: 1px solid rgba(210,153,34,.3); }
+  .dep-e { background: rgba(255,166,87,.12); color: #ffa657; border: 1px solid rgba(255,166,87,.3); }
+
+  /* ── Footer ── */
+  .site-footer { text-align: center; padding-top: 40px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+
+  /* ── Course LOs strip ── */
+  .course-los { margin-bottom: 32px; border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; overflow: hidden; }
+  .course-los-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--surface); border: none; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; font-family: inherit; }
+  .course-los-toggle:hover { background: rgba(88,166,255,.05); }
+  .course-los-toggle span:first-child { display: flex; align-items: center; gap: 8px; }
+  .course-los-arrow { font-size: 12px; color: var(--muted); transition: transform .2s; }
+  .course-los.open .course-los-arrow { transform: rotate(90deg); }
+  .course-los-body { display: none; padding: 14px 20px 18px; background: var(--bg); }
+  .course-los.open .course-los-body { display: block; }
+  .course-los-intro { font-size: 13px; color: var(--muted); margin-bottom: 10px; font-style: italic; }
+  .course-lo-list { list-style: none; padding: 0; }
+  .course-lo-list li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); line-height: 1.5; }
+  .course-lo-list li:last-child { border-bottom: none; }
+  .course-lo-num { font-family: 'SF Mono','Fira Code',monospace; font-size: 10px; font-weight: 700; color: var(--accent); background: rgba(88,166,255,.1); border: 1px solid rgba(88,166,255,.2); border-radius: 4px; padding: 2px 5px; flex-shrink: 0; margin-top: 2px; min-width: 22px; text-align: center; }
+
+  /* ── Card progress + LO button ── */
+  .card.available .card-badge { display: none; }         /* replaced by progress bar */
+  .card-reflect { font-size: 0; justify-content: flex-end; margin-top: 8px; }
+  .card-reflect::before { display: none; }               /* remove person icon */
+  .card-progress { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 8px; }
+  .card-progress-bar { flex: 1; height: 3px; background: #21262d; border-radius: 2px; overflow: hidden; }
+  .card-progress-fill { height: 100%; border-radius: 2px; transition: width .4s; }
+  .card-a .card-progress-fill { background: #3fb950; }
+  .card-b .card-progress-fill { background: #58a6ff; }
+  .card-c .card-progress-fill { background: #bc8cff; }
+  .card-d .card-progress-fill { background: #d29922; }
+  .card-start .card-progress-fill { background: #56d4e4; }
+  .card-progress-label { font-size: 10px; color: var(--muted); font-family: 'SF Mono','Fira Code',monospace; white-space: nowrap; }
+  .card-lo-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 13px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color .15s, border-color .15s; line-height: 1; padding: 0; }
+  .card-lo-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .card-assess-chip { font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; color: #484f58; white-space: nowrap; }
+  .card-assess-chip.has-done { color: #e3b341; }
+  #cert-link { color: var(--accent) !important; border-color: rgba(88,166,255,.4) !important; }
+
+  /* ── LO Popover (module card click) ── */
+  #lo-backdrop { display: none; position: fixed; inset: 0; background: rgba(1,4,9,.55); z-index: 1000; }
+  #lo-backdrop.active { display: block; }
+  #lo-popover { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(480px,90vw); background: #161b22; border: 1px solid #30363d; border-radius: 12px; z-index: 1001; box-shadow: 0 16px 48px rgba(0,0,0,.7); overflow: hidden; }
+  #lo-popover.active { display: block; }
+  #lo-pop-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 18px 12px; border-bottom: 1px solid #30363d; gap: 12px; }
+  #lo-pop-meta { display: flex; flex-direction: column; gap: 3px; }
+  #lo-pop-code { font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  #lo-pop-title { font-size: 14px; font-weight: 600; color: #e6edf3; }
+  #lo-pop-close { background: none; border: 1px solid #30363d; color: #8b949e; font-size: 16px; cursor: pointer; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; transition: color .15s, border-color .15s; }
+  #lo-pop-close:hover { color: #e6edf3; border-color: #e6edf3; }
+  #lo-pop-intro { font-size: 12px; color: #8b949e; padding: 10px 18px 2px; font-style: italic; }
+  #lo-pop-body { padding: 4px 18px 16px; }
+  .lo-pop-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #21262d; font-size: 13px; color: #c9d1d9; line-height: 1.5; }
+  .lo-pop-item:last-child { border-bottom: none; }
+  .lo-pop-num { font-family: 'SF Mono','Fira Code',monospace; font-size: 10px; font-weight: 700; color: #58a6ff; background: rgba(88,166,255,.1); border: 1px solid rgba(88,166,255,.2); border-radius: 4px; padding: 2px 5px; flex-shrink: 0; margin-top: 2px; min-width: 22px; text-align: center; }
+
+  /* ── Theme toggle button ── */
+  #theme-toggle { position: fixed; top: 18px; right: 22px; width: 36px; height: 36px; border-radius: 50%; background: #21262d; border: 1px solid #58a6ff; color: #c9d1d9; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 500; transition: color .15s, border-color .15s, background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  #theme-toggle:hover { color: #58a6ff; border-color: #79c0ff; background: #2d333b; }
+
+  /* ── Light theme (Notion/Bear warm parchment) ── */
+  body.light-theme {
+    --bg: #f5f0e8; --surface: #faf8f4; --border: #d8cfc0;
+    --text: #2d2520; --muted: #6e6660;
+    --accent: #1d6fe8; --green: #1a7f37; --yellow: #946800;
+    --red: #b91c1c; --purple: #6639d6; --orange: #bf5a0a;
+  }
+  body.light-theme #theme-toggle { background: #faf8f4; border-color: #1d6fe8; color: #2d2520; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  body.light-theme #theme-toggle:hover { color: #1d6fe8; border-color: #1d6fe8; background: #f0ece4; }
+  body.light-theme .card-progress-bar { background: #ddd6ca; }
+  body.light-theme .card-assess-chip { color: #b5afa8; }
+  body.light-theme .card-assess-chip.has-done { color: #946800; }
+  body.light-theme #lo-backdrop { background: rgba(180,170,160,.55); }
+  body.light-theme #lo-popover { background: #faf8f4; border-color: #d8cfc0; box-shadow: 0 16px 48px rgba(0,0,0,.15); }
+  body.light-theme #lo-pop-header { border-bottom-color: #e8e1d8; }
+  body.light-theme #lo-pop-title { color: #2d2520; }
+  body.light-theme #lo-pop-intro { color: #6e6660; }
+  body.light-theme #lo-pop-close { border-color: #d8cfc0; color: #6e6660; }
+  body.light-theme #lo-pop-close:hover { color: #2d2520; border-color: #2d2520; }
+  body.light-theme .lo-pop-item { color: #4a4540; border-bottom-color: #e8e1d8; }
+  body.light-theme .quick-links a { background: #faf8f4; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <h1>Learning Web Development <span>by Building with AI</span></h1>
+    <p class="subtitle">A practical course in full-stack web development</p>
+    <p class="tagline">Build real things. Read what the AI wrote. Understand every line.</p>
+  </header>
+
+  <nav class="quick-links">
+    <a href="setup-guide.html">Setup Guide</a>
+    <a href="resources.html">Resources</a>
+    <a href="crud-demo/">Demo App</a>
+    <a href="certificate.html" id="cert-link">My Certificate &#8594;</a>
+  </nav>
+
+  <div class="philosophy">
+    <p>This course pairs hands-on building with deliberate reflection. At every step you use AI to generate code — then you read it, question it, and understand it. The goal is not to produce software faster. It is to become the developer who can evaluate, fix, and extend what AI produces.</p>
+    <p style="margin-top:10px;font-size:13px;color:var(--muted);">Every module ends with a <strong style="color:var(--text);">prompt reflection exercise</strong> — a structured pause to consider what the AI did, why, and what you would change next time.</p>
+  </div>
+
+  <div class="course-los" id="course-los">
+    <button class="course-los-toggle" onclick="document.getElementById('course-los').classList.toggle('open')">
+      <span><span class="course-los-arrow">&#9654;</span> Course Learning Outcomes</span>
+      <span style="font-size:12px;color:var(--muted);font-weight:400;">8 outcomes across 5 tracks</span>
+    </button>
+    <div class="course-los-body">
+      <p class="course-los-intro">By the end of this course, you will be able to:</p>
+      <ol class="course-lo-list">
+        <li><span class="course-lo-num">01</span><span>Explain how the web works — HTTP, DNS, status codes, request-response — and trace a request from browser to database</span></li>
+        <li><span class="course-lo-num">02</span><span>Use the terminal confidently: navigate the filesystem, compose shell pipelines, manage environment variables, and write shell scripts</span></li>
+        <li><span class="course-lo-num">03</span><span>Track and share code using Git and GitHub, including branching, pull requests, and publishing via GitHub Pages</span></li>
+        <li><span class="course-lo-num">04</span><span>Design relational database schemas, write SQL queries, apply constraints and JOIN operations, and manage schema evolution safely</span></li>
+        <li><span class="course-lo-num">05</span><span>Build a fully functional REST API from scratch using Node.js, Express, and PostgreSQL, with authentication via JWT</span></li>
+        <li><span class="course-lo-num">06</span><span>Apply prompt engineering strategies — Scaffold, Explain, Debug, Extend — to direct AI assistants effectively at each stage of development</span></li>
+        <li><span class="course-lo-num">07</span><span>Read and evaluate AI-generated code critically: identify patterns, security risks, and design tradeoffs rather than accepting output blindly</span></li>
+        <li><span class="course-lo-num">08</span><span>Deploy a working server-side application to a cloud platform with proper environment configuration and database integration</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="badge-avail">&#10003;</span> Deck available</span>
+    <span class="legend-item"><span class="badge-planned">&#9675;</span> Planned</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       START HERE — ORIENTATION
+  ═══════════════════════════════════════════════════════ -->
+  <section class="track track-start" style="margin-bottom:32px;">
+    <div class="track-header" style="background:rgba(86,212,228,.08);border-color:rgba(86,212,228,.3);">
+      <span class="track-id" style="color:#56d4e4;">Start Here</span>
+      <span class="track-title" style="color:#56d4e4;">Orientation</span>
+      <span class="track-desc">Read this before Track A — prompting mindset, reading habit, how this course works</span>
+    </div>
+    <div class="card-row">
+      <a href="start-here.html" class="card available card-start">
+        <div class="card-code" style="color:#56d4e4;">S0</div>
+        <div class="card-title">Start Here</div>
+        <div class="card-desc">Prompting philosophy, good vs bad prompts, what AI gets wrong, the reading checklist, vibe coding debate</div>
+        <div class="card-reflect"></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       TRACK A — FOUNDATIONS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="track track-a">
+    <div class="track-header">
+      <span class="track-id">Track A</span>
+      <span class="track-title">Foundations</span>
+      <span class="track-desc">Core concepts every web developer needs before writing a line of backend code</span>
+    </div>
+    <div class="card-row">
+      <a href="web-fundamentals-workshop.html" class="card available card-a">
+        <span class="card-badge badge-avail">&#10003; Deck ready</span>
+        <div class="card-code">A1</div>
+        <div class="card-title">How the Web Works</div>
+        <div class="card-desc">HTTP request/response, status codes, DNS, browsers, JSON</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="shell-workshop.html" class="card available card-a">
+        <span class="card-badge badge-avail">&#10003; Deck ready</span>
+        <div class="card-code">A2</div>
+        <div class="card-title">Terminal &amp; Shell</div>
+        <div class="card-desc">Navigation, pipes, environment variables, aliases, scripting</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="git-workshop.html" class="card available card-a">
+        <span class="card-badge badge-avail">&#10003; Deck ready</span>
+        <div class="card-code">A3</div>
+        <div class="card-title">Git &amp; GitHub</div>
+        <div class="card-desc">Version control, commit, push, branches, PRs, GitHub Pages</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="database-workshop.html" class="card available card-a">
+        <span class="card-badge badge-avail">&#10003; Deck ready</span>
+        <div class="card-code">A4</div>
+        <div class="card-title">Database Concepts</div>
+        <div class="card-desc">Tables, SQL, psql, primary keys, constraints, transactions</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="mongodb-workshop.html" class="card available card-a">
+        <span class="card-badge badge-avail">&#10003; Deck ready</span>
+        <div class="card-code">A5</div>
+        <div class="card-title">Document Databases &amp; MongoDB</div>
+        <div class="card-desc">Collections, documents, Mongoose, embed vs reference, aggregation pipelines</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="rest-workshop.html" class="card available card-a">
+        <span class="card-badge badge-avail">&#10003; Deck ready</span>
+        <div class="card-code">A6</div>
+        <div class="card-title">REST &amp; HTTP APIs</div>
+        <div class="card-desc">Methods, URI design, status codes, statelessness, error design</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       TRACK B — BACKEND API
+  ═══════════════════════════════════════════════════════ -->
+  <section class="track track-b">
+    <div class="track-header">
+      <span class="track-id">Track B</span>
+      <span class="track-title">Backend API</span>
+      <span class="track-desc">Build a production-quality REST API from scratch using AI as your coding partner</span>
+    </div>
+    <div class="track-note">
+      <strong>Note:</strong> The Backend track forms the core of Part 1–4 series (B2–B5). Start with B1 (Prompt Engineering) before B2.
+    </div>
+    <div class="card-row">
+      <a class="card available card-b" href="prompt-engineering-workshop.html">
+        <span class="card-badge">&#10003; Available</span>
+        <div class="card-code">B1</div>
+        <div class="card-title">Prompt Engineering</div>
+        <div class="card-desc">Four prompt types: Scaffold, Explain, Debug, Extend</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a class="card available card-b" href="ai-crud-workshop.html">
+        <span class="card-badge">&#10003; Available</span>
+        <div class="card-code">B2</div>
+        <div class="card-title">CRUD API with AI</div>
+        <div class="card-desc">Node.js, Express, PostgreSQL, generated code walkthrough</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a class="card available card-b" href="auth-workshop.html">
+        <span class="card-badge">&#10003; Available</span>
+        <div class="card-code">B3</div>
+        <div class="card-title">Authentication</div>
+        <div class="card-desc">JWT, bcrypt, middleware, protected routes</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a class="card available card-b" href="curl-testing-workshop.html">
+        <span class="card-badge">&#10003; Available</span>
+        <div class="card-code">B4</div>
+        <div class="card-title">Testing with curl</div>
+        <div class="card-desc">curl, jq, scripted API test workflow</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a class="card available card-b" href="extending-api-workshop.html">
+        <span class="card-badge">&#10003; Available</span>
+        <div class="card-code">B5</div>
+        <div class="card-title">Extending APIs</div>
+        <div class="card-desc">Pagination, relational data, JOIN queries</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a class="card available card-b" href="validation-workshop.html">
+        <span class="card-badge">&#10003; Available</span>
+        <div class="card-code">B6</div>
+        <div class="card-title">Validation &amp; Errors</div>
+        <div class="card-desc">Input validation, error middleware, Zod, asyncHandler</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <div class="card planned card-b">
+        <span class="card-badge">&#9675; Planned</span>
+        <div class="card-code">B7</div>
+        <div class="card-title">Deployment</div>
+        <div class="card-desc">Railway, env vars, Railway PostgreSQL, live testing</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       TRACK C — FRONTEND
+  ═══════════════════════════════════════════════════════ -->
+  <section class="track track-c">
+    <div class="track-header">
+      <span class="track-id">Track C</span>
+      <span class="track-title">Frontend</span>
+      <span class="track-desc">Build a React application that connects to your API</span>
+    </div>
+    <div class="card-row">
+      <a href="react-fundamentals-workshop.html" class="card available card-c">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">C1</div>
+        <div class="card-title">React Fundamentals</div>
+        <div class="card-desc">Components, JSX, props, useState, events, forms, lists</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="state-effects-workshop.html" class="card available card-c">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">C2</div>
+        <div class="card-title">State &amp; Effects</div>
+        <div class="card-desc">useEffect, async fetch, cleanup, custom hooks, useMemo</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="api-integration-workshop.html" class="card available card-c">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">C3</div>
+        <div class="card-title">API Integration</div>
+        <div class="card-desc">CORS, env vars, Vite proxy, centralised api.ts, token storage</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="forms-validation-workshop.html" class="card available card-c">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">C4</div>
+        <div class="card-title">Forms &amp; Validation</div>
+        <div class="card-desc">Controlled inputs, generic onChange, validation, aria-describedby</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="routing-workshop.html" class="card available card-c">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">C5</div>
+        <div class="card-title">Routing</div>
+        <div class="card-desc">React Router v6, Link, useParams, useNavigate, ProtectedRoute</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       TRACK D — FULLSTACK
+  ═══════════════════════════════════════════════════════ -->
+  <section class="track track-d">
+    <div class="track-header">
+      <span class="track-id">Track D</span>
+      <span class="track-title">Fullstack</span>
+      <span class="track-desc">Connect everything — requires Tracks B and C</span>
+    </div>
+    <div class="card-row">
+      <a href="fullstack-contracts-workshop.html" class="card available card-d">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">D1</div>
+        <div class="card-title">Connecting the Stack</div>
+        <div class="card-desc">Architecture, shared types, API contracts, production CORS, Express serving React</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="auth-end-to-end-workshop.html" class="card available card-d">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">D2</div>
+        <div class="card-title">Auth End-to-End</div>
+        <div class="card-desc">Register, login, useAuth hook, token lifecycle, logout</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="deploy-workshop.html" class="card available card-d">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">D3</div>
+        <div class="card-title">Build &amp; Deploy</div>
+        <div class="card-desc">npm run build, Railway, schema setup, env vars, live testing</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       TRACK E — AI AGENTS & AUTOMATION
+  ═══════════════════════════════════════════════════════ -->
+  <section class="track track-e">
+    <div class="track-header">
+      <span class="track-id">Track E</span>
+      <span class="track-title">AI Agents &amp; Automation</span>
+      <span class="track-desc">Build autonomous workflows with n8n and large language model APIs</span>
+    </div>
+    <div class="card-row">
+      <a href="ai-agents-workshop.html" class="card available card-e">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">E1</div>
+        <div class="card-title">What is an Agent?</div>
+        <div class="card-desc">LLMs + tools + loops, ReAct pattern, agent vs chatbot</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="n8n-fundamentals-workshop.html" class="card available card-e">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">E2</div>
+        <div class="card-title">n8n Fundamentals</div>
+        <div class="card-desc">Nodes, expressions, credentials, the item model</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="n8n-api-workshop.html" class="card available card-e">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">E3</div>
+        <div class="card-title">Calling APIs in n8n</div>
+        <div class="card-desc">Login for JWT, full CRUD, data mapping, debugging errors</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="n8n-agent-node-workshop.html" class="card available card-e">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">E4</div>
+        <div class="card-title">AI Agent Node</div>
+        <div class="card-desc">Tool nodes, system prompts, memory, testing</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="n8n-building-agents-workshop.html" class="card available card-e">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">E5</div>
+        <div class="card-title">Building Agents</div>
+        <div class="card-desc">Research, summarise &amp; tag, monitor &amp; notify</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+      <a href="n8n-production-workshop.html" class="card available card-e">
+        <span class="card-badge">&#10003; Deck ready</span>
+        <div class="card-code">E6</div>
+        <div class="card-title">Production Patterns</div>
+        <div class="card-desc">Error workflows, approval gates, monitoring, cost</div>
+        <div class="card-reflect">Includes prompt reflection</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       DEPENDENCIES
+  ═══════════════════════════════════════════════════════ -->
+  <div class="dep-note">
+    <strong>Track dependencies</strong>
+    <div class="dep-chain">
+      <span class="dep-pill dep-a">A &mdash; Foundations</span>
+      <span class="dep-arrow">&#8594;</span>
+      <span class="dep-pill dep-b">B &mdash; Backend API</span>
+      <span class="dep-arrow">and</span>
+      <span class="dep-pill dep-c">C &mdash; Frontend</span>
+      <span class="dep-arrow">&#8594;</span>
+      <span class="dep-pill dep-d">D &mdash; Fullstack</span>
+    </div>
+    <div class="dep-chain">
+      <span class="dep-pill dep-a">A &mdash; Foundations</span>
+      <span class="dep-arrow">&#8594;</span>
+      <span class="dep-pill dep-e">E &mdash; AI Agents</span>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    Built with AI &middot; Maynooth University
+  </footer>
+
+</div>
+
+<!-- LO Popover -->
+<div id="lo-backdrop" onclick="closeLOPopover()"></div>
+<div id="lo-popover">
+  <div id="lo-pop-header">
+    <div id="lo-pop-meta">
+      <span id="lo-pop-code"></span>
+      <span id="lo-pop-title"></span>
+    </div>
+    <button id="lo-pop-close" onclick="closeLOPopover()" title="Close">&times;</button>
+  </div>
+  <div id="lo-pop-intro">By the end of this module, you will be able to:</div>
+  <div id="lo-pop-body"></div>
+</div>
+
+<script>
+  // Apply saved theme immediately before first paint
+  if (localStorage.getItem('svl_theme') === 'light') document.body.classList.add('light-theme');
+var MODULE_LOS = {
+  'S0': { title: 'Start Here', color: '#56d4e4', file: 'start-here', los: [
+    'Describe the AI-assisted development loop and identify where reading and understanding fit within it',
+    'Distinguish between surface-level and directed AI use and explain why the distinction matters for long-term maintainability',
+    'Write a scaffold prompt that includes stack context, state shape, API contract, error handling requirements, and constraints',
+    'Identify the four prompt move types — Scaffold, Explain, Debug, Extend — and the appropriate situation for each',
+    'List at least four failure modes of AI code generation and the corresponding strategy for catching each',
+    'Apply the five-point reading checklist to evaluate any piece of AI-generated code'
+  ]},
+  'A1': { title: 'How the Web Works', color: '#3fb950', file: 'web-fundamentals-workshop', los: [
+    'Trace what happens when a browser makes an HTTP request and receives a response',
+    'Interpret HTTP status codes, methods, and headers in the context of real API calls',
+    'Explain the role of DNS in resolving domain names to IP addresses',
+    'Parse and construct JSON data structures used in API communication',
+    'Distinguish between REST and non-REST API design approaches'
+  ]},
+  'A2': { title: 'Terminal & Shell', color: '#3fb950', file: 'shell-workshop', los: [
+    'Navigate the filesystem and manage files and directories from the command line',
+    'Compose shell pipelines using pipes, redirection, and chaining operators (&&, ||)',
+    'Configure environment variables and apply the .env / .env.example pattern',
+    'Write basic shell scripts with variables and exit codes',
+    'Use curl and jq to make HTTP requests and process JSON responses from the terminal'
+  ]},
+  'A3': { title: 'Git & GitHub', color: '#3fb950', file: 'git-workshop', los: [
+    'Explain the three-zone Git model: working tree, staging area, and commit history',
+    'Apply the daily commit workflow: stage, commit, push to a remote repository',
+    'Create and merge branches safely, resolving conflicts when they arise',
+    'Collaborate using GitHub: open pull requests and review changes',
+    'Configure .gitignore to protect sensitive and generated files from version control'
+  ]},
+  'A4': { title: 'Database Concepts', color: '#3fb950', file: 'database-workshop', los: [
+    'Explain the relational model: tables, rows, columns, primary keys, and foreign keys',
+    'Write SQL queries to create, read, update, and delete records',
+    'Apply database constraints (NOT NULL, UNIQUE, CHECK, FK) to enforce data integrity',
+    'Construct JOIN queries to retrieve related data from multiple tables',
+    'Apply safe migration discipline: extend schemas without dropping existing data'
+  ]},
+  'A5': { title: 'Document Databases & MongoDB', color: '#3fb950', file: 'mongodb-workshop', los: [
+    'Explain the document model and contrast it with the relational model',
+    'Design MongoDB schemas using Mongoose with appropriate field types and validation',
+    'Perform CRUD operations on a MongoDB collection using Mongoose methods',
+    'Choose between embedding and referencing related data in document schemas',
+    'Construct basic aggregation pipelines to filter, group, and transform documents'
+  ]},
+  'A6': { title: 'REST & HTTP APIs', color: '#3fb950', file: 'rest-workshop', los: [
+    'Explain the six REST constraints and their practical implications for API design',
+    'Design clean, resource-oriented URI structures following REST conventions',
+    'Select appropriate HTTP methods and status codes for each API operation',
+    'Explain statelessness and its implications for session management and scalability',
+    'Design consistent, informative error responses that distinguish client from server errors'
+  ]},
+  'B1': { title: 'Prompt Engineering', color: '#58a6ff', file: 'prompt-engineering-workshop', los: [
+    'Apply the four prompt types — Scaffold, Explain, Debug, Extend — to appropriate coding tasks',
+    'Construct scaffold prompts that specify schema, environment, and security constraints',
+    'Use explain prompts to interrogate AI-generated code and understand each design decision',
+    'Apply debug prompts to diagnose errors systematically before requesting a fix',
+    'Evaluate AI-generated security choices and identify decisions that require human scrutiny'
+  ]},
+  'B2': { title: 'CRUD API with AI', color: '#58a6ff', file: 'ai-crud-workshop', los: [
+    'Use a scaffold prompt to generate a working Node.js / Express / PostgreSQL CRUD API',
+    'Read and explain the purpose of every generated file, including package.json and db.js',
+    'Apply parameterised queries to prevent SQL injection in AI-generated database code',
+    'Identify and correct common AI mistakes: ES module paths, route ordering, dynamic PORT handling',
+    'Deploy a Node.js API to Railway and configure environment variables for production'
+  ]},
+  'B3': { title: 'Authentication', color: '#58a6ff', file: 'auth-workshop', los: [
+    'Explain how JWT works: structure (header, payload, signature), signing, and verification',
+    'Implement user registration with bcrypt password hashing and safe, uniform error messages',
+    'Build an Express authentication middleware that verifies JWTs and attaches the payload to req.user',
+    'Protect routes by composing middleware and trace the full auth flow from request to response',
+    'Apply JWT security best practices: secret management, token expiry, payload content, and revocation limitations'
+  ]},
+  'B4': { title: 'Testing with curl', color: '#58a6ff', file: 'curl-testing-workshop', los: [
+    'Use curl to send HTTP requests and interpret response bodies, headers, and status codes',
+    'Capture a JWT from a login response and use it in subsequent authenticated requests',
+    'Write a shell script that runs a complete CRUD test sequence automatically',
+    'Use jq to filter and extract data from JSON API responses in the terminal',
+    'Diagnose common API failures — connection refused, 401, 404, 422 — using curl output alone'
+  ]},
+  'C2': { title: 'State & Effects', color: '#bc8cff', file: 'state-effects-workshop', los: [
+    'Explain what triggers a React re-render and why side effects must not run during render',
+    'Use useEffect with the correct dependency array to control when effects run',
+    'Write async fetch logic inside useEffect using the define-then-call async pattern',
+    'Implement AbortController cleanup to prevent memory leaks on unmount',
+    'Extract reusable stateful logic into a custom hook and explain the naming convention',
+    'Recognise when useCallback and useMemo are and are not appropriate optimisations'
+  ]},
+  'C1': { title: 'React Fundamentals', color: '#bc8cff', file: 'react-fundamentals-workshop', los: [
+    'Set up a Vite + React + TypeScript project and explain the purpose of each generated file',
+    'Write function components with typed props using TypeScript interfaces',
+    'Manage local component state with useState and explain why direct mutation does not work',
+    'Build controlled form inputs using the value and onChange pattern',
+    'Render lists using .map() with stable key props and explain why keys are required',
+    'Apply conditional rendering using &&, ternary, and early return patterns',
+    'Read and critically evaluate AI-generated React components'
+  ]},
+  'D1': { title: 'Connecting the Stack', color: '#d29922', file: 'fullstack-contracts-workshop', los: [
+    'Explain the development vs production fullstack architecture and why same-origin production eliminates client-side CORS',
+    'Identify API contract mismatches between frontend and backend by comparing field names, wrapper objects, and error keys',
+    'Create a shared/types.ts file as a single source of truth for request and response shapes',
+    'Configure environment-based CORS using CLIENT_ORIGIN rather than a hardcoded origin string',
+    'Add express.static and a catch-all GET * route in the correct order to serve a React production build from Express',
+    'Run a local integration test to verify API and SPA routing both work on one port after building React'
+  ]},
+  'D2': { title: 'Auth End-to-End', color: '#d29922', file: 'auth-end-to-end-workshop', los: [
+    'Trace the complete auth flow across register, login, protected request, and logout, identifying what each operation stores and returns',
+    'Implement a useAuth hook that updates both localStorage and React state atomically on login and logout',
+    'Write a LoginPage that stores the token before navigating and shows a uniform error message that does not reveal which credential was wrong',
+    'Diagnose the six common auth bugs: token key mismatch, wrong Bearer prefix, stale NavBar state, Back-button loop, registration token storage, and email enumeration',
+    'Explain JWT expiry handling and why window.location.href is used instead of navigate in api.ts'
+  ]},
+  'D3': { title: 'Build & Deploy', color: '#d29922', file: 'deploy-workshop', los: [
+    'Explain what npm run build produces and why VITE_ variables are baked in at build time rather than read at runtime',
+    'Apply the six-point pre-deploy checklist to identify common issues before pushing to Railway',
+    'Set up a Railway project with a PostgreSQL plugin, configure environment variables, and trigger a deploy via GitHub push',
+    'Run schema.sql against a Railway PostgreSQL database using the Railway CLI',
+    'Test a live deployment in layers using curl before testing in the browser',
+    'Diagnose the six most common Railway deploy failures from logs and error responses'
+  ]},
+  'C5': { title: 'Routing', color: '#bc8cff', file: 'routing-workshop', los: [
+    'Explain client-side routing and how React Router intercepts navigation without a server round-trip',
+    'Set up React Router v6 with BrowserRouter, Routes, and Route, and identify differences from v5 syntax',
+    'Use Link for internal navigation and NavLink with active styling for nav bars',
+    'Read URL parameters with useParams and include them correctly in useEffect dependency arrays',
+    'Navigate programmatically with useNavigate after login, logout, and form submissions, using replace to prevent Back-button loops',
+    'Structure shared UI with layout routes and Outlet, keeping shared components mounted across route transitions',
+    'Build a ProtectedRoute component that redirects unauthenticated users before any API call is made, and explain why it is a UX guard rather than a security boundary'
+  ]},
+  'C4': { title: 'Forms & Validation', color: '#bc8cff', file: 'forms-validation-workshop', los: [
+    'Use controlled inputs with value and onChange to manage form field values in React state',
+    'Manage multiple form fields with a single state object and a generic onChange handler that reads e.target.name',
+    'Write async submit handlers with loading and error state, and a finally block that always re-enables the button',
+    'Implement client-side validation and display per-field errors accessibly using aria-describedby and role="alert"',
+    'Apply the correct TypeScript generics for FormEvent and ChangeEvent handlers',
+    'Choose between submit-time and blur-time validation strategies and explain the trade-offs of each',
+    'Use a useDebounce custom hook to rate-limit async validation effects and prevent redundant network calls'
+  ]},
+  'C3': { title: 'API Integration', color: '#bc8cff', file: 'api-integration-workshop', los: [
+    'Explain the same-origin policy and why a Vite dev server and an Express server require CORS configuration',
+    'Configure the cors() middleware in Express with explicit origin, methods, and headers options',
+    'Use VITE_ prefixed environment variables to configure the API base URL for development and production',
+    'Set up a Vite proxy to forward /api requests to Express, eliminating CORS in development',
+    'Build a centralised api.ts module with a generic request<T> function, Bearer token header, and global 401 handling',
+    'Apply the token storage trade-offs between localStorage, sessionStorage, and httpOnly cookies',
+    'Diagnose CORS and authentication errors using browser DevTools Network and Console panels'
+  ]},
+  'B5': { title: 'Extending APIs', color: '#58a6ff', file: 'extending-api-workshop', los: [
+    'Add offset pagination to an existing API endpoint using SQL LIMIT and OFFSET with a JSON envelope',
+    'Construct window function queries to include total count without a second database round-trip',
+    'Add a foreign-key relationship between two database tables with appropriate CASCADE rules',
+    'Write JOIN queries to fetch related data across tables in a single database call',
+    'Apply safe migration discipline: add tables and columns without modifying or dropping existing data'
+  ]},
+  'B6': { title: 'Validation & Errors', color: '#58a6ff', file: 'validation-workshop', los: [
+    'Identify the four validation layers in a web application and explain why route-handler validation is essential',
+    'Write manual validation checks for required fields, type, length, and allowed values in an Express route',
+    'Create a centralised error-handling middleware and an AppError class that carries an HTTP status code',
+    'Wrap async route handlers with asyncHandler to eliminate try/catch boilerplate',
+    'Apply Zod schema validation with safeParse to parse and type-check request bodies in Express routes'
+  ]},
+  'E1': { title: 'What is an Agent?', color: '#ffa657', file: 'ai-agents-workshop', los: [
+    'Explain the four components of an AI agent: LLM, tools, memory, and objective',
+    'Trace the ReAct loop (Reason → Act → Observe) through a concrete agent interaction',
+    'Read function-calling code and identify the tool definition, call, and observation pattern',
+    'Distinguish single-agent, multi-agent, and human-in-the-loop architectures and their trade-offs',
+    'Identify the four common agent failure modes and describe how to mitigate each'
+  ]},
+  'E2': { title: 'n8n Fundamentals', color: '#ffa657', file: 'n8n-fundamentals-workshop', los: [
+    'Explain the node-and-connection model of n8n and describe what a trigger, action, logic, and AI node each do',
+    'Describe the item model and explain why Split Out is needed when an API returns an array',
+    'Write n8n expressions to reference data from the current item and from named nodes',
+    'Configure HTTP Request nodes with Header Auth credentials to call a JWT-protected REST API',
+    'Set up an AI Agent node with a model, system prompt, and tool nodes'
+  ]},
+  'E3': { title: 'Calling APIs in n8n', color: '#ffa657', file: 'n8n-api-workshop', los: [
+    'Build an n8n workflow that authenticates against a JWT-protected REST API at runtime',
+    'Carry a JWT through a multi-node workflow using named-node expressions',
+    'Perform all four CRUD operations via HTTP Request nodes with expressions',
+    'Use Set, Code, and Aggregate nodes to reshape and summarise item data between nodes',
+    'Diagnose and fix the four most common n8n API errors: 401, 404, ECONNREFUSED, and expression errors'
+  ]},
+  'E4': { title: 'AI Agent Node', color: '#ffa657', file: 'n8n-agent-node-workshop', los: [
+    'Explain what the AI Agent node does internally and how it implements the ReAct loop',
+    'Configure tool nodes with names, descriptions, and schemas that enable accurate LLM tool routing',
+    'Write a system prompt with explicit constraints that prevent common agent errors',
+    'Connect Window Buffer Memory and Postgres Chat Memory and explain when to use each',
+    'Use the n8n execution log to diagnose incorrect tool routing and hallucinated arguments'
+  ]},
+  'E5': { title: 'Building Agents', color: '#ffa657', file: 'n8n-building-agents-workshop', los: [
+    'Build a research agent that uses LLM knowledge to generate recommendations and deduplicates against a live API',
+    'Build an idempotent batch-processing pipeline using IF node filtering and Basic LLM Chain',
+    'Build a monitor-and-notify workflow using scheduled polling, Code node date arithmetic, and conditional alerting',
+    'Chain two agents using a Set node to translate the first agent\'s output into the second agent\'s input',
+    'Apply a reversibility framework to classify agent actions and determine appropriate human gate placement'
+  ]},
+  'E6': { title: 'Production Patterns', color: '#ffa657', file: 'n8n-production-workshop', los: [
+    'Set up an n8n Error Workflow that alerts on any execution failure with structured error context',
+    'Configure retry logic appropriately for transient failures while avoiding retries on permanent errors',
+    'Implement the Wait node approval pattern to pause a workflow pending human review',
+    'Use the execution history panel to audit workflow runs and diagnose silent or partial failures',
+    'Apply at least two cost management strategies to reduce LLM token consumption in a production workflow'
+  ]}
+};
+
+function showLOPopover(code) {
+  var mod = MODULE_LOS[code];
+  if (!mod) return;
+  document.getElementById('lo-pop-code').textContent = code;
+  document.getElementById('lo-pop-code').style.color = mod.color;
+  document.getElementById('lo-pop-title').textContent = mod.title;
+  document.getElementById('lo-pop-body').innerHTML = mod.los.map(function(lo, i) {
+    return '<div class="lo-pop-item"><span class="lo-pop-num">' +
+      String(i + 1).padStart(2, '0') + '</span><span>' + lo + '</span></div>';
+  }).join('');
+  document.getElementById('lo-popover').classList.add('active');
+  document.getElementById('lo-backdrop').classList.add('active');
+}
+
+function closeLOPopover() {
+  document.getElementById('lo-popover').classList.remove('active');
+  document.getElementById('lo-backdrop').classList.remove('active');
+}
+
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLOPopover(); });
+
+// Auto-inject progress bars + ⓘ buttons into all available module cards
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.card.available').forEach(function(card) {
+    var codeEl  = card.querySelector('.card-code');
+    var reflectEl = card.querySelector('.card-reflect');
+    if (!codeEl) return;
+    var code = codeEl.textContent.trim();
+    var mod  = MODULE_LOS[code];
+    if (!mod) return;
+
+    // Read progress from localStorage
+    var key   = 'svl_' + mod.file;
+    var max   = parseInt(localStorage.getItem(key + '_max')   || '0', 10);
+    var total = parseInt(localStorage.getItem(key + '_total') || '0', 10);
+
+    // Build progress bar
+    var pct = total > 1 ? Math.round(max / (total - 1) * 100) : 0;
+    var label = total > 0
+      ? (max + 1) + '\u202f/\u202f' + total  // thin-space around slash
+      : 'Not started';
+
+    var prog = document.createElement('div');
+    prog.className = 'card-progress';
+
+    var bar = document.createElement('div');
+    bar.className = 'card-progress-bar';
+    var fill = document.createElement('div');
+    fill.className = 'card-progress-fill';
+    fill.style.width = pct + '%';
+    bar.appendChild(fill);
+
+    var lbl = document.createElement('span');
+    lbl.className = 'card-progress-label';
+    lbl.textContent = label;
+
+    // Assessment chip
+    var assessDone  = parseInt(localStorage.getItem(key + '_assess_done')  || '0', 10);
+    var assessTotal = parseInt(localStorage.getItem(key + '_assess_total') || '3', 10);
+    var assessChip = document.createElement('span');
+    assessChip.className = 'card-assess-chip' + (assessDone > 0 ? ' has-done' : '');
+    assessChip.title = assessDone + ' of ' + assessTotal + ' tasks completed';
+    assessChip.textContent = '\u2605\u202f' + assessDone + '/' + assessTotal;
+
+    // ⓘ button
+    var loBtn = document.createElement('button');
+    loBtn.className = 'card-lo-btn';
+    loBtn.title = 'View learning objectives';
+    loBtn.textContent = '\u24d8';
+    loBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      showLOPopover(code);
+    });
+
+    prog.appendChild(bar);
+    prog.appendChild(lbl);
+    prog.appendChild(assessChip);
+    prog.appendChild(loBtn);
+
+    // Replace card-reflect content with progress
+    if (reflectEl) {
+      reflectEl.textContent = '';
+      reflectEl.appendChild(prog);
+    } else {
+      card.appendChild(prog);
+    }
+  });
+});
+  // ── Theme toggle button ────────────────────────────────────
+  var themeBtn = document.createElement('button');
+  themeBtn.id = 'theme-toggle';
+  themeBtn.title = 'Toggle light / dark theme';
+  function syncThemeBtn() {
+    themeBtn.textContent = document.body.classList.contains('light-theme') ? '\u263D' : '\u2600';
+  }
+  syncThemeBtn();
+  themeBtn.addEventListener('click', function() {
+    var isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('svl_theme', isLight ? 'light' : 'dark');
+    syncThemeBtn();
+  });
+  document.body.appendChild(themeBtn);
+</script>
+</body>
+</html>

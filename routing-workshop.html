@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #bc8cff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #6e40c9; --prompt-border: #9d71e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#1a1040 0%,#0f0a2a 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;       color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);    color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple); color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange); color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-60-40 > *:first-child { flex: 60; }
+  .cols-60-40 > *:last-child  { flex: 40; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(157,113,232,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(157,113,232,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="routing-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track C · Frontend</div>
+  <h1>React <span class="accent">Routing</span></h1>
+  <div class="subtitle">React Router v6 · URL params · Programmatic navigation · Protected routes</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-purple">BrowserRouter</span>
+    <span class="badge badge-purple">useParams</span>
+    <span class="badge badge-purple">useNavigate</span>
+    <span class="badge badge-purple">ProtectedRoute</span>
+  </div>
+  <div class="callout callout-purple">A single-page React app without routing has one URL — the user cannot bookmark a page, share a link, or press the back button. React Router gives each view its own URL while keeping the SPA model. This deck covers the essentials, including how to block unauthenticated users from protected pages.</div>
+</div>
+
+<!-- Slide 2 — SPA vs MPA -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Client-Side Routing vs Server-Side Routing</h2>
+  <p>Traditional web apps request a new HTML page from the server for every URL. React SPAs load once and swap components in the browser — the server never changes.</p>
+  <div class="cols cols-2" style="margin-top:10px;">
+    <div>
+      <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:8px;">Traditional multi-page app</p>
+      <svg viewBox="0 0 280 160" width="100%" height="auto" style="display:block;margin-bottom:8px;">
+        <rect x="10" y="20" width="100" height="40" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+        <text x="60" y="44" fill="#e6edf3" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">Browser</text>
+        <rect x="170" y="20" width="100" height="40" rx="5" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="220" y="44" fill="#3fb950" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">Server</text>
+        <line x1="112" y1="35" x2="168" y2="35" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="140" y="28" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">GET /books</text>
+        <line x1="168" y1="48" x2="112" y2="48" stroke="#ffa657" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="140" y="62" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">HTML page</text>
+        <line x1="112" y1="80" x2="168" y2="80" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="140" y="73" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">GET /books/42</text>
+        <line x1="168" y1="93" x2="112" y2="93" stroke="#ffa657" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="140" y="107" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">new HTML page</text>
+        <text x="140" y="130" fill="#f85149" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">full reload every navigation</text>
+        <defs>
+          <marker id="arr"  markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#58a6ff"/></marker>
+          <marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ffa657"/></marker>
+        </defs>
+      </svg>
+      <div class="callout callout-red" style="font-size:13px;">Every link triggers a server round-trip. State is lost. Page flashes white on every navigation.</div>
+    </div>
+    <div>
+      <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:8px;">React SPA with React Router</p>
+      <svg viewBox="0 0 280 160" width="100%" height="auto" style="display:block;margin-bottom:8px;">
+        <rect x="10" y="20" width="100" height="40" rx="5" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
+        <text x="60" y="39" fill="#bc8cff" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">Browser</text>
+        <text x="60" y="54" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">React Router</text>
+        <rect x="170" y="20" width="100" height="40" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+        <text x="220" y="44" fill="#8b949e" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">Server (once)</text>
+        <line x1="112" y1="35" x2="168" y2="35" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="140" y="28" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">GET /  (initial load)</text>
+        <line x1="168" y1="48" x2="112" y2="48" stroke="#ffa657" stroke-width="1.5" marker-end="url(#arr4)"/>
+        <text x="140" y="62" fill="#8b949e" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">index.html + JS bundle</text>
+        <rect x="10" y="90" width="260" height="30" rx="5" fill="rgba(188,140,255,.06)" stroke="#bc8cff" stroke-width="1"/>
+        <text x="140" y="110" fill="#bc8cff" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">URL changes handled in the browser — no server round-trip</text>
+        <text x="140" y="145" fill="#3fb950" font-size="9" text-anchor="middle" font-family="system-ui,sans-serif">instant navigation · state preserved · no page flash</text>
+        <defs>
+          <marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#58a6ff"/></marker>
+          <marker id="arr4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ffa657"/></marker>
+        </defs>
+      </svg>
+      <div class="callout callout-green" style="font-size:13px;">React Router intercepts navigation, updates the URL, and swaps the matching component — all without touching the server.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3 — Setting Up React Router -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Setting Up React Router v6</h2>
+  <p>Install the package, wrap your app in <code>BrowserRouter</code>, then declare your routes. AI generates this correctly almost every time — understand it so you can extend it.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">npm install react-router-dom</span></div>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">src/main.tsx</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { <span class="hi">BrowserRouter</span> } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="hi">ReactDOM</span>.<span class="fn">createRoot</span>(document.<span class="fn">getElementById</span>(<span class="str">'root'</span>)!)
+  .<span class="fn">render</span>(
+    &lt;<span class="hi">BrowserRouter</span>&gt;
+      &lt;<span class="hi">App</span> /&gt;
+    &lt;/<span class="hi">BrowserRouter</span>&gt;
+  );</div>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">src/App.tsx</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { <span class="hi">Routes</span>, <span class="hi">Route</span> } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">export function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="hi">Routes</span>&gt;
+      &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/"</span>       <span class="key">element</span>={&lt;<span class="hi">HomePage</span> /&gt;}  /&gt;
+      &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/books"</span>  <span class="key">element</span>={&lt;<span class="hi">BooksPage</span> /&gt;} /&gt;
+      &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/login"</span>  <span class="key">element</span>={&lt;<span class="hi">LoginPage</span> /&gt;} /&gt;
+      &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"*"</span>       <span class="key">element</span>={&lt;<span class="hi">NotFound</span> /&gt;}  /&gt;
+    &lt;/<span class="hi">Routes</span>&gt;
+  );
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong><code>BrowserRouter</code></strong> uses the HTML5 History API to keep the UI in sync with the URL. It must wrap everything that uses routing hooks or components.</div>
+      <div class="callout callout-blue"><strong><code>Routes</code></strong> looks at the current URL and renders the first matching <code>Route</code>. Unlike React Router v5, it no longer requires the <code>exact</code> prop — v6 always matches exactly by default.</div>
+      <div class="callout callout-yellow"><strong><code>path="*"</code></strong> is a catch-all that renders when no other route matches. Always add a 404 route — without it, unknown URLs render nothing at all.</div>
+      <div class="callout callout-orange"><strong>Version check:</strong> ask AI to use React Router v6 explicitly. Some AI models still generate v5 syntax (<code>&lt;Switch&gt;</code>, <code>component=</code>, <code>exact</code>) from training data. The two APIs are incompatible.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — Link and NavLink -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Navigation — Link and NavLink</h2>
+  <p>Never use <code>&lt;a href="..."&gt;</code> for internal navigation in a React Router app — it triggers a full page reload and discards all React state. Use <code>Link</code> instead.</p>
+  <div class="cols cols-2" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">NavBar.tsx</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { <span class="hi">Link</span>, <span class="hi">NavLink</span> } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="comment">// Link — basic navigation, no active styling</span>
+&lt;<span class="hi">Link</span> <span class="key">to</span>=<span class="str">"/"</span>&gt;Home&lt;/<span class="hi">Link</span>&gt;
+&lt;<span class="hi">Link</span> <span class="key">to</span>=<span class="str">"/books"</span>&gt;My Books&lt;/<span class="hi">Link</span>&gt;
+
+<span class="comment">// NavLink — adds aria-current and active class
+// when the URL matches its to= prop</span>
+&lt;<span class="hi">NavLink</span>
+  <span class="key">to</span>=<span class="str">"/books"</span>
+  <span class="key">className</span>={({ <span class="key">isActive</span> }) =&gt;
+    isActive ? <span class="str">'nav-link active'</span> : <span class="str">'nav-link'</span>
+  }
+&gt;
+  My Books
+&lt;/<span class="hi">NavLink</span>&gt;
+
+<span class="comment">// NavLink with style prop — inline active style</span>
+&lt;<span class="hi">NavLink</span>
+  <span class="key">to</span>=<span class="str">"/books"</span>
+  <span class="key">style</span>={({ <span class="key">isActive</span> }) =&gt; ({
+    color: isActive ? <span class="str">'#bc8cff'</span> : <span class="str">'#8b949e'</span>,
+    fontWeight: isActive ? <span class="str">'600'</span> : <span class="str">'400'</span>,
+  })}
+&gt;
+  My Books
+&lt;/<span class="hi">NavLink</span>&gt;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>Never <code>&lt;a href&gt;</code> for internal links.</strong> It causes a full page reload. Your token in localStorage survives, but all React state is gone — any open modals, unsaved form data, and scroll position are lost.</div>
+      <div class="callout callout-purple"><strong><code>NavLink</code></strong> receives a function for <code>className</code> and <code>style</code> props. The function receives an <code>isActive</code> boolean — use it to highlight the current route in your navigation bar.</div>
+      <div class="callout callout-blue"><strong><code>NavLink</code> also adds <code>aria-current="page"</code></strong> automatically when active. This tells screen readers which link is the current page — a free accessibility win.</div>
+      <div class="callout callout-yellow"><strong><code>to="/"</code> is active on every page</strong> unless you add <code>end</code> to the NavLink. <code>&lt;NavLink to="/" end&gt;</code> only activates when the URL is exactly <code>/</code>, not on <code>/books</code>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — URL Parameters -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>URL Parameters — useParams</h2>
+  <p>URL parameters let you encode dynamic values in the path — like a book ID. The <code>useParams</code> hook reads them from the current URL inside any component rendered by that route.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">App.tsx + BookDetailPage.tsx</span></div>
+        <div class="terminal-body"><span class="comment">// Declare the param with a colon in the path</span>
+&lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/books/:id"</span>
+       <span class="key">element</span>={&lt;<span class="hi">BookDetailPage</span> /&gt;} /&gt;
+
+<span class="comment">// ─────────────────────────────────────────────</span>
+<span class="comment">// In BookDetailPage — read the param</span>
+<span class="kw">import</span> { <span class="hi">useParams</span> } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">BookDetailPage</span>() {
+  <span class="kw">const</span> { <span class="key">id</span> } = <span class="fn">useParams</span>&lt;{ <span class="key">id</span>: <span class="hi">string</span> }&gt;();
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">if</span> (!id) <span class="kw">return</span>;
+    api.<span class="fn">get</span>(<span class="str">`/api/books/${id}`</span>)
+      .<span class="fn">then</span>(data =&gt; <span class="fn">setBook</span>(data));
+  }, [id]);
+
+  <span class="kw">if</span> (!book) <span class="kw">return</span> &lt;<span class="fn">p</span>&gt;Loading…&lt;/<span class="fn">p</span>&gt;;
+  <span class="kw">return</span> &lt;<span class="fn">h1</span>&gt;{book.<span class="key">title</span>}&lt;/<span class="fn">h1</span>&gt;;
+}
+
+<span class="comment">// Link to a specific book from a list</span>
+&lt;<span class="hi">Link</span> <span class="key">to</span>={<span class="str">`/books/${book.id}`</span>}&gt;
+  {book.<span class="key">title</span>}
+&lt;/<span class="hi">Link</span>&gt;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>The colon syntax</strong> (<code>/books/:id</code>) declares a named placeholder. React Router captures whatever is in that URL segment and makes it available via <code>useParams</code>.</div>
+      <div class="callout callout-orange"><strong>All params are strings.</strong> If your API expects a number, convert with <code>parseInt(id!, 10)</code>. Forgetting this passes <code>"42"</code> instead of <code>42</code> — which may or may not cause a bug depending on your API.</div>
+      <div class="callout callout-yellow"><strong>TypeScript generic:</strong> <code>useParams&lt;{ id: string }&gt;()</code> tells TypeScript which params to expect. Without the generic, <code>id</code> is typed as <code>string | undefined</code> — which is actually correct, so always check for it before using.</div>
+      <div class="callout callout-blue">Re-fetch when the param changes by including <code>id</code> in the <code>useEffect</code> dependency array. Without it, navigating from <code>/books/1</code> to <code>/books/2</code> reuses the component without re-fetching.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — Programmatic Navigation -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Programmatic Navigation — useNavigate</h2>
+  <p><code>Link</code> handles navigation triggered by user clicks. <code>useNavigate</code> handles navigation triggered by code — after a form submission, after login, or after an error.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">LoginPage.tsx</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { <span class="hi">useNavigate</span> } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">LoginPage</span>() {
+  <span class="kw">const</span> navigate = <span class="fn">useNavigate</span>();
+  <span class="kw">const</span> [<span class="key">form</span>, <span class="fn">setForm</span>] = <span class="fn">useState</span>({
+    email: <span class="str">''</span>, password: <span class="str">''</span>,
+  });
+
+  <span class="kw">async function</span> <span class="fn">handleSubmit</span>(e: <span class="hi">FormEvent</span>) {
+    e.<span class="fn">preventDefault</span>();
+    <span class="kw">try</span> {
+      <span class="kw">const</span> { <span class="key">token</span> } = <span class="kw">await</span> api.<span class="fn">post</span>(
+        <span class="str">'/auth/login'</span>, form
+      );
+      localStorage.<span class="fn">setItem</span>(<span class="str">'token'</span>, token);
+
+      <span class="comment">// Navigate to /books after successful login</span>
+      <span class="fn">navigate</span>(<span class="str">'/books'</span>);
+    } <span class="kw">catch</span> (err) {
+      <span class="fn">setError</span>(<span class="str">'Invalid credentials'</span>);
+    }
+  }
+  <span class="comment">// ...</span>
+}
+
+<span class="comment">// Go back one step in history</span>
+<span class="fn">navigate</span>(-<span class="val">1</span>);
+
+<span class="comment">// Replace current history entry (no back button)</span>
+<span class="fn">navigate</span>(<span class="str">'/books'</span>, { replace: <span class="kw">true</span> });</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong><code>navigate('/books')</code></strong> pushes a new entry onto the browser history stack. The user can press Back to return to the previous page.</div>
+      <div class="callout callout-blue"><strong><code>navigate('/books', &#123; replace: true &#125;)</code></strong> replaces the current entry — useful after login so pressing Back doesn't return to the login page with a valid token already in localStorage.</div>
+      <div class="callout callout-yellow"><strong><code>navigate(-1)</code></strong> is equivalent to pressing the browser's Back button. Use it on a Cancel button in a detail view to return wherever the user came from.</div>
+      <div class="callout callout-orange"><strong>Do not call <code>navigate</code> during render.</strong> Only call it inside event handlers or effects. Calling it during render causes an infinite loop as React re-renders after every navigation.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — Layout Routes -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Layout Routes — Outlet</h2>
+  <p>Most apps share a navigation bar, header, or footer across multiple pages. Layout routes let you wrap child routes in a shared component without repeating it in every page.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">App.tsx + Layout.tsx</span></div>
+        <div class="terminal-body"><span class="comment">// Layout component — renders shared UI + Outlet</span>
+<span class="kw">import</span> { <span class="hi">Outlet</span> } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">Layout</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="fn">div</span>&gt;
+      &lt;<span class="hi">NavBar</span> /&gt;         <span class="comment">// rendered on every child route</span>
+      &lt;<span class="fn">main</span>&gt;
+        &lt;<span class="hi">Outlet</span> /&gt;      <span class="comment">// child route renders here</span>
+      &lt;/<span class="fn">main</span>&gt;
+      &lt;<span class="hi">Footer</span> /&gt;
+    &lt;/<span class="fn">div</span>&gt;
+  );
+}
+
+<span class="comment">// ─────────────────────────────────────────────</span>
+<span class="comment">// App.tsx — nest routes inside the layout route</span>
+&lt;<span class="hi">Routes</span>&gt;
+  <span class="comment">// Layout route — no path of its own</span>
+  &lt;<span class="hi">Route</span> <span class="key">element</span>={&lt;<span class="hi">Layout</span> /&gt;}&gt;
+    &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/"</span>          <span class="key">element</span>={&lt;<span class="hi">HomePage</span> /&gt;}       /&gt;
+    &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/books"</span>      <span class="key">element</span>={&lt;<span class="hi">BooksPage</span> /&gt;}      /&gt;
+    &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/books/:id"</span>  <span class="key">element</span>={&lt;<span class="hi">BookDetailPage</span> /&gt;} /&gt;
+  &lt;/<span class="hi">Route</span>&gt;
+  <span class="comment">// Login has no layout (no navbar)</span>
+  &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/login"</span>      <span class="key">element</span>={&lt;<span class="hi">LoginPage</span> /&gt;}      /&gt;
+  &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"*"</span>           <span class="key">element</span>={&lt;<span class="hi">NotFound</span> /&gt;}       /&gt;
+&lt;/<span class="hi">Routes</span>&gt;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong><code>&lt;Outlet /&gt;</code></strong> is a placeholder. When the URL matches a child route, React Router renders that child's <code>element</code> in place of <code>&lt;Outlet&gt;</code>. The Layout component itself stays mounted.</div>
+      <div class="callout callout-blue"><strong>Layout routes have no <code>path</code>.</strong> They match any URL and pass through — their only job is to wrap child routes with shared UI.</div>
+      <div class="callout callout-yellow"><strong>Login typically has no layout.</strong> A login page with a navigation bar showing "My Books" for an unauthenticated user is confusing. Place the login route outside the layout wrapper.</div>
+      <div class="callout callout-orange"><strong>The NavBar stays mounted</strong> as you navigate between child routes. This means it doesn't re-render from scratch — animations, dropdowns, and focus are preserved across page transitions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — Section Header: Protected Routes -->
+<div class="slide section-header">
+  <div class="pill">Part 2 — Auth</div>
+  <h1>Protected <span class="accent">Routes</span></h1>
+  <div class="subtitle">Redirecting unauthenticated users · Building a ProtectedRoute component</div>
+</div>
+
+<!-- Slide 9 — The Auth Problem -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>The Auth Problem</h2>
+  <p>Without protection, any user can navigate directly to <code>/books</code> — they get an empty page or an error when the API rejects the request. A protected route checks for a token and redirects to login if it's missing.</p>
+  <div class="cols cols-2" style="margin-top:10px;">
+    <div>
+      <p style="font-size:13px;color:var(--orange);font-weight:600;margin-bottom:6px;">Without protection</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-orange">1</span><span>User opens <code>/books</code> directly in a new tab</span></li>
+        <li><span class="badge badge-orange">2</span><span>React renders <code>&lt;BooksPage /&gt;</code> immediately</span></li>
+        <li><span class="badge badge-orange">3</span><span><code>useEffect</code> fires — <code>api.get('/api/books')</code> sends no token</span></li>
+        <li><span class="badge badge-orange">4</span><span>API returns 401 — <code>api.ts</code> redirects to <code>/login</code></span></li>
+        <li><span class="badge badge-orange">5</span><span>User sees a flash of broken UI before being redirected</span></li>
+      </ul>
+    </div>
+    <div>
+      <p style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:6px;">With ProtectedRoute</p>
+      <ul class="annot-list">
+        <li><span class="badge badge-green">1</span><span>User opens <code>/books</code> directly in a new tab</span></li>
+        <li><span class="badge badge-green">2</span><span><code>ProtectedRoute</code> checks <code>localStorage</code> for a token</span></li>
+        <li><span class="badge badge-green">3</span><span>No token found — immediately renders <code>&lt;Navigate to="/login" /&gt;</code></span></li>
+        <li><span class="badge badge-green">4</span><span>User is on <code>/login</code> before any API call is made</span></li>
+        <li><span class="badge badge-green">5</span><span>No flash of broken UI — smooth redirect</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:14px;"><strong>Frontend auth is always advisory.</strong> A user can manually set a fake token in localStorage to get past the route guard. The API must still validate every request — the ProtectedRoute is a UX improvement, not a security boundary.</div>
+</div>
+
+<!-- Slide 10 — ProtectedRoute Component -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Building a ProtectedRoute Component</h2>
+  <p>A <code>ProtectedRoute</code> is a wrapper component — it either renders its children or redirects to login, depending on whether a token exists.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">ProtectedRoute.tsx + App.tsx</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { <span class="hi">Navigate</span>, <span class="hi">Outlet</span> } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">ProtectedRoute</span>() {
+  <span class="kw">const</span> token = localStorage.<span class="fn">getItem</span>(<span class="str">'token'</span>);
+
+  <span class="kw">if</span> (!token) {
+    <span class="comment">// Replace so Back button doesn't loop</span>
+    <span class="kw">return</span> &lt;<span class="hi">Navigate</span> <span class="key">to</span>=<span class="str">"/login"</span> <span class="key">replace</span> /&gt;;
+  }
+
+  <span class="kw">return</span> &lt;<span class="hi">Outlet</span> /&gt;; <span class="comment">// render the child route</span>
+}
+
+<span class="comment">// ─────────────────────────────────────────────</span>
+<span class="comment">// App.tsx — wrap protected routes</span>
+&lt;<span class="hi">Routes</span>&gt;
+  <span class="comment">// Public routes</span>
+  &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/login"</span>    <span class="key">element</span>={&lt;<span class="hi">LoginPage</span> /&gt;} /&gt;
+  &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/register"</span> <span class="key">element</span>={&lt;<span class="hi">RegisterPage</span> /&gt;} /&gt;
+
+  <span class="comment">// Layout wrapping protected routes</span>
+  &lt;<span class="hi">Route</span> <span class="key">element</span>={&lt;<span class="hi">Layout</span> /&gt;}&gt;
+    &lt;<span class="hi">Route</span> <span class="key">element</span>={&lt;<span class="hi">ProtectedRoute</span> /&gt;}&gt;
+      &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/"</span>         <span class="key">element</span>={&lt;<span class="hi">HomePage</span> /&gt;}       /&gt;
+      &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/books"</span>    <span class="key">element</span>={&lt;<span class="hi">BooksPage</span> /&gt;}      /&gt;
+      &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"/books/:id"</span> <span class="key">element</span>={&lt;<span class="hi">BookDetailPage</span> /&gt;} /&gt;
+    &lt;/<span class="hi">Route</span>&gt;
+  &lt;/<span class="hi">Route</span>&gt;
+
+  &lt;<span class="hi">Route</span> <span class="key">path</span>=<span class="str">"*"</span> <span class="key">element</span>={&lt;<span class="hi">NotFound</span> /&gt;} /&gt;
+&lt;/<span class="hi">Routes</span>&gt;</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong><code>&lt;Navigate&gt;</code></strong> is a component that performs a redirect when rendered. Using <code>replace</code> means the login page replaces the protected page in history — pressing Back won't try to re-visit <code>/books</code>.</div>
+      <div class="callout callout-blue"><strong>Nesting works left to right:</strong> the URL must pass through <code>Layout</code> then <code>ProtectedRoute</code> before reaching the page component. Both are layout-style routes with <code>Outlet</code>.</div>
+      <div class="callout callout-yellow"><strong>Token presence ≠ token validity.</strong> An expired or revoked token will pass this check. The API call will fail with a 401, and <code>api.ts</code>'s global 401 handler will redirect to login at that point.</div>
+      <div class="callout callout-orange"><strong>Logout is just <code>localStorage.removeItem('token')</code></strong> followed by <code>navigate('/login', &#123; replace: true &#125;)</code>. No server call is required (JWTs are stateless) — though a token blocklist is better practice for production.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — Scaffold Prompt -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Scaffold Prompt — Full Router Setup</h2>
+  <p>Give AI the complete picture upfront. A vague "add routing" prompt produces a flat route list without layouts or protection.</p>
+  <div class="prompt-block" style="margin-top:8px;">
+    <div class="prompt-bar">&#9998; Scaffold prompt — paste into your AI assistant</div>
+    <div class="prompt-body">Add React Router v6 to my Reading List React TypeScript app. The app uses <em>api.ts</em> for API calls and stores a JWT in <em>localStorage</em> under the key <em>'token'</em>.
+
+<strong>Pages to create (as placeholder components for now):</strong>
+<ul>
+  <li><em>LoginPage</em> — <em>/login</em></li>
+  <li><em>RegisterPage</em> — <em>/register</em></li>
+  <li><em>HomePage</em> — <em>/</em> (protected)</li>
+  <li><em>BooksPage</em> — <em>/books</em> (protected)</li>
+  <li><em>BookDetailPage</em> — <em>/books/:id</em> (protected)</li>
+  <li><em>NotFoundPage</em> — catch-all <em>*</em></li>
+</ul>
+
+<strong>Structure required:</strong>
+<ul>
+  <li>Wrap the app in <em>BrowserRouter</em> in <em>main.tsx</em></li>
+  <li>A <em>Layout</em> component with a <em>NavBar</em> and <em>Outlet</em>, rendered for all protected pages</li>
+  <li>A <em>ProtectedRoute</em> component that checks <em>localStorage.getItem('token')</em> — redirects to <em>/login</em> with <em>replace</em> if absent, renders <em>Outlet</em> if present</li>
+  <li>Nesting order: Layout wraps ProtectedRoute, ProtectedRoute wraps the protected page routes</li>
+  <li>LoginPage and RegisterPage are outside the Layout wrapper</li>
+  <li>A NavBar using <em>NavLink</em> with active styling for the current route</li>
+  <li>A logout button in the NavBar that removes the token and navigates to <em>/login replace</em></li>
+</ul>
+
+<strong>Use React Router v6 only</strong> — do not use Switch, Redirect, or <em>component=</em> props.</div>
+  </div>
+</div>
+
+<!-- Slide 12 — Reading the Generated Router -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Reading the AI-Generated Router</h2>
+  <p>Before running the app, check these five things. AI gets the route tree right most of the time but makes predictable mistakes in the details.</p>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span class="badge badge-num">1</span><span><strong>Version check:</strong> search the generated code for <code>Switch</code> or <code>component=</code>. If you find either, the AI used v5 syntax. Ask it to rewrite using v6 — <code>Routes</code>, <code>Route element=</code>.</span></li>
+    <li><span class="badge badge-num">2</span><span><strong>ProtectedRoute uses Navigate, not navigate:</strong> <code>&lt;Navigate to="/login" replace /&gt;</code> is the v6 component. <code>navigate('/login')</code> is the hook — it can't be called conditionally at the top level of a component.</span></li>
+    <li><span class="badge badge-num">3</span><span><strong>Nesting order:</strong> confirm the tree is <code>Layout &gt; ProtectedRoute &gt; page routes</code>. If ProtectedRoute is outside Layout, protected pages won't have the navbar. If Layout is inside ProtectedRoute, the login page may accidentally get a navbar.</span></li>
+    <li><span class="badge badge-num">4</span><span><strong>NavLink active styling:</strong> <code>className</code> must receive a function <code>({'{'} isActive {'}'}) =&gt; ...</code>, not a plain string. A plain string class never changes on navigation.</span></li>
+    <li><span class="badge badge-num">5</span><span><strong>Catch-all route last:</strong> <code>path="*"</code> must be the final route. In v6 Routes already picks the most specific match, but putting <code>*</code> first causes confusion and may shadow other routes in complex configurations.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 13 — Common Pitfalls -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Common Pitfalls</h2>
+  <table style="margin-top:10px;">
+    <thead>
+      <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Refreshing a page gives a 404 from the server</td>
+        <td>The server returns 404 for paths like <code>/books</code> because it has no route for them — only the React app knows about those paths</td>
+        <td>Configure the dev server to fall back to <code>index.html</code>. In Vite this is automatic. In production with Express: <code>app.get('*', (req, res) =&gt; res.sendFile(...))</code> after your API routes</td>
+      </tr>
+      <tr>
+        <td>Clicking Back after login returns to the login page</td>
+        <td><code>navigate('/books')</code> pushes onto history — login is still in the stack</td>
+        <td>Use <code>navigate('/books', &#123; replace: true &#125;)</code> after login so the login page is replaced, not stacked</td>
+      </tr>
+      <tr>
+        <td>NavLink never shows as active</td>
+        <td><code>className</code> is a plain string, not a function; or the path doesn't match exactly</td>
+        <td>Use the function form: <code>className={'({'} isActive {'}'}) =&gt; isActive ? 'active' : ''}</code></td>
+      </tr>
+      <tr>
+        <td>URL param change doesn't reload data</td>
+        <td><code>id</code> is not in the <code>useEffect</code> dependency array</td>
+        <td>Add <code>id</code> to the array: <code>useEffect(() =&gt; &#123; ... &#125;, [id])</code></td>
+      </tr>
+      <tr>
+        <td>Protected page briefly flashes before redirect</td>
+        <td>Component renders before the token check completes</td>
+        <td>Return <code>null</code> or a spinner while checking; keep the check synchronous (localStorage) to avoid the flash entirely</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Slide 14 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Prompt Reflection</h2>
+  <p>Before moving on, spend a few minutes reflecting on what you observed when you generated and read the router code.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-purple">
+        <strong>Version friction:</strong><br>
+        Did the AI use v5 or v6 syntax? If it used v5 without being told, what does this suggest about how training data affects AI code generation? How would you catch this in a real project without running the app?
+      </div>
+      <div class="callout callout-blue">
+        <strong>Route structure:</strong><br>
+        Draw the route tree the AI generated. Does it match the structure in slide 10? If not, what would break at runtime — and would you notice from reading the code alone or only after testing?
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-yellow">
+        <strong>Security boundary:</strong><br>
+        The ProtectedRoute checks localStorage. What are three ways a user could bypass this check without modifying your React code? Does bypassing the route guard grant access to any data?
+      </div>
+      <div class="callout callout-orange">
+        <strong>Prompt evolution:</strong><br>
+        Which part of the scaffold prompt on slide 11 was most important for getting a correct output? Which constraint, if removed, would most likely cause the AI to produce a subtly broken result?
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 15 — Wrap-up -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Wrap-up</h2>
+  <div class="subtitle">What you can now do with routing in React</div>
+  <ul class="annot-list" style="margin-top:12px;">
+    <li><span class="badge badge-green">&#10003;</span><span>Set up React Router v6 with <code>BrowserRouter</code>, <code>Routes</code>, and <code>Route</code>, and distinguish it from v5 syntax</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Use <code>Link</code> for internal navigation and <code>NavLink</code> for active-highlighted nav links — never <code>&lt;a href&gt;</code> for internal routes</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Read URL parameters with <code>useParams</code> and use them in a <code>useEffect</code> dependency array to re-fetch when the parameter changes</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Navigate programmatically with <code>useNavigate</code> after form submissions, login, and logout — using <code>replace</code> to prevent Back-button loops</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Structure shared UI using layout routes with <code>Outlet</code>, keeping the navbar mounted across page transitions</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Build a <code>ProtectedRoute</code> component that redirects unauthenticated users before any API call is made, and explain why it is a UX guard rather than a security boundary</span></li>
+  </ul>
+  <div class="callout callout-purple" style="margin-top:14px;"><strong>Track C complete.</strong> You now have a React app with state, effects, API integration, forms, validation, and routing. Track D connects everything — fullstack integration, deployment, and end-to-end auth flow.</div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <span id="counter">1 / 15</span>
+  <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
+  <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
+</div>
+<div id="progress"></div>
+<span id="hint">← → keys to navigate</span>
+<a href="http://localhost:3001/api/health" id="app-link" target="_blank" rel="noopener">localhost:3001 &#8599;</a>
+<a href="index.html" id="index-link">&#8962; Course</a>
+
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_NAME = 'routing-workshop';
+window.DECK_OBJECTIVES = [
+  'Explain client-side routing and how React Router intercepts navigation without a server round-trip',
+  'Set up React Router v6 with BrowserRouter, Routes, and Route, and identify differences from v5 syntax',
+  'Use Link for internal navigation and NavLink for active-highlighted nav links',
+  'Read URL parameters with useParams and include them in useEffect dependency arrays',
+  'Navigate programmatically with useNavigate after login, logout, and form submissions',
+  'Structure shared UI with layout routes and Outlet, keeping shared components mounted across routes',
+  'Build a ProtectedRoute component that redirects unauthenticated users before any API call is made'
+];
+window.DECK_ASSESSMENTS = [
+  {
+    id: 'a1',
+    title: 'Wire up the full router',
+    description: 'Add React Router v6 to your Reading List app using the scaffold prompt from slide 11. Verify the route tree against the checklist on slide 12 before running the app.',
+    points: 3
+  },
+  {
+    id: 'a2',
+    title: 'Test protected navigation',
+    description: 'With a valid token in localStorage, navigate to /books directly in a new tab — it should work. Remove the token (DevTools → Application → localStorage), refresh, and confirm you are redirected to /login without seeing the books page.',
+    points: 2
+  },
+  {
+    id: 'a3',
+    title: 'Prompt reflection write-up',
+    description: 'Answer the four reflection questions from slide 14 in your own words (bullet points are fine). Focus particularly on the security boundary question — what would an attacker actually gain by bypassing the ProtectedRoute?',
+    points: 2
+  }
+];
+window.DECK_QUESTIONS = [
+  {
+    id: 'q1', type: 'mcq',
+    question: 'Why should you never use <a href="/books"> for internal navigation in a React Router app?',
+    options: [
+      'React Router does not support standard anchor elements',
+      'It triggers a full page reload, discarding all React state',
+      'It sends the request to the Express server instead of the React app',
+      'It only works in development, not in production builds'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q2', type: 'mcq',
+    question: 'Which React Router v6 hook reads a value like the :id segment from the current URL?',
+    options: ['useLocation', 'useSearchParams', 'useParams', 'useRouteMatch'],
+    answer: 2
+  },
+  {
+    id: 'q3', type: 'mcq',
+    question: 'You navigate to /books/1, the BookDetail component mounts and fetches data. You then navigate to /books/2. What must you do to ensure new data is fetched?',
+    options: [
+      'Unmount and remount the component by adding a key prop to the Route',
+      'Include the id param in the useEffect dependency array',
+      'Use useNavigate to force a re-render',
+      'Nothing — React Router remounts the component automatically on param change'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q4', type: 'mcq',
+    question: 'After a successful login, you call navigate("/books"). The user presses Back. What happens, and how would you prevent it?',
+    options: [
+      'The user returns to the login page; use navigate("/books", { replace: true }) to replace the history entry',
+      'The user goes to the previous page they visited before login; this is always the correct behaviour',
+      'React Router blocks Back navigation automatically after login',
+      'The user is redirected to / by the ProtectedRoute'
+    ],
+    answer: 0
+  },
+  {
+    id: 'q5', type: 'mcq',
+    question: 'In a layout route, what does <Outlet /> render?',
+    options: [
+      'The layout component itself, recursively',
+      'A loading spinner while the child route fetches data',
+      'The matched child route\'s element',
+      'The nearest parent route\'s element'
+    ],
+    answer: 2
+  },
+  {
+    id: 'q6', type: 'self',
+    question: 'A ProtectedRoute checks localStorage for a token. Give two specific examples of how a user could bypass this check without changing your source code. Does bypassing the check give them access to real data?'
+  },
+  {
+    id: 'q7', type: 'mcq',
+    question: 'You refresh a page at /books/42 in production and get a 404 from the server. What is the cause and the fix?',
+    options: [
+      'The React Router catch-all route is missing; add path="*" to your Routes',
+      'The server has no route for /books/42; configure it to serve index.html for all non-API paths',
+      'You must use HashRouter instead of BrowserRouter in production',
+      'The API returned 404 for the book; add a loading state to the component'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q8', type: 'self',
+    question: 'Describe the nesting order required to have a Layout (navbar + footer) that wraps only authenticated pages, with Login and Register outside the layout. Sketch the Routes tree structure.'
+  }
+];
+
+(function() {
+  var slides = document.querySelectorAll('.slide');
+  var total  = slides.length;
+  var idx    = 0;
+
+  function show(n) {
+    slides[idx].classList.remove('active');
+    idx = Math.max(0, Math.min(n, total - 1));
+    slides[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((idx / (total - 1)) * 100) + '%';
+    if (window.localStorage) localStorage.setItem('svl_routing-workshop', idx);
+    if (window.localStorage) localStorage.setItem('svl_routing-workshop_total', total);
+    if (idx > parseInt(localStorage.getItem('svl_routing-workshop_max') || '0'))
+      localStorage.setItem('svl_routing-workshop_max', idx);
+  }
+
+  document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
+  document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') show(idx + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   show(idx - 1);
+  });
+
+  var saved = window.localStorage ? parseInt(localStorage.getItem('svl_routing-workshop') || '0') : 0;
+  if (saved > 0 && saved < total) show(saved);
+  else show(0);
+
+  if (window.initHUD)        initHUD();
+  if (window.initLO)         initLO();
+  if (window.initAssessments) initAssessments();
+  if (window.initAudio)      initAudio();
+  if (window.initAnnotation) initAnnotation();
+  if (window.initScripts)    initScripts();
+  if (window.initQuiz)       initQuiz();
+})();
+</script>
+</body>
+</html>

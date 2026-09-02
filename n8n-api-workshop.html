@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calling APIs in n8n — Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #ffa657; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #8a3800; --prompt-border: #c4621a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 52px 72px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+  .section-header { background: linear-gradient(135deg,#200e02 0%,#150901 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(196,98,26,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(196,98,26,.2); font-size: 12px; color: var(--accent); font-weight: 600; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+  .cols { display: grid; gap: 18px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+  .cols-40-60 { grid-template-columns: 40fr 60fr; }
+  .callout { border-radius: 8px; padding: 13px 16px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;    color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-green  { background: rgba(63,185,80,.15);    color: var(--green);  }
+  .badge-yellow { background: rgba(210,153,34,.15);   color: var(--yellow); }
+  .badge-orange { background: rgba(255,166,87,.15);   color: var(--orange); }
+  .badge-blue   { background: rgba(88,166,255,.15);   color: #58a6ff; }
+  .badge-red    { background: rgba(248,81,73,.15);    color: var(--red); }
+  .badge-num    { background: rgba(255,166,87,.2); color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td strong { color: var(--text); }
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 26px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(255,166,87,.12); color: var(--accent); border: 1px solid rgba(255,166,87,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .n8n-flow { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: nowrap; overflow-x: auto; }
+  .n8n-node { background: #1c2128; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 100px; flex-shrink: 0; }
+  .n8n-node .node-icon { font-size: 20px; margin-bottom: 4px; }
+  .n8n-node .node-name { font-size: 11px; font-weight: 700; color: var(--text); }
+  .n8n-node .node-type { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .n8n-node.trigger { border-color: var(--green); }
+  .n8n-node.action  { border-color: #58a6ff; }
+  .n8n-node.ai      { border-color: var(--accent); }
+  .n8n-node.logic   { border-color: var(--purple); }
+  .n8n-arrow { color: var(--muted); font-size: 18px; padding: 0 6px; flex-shrink: 0; }
+  #nav { position: fixed; bottom: 26px; right: 36px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 36px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .terminal-body, .diagram { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Calling APIs in n8n -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">HTTP Request</span>
+    <span class="tag">JWT Auth</span>
+    <span class="tag">CRUD Workflows</span>
+    <span class="tag">Data Mapping</span>
+    <span class="tag">Track E</span>
+  </div>
+  <div class="slide-label">Track E · AI Agents &amp; Automation</div>
+  <h1>Calling APIs<br><span class="accent">in n8n</span></h1>
+  <p class="subtitle">
+    Build a complete Reading List API workflow: login for a JWT, run CRUD operations,
+    transform data between nodes, and handle the errors you will actually hit.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Track E · Deck 3 of 6 · Prerequisites: E1, E2</span>
+  </div>
+</div>
+
+<!-- Slide 2 — What We'll Build -->
+<div class="slide">
+  <div class="slide-label">The Plan</div>
+  <h2>What We're Building</h2>
+  <p>By the end of this deck you will have a working n8n workflow that authenticates against your Reading List API and performs full CRUD. This is the foundation every subsequent E-track workflow builds on.</p>
+  <div class="n8n-flow">
+    <div class="n8n-node trigger"><div class="node-icon">🔗</div><div class="node-name">Webhook</div><div class="node-type">Manual trigger</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action"><div class="node-icon">🔐</div><div class="node-name">Login</div><div class="node-type">POST /auth/login</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic"><div class="node-icon">🔧</div><div class="node-name">Set</div><div class="node-type">Extract token</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action"><div class="node-icon">📚</div><div class="node-name">Get Books</div><div class="node-type">GET /api/books</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic"><div class="node-icon">📋</div><div class="node-name">Split Out</div><div class="node-type">Per book</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action"><div class="node-icon">✏️</div><div class="node-name">Update</div><div class="node-type">PATCH /api/books/:id</div></div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:12px;">
+    <strong>Why not just use a hardcoded token?</strong> Tokens expire. A workflow that logs in at runtime always has a fresh token — no manual credential rotation. This is the production-correct pattern.
+  </div>
+  <div class="callout callout-orange" style="margin-top:8px; font-size:13px;">
+    <strong>Prerequisites:</strong> Your Reading List API must be running at <code>http://localhost:3001</code> with at least one registered user and a few books. If using Railway, substitute the production URL.
+  </div>
+</div>
+
+<!-- Slide 3 — Step 1: Login and Capture the JWT -->
+<div class="slide">
+  <div class="slide-label">Step 1</div>
+  <h2>Login: POST /auth/login</h2>
+  <p>The first node in any authenticated workflow logs in and captures the token. The response goes into the <code>messages</code> array — downstream nodes read from it via expressions.</p>
+  <div class="cols cols-55-45" style="margin-top:10px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:10px;"><strong>HTTP Request node config</strong></div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Method</td><td><code>POST</code></td></tr>
+        <tr><td>URL</td><td><code>http://localhost:3001/auth/login</code></td></tr>
+        <tr><td>Authentication</td><td>None (public endpoint)</td></tr>
+        <tr><td>Body Content Type</td><td>JSON</td></tr>
+        <tr><td>Body</td><td><code>{ "email": "you@example.com", "password": "..." }</code></td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:10px;"><strong>Response you receive</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px; max-height:160px;">{
+  <span class="key">json</span>: {
+    <span class="key">token</span>: <span class="str">"eyJhbGciOiJIUzI1NiIs..."</span>
+  }
+}</div></div>
+      <div class="callout callout-yellow" style="font-size:12px; margin-top:8px;">
+        Access it downstream: <code>{{ $('Login').item.json.token }}</code>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:10px; font-size:13px;">
+    <strong>Naming nodes matters.</strong> Give the login node a clear name like "Login" — then any downstream node can reference <code>$('Login').item.json.token</code> without ambiguity. Unnamed nodes default to "HTTP Request", "HTTP Request1", etc. — fragile and hard to read.
+  </div>
+</div>
+
+<!-- Slide 4 — Step 2: Passing the Token Forward -->
+<div class="slide">
+  <div class="slide-label">Step 2</div>
+  <h2>Passing the Token to Protected Nodes</h2>
+  <p>There are two ways to carry the JWT forward to protected API nodes. The first is cleaner; the second works but is fragile if the workflow grows.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:8px;"><strong>Option A — Expression in each node (recommended)</strong></div>
+      <p style="font-size:13px;">In each HTTP Request node that needs auth, set the <strong>Header Auth</strong> credential type to "None" and instead add a custom Header manually:</p>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px;">Header name:  <span class="hi">Authorization</span>
+Header value: <span class="str">Bearer </span><span class="fn">{{ $('Login').item.json.token }}</span></div></div>
+      <p style="font-size:12px; margin-top:6px; color:var(--muted);">The expression evaluates fresh on every execution — always uses the token from the current run's login step.</p>
+    </div>
+    <div>
+      <div class="callout callout-yellow" style="font-size:13px; margin-bottom:8px;"><strong>Option B — Set node to extract token once</strong></div>
+      <p style="font-size:13px;">Add a <strong>Set</strong> node after Login. Set a field <code>token</code> = <code>{{ $json.token }}</code>. Subsequent nodes reference <code>{{ $('Set').item.json.token }}</code>. Useful when many nodes need the same value — change the Set node, not every consumer.</p>
+      <div class="callout callout-blue" style="font-size:12px; margin-top:8px;">
+        In large workflows, a Set node acting as a "variables" step improves maintainability — one place to update when the field name changes.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — GET: Listing and Filtering Books -->
+<div class="slide">
+  <div class="slide-label">Read Operations</div>
+  <h2>GET /api/books — List and Filter</h2>
+  <p>The Reading List API supports a <code>?status=</code> query parameter. Use it in n8n by adding a Query Parameter field — n8n URL-encodes it automatically.</p>
+  <div class="cols cols-55-45" style="margin-top:12px;">
+    <div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Method</td><td><code>GET</code></td></tr>
+        <tr><td>URL</td><td><code>http://localhost:3001/api/books</code></td></tr>
+        <tr><td>Auth header</td><td><code>Bearer {{ $('Login').item.json.token }}</code></td></tr>
+        <tr><td>Query Parameters</td><td>Name: <code>status</code> · Value: <code>unread</code></td></tr>
+        <tr><td>Response format</td><td>JSON</td></tr>
+      </table>
+      <div class="callout callout-blue" style="margin-top:10px; font-size:13px;">
+        To make the filter dynamic — driven by a previous node — use an expression for the query parameter value: <code>{{ $json.filter }}</code>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>What comes back</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px; max-height:200px;">{
+  <span class="key">json</span>: {
+    <span class="key">books</span>: [
+      { <span class="key">id</span>: <span class="str">1</span>, <span class="key">title</span>: <span class="str">"DDIA"</span>,
+        <span class="key">author</span>: <span class="str">"Kleppmann"</span>,
+        <span class="key">status</span>: <span class="str">"unread"</span> },
+      { <span class="key">id</span>: <span class="str">3</span>, <span class="key">title</span>: <span class="str">"SICP"</span>,
+        <span class="key">author</span>: <span class="str">"Abelson"</span>,
+        <span class="key">status</span>: <span class="str">"unread"</span> }
+    ]
+  }
+}
+
+<span class="comment">Add Split Out after this →
+Field: books
+→ one item per book</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — POST: Creating a Book -->
+<div class="slide">
+  <div class="slide-label">Create Operation</div>
+  <h2>POST /api/books — Creating a Book</h2>
+  <p>POST sends a JSON body. The fields in the body can be static values, expressions from previous nodes, or a mix of both.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>HTTP Request node config</strong></div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Method</td><td><code>POST</code></td></tr>
+        <tr><td>URL</td><td><code>http://localhost:3001/api/books</code></td></tr>
+        <tr><td>Auth</td><td>Bearer token header (as before)</td></tr>
+        <tr><td>Body type</td><td>JSON</td></tr>
+        <tr><td>Body fields</td><td>title, author, status, year</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:8px;"><strong>Dynamic from a previous node</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px; max-height:180px;">Body (JSON fields):
+  title:  <span class="fn">{{ $json.title }}</span>
+  author: <span class="fn">{{ $json.author }}</span>
+  status: <span class="str">unread</span>      <span class="comment">← static</span>
+  year:   <span class="fn">{{ $json.year }}</span>
+
+<span class="comment">Result: { "id": 7, "title": "...",
+  "author": "...", "status": "unread",
+  ... }</span>
+
+<span class="comment">The API returns RETURNING * —
+full created record is available
+in $json on the next node</span></div></div>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px; font-size:13px;">
+    <strong>Batch inserts:</strong> If you have multiple books to create (from a Split Out), place the HTTP Request node <em>after</em> the Split Out. n8n runs one POST per item automatically — no loop needed.
+  </div>
+</div>
+
+<!-- Slide 7 — PATCH and DELETE -->
+<div class="slide">
+  <div class="slide-label">Update and Delete</div>
+  <h2>PATCH and DELETE — Modifying Records</h2>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>PATCH /api/books/:id</strong></div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Method</td><td><code>PATCH</code></td></tr>
+        <tr><td>URL</td><td><code>http://localhost:3001/api/books/{{ $json.id }}</code></td></tr>
+        <tr><td>Body fields</td><td>Only the fields you want to change</td></tr>
+      </table>
+      <div class="callout callout-blue" style="font-size:12px; margin-top:8px;">
+        The Reading List API uses <code>COALESCE</code> — omitted fields keep their current value. Send only <code>status: "reading"</code> to update just the status.
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-red" style="font-size:13px; margin-bottom:8px;"><strong>DELETE /api/books/:id — add a safety gate</strong></div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Method</td><td><code>DELETE</code></td></tr>
+        <tr><td>URL</td><td><code>http://localhost:3001/api/books/{{ $json.id }}</code></td></tr>
+        <tr><td>Body</td><td>None</td></tr>
+      </table>
+      <div class="callout callout-red" style="font-size:12px; margin-top:8px;">
+        <strong>Always add a Wait node or IF node before DELETE.</strong> A DELETE is irreversible. Confirm the ID is correct — log it, or require human approval (see E6).
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px; font-size:13px;">
+    DELETE returns <code>{ "deleted": 7 }</code>. Use an IF node to check: <code>{{ $json.deleted }}</code> is truthy → success branch; else → error branch.
+  </div>
+</div>
+
+<!-- Slide 8 — Section Header: Data Mapping -->
+<div class="slide section-header">
+  <div class="pill">Data Mapping</div>
+  <h1>Transforming Data<br>Between Nodes</h1>
+  <p class="subtitle">Set, Code, Aggregate — the three nodes for reshaping what flows between steps.</p>
+</div>
+
+<!-- Slide 9 — Set Node -->
+<div class="slide">
+  <div class="slide-label">Transformation</div>
+  <h2>The Set Node: Rename, Extract, Compute</h2>
+  <p>The Set node (also called "Edit Fields") modifies the item's JSON without calling an external service. Use it to rename fields, compute derived values, or drop fields you no longer need.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:8px;"><strong>Common uses</strong></div>
+      <table>
+        <tr><th>Task</th><th>Set node field</th></tr>
+        <tr><td>Rename <code>id</code> to <code>bookId</code></td><td>bookId = <code>{{ $json.id }}</code></td></tr>
+        <tr><td>Build a display string</td><td>label = <code>{{ $json.title }} by {{ $json.author }}</code></td></tr>
+        <tr><td>Uppercase status</td><td>status = <code>{{ $json.status.toUpperCase() }}</code></td></tr>
+        <tr><td>Flag overdue reads</td><td>overdue = <code>{{ $json.status === 'reading' && $json.year < 2023 }}</code></td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>"Keep Only Set Fields" toggle</strong></div>
+      <p style="font-size:13px; color:var(--muted);">By default, Set passes all existing fields through and adds/overwrites the ones you specify. Enable <strong>Keep Only Set Fields</strong> to strip everything else — useful when the downstream node only needs two specific fields from a large API response.</p>
+      <div class="callout callout-yellow" style="font-size:12px; margin-top:8px;">
+        Example: API returns 12 fields per book. The Slack node only needs <code>title</code> and <code>status</code>. Set both fields, enable Keep Only — the item is now clean and minimal.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Code Node and Aggregate -->
+<div class="slide">
+  <div class="slide-label">Transformation</div>
+  <h2>Code Node and Aggregate</h2>
+  <p>For logic the Set node cannot express, use the Code node (JavaScript). For combining multiple items into one summary, use Aggregate.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>Code node — process all items</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px; max-height:200px;"><span class="comment">// Mode: "Run once for all items"
+// $input.all() returns all items</span>
+<span class="kw">const</span> books = $input.all()
+  .map(<span class="fn">i</span> => i.json);
+
+<span class="kw">const</span> summary = books
+  .map(<span class="fn">b</span> => `• ${b.title}`)
+  .join(<span class="str">'\n'</span>);
+
+<span class="kw">return</span> [{ json: {
+  count: books.length,
+  list: summary
+}}];</div></div>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:8px;"><strong>Aggregate node — no-code summary</strong></div>
+      <p style="font-size:13px; color:var(--muted);">Aggregate collects all items flowing through and outputs one item. Common modes:</p>
+      <ul class="annot-list" style="margin-top:4px;">
+        <li><span class="badge badge-orange">→</span><span><strong>Append to array</strong>: collect all <code>title</code> fields into one array</span></li>
+        <li><span class="badge badge-orange">→</span><span><strong>Concatenate</strong>: join all <code>label</code> strings with a separator</span></li>
+        <li><span class="badge badge-orange">→</span><span><strong>Count</strong>: output the number of items received</span></li>
+      </ul>
+      <div class="callout callout-yellow" style="font-size:12px; margin-top:8px;">
+        Use Aggregate when: Split Out created multiple items and you need to recombine them before sending one email or one API call.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — Common Errors and Fixes -->
+<div class="slide">
+  <div class="slide-label">Debugging</div>
+  <h2>The Errors You Will Actually Hit</h2>
+  <table style="margin-top:14px;">
+    <tr><th>Error</th><th>What it means</th><th>Fix</th></tr>
+    <tr>
+      <td><strong style="color:var(--red);">401 Unauthorized</strong></td>
+      <td>JWT missing, malformed, or expired</td>
+      <td>Check: (1) header name is exactly <code>Authorization</code>, (2) value starts <code>Bearer </code> with a space, (3) the login step ran and <code>$('Login').item.json.token</code> is not undefined</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--red);">404 Not Found</strong></td>
+      <td>URL is wrong or ID doesn't exist</td>
+      <td>Pin the node output and check the URL — log <code>{{ $json.id }}</code> with a Set node before the request to verify the value</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--yellow);">Connection refused / ECONNREFUSED</strong></td>
+      <td>The API server is not running at that address</td>
+      <td>Check the API is running (<code>curl http://localhost:3001/api/health</code>). If using n8n in Docker, <code>localhost</code> refers to the container — use <code>host.docker.internal</code> instead.</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--yellow);">Expression error: Cannot read property</strong></td>
+      <td>An expression references a field that doesn't exist at that point in the flow</td>
+      <td>Pin the output of the previous node and inspect the actual JSON shape. The field name or nesting may differ from what you expected.</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--purple);">409 Conflict</strong></td>
+      <td>UNIQUE constraint violation — item already exists</td>
+      <td>Add an IF node before POST to check whether the book already exists. Or use an upsert pattern if the API supports it.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Slide 12 — Pinning and Inspecting -->
+<div class="slide">
+  <div class="slide-label">Testing Technique</div>
+  <h2>Pin Data: Test Nodes Without Running the Whole Workflow</h2>
+  <p>When building incrementally, you do not want to call the login endpoint every time you adjust a downstream node. <strong>Pinning</strong> freezes a node's output so downstream nodes use it without the node re-executing.</p>
+  <ul class="annot-list" style="margin-top:16px;">
+    <li>
+      <span class="badge badge-orange">1</span>
+      <span><strong>Run the workflow once</strong> to populate real data through all nodes.</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">2</span>
+      <span><strong>Click the node</strong> you want to freeze → in the output panel → click the <strong>pin icon</strong>. The node now shows a pin badge.</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">3</span>
+      <span><strong>Edit downstream nodes</strong> freely. Re-run from the pinned node — the login is not called again; the pinned data flows through as if it had just executed.</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">4</span>
+      <span><strong>Unpin</strong> when you are happy with the downstream logic and want to run end-to-end again.</span>
+    </li>
+  </ul>
+  <div class="callout callout-yellow" style="margin-top:14px; font-size:13px;">
+    <strong>Pin the login node</strong> while working on data transformation — you avoid repeatedly hitting the auth endpoint and can inspect the exact token and structure being used.
+  </div>
+</div>
+
+<!-- Slide 13 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Prompt Reflection</div>
+  <h2>What You Built With vs What You Learned</h2>
+  <p>If you used an AI assistant to generate any part of this workflow, answer these before moving to E4.</p>
+  <div class="prompt-block" style="margin-top:10px;">
+    <div class="prompt-bar">🤔 Questions to answer without re-reading the AI's explanation</div>
+    <div class="prompt-body">
+      <ul>
+        <li>Where does the JWT come from in your workflow? Trace the exact expression that carries it to each protected node.</li>
+        <li>Why is Split Out needed after GET /api/books? What is the shape of the data before and after?</li>
+        <li>In the PATCH node, what expression builds the URL? What happens if <code>$json.id</code> is undefined?</li>
+        <li>Name one place in your workflow where a mistake would cause a 401. Name one place where it would cause a 404.</li>
+        <li>What does pinning a node do, and when would you use it?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:12px; font-size:13px;">
+    <strong>Up next — E4: The AI Agent Node.</strong> Your workflow now has a working API connection. E4 adds an AI Agent node on top — turning the workflow into an agent that can reason about which books to update, draft summaries, and respond to natural-language queries.
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 13</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'n8n-api-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'e3-1', type: 'practical', title: 'Build the authenticated CRUD workflow',
+    desc: 'Build the complete workflow shown in slide 2: Webhook → Login → Set (extract token) → GET /api/books → Split Out → PATCH each book\'s status to "reading". Use expressions throughout. Verify with a GET at the end that statuses changed.',
+    criteria: [
+      'The JWT is obtained at runtime via POST /auth/login — no hardcoded token',
+      'Split Out correctly creates one item per book from the books array',
+      'The PATCH URL uses {{ $json.id }} to target each book individually'
+    ] },
+  { id: 'e3-2', type: 'practical', title: 'Add a filter and summary',
+    desc: 'Extend the workflow: after GET /api/books, add an IF node to filter to only books with status="unread". Then add an Aggregate node to count the unread books and build a formatted list of their titles. Log the result.',
+    criteria: [
+      'The IF node correctly filters on $json.status === "unread" (or equivalent expression)',
+      'The Aggregate node produces one output item with a count and formatted list',
+      'You can explain why Aggregate is needed here instead of just using Split Out output directly'
+    ] },
+  { id: 'e3-3', type: 'reflect', title: 'Debugging: what went wrong?',
+    desc: 'During the build, you will hit at least one error. Document it: what was the error, what did you check first, and what fixed it? Use the debugging patterns from slide 11.',
+    criteria: [
+      'You named the specific error message or HTTP status code',
+      'You described what you checked to diagnose it (pinning, inspecting node output, etc.)',
+      'Your fix addresses the root cause, not just the symptom'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Build an n8n workflow that authenticates against a JWT-protected REST API at runtime',
+  'Carry a JWT through a multi-node workflow using named-node expressions',
+  'Perform all four CRUD operations (GET, POST, PATCH, DELETE) via HTTP Request nodes with expressions',
+  'Use Set, Code, and Aggregate nodes to reshape and summarise item data between nodes',
+  'Diagnose and fix the four most common n8n API errors: 401, 404, ECONNREFUSED, and expression errors'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'e3-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Your workflow has a node named "Login" that returns `{ "token": "eyJ..." }`. Which expression correctly references this token in a downstream HTTP Request node?',
+    options: [
+      '{{ $json.token }}',
+      '{{ $("Login").item.json.token }}',
+      '{{ $node.Login.token }}',
+      '{{ token }}'
+    ],
+    correct: 1,
+    explanation: '{{ $("Login").item.json.token }} references a specific named node\'s output. {{ $json.token }} would only work if the Login node is the immediate parent — once you have other nodes between Login and the current node, you need the named reference. $node.Login is not valid n8n syntax.',
+    reviewSlide: 'Login: POST /auth/login'
+  },
+  {
+    id: 'e3-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'After a GET /api/books, the output item contains `{ "books": [{...}, {...}, {...}] }`. You add a Split Out node with Field = "books". What does the next node receive?',
+    options: [
+      'One item containing the books array unchanged',
+      'Three separate items, one per book object',
+      'An error — Split Out only works on top-level arrays',
+      'Three items each containing the full original response'
+    ],
+    correct: 1,
+    explanation: 'Split Out extracts a specified field (here "books") and creates one item per element in that array. The three book objects become three separate items. From this point, any downstream node processes each book independently.',
+    reviewSlide: 'GET /api/books — List and Filter'
+  },
+  {
+    id: 'e3-1-3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You receive a 401 Unauthorized from a PATCH node. What is the most likely cause?',
+    options: [
+      'The book ID does not exist in the database',
+      'The Authorization header is missing the "Bearer " prefix or the token expression evaluates to undefined',
+      'PATCH is not supported by the Reading List API',
+      'The n8n workflow has insufficient permissions'
+    ],
+    correct: 1,
+    explanation: '401 means the server rejected the authentication. The two most common causes in n8n: (1) the header value is just the token without "Bearer " prefix — the full value must be "Bearer <token>", (2) the expression evaluates to undefined because the referenced node name is wrong or the login step failed. Check both.',
+    reviewSlide: 'The Errors You Will Actually Hit'
+  },
+  {
+    id: 'e3-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'You want to send one Slack message listing all unread books, not one message per book. You have used Split Out to create one item per book. What node do you add before the Slack node?',
+    options: [
+      'Merge — to combine all the item streams into one',
+      'IF — to filter out books that are not unread',
+      'Aggregate — to collect all items into one summarised output',
+      'HTTP Request — to fetch the consolidated list from the API'
+    ],
+    correct: 2,
+    explanation: 'Aggregate collects multiple items and outputs one. You can use it to append all book titles into an array, or concatenate them into a string. The Slack node then receives one item with the full list — one message. Merge is for combining branches; IF is for filtering; another HTTP Request would re-fetch, not combine.',
+    reviewSlide: 'Code Node and Aggregate'
+  },
+  {
+    id: 'e3-2-2',
+    checkpoint: 2,
+    type: 'self',
+    q: 'You are running n8n in Docker on your laptop, and your Reading List API is running directly on your Mac at localhost:3001. Your HTTP Request node keeps getting "ECONNREFUSED". What is happening and how do you fix it?',
+    rubric: 'In Docker, "localhost" inside the container refers to the container itself, not the host machine. The API is on the host. Fix: replace "localhost" with "host.docker.internal" in the URL — this is a Docker DNS alias that resolves to the host machine\'s IP from inside a container. Alternatively, run n8n natively (not in Docker) for local development, or put both n8n and the API in the same Docker Compose network.'
+  }
+];
+</script>
+</body>
+</html>

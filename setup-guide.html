@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local Setup Guide — Reading List API</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --orange: #f0883e;
+    --purple: #bc8cff; --red: #f85149;
+    --term-bg: #010409; --term-text: #e6edf3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; }
+
+  /* ── Layout ── */
+  .page { max-width: 860px; margin: 0 auto; padding: 48px 32px 80px; }
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 32px; margin-bottom: 40px; }
+  .header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+  .header p  { font-size: 15px; color: var(--muted); margin-top: 8px; }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); }
+
+  /* ── Sections ── */
+  section { margin-bottom: 48px; }
+  section h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  section h2 .step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(88,166,255,.15); color: var(--accent); font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  section h3 { font-size: 1rem; font-weight: 600; color: var(--accent); margin: 20px 0 10px; }
+  p  { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+  li { font-size: 14px; color: var(--muted); margin-bottom: 6px; padding-left: 4px; }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; background: rgba(88,166,255,.08); border: 1px solid rgba(88,166,255,.18); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a    { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: var(--text); }
+
+  /* ── Platform tabs ── */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab-btn { padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Terminal ── */
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 12px 0; }
+  .terminal-bar { display: flex; align-items: center; gap: 6px; padding: 9px 14px; background: #21262d; border-bottom: 1px solid var(--border); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot-red    { background: #ff5f57; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green  { background: #28c840; }
+  .terminal-label { font-size: 11px; color: var(--muted); margin-left: 6px; font-family: 'SF Mono', monospace; }
+  .terminal-body  { padding: 14px 18px; font-size: 13px; line-height: 1.85; color: var(--term-text); font-family: 'SF Mono', 'Fira Code', monospace; white-space: pre; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar { height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body .prompt { color: var(--green); user-select: none; }
+  .terminal-body .cmt    { color: #5c6370; font-style: italic; }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+  .terminal-body .hi     { color: var(--accent); }
+
+  /* ── Callouts ── */
+  .callout { border-radius: 8px; padding: 12px 16px; font-size: 13px; border-left: 3px solid; line-height: 1.7; margin: 12px 0; }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--muted); }
+  .callout-blue   strong { color: var(--accent); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--muted); }
+  .callout-green  strong { color: var(--green); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--muted); }
+  .callout-yellow strong { color: var(--yellow); }
+  .callout-orange { background: rgba(240,136,62,.07);  border-color: var(--orange);  color: var(--muted); }
+  .callout-orange strong { color: var(--orange); }
+
+  /* ── Verify badge ── */
+  .verify { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; background: rgba(63,185,80,.1); color: var(--green); border: 1px solid rgba(63,185,80,.25); padding: 3px 10px; border-radius: 20px; margin: 8px 0; }
+
+  /* ── File block ── */
+  .file-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; font-family: 'SF Mono', monospace; font-size: 13px; white-space: pre; overflow-x: auto; margin: 12px 0; color: var(--muted); line-height: 1.8; scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .file-block::-webkit-scrollbar { height: 6px; }
+  .file-block::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .file-block .key { color: var(--accent); }
+  .file-block .val { color: #a5d6ff; }
+  .file-block .cmt { color: #5c6370; font-style: italic; }
+
+  /* ── Step checklist ── */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step  { display: flex; gap: 14px; align-items: flex-start; }
+  .step-circle { width: 24px; height: 24px; border-radius: 50%; background: rgba(88,166,255,.15); color: var(--accent); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body { flex: 1; }
+  .step-body strong { font-size: 14px; color: var(--text); display: block; margin-bottom: 4px; }
+  .step-body p { margin: 0; }
+
+  /* ── Issues table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+  th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 9px 12px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td code { font-size: 12px; }
+  td strong { color: var(--text); }
+
+  /* ── Deck links ── */
+  .deck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .deck-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; text-decoration: none; transition: border-color .15s; }
+  .deck-card:hover { border-color: var(--accent); }
+  .deck-card .deck-num  { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .deck-card .deck-name { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 4px; }
+  .deck-card .deck-desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: var(--surface); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; margin-bottom: 28px; transition: color .15s, border-color .15s; }
+  .back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Theme toggle ── */
+  #theme-toggle { position: fixed; top: 18px; right: 22px; width: 32px; height: 32px; border-radius: 50%; background: rgba(22,27,34,.9); border: 1px solid #30363d; color: #8b949e; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 500; transition: color .15s, border-color .15s; }
+  #theme-toggle:hover { color: #58a6ff; border-color: #58a6ff; }
+  @media print { #theme-toggle { display: none; } }
+
+  /* ── Light theme (terminal intentionally stays dark) ── */
+  body.light-theme { --bg: #f5f0e8; --surface: #faf8f4; --border: #d8cfc0; --text: #2d2520; --muted: #6e6660; --accent: #1d6fe8; --green: #1a7f37; --yellow: #946800; --orange: #bf5a0a; --purple: #6639d6; --red: #b91c1c; --term-bg: #252220; }
+  body.light-theme #theme-toggle { background: rgba(245,240,232,.95); border-color: #d8cfc0; color: #6e6660; }
+  body.light-theme #theme-toggle:hover { color: #1d6fe8; border-color: #1d6fe8; }
+  body.light-theme .terminal     { border-color: #3a3530; }
+  body.light-theme .terminal-bar { background: #2d2926; }
+  body.light-theme code { background: rgba(29,111,232,.06); border-color: rgba(29,111,232,.15); }
+  body.light-theme .tab-btn:hover:not(.active) { color: #2d2520; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="index.html" class="back-link">&#8592; Back to course</a>
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <h1>Local Setup Guide</h1>
+    <p>Everything you need to run the Reading List API on your own machine.</p>
+    <div class="tag-row">
+      <span class="tag">macOS</span>
+      <span class="tag">Windows</span>
+      <span class="tag">Linux</span>
+      <span class="tag">Node.js 20+</span>
+      <span class="tag">PostgreSQL 15+</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 1 — NODE.JS
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">1</span> Install Node.js</h2>
+    <p>We need Node.js v20 or later. The recommended approach uses <strong>nvm</strong> (Node Version Manager) so you can switch versions easily. Windows has its own nvm port.</p>
+
+    <div class="tabs" data-group="node">
+      <button class="tab-btn active" data-tab="node-mac">macOS</button>
+      <button class="tab-btn" data-tab="node-win">Windows</button>
+      <button class="tab-btn" data-tab="node-linux">Linux</button>
+    </div>
+
+    <!-- macOS -->
+    <div class="tab-panel active" id="node-mac">
+      <h3>Option A — nvm (recommended)</h3>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="cmt"># Install nvm</span>
+<span class="prompt">$ </span>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+<span class="cmt"># Restart your terminal, then install Node 20</span>
+<span class="prompt">$ </span>nvm install 20
+<span class="prompt">$ </span>nvm use 20</div>
+      </div>
+      <h3>Option B — Direct installer</h3>
+      <p>Download the macOS installer from <a href="https://nodejs.org" target="_blank">nodejs.org</a> → choose the LTS version (20.x). Run the <code>.pkg</code> file and follow the prompts.</p>
+      <div class="callout callout-blue">
+        <strong>Note on Homebrew</strong>
+        You can also use <code>brew install node@20</code> if you already have Homebrew. However, nvm or the direct installer work the same and don't require Homebrew.
+      </div>
+    </div>
+
+    <!-- Windows -->
+    <div class="tab-panel" id="node-win">
+      <h3>Option A — nvm-windows (recommended)</h3>
+      <p>Download the installer from <a href="https://github.com/coreybutler/nvm-windows/releases" target="_blank">github.com/coreybutler/nvm-windows</a> — grab <code>nvm-setup.exe</code> from the latest release.</p>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Command Prompt or PowerShell (as Administrator)</span></div>
+        <div class="terminal-body"><span class="cmt">After installing nvm-windows:</span>
+<span class="prompt">> </span>nvm install 20
+<span class="prompt">> </span>nvm use 20</div>
+      </div>
+      <h3>Option B — winget</h3>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Command Prompt or PowerShell (as Administrator)</span></div>
+        <div class="terminal-body"><span class="prompt">> </span>winget install OpenJS.NodeJS.LTS</div>
+      </div>
+      <h3>Option C — Direct installer</h3>
+      <p>Download the Windows installer from <a href="https://nodejs.org" target="_blank">nodejs.org</a> → LTS version → <code>.msi</code> file. Run it and accept all defaults.</p>
+      <div class="callout callout-yellow">
+        <strong>PowerShell execution policy</strong>
+        If you see a "scripts are disabled" error, run PowerShell as Administrator and execute: <code>Set-ExecutionPolicy RemoteSigned</code>
+      </div>
+    </div>
+
+    <!-- Linux -->
+    <div class="tab-panel" id="node-linux">
+      <h3>Option A — nvm (recommended)</h3>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="cmt"># Install nvm</span>
+<span class="prompt">$ </span>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+<span class="cmt"># Reload shell config, then install Node 20</span>
+<span class="prompt">$ </span>source ~/.bashrc      <span class="cmt"># or ~/.zshrc if using zsh</span>
+<span class="prompt">$ </span>nvm install 20
+<span class="prompt">$ </span>nvm use 20</div>
+      </div>
+      <h3>Option B — NodeSource APT repository (Ubuntu/Debian)</h3>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$ </span>curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+<span class="prompt">$ </span>sudo apt-get install -y nodejs</div>
+      </div>
+      <div class="callout callout-orange">
+        <strong>Avoid apt's default Node</strong>
+        <code>sudo apt install nodejs</code> on Ubuntu often installs an old version (v12 or v18). Use nvm or the NodeSource repo to get v20.
+      </div>
+    </div>
+
+    <!-- Verify -->
+    <div class="callout callout-green" style="margin-top:16px;">
+      <strong>Verify — run this in any terminal:</strong>
+      <div class="terminal" style="margin-top:8px;">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
+        <div class="terminal-body"><span class="prompt">$ </span>node --version
+<span class="gr">v20.x.x</span>     <span class="cmt"># any 20.x is fine</span>
+
+<span class="prompt">$ </span>npm --version
+<span class="gr">10.x.x</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 2 — POSTGRESQL
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">2</span> Install PostgreSQL</h2>
+    <p>We need PostgreSQL 15 or later. The installation method varies significantly by platform.</p>
+
+    <div class="tabs" data-group="pg">
+      <button class="tab-btn active" data-tab="pg-mac">macOS</button>
+      <button class="tab-btn" data-tab="pg-win">Windows</button>
+      <button class="tab-btn" data-tab="pg-linux">Linux</button>
+    </div>
+
+    <!-- macOS -->
+    <div class="tab-panel active" id="pg-mac">
+      <h3>Postgres.app (recommended — easiest)</h3>
+      <p>Download from <a href="https://postgresapp.com" target="_blank">postgresapp.com</a>. Drag to Applications and open it. Click <strong>Initialize</strong>. PostgreSQL is now running.</p>
+      <p>Add the command-line tools to your PATH — copy this into your terminal:</p>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$ </span>sudo mkdir -p /etc/paths.d
+<span class="prompt">$ </span>echo /Applications/Postgres.app/Contents/Versions/latest/bin \
+  | sudo tee /etc/paths.d/postgresapp
+<span class="cmt"># Restart terminal, then verify:</span>
+<span class="prompt">$ </span>psql --version
+<span class="gr">psql (PostgreSQL) 16.x</span></div>
+      </div>
+      <div class="callout callout-blue">
+        <strong>Postgres.app advantages</strong>
+        Runs as a menu bar app — easy to start/stop. No admin password needed. Creates a database named after your username automatically (used as the default connection).
+      </div>
+    </div>
+
+    <!-- Windows -->
+    <div class="tab-panel" id="pg-win">
+      <h3>EDB Installer (official)</h3>
+      <p>Download from <a href="https://www.postgresql.org/download/windows/" target="_blank">postgresql.org/download/windows</a> — click <strong>Download the installer</strong> (EDB). Run the <code>.exe</code> and follow the wizard.</p>
+      <p>During installation:</p>
+      <ul style="padding-left:20px; margin-bottom:12px;">
+        <li>Choose a <strong>password for the postgres superuser</strong> — remember this</li>
+        <li>Keep the default port: <strong>5432</strong></li>
+        <li>Keep the default locale</li>
+        <li>The installer adds <code>psql</code> and other tools to your PATH automatically</li>
+      </ul>
+      <div class="callout callout-yellow">
+        <strong>Starting PostgreSQL</strong>
+        After installation, PostgreSQL runs as a Windows service and starts automatically. To check: open <em>Services</em> (search in Start menu) and look for <strong>postgresql-x64-16</strong> — it should show "Running".
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Command Prompt</span></div>
+        <div class="terminal-body"><span class="cmt"># Connect as the postgres superuser to verify</span>
+<span class="prompt">> </span>psql -U postgres
+<span class="cmt"># Enter the password you chose during installation</span>
+<span class="gr">psql (16.x)</span>
+postgres=# \q</div>
+      </div>
+    </div>
+
+    <!-- Linux -->
+    <div class="tab-panel" id="pg-linux">
+      <h3>apt (Ubuntu/Debian)</h3>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$ </span>sudo apt update
+<span class="prompt">$ </span>sudo apt install -y postgresql postgresql-contrib
+
+<span class="cmt"># Start the service</span>
+<span class="prompt">$ </span>sudo systemctl start postgresql
+<span class="prompt">$ </span>sudo systemctl enable postgresql  <span class="cmt"># start on boot</span>
+
+<span class="cmt"># Create a user matching your login name (makes psql easier)</span>
+<span class="prompt">$ </span>sudo -u postgres createuser --superuser $USER
+<span class="prompt">$ </span>sudo -u postgres createdb $USER</div>
+      </div>
+      <h3>dnf/yum (Fedora/RHEL/CentOS)</h3>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$ </span>sudo dnf install -y postgresql-server postgresql-contrib
+<span class="prompt">$ </span>sudo postgresql-setup --initdb
+<span class="prompt">$ </span>sudo systemctl start postgresql
+<span class="prompt">$ </span>sudo systemctl enable postgresql</div>
+      </div>
+    </div>
+
+    <!-- Verify -->
+    <div class="callout callout-green" style="margin-top:16px;">
+      <strong>Verify — you should be able to connect:</strong>
+      <div class="terminal" style="margin-top:8px;">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
+        <div class="terminal-body"><span class="prompt">$ </span>psql --version
+<span class="gr">psql (PostgreSQL) 15.x  or  16.x</span>
+
+<span class="prompt">$ </span>psql             <span class="cmt"># connects using your system username (macOS/Linux)</span>
+<span class="prompt">> </span>psql -U postgres  <span class="cmt"># Windows — connect as postgres superuser</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 3 — GET THE DEMO APP FILES
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">3</span> Get the Demo App Files</h2>
+    <p>The demo app is a folder called <code>crud-demo</code> provided by your instructor. You should have these files:</p>
+    <div class="file-block"><span class="key">reading-list-api/</span>
+├── <span class="key">package.json</span>              <span class="cmt">project config + dependencies</span>
+├── <span class="key">.env.example</span>             <span class="cmt">environment variable template</span>
+├── <span class="key">schema.sql</span>               <span class="cmt">database table definitions</span>
+├── <span class="key">db.js</span>                    <span class="cmt">PostgreSQL connection pool</span>
+├── <span class="key">auth.js</span>                  <span class="cmt">register and login routes</span>
+├── <span class="key">middleware/</span>
+│   └── <span class="key">authenticate.js</span>      <span class="cmt">JWT verification middleware</span>
+└── <span class="key">server.js</span>                <span class="cmt">Express app + all routes</span></div>
+    <div class="callout callout-blue">
+      <strong>If you received a ZIP file</strong>
+      Right-click → Extract All (Windows) or double-click (macOS/Linux) to unzip it. Open a terminal and navigate into the extracted folder.
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">All platforms — navigate to the app folder</span></div>
+      <div class="terminal-body"><span class="cmt"># Navigate into the app folder (adjust the path to where you extracted it)</span>
+<span class="prompt">$ </span>cd reading-list-api
+
+<span class="cmt"># Confirm you can see the files</span>
+<span class="prompt">$ </span>ls                  <span class="cmt"># macOS / Linux</span>
+<span class="prompt">> </span>dir                 <span class="cmt"># Windows Command Prompt</span>
+<span class="prompt">> </span>ls                  <span class="cmt"># Windows PowerShell</span></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 4 — CREATE THE DATABASE
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">4</span> Create the Database</h2>
+
+    <div class="tabs" data-group="db">
+      <button class="tab-btn active" data-tab="db-mac">macOS / Linux</button>
+      <button class="tab-btn" data-tab="db-win">Windows</button>
+    </div>
+
+    <div class="tab-panel active" id="db-mac">
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="cmt"># Create a new database called reading_list</span>
+<span class="prompt">$ </span>createdb reading_list
+
+<span class="cmt"># Run the schema (creates the tables)</span>
+<span class="prompt">$ </span>psql reading_list &lt; schema.sql
+
+<span class="cmt"># Verify the tables were created</span>
+<span class="prompt">$ </span>psql reading_list -c "\dt"
+<span class="gr">        List of relations
+ Schema │   Name   │ Type  │ Owner
+────────┼──────────┼───────┼───────
+ public │ books    │ table │ ...
+ public │ users    │ table │ ...</span></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="db-win">
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Command Prompt</span></div>
+        <div class="terminal-body"><span class="cmt"># Connect as postgres superuser and create the database</span>
+<span class="prompt">> </span>psql -U postgres -c "CREATE DATABASE reading_list;"
+
+<span class="cmt"># Run the schema file (adjust path if needed)</span>
+<span class="prompt">> </span>psql -U postgres -d reading_list -f schema.sql
+
+<span class="cmt"># Verify the tables</span>
+<span class="prompt">> </span>psql -U postgres -d reading_list -c "\dt"</div>
+      </div>
+      <div class="callout callout-blue">
+        <strong>Windows connection string</strong>
+        Your DATABASE_URL in the next step will need to include the postgres password:
+        <code>postgresql://postgres:YOURPASSWORD@localhost:5432/reading_list</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 5 — CONFIGURE ENVIRONMENT
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">5</span> Configure the Environment</h2>
+    <p>Copy the example file and fill in your values:</p>
+
+    <div class="tabs" data-group="env">
+      <button class="tab-btn active" data-tab="env-mac">macOS / Linux</button>
+      <button class="tab-btn" data-tab="env-win">Windows</button>
+    </div>
+
+    <div class="tab-panel active" id="env-mac">
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$ </span>cp .env.example .env</div>
+      </div>
+    </div>
+    <div class="tab-panel" id="env-win">
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Command Prompt</span></div>
+        <div class="terminal-body"><span class="prompt">> </span>copy .env.example .env</div>
+      </div>
+    </div>
+
+    <p style="margin-top:12px;">Now open <code>.env</code> in any text editor (VS Code, Notepad, nano, etc.) and set the values:</p>
+    <div class="file-block"><span class="cmt"># .env — fill these in</span>
+
+<span class="key">DATABASE_URL</span>=<span class="val">postgresql://localhost/reading_list</span>
+<span class="cmt"># macOS (Postgres.app): postgresql://localhost/reading_list
+# Linux:               postgresql://localhost/reading_list
+# Windows:             postgresql://postgres:YOURPASSWORD@localhost:5432/reading_list</span>
+
+<span class="key">PORT</span>=<span class="val">3001</span>
+
+<span class="key">JWT_SECRET</span>=<span class="val">replace-with-a-long-random-string-at-least-32-characters</span></div>
+
+    <div class="callout callout-yellow">
+      <strong>Generating a good JWT_SECRET</strong>
+      <div class="terminal" style="margin-top:8px;">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
+        <div class="terminal-body"><span class="cmt"># macOS / Linux — generates 32 random bytes as hex</span>
+<span class="prompt">$ </span>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+<span class="cmt"># Windows PowerShell</span>
+<span class="prompt">> </span>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</div>
+      </div>
+      Paste the output as the value for <code>JWT_SECRET</code>. Never commit your <code>.env</code> file.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 6 — INSTALL & RUN
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">6</span> Install Dependencies &amp; Start the Server</h2>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">All platforms</span></div>
+      <div class="terminal-body"><span class="cmt"># Install Node.js packages</span>
+<span class="prompt">$ </span>npm install
+
+<span class="cmt"># Start the server in development mode (auto-restarts on file changes)</span>
+<span class="prompt">$ </span>npm run dev
+
+<span class="cmt"># You should see:</span>
+<span class="gr">Server running on port 3001</span></div>
+    </div>
+    <div class="callout callout-green" style="margin-top:12px;">
+      <strong>Verify it's working — open a new terminal tab and run:</strong>
+      <div class="terminal" style="margin-top:8px;">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
+        <div class="terminal-body"><span class="prompt">$ </span>curl -s http://localhost:3001/api/health
+<span class="gr">{"status":"ok"}</span></div>
+      </div>
+      If you see <code>{"status":"ok"}</code> — you're all set.
+    </div>
+    <div class="callout callout-blue" style="margin-top:8px;">
+      <strong>Windows without curl</strong>
+      curl is included in Windows 10/11. If it's not found, use PowerShell's <code>Invoke-WebRequest</code>:
+      <br><code>Invoke-WebRequest -Uri http://localhost:3001/api/health | Select-Object -ExpandProperty Content</code>
+      <br>Or install curl from <a href="https://curl.se/windows/" target="_blank">curl.se/windows</a>.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       TROUBLESHOOTING
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">?</span> Common Problems</h2>
+    <table>
+      <thead>
+        <tr><th>Error message</th><th>Likely cause</th><th>Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>command not found: node</code></td>
+          <td>Node not installed, or nvm not loaded</td>
+          <td>Restart your terminal. If using nvm: <code>nvm use 20</code>. Otherwise re-install Node.</td>
+        </tr>
+        <tr>
+          <td><code>command not found: psql</code></td>
+          <td>PostgreSQL CLI tools not on PATH</td>
+          <td>macOS: add Postgres.app to PATH (Step 2). Windows: re-run installer, check "Add to PATH". Linux: <code>sudo apt install postgresql-client</code></td>
+        </tr>
+        <tr>
+          <td><code>EADDRINUSE: address already in use :::3001</code></td>
+          <td>Another process is on port 3001</td>
+          <td>macOS/Linux: <code>lsof -ti:3001 | xargs kill</code> — Windows: <code>netstat -ano | findstr 3001</code> then <code>taskkill /PID [number] /F</code></td>
+        </tr>
+        <tr>
+          <td><code>Connection refused</code> (PostgreSQL)</td>
+          <td>PostgreSQL service not running</td>
+          <td>macOS: click the Postgres.app elephant icon → Start. Linux: <code>sudo systemctl start postgresql</code>. Windows: start the service in Services.</td>
+        </tr>
+        <tr>
+          <td><code>password authentication failed</code></td>
+          <td>Wrong username/password in DATABASE_URL</td>
+          <td>Check your <code>.env</code> DATABASE_URL. Windows users must include the postgres password.</td>
+        </tr>
+        <tr>
+          <td><code>relation "books" does not exist</code></td>
+          <td>schema.sql hasn't been run</td>
+          <td>Re-run Step 4: <code>psql reading_list &lt; schema.sql</code></td>
+        </tr>
+        <tr>
+          <td><code>MODULE_NOT_FOUND</code></td>
+          <td><code>npm install</code> not run, or run in wrong folder</td>
+          <td>Make sure you're inside the <code>reading-list-api</code> folder, then run <code>npm install</code></td>
+        </tr>
+        <tr>
+          <td><code>Cannot use import statement</code></td>
+          <td>Node version too old (pre-14)</td>
+          <td>Run <code>node --version</code> — must be 14+. Use nvm to upgrade: <code>nvm install 20 &amp;&amp; nvm use 20</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       WORKSHOP DECKS
+  ═══════════════════════════════════════════════════════ -->
+  <section>
+    <h2><span class="step-num">↗</span> Workshop Decks</h2>
+    <p>Once your server is running, open the workshop slides. Navigate with arrow keys; press <code>F</code> for fullscreen.</p>
+    <div class="deck-grid">
+      <a class="deck-card" href="ai-crud-workshop.html">
+        <div class="deck-num">Part 1</div>
+        <div class="deck-name">AI-Assisted CRUD API</div>
+        <div class="deck-desc">Prompting strategy, generated code walkthrough, Railway deployment</div>
+      </a>
+      <a class="deck-card" href="auth-workshop.html">
+        <div class="deck-num">Part 2</div>
+        <div class="deck-name">JWT Authentication</div>
+        <div class="deck-desc">bcrypt, middleware, register/login, alternatives</div>
+      </a>
+      <a class="deck-card" href="curl-testing-workshop.html">
+        <div class="deck-num">Part 3</div>
+        <div class="deck-name">Testing with curl</div>
+        <div class="deck-desc">Health check, JWT capture, full CRUD test script, jq reference</div>
+      </a>
+      <a class="deck-card" href="extending-api-workshop.html">
+        <div class="deck-num">Part 4</div>
+        <div class="deck-name">Pagination &amp; Relational Data</div>
+        <div class="deck-desc">Offset pagination, second table, JOIN queries, safe migrations</div>
+      </a>
+      <a class="deck-card" href="prompt-engineering-workshop.html">
+        <div class="deck-num">Standalone</div>
+        <div class="deck-name">Prompt Engineering</div>
+        <div class="deck-desc">Scaffold, Explain, Debug, Extend — four prompt types for infrastructure</div>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  if (localStorage.getItem('svl_theme') === 'light') document.body.classList.add('light-theme');
+  (function() {
+    var themeBtn = document.createElement('button');
+    themeBtn.id = 'theme-toggle';
+    themeBtn.title = 'Toggle light / dark theme';
+    function syncTheme() { themeBtn.textContent = document.body.classList.contains('light-theme') ? '\u263D' : '\u2600'; }
+    syncTheme();
+    themeBtn.addEventListener('click', function() {
+      var isLight = document.body.classList.toggle('light-theme');
+      localStorage.setItem('svl_theme', isLight ? 'light' : 'dark');
+      syncTheme();
+    });
+    document.body.appendChild(themeBtn);
+  }());
+
+  // Simple tab system
+  document.querySelectorAll('[data-group]').forEach(tabSet => {
+    const group = tabSet.dataset.group;
+    tabSet.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Deactivate all tabs in this group
+        tabSet.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll(`[id^="${group}-"]`).forEach(p => p.classList.remove('active'));
+        // Activate clicked
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  });
+</script>
+</body>
+</html>

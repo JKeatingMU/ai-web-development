@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terminal &amp; Shell — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1e0e 0%,#091409 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .tbl-section td { background: rgba(255,255,255,.03); color: var(--accent); font-weight: 600; font-family: system-ui,sans-serif; font-size: 12px; letter-spacing: .5px; border-bottom: 1px solid var(--border); padding: 6px 12px; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: var(--accent); border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-red    { background: rgba(248,81,73,.15);   color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track A · Foundation</div>
+  <h1>Terminal &amp; <span class="accent">Shell</span></h1>
+  <div class="subtitle">Commands · Files · Variables · Pipes · Scripts</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-green">Navigation</span>
+    <span class="badge badge-green">Environment</span>
+    <span class="badge badge-green">Scripting</span>
+  </div>
+  <div class="callout callout-blue icon-key">Every curl command in this course, every <code>npm install</code>, every <code>psql</code> connection, every <code>node server.js</code> — all of these run in the terminal. This deck gives you the vocabulary to understand, modify, and write your own shell commands.</div>
+</div>
+
+<!-- Slide 2 — What is the Terminal? -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Terminal, Shell, Command Line</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-blue">Terminal</span><span>The window you type in. A graphical interface to the shell. (iTerm2, Terminal.app, Windows Terminal)</span></li>
+        <li><span class="badge badge-blue">Shell</span><span>The program that reads your commands and runs them. <strong>zsh</strong> (macOS default), <strong>bash</strong> (Linux default), PowerShell (Windows)</span></li>
+        <li><span class="badge badge-blue">Command</span><span>A program you run by name. <code>node</code>, <code>npm</code>, <code>psql</code>, <code>curl</code>, <code>git</code> — all programs found somewhere on your system.</span></li>
+        <li><span class="badge badge-blue">Prompt</span><span>The line where you type. Usually shows your current directory. The <code>$</code> symbol means "ready for input."</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">shell prompt and basic commands</span></div>
+        <div class="terminal-body"><span class="out">username@machine ~/projects/my-api $</span>
+
+<span class="prompt">$</span> <span class="cmd">node</span> <span class="flag">--version</span>
+<span class="out">v22.0.0</span>
+
+<span class="prompt">$</span> <span class="cmd">npm</span> <span class="flag">--version</span>
+<span class="out">10.5.0</span>
+
+<span class="prompt">$</span> <span class="cmd">whoami</span>
+<span class="out">username</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px;"><strong>macOS / Linux</strong>: use Terminal.app, iTerm2, or any terminal emulator. The shell is zsh or bash. <strong>Windows</strong>: use Windows Terminal with WSL2 (Ubuntu) or Git Bash. The commands in this course assume a Unix-like shell.</div>
+</div>
+
+<!-- Slide 3 — Navigating the Filesystem -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Where Am I? Moving Around</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">navigation commands</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">pwd</span>
+<span class="out">/Users/alice/projects</span>
+
+<span class="prompt">$</span> <span class="cmd">ls</span>
+<span class="out">my-api/   notes.md   .env</span>
+
+<span class="prompt">$</span> <span class="cmd">ls</span> <span class="flag">-la</span>
+<span class="out">drwxr-xr-x  alice  my-api/</span>
+<span class="out">-rw-r--r--  alice  notes.md</span>
+<span class="out">-rw-------  alice  .env</span>
+
+<span class="prompt">$</span> <span class="cmd">cd</span> my-api
+<span class="prompt">$</span> <span class="cmd">pwd</span>
+<span class="out">/Users/alice/projects/my-api</span>
+
+<span class="prompt">$</span> <span class="cmd">cd</span> ..          <span class="comment"># go up one level</span>
+<span class="prompt">$</span> <span class="cmd">cd</span> ~           <span class="comment"># go to home directory</span>
+<span class="prompt">$</span> <span class="cmd">cd</span> -           <span class="comment"># go to previous directory</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">pwd</span><span><strong>P</strong>rint <strong>W</strong>orking <strong>D</strong>irectory — where you are right now</span></li>
+        <li><span class="badge badge-yellow">ls</span><span><strong>L</strong>i<strong>s</strong>t files in current directory. <code>-l</code> for details, <code>-a</code> to show hidden files (starting with <code>.</code>)</span></li>
+        <li><span class="badge badge-yellow">cd</span><span><strong>C</strong>hange <strong>D</strong>irectory. <code>cd path</code> to go there, <code>cd ..</code> to go up, <code>cd ~</code> for home</span></li>
+        <li><span class="badge badge-blue">Tab</span><span>Press Tab to autocomplete paths and filenames — use it constantly</span></li>
+        <li><span class="badge badge-blue">↑ / ↓</span><span>Navigate command history without retyping</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — Files and Directories -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Creating, Moving, Deleting</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">file operations</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">mkdir</span> my-project         <span class="comment"># create a directory</span>
+<span class="prompt">$</span> <span class="cmd">mkdir</span> <span class="flag">-p</span> a/b/c           <span class="comment"># create nested directories</span>
+
+<span class="prompt">$</span> <span class="cmd">touch</span> server.js          <span class="comment"># create an empty file</span>
+
+<span class="prompt">$</span> <span class="cmd">mv</span> server.js app.js      <span class="comment"># rename a file</span>
+<span class="prompt">$</span> <span class="cmd">mv</span> app.js src/           <span class="comment"># move a file into src/</span>
+
+<span class="prompt">$</span> <span class="cmd">cp</span> .env.example .env     <span class="comment"># copy a file</span>
+<span class="prompt">$</span> <span class="cmd">cp</span> <span class="flag">-r</span> src/ backup/       <span class="comment"># copy a directory</span>
+
+<span class="prompt">$</span> <span class="cmd">rm</span> notes.txt             <span class="comment"># delete a file</span>
+<span class="prompt">$</span> <span class="cmd">rm</span> <span class="flag">-rf</span> node_modules/     <span class="comment"># delete a directory recursively</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-yellow">mkdir</span><span>Make directory. <code>-p</code> creates all parent dirs.</span></li>
+        <li><span class="badge badge-yellow">touch</span><span>Create empty file (or update timestamp).</span></li>
+        <li><span class="badge badge-yellow">mv</span><span>Move or rename. Works for both files and directories.</span></li>
+        <li><span class="badge badge-yellow">cp</span><span>Copy. Use <code>-r</code> for directories.</span></li>
+        <li><span class="badge badge-red">rm</span><span>Delete — <strong>permanent</strong>. No trash bin. No undo.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-orange icon-gotcha" style="margin-top:10px;"><strong><code>rm -rf</code> is irreversible.</strong> It deletes everything in the path recursively with no confirmation. Before running any <code>rm -rf</code> command — especially AI-generated ones — verify the path is exactly what you intend. A stray space can destroy your project.</div>
+</div>
+
+<!-- Slide 5 — Reading Files -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Reading File Contents</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">reading file contents</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">cat</span> server.js           <span class="comment"># print entire file</span>
+
+<span class="prompt">$</span> <span class="cmd">head</span> <span class="flag">-n</span> <span class="val">20</span> server.js   <span class="comment"># first 20 lines</span>
+<span class="prompt">$</span> <span class="cmd">tail</span> <span class="flag">-n</span> <span class="val">20</span> server.js   <span class="comment"># last 20 lines</span>
+
+<span class="prompt">$</span> <span class="cmd">tail</span> <span class="flag">-f</span> server.log     <span class="comment"># follow a file live</span>
+<span class="out">^C to stop</span>
+
+<span class="prompt">$</span> <span class="cmd">less</span> server.js         <span class="comment"># page through file</span>
+<span class="comment"># space = next page, b = back, q = quit, /term = search</span>
+
+<span class="prompt">$</span> <span class="cmd">wc</span> <span class="flag">-l</span> server.js        <span class="comment"># count lines</span>
+<span class="out">87 server.js</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">cat</span><span>Print entire file. Good for small files; overwhelming for large ones.</span></li>
+        <li><span class="badge badge-yellow">head / tail</span><span>First or last N lines. <code>tail -f</code> follows a log file as it grows — invaluable for watching a server's output.</span></li>
+        <li><span class="badge badge-yellow">less</span><span>Page through large files. Searchable. Press <code>q</code> to quit.</span></li>
+        <li><span class="badge badge-yellow">wc -l</span><span>Word count — with <code>-l</code> counts lines. Useful for checking file size.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-blue icon-tip" style="margin-top:10px;"><strong>Reading server logs:</strong> When your Express server is running with <code>node --watch server.js</code>, its console.log output goes to the terminal. If something breaks, look there first — the error message and stack trace tell you exactly what went wrong.</div>
+</div>
+
+<!-- Slide 6 — The PATH -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>The PATH — How the Shell Finds Commands</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">PATH — finding executables</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">echo</span> <span class="val">$PATH</span>
+<span class="out">/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</span>
+
+<span class="prompt">$</span> <span class="cmd">which</span> node
+<span class="out">/usr/local/bin/node</span>
+
+<span class="prompt">$</span> <span class="cmd">which</span> psql
+<span class="out">/usr/local/bin/psql</span>
+
+<span class="comment"># If you see "command not found":</span>
+<span class="prompt">$</span> <span class="cmd">node</span>
+<span class="out">zsh: command not found: node</span>
+<span class="comment"># → node is not in any PATH directory</span>
+
+<span class="comment"># nvm adds itself to PATH in ~/.zshrc:</span>
+<span class="kw">export</span> <span class="val">PATH</span>=<span class="str">"$HOME/.nvm/versions/node/v22.0.0/bin:$PATH"</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">$PATH</span><span>A colon-separated list of directories. When you type <code>node</code>, the shell searches each directory in order for a file named <code>node</code>.</span></li>
+        <li><span class="badge badge-yellow">which</span><span>Shows where a command's executable lives. <code>which node</code> tells you exactly which installation is being used.</span></li>
+        <li><span class="badge badge-blue">nvm</span><span>Manages multiple Node.js versions by adding the active version's <code>bin/</code> directory to PATH. That's why <code>nvm use 22</code> changes which <code>node</code> you run.</span></li>
+        <li><span class="badge badge-blue">brew / apt</span><span>Package managers install programs into standard PATH directories, which is why after <code>brew install jq</code> you can just type <code>jq</code>.</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — Environment Variables -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Environment Variables</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">environment variables</span></div>
+        <div class="terminal-body"><span class="comment"># Set a variable in the current session</span>
+<span class="prompt">$</span> <span class="kw">export</span> <span class="val">DATABASE_URL</span>=<span class="str">"postgresql://localhost/mydb"</span>
+<span class="prompt">$</span> <span class="kw">export</span> <span class="val">PORT</span>=<span class="val">3001</span>
+<span class="prompt">$</span> <span class="kw">export</span> <span class="val">NODE_ENV</span>=<span class="str">development</span>
+
+<span class="comment"># Read it back</span>
+<span class="prompt">$</span> <span class="cmd">echo</span> <span class="val">$DATABASE_URL</span>
+<span class="out">postgresql://localhost/mydb</span>
+
+<span class="comment"># All current env vars</span>
+<span class="prompt">$</span> <span class="cmd">env</span>
+<span class="comment"># ... long list</span>
+
+<span class="comment"># In Node.js:</span>
+<span class="comment"># process.env.DATABASE_URL</span>
+<span class="comment"># process.env.PORT</span>
+<span class="comment"># process.env.NODE_ENV</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-yellow">export</span><span>Makes the variable available to any program started in this session. Without <code>export</code>, it's only in the shell itself.</span></li>
+        <li><span class="badge badge-yellow">$VAR</span><span>Read a variable. <code>$DATABASE_URL</code> expands to its value. Unset variables expand to an empty string.</span></li>
+        <li><span class="badge badge-blue">process.env</span><span>In Node.js, all environment variables are available as properties of <code>process.env</code>. Express reads <code>process.env.PORT</code>, <code>process.env.DATABASE_URL</code>, etc.</span></li>
+        <li><span class="badge badge-orange">Session scope</span><span>Variables set with <code>export</code> last for the current terminal session only. A new terminal window starts fresh.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-yellow icon-key" style="margin-top:10px;"><strong>Convention:</strong> environment variable names are <code>UPPER_CASE</code>. This distinguishes them from shell variables and code variables.</div>
+</div>
+
+<!-- Slide 8 — The .env Pattern -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>The .env File — Secrets and Config</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">.env and .env.example</span></div>
+        <div class="terminal-body"><span class="comment"># .env — your actual secrets (NEVER commit this)</span>
+<span class="val">DATABASE_URL</span>=<span class="str">postgresql://localhost:5432/reading_list</span>
+<span class="val">PORT</span>=<span class="val">3001</span>
+<span class="val">JWT_SECRET</span>=<span class="str">a-long-random-string-here</span>
+<span class="val">NODE_ENV</span>=<span class="str">development</span>
+
+<span class="comment"># .env.example — template (commit this)</span>
+<span class="val">DATABASE_URL</span>=<span class="str">postgresql://localhost:5432/your_db_name</span>
+<span class="val">PORT</span>=<span class="val">3001</span>
+<span class="val">JWT_SECRET</span>=<span class="str">replace-with-a-long-random-string</span>
+<span class="val">NODE_ENV</span>=<span class="str">development</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-red">.env</span><span>Contains real secrets. In <code>.gitignore</code>. Never committed. Different on every machine.</span></li>
+        <li><span class="badge badge-green">.env.example</span><span>Template with placeholder values. Committed to git. Tells collaborators (and future you) what variables are needed.</span></li>
+        <li><span class="badge badge-blue">dotenv</span><span><code>import 'dotenv/config'</code> at the top of your server file loads <code>.env</code> into <code>process.env</code> automatically.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-orange icon-gotcha" style="margin-top:10px;"><strong>Never commit .env to git.</strong> If a secret reaches a public repository, assume it is compromised — rotate it immediately. Railway and Vercel have a dashboard for setting production env vars; they never go in the code.</div>
+  <div class="callout callout-blue icon-tip"><strong>How to create a strong JWT_SECRET:</strong> <code>openssl rand -base64 32</code> in the terminal. 32 bytes of random data, base64 encoded.</div>
+</div>
+
+<!-- Slide 9 — Pipes -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Pipes — Connecting Commands</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">pipes and redirection</span></div>
+        <div class="terminal-body"><span class="comment"># Pipe: output of left becomes input of right</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books</span> | <span class="cmd">jq</span> .
+
+<span class="comment"># Chain multiple pipes</span>
+<span class="prompt">$</span> <span class="cmd">cat</span> server.js | <span class="cmd">grep</span> <span class="str">"app\."</span> | <span class="cmd">wc</span> <span class="flag">-l</span>
+<span class="out">12</span>
+
+<span class="comment"># grep: filter lines matching a pattern</span>
+<span class="prompt">$</span> <span class="cmd">ls</span> <span class="flag">-la</span> | <span class="cmd">grep</span> <span class="str">".js"</span>
+
+<span class="comment"># sort and count unique values</span>
+<span class="prompt">$</span> <span class="cmd">cat</span> access.log | <span class="cmd">sort</span> | <span class="cmd">uniq</span> <span class="flag">-c</span> | <span class="cmd">sort</span> <span class="flag">-rn</span>
+
+<span class="comment"># Redirect to a file</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> .../books &gt; books.json
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> .../books &gt;&gt; books.json  <span class="comment"># append</span>
+
+<span class="comment"># Redirect stderr to stdout</span>
+<span class="prompt">$</span> <span class="cmd">node</span> server.js <span class="or">2&gt;&amp;1</span> | <span class="cmd">tee</span> server.log</div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">|</span><span>The pipe operator. Takes stdout of the left command and feeds it as stdin to the right command. Chains can be as long as you need.</span></li>
+        <li><span class="badge badge-yellow">&gt;</span><span>Redirect output to a file. Creates or overwrites.</span></li>
+        <li><span class="badge badge-yellow">&gt;&gt;</span><span>Append to a file. Creates if it doesn't exist.</span></li>
+        <li><span class="badge badge-yellow">2&gt;&amp;1</span><span>Redirect stderr (error output, stream 2) to stdout (stream 1). Useful when errors would otherwise be invisible.</span></li>
+        <li><span class="badge badge-blue">grep</span><span>Filter lines matching a regex pattern. <code>-i</code> for case-insensitive, <code>-v</code> to invert.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-blue icon-tip" style="margin-top:10px;">The <code>curl ... | jq .</code> pattern you've used throughout this course is a pipe. curl writes JSON to stdout. The <code>|</code> passes it to jq, which pretty-prints it to your terminal.</div>
+</div>
+
+<!-- Slide 10 — Combining Commands -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Chaining Commands — &amp;&amp;, ||, ;</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">chaining operators</span></div>
+        <div class="terminal-body"><span class="comment"># &amp;&amp; — run next only if previous succeeded (exit code 0)</span>
+<span class="prompt">$</span> <span class="cmd">npm install</span> &amp;&amp; <span class="cmd">node server.js</span>
+<span class="prompt">$</span> <span class="cmd">psql</span> <span class="val">$DATABASE_URL</span> &lt; schema.sql &amp;&amp; <span class="cmd">echo</span> <span class="str">"Migration done"</span>
+
+<span class="comment"># || — run next only if previous FAILED</span>
+<span class="prompt">$</span> <span class="cmd">ping</span> <span class="flag">-c1</span> localhost || <span class="cmd">echo</span> <span class="str">"No network"</span>
+
+<span class="comment"># ; — run next regardless</span>
+<span class="prompt">$</span> <span class="cmd">npm run build</span>; <span class="cmd">npm start</span>
+
+<span class="comment"># Practical: create project and enter it</span>
+<span class="prompt">$</span> <span class="cmd">mkdir</span> my-api &amp;&amp; <span class="cmd">cd</span> my-api &amp;&amp; <span class="cmd">npm init</span> <span class="flag">-y</span>
+
+<span class="comment"># Practical: migrate and start</span>
+<span class="prompt">$</span> <span class="cmd">psql</span> <span class="val">$DATABASE_URL</span> &lt; schema.sql &amp;&amp; <span class="str">\</span>
+  <span class="cmd">npm install</span> &amp;&amp; <span class="str">\</span>
+  <span class="cmd">node server.js</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">&amp;&amp;</span><span>"And then — if success." The most common. Stops the chain on first failure. Used in npm scripts, deployment steps, CI pipelines.</span></li>
+        <li><span class="badge badge-yellow">||</span><span>"Or — if failure." Good for fallback behaviour or error messages.</span></li>
+        <li><span class="badge badge-yellow">;</span><span>"Then — always." Runs both commands regardless of success or failure. Rarely what you want in automated scripts.</span></li>
+        <li><span class="badge badge-blue">Exit codes</span><span>Programs signal success (0) or failure (non-zero) with an exit code. <code>$?</code> holds the exit code of the last command.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-yellow icon-tip" style="margin-top:10px;">AI often generates multi-step setup commands joined by <code>&amp;&amp;</code>. Now you know why: if <code>npm install</code> fails, you don't want <code>node server.js</code> to run with incomplete dependencies.</div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- Slide 11 — Command Substitution -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Command Substitution — Capturing Output</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">command substitution with $()</span></div>
+        <div class="terminal-body"><span class="comment"># $() captures the output of a command as a string</span>
+
+<span class="comment"># Capture a JWT token</span>
+<span class="prompt">$</span> <span class="val">TOKEN</span>=$(<span class="cmd">curl</span> <span class="flag">-s -X POST</span> <span class="url">http://localhost:3001/auth/login</span> <span class="str">\</span>
+    <span class="flag">-H</span> <span class="str">'Content-Type: application/json'</span> <span class="str">\</span>
+    <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"abc"}'</span> <span class="str">\</span>
+    | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.token'</span>)
+
+<span class="comment"># Confirm it worked</span>
+<span class="prompt">$</span> <span class="cmd">echo</span> <span class="val">$TOKEN</span>
+<span class="out">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</span>
+
+<span class="comment"># Capture date for a filename</span>
+<span class="prompt">$</span> <span class="val">DATE</span>=$(<span class="cmd">date</span> <span class="str">+%Y-%m-%d</span>)
+<span class="prompt">$</span> <span class="cmd">cp</span> backup.sql backup-<span class="val">$DATE</span>.sql
+
+<span class="comment"># Capture line count</span>
+<span class="prompt">$</span> <span class="val">LINES</span>=$(<span class="cmd">wc</span> <span class="flag">-l</span> &lt; server.js)
+<span class="prompt">$</span> <span class="cmd">echo</span> <span class="str">"server.js has $LINES lines"</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">$()</span><span>Runs the command inside and substitutes its stdout in place. The outer shell sees the captured text, not the original command.</span></li>
+        <li><span class="badge badge-blue">TOKEN=$(...)</span><span>The entire TOKEN capture pattern from the curl deck — this is how it works. The <code>jq -r '.token'</code> extracts just the token string from the JSON response.</span></li>
+        <li><span class="badge badge-blue">Variable in strings</span><span><code>$VARNAME</code> expands inside double-quoted strings. In single-quoted strings, it does NOT expand. That's why you need double quotes when using variables.</span></li>
+        <li><span class="badge badge-orange">Backticks</span><span>The older syntax <code>`command`</code> is equivalent to <code>$(command)</code>. Prefer <code>$()</code> — it nests more clearly.</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Process Control -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Controlling Running Programs</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">process management</span></div>
+        <div class="terminal-body"><span class="comment"># Stop a running program</span>
+<span class="or">Ctrl+C</span>
+
+<span class="comment"># Suspend (pause) a running program</span>
+<span class="or">Ctrl+Z</span>
+
+<span class="comment"># Resume in background</span>
+<span class="prompt">$</span> <span class="cmd">bg</span>
+
+<span class="comment"># Resume in foreground</span>
+<span class="prompt">$</span> <span class="cmd">fg</span>
+
+<span class="comment"># Run in background from the start</span>
+<span class="prompt">$</span> <span class="cmd">node server.js</span> &amp;
+<span class="out">[1] 12345         </span><span class="comment"># PID printed</span>
+
+<span class="comment"># List background jobs</span>
+<span class="prompt">$</span> <span class="cmd">jobs</span>
+<span class="out">[1]+ Running  node server.js</span>
+
+<span class="comment"># Kill by PID</span>
+<span class="prompt">$</span> <span class="cmd">kill</span> <span class="val">12345</span>
+<span class="prompt">$</span> <span class="cmd">kill</span> <span class="flag">-9</span> <span class="val">12345</span>   <span class="comment"># force kill (SIGKILL)</span>
+
+<span class="comment"># Find what's using port 3001</span>
+<span class="prompt">$</span> <span class="cmd">lsof</span> <span class="flag">-i</span> :<span class="val">3001</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">Ctrl+C</span><span>Sends SIGINT — asks the program to stop cleanly. Use this to stop your dev server.</span></li>
+        <li><span class="badge badge-yellow">Ctrl+Z</span><span>Suspends the process. You get your prompt back. The process is paused, not killed.</span></li>
+        <li><span class="badge badge-yellow">&amp;</span><span>Run a command in the background. Your prompt returns immediately. The process keeps running.</span></li>
+        <li><span class="badge badge-yellow">lsof -i :PORT</span><span>Shows what process is listening on a port. If "address already in use" — use this to find what's occupying port 3001.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:10px;"><strong>Keyboard shortcuts in the shell:</strong> <code>Ctrl+A</code> — beginning of line. <code>Ctrl+E</code> — end of line. <code>Ctrl+R</code> — search command history. <code>Ctrl+L</code> — clear screen. <code>↑</code>/<code>↓</code> — navigate history. <code>!!</code> — repeat last command.</div>
+</div>
+
+<!-- Slide 13 — Shell Configuration -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>~/.zshrc — Your Shell's Startup File</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">~/.zshrc example</span></div>
+        <div class="terminal-body"><span class="comment"># ~/.zshrc — loaded every time you open a terminal</span>
+
+<span class="comment"># Make ls use colour</span>
+<span class="kw">alias</span> <span class="fn">ls</span>=<span class="str">'ls --color=auto'</span>
+<span class="kw">alias</span> <span class="fn">ll</span>=<span class="str">'ls -la'</span>
+<span class="kw">alias</span> <span class="fn">la</span>=<span class="str">'ls -A'</span>
+
+<span class="comment"># Shortcut to project directory</span>
+<span class="kw">alias</span> <span class="fn">api</span>=<span class="str">'cd ~/projects/my-api'</span>
+
+<span class="comment"># Always set NODE_ENV for development</span>
+<span class="kw">export</span> <span class="val">NODE_ENV</span>=<span class="str">development</span>
+
+<span class="comment"># nvm (added automatically by nvm install)</span>
+<span class="kw">export</span> <span class="val">NVM_DIR</span>=<span class="str">"$HOME/.nvm"</span>
+[ -s <span class="str">"$NVM_DIR/nvm.sh"</span> ] &amp;&amp; \. <span class="str">"$NVM_DIR/nvm.sh"</span>
+
+<span class="comment"># Reload after editing:</span>
+<span class="comment"># source ~/.zshrc</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">~/.zshrc</span><span>The file zsh reads when it starts. <code>~</code> means your home directory. On macOS with bash it's <code>~/.bashrc</code> or <code>~/.bash_profile</code>.</span></li>
+        <li><span class="badge badge-yellow">alias</span><span>Create a shortcut. <code>alias ll='ls -la'</code> means typing <code>ll</code> runs <code>ls -la</code>. Saved permanently once in .zshrc.</span></li>
+        <li><span class="badge badge-yellow">export</span><span>Variables set here are available to every program you run in every terminal session. Good place for EDITOR, NODE_ENV etc.</span></li>
+        <li><span class="badge badge-blue">source</span><span><code>source ~/.zshrc</code> reloads the file without closing the terminal. Run this after editing .zshrc.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-yellow icon-gotcha" style="margin-top:10px;"><strong>Don't blindly copy .zshrc snippets from the internet.</strong> Understand each line before adding it. AI can generate .zshrc snippets — ask it to explain each line.</div>
+</div>
+
+<!-- Slide 14 — A Simple Script -->
+<div class="slide icon-hands-on">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Writing a Shell Script</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">test-api.sh</span></div>
+        <div class="terminal-body"><span class="comment">#!/usr/bin/env bash</span>
+<span class="comment"># test-api.sh — basic API smoke test</span>
+
+<span class="val">BASE</span>=<span class="str">"http://localhost:3001"</span>
+
+<span class="comment"># 1. Health check</span>
+<span class="cmd">echo</span> <span class="str">"--- Health check ---"</span>
+<span class="cmd">curl</span> <span class="flag">-s</span> <span class="val">$BASE</span>/api/health | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.status'</span>
+
+<span class="comment"># 2. Login and capture token</span>
+<span class="cmd">echo</span> <span class="str">"--- Login ---"</span>
+<span class="val">TOKEN</span>=$(<span class="cmd">curl</span> <span class="flag">-s -X POST</span> <span class="val">$BASE</span>/auth/login <span class="str">\</span>
+  <span class="flag">-H</span> <span class="str">'Content-Type: application/json'</span> <span class="str">\</span>
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"test123"}'</span> <span class="str">\</span>
+  | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.token'</span>)
+
+<span class="kw">if</span> [ <span class="flag">-z</span> <span class="str">"$TOKEN"</span> ] || [ <span class="str">"$TOKEN"</span> = <span class="str">"null"</span> ]; <span class="kw">then</span>
+  <span class="cmd">echo</span> <span class="str">"Login failed — is the server running?"</span>
+  <span class="cmd">exit</span> <span class="val">1</span>
+<span class="kw">fi</span>
+<span class="cmd">echo</span> <span class="str">"Token captured"</span>
+
+<span class="comment"># 3. Create a book</span>
+<span class="cmd">echo</span> <span class="str">"--- Create book ---"</span>
+<span class="cmd">curl</span> <span class="flag">-s -X POST</span> <span class="val">$BASE</span>/api/books <span class="str">\</span>
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer $TOKEN"</span> <span class="str">\</span>
+  <span class="flag">-H</span> <span class="str">'Content-Type: application/json'</span> <span class="str">\</span>
+  <span class="flag">-d</span> <span class="str">'{"title":"Test Book","author":"Tester"}'</span> | <span class="cmd">jq</span> <span class="str">'{id,title}'</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">#!/usr/bin/env bash</span><span>The shebang line — tells the OS which interpreter to use. Always the first line of a script.</span></li>
+        <li><span class="badge badge-yellow">Variables</span><span><code>BASE="..."</code> — assign without spaces around <code>=</code>. Read with <code>$BASE</code>.</span></li>
+        <li><span class="badge badge-yellow">if [ -z ... ]</span><span>Test if a string is empty (<code>-z</code>). <code>-n</code> tests non-empty. <code>[ "$VAR" = "value" ]</code> tests equality.</span></li>
+        <li><span class="badge badge-yellow">exit 1</span><span>Stop the script and signal failure (non-zero exit code). <code>exit 0</code> signals success.</span></li>
+        <li><span class="badge badge-blue">Make executable</span><span><code>chmod +x test-api.sh</code>, then run with <code>./test-api.sh</code></span></li>
+      </ul>
+      <a href="https://explainshell.com" target="_blank" class="breakout-link">explainshell.com — paste any command to see it explained token by token ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- Slide 15 — AI and the Terminal -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Reading AI-Generated Shell Commands</h2>
+  <div class="callout callout-orange icon-gotcha" style="font-size:15px;line-height:1.8;margin-bottom:14px;">AI generates shell commands constantly — curl examples, npm scripts, deployment instructions, database setup commands. <strong>Always read a shell command before running it.</strong> Unlike a code file you can review and test in stages, a shell command executes immediately and some effects are irreversible. AI is often overconfident about shell syntax: it may use the wrong flags for your OS, assume a tool is installed, or generate <code>rm -rf</code> patterns you should scrutinise carefully.</div>
+  <div class="cols cols-2" style="margin-top:6px;">
+    <div class="callout callout-blue"><strong>AI-generated commands you'll see in this course:</strong> <code>npm install &amp;&amp; node server.js</code> · <code>psql $DATABASE_URL &lt; schema.sql</code> · <code>TOKEN=$(curl ... | jq -r '.token')</code> · <code>export $(grep -v '^#' .env | xargs)</code>. Now you can read every token of these commands and understand exactly what they do.</div>
+    <div class="callout callout-green"><strong>Using AI to learn shell:</strong> Ask AI to explain any command you don't recognise. <code>curl -s -X POST ... -H ... -d ...</code> — ask "what does each flag do?". Ask it to write a test script and explain each line. The AI is an excellent shell tutor when you engage with it rather than just copying.</div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px;"><strong>Cross-platform note:</strong> <code>bash</code> scripts run on macOS and Linux. Windows users should use WSL2 or Git Bash. PowerShell has different syntax. If AI generates a shell command, ask it to confirm which shell it assumes.</div>
+</div>
+
+<!-- Slide 16 — Quick Reference -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Shell Quick Reference</h2>
+  <div class="cols cols-2" style="margin-top:10px;">
+    <div>
+      <table>
+        <tbody>
+          <tr class="tbl-section"><td colspan="2">Navigation &amp; Files</td></tr>
+          <tr><td>pwd</td><td>Print current directory</td></tr>
+          <tr><td>ls -la</td><td>List files with details + hidden</td></tr>
+          <tr><td>cd path</td><td>Change directory</td></tr>
+          <tr><td>mkdir -p</td><td>Create directory (and parents)</td></tr>
+          <tr><td>cp -r</td><td>Copy file or directory</td></tr>
+          <tr><td>mv</td><td>Move or rename</td></tr>
+          <tr><td>rm -rf</td><td>Delete (permanent — careful)</td></tr>
+          <tr><td>cat / less</td><td>Read file contents</td></tr>
+          <tr><td>tail -f</td><td>Follow log file live</td></tr>
+          <tr class="tbl-section"><td colspan="2">Variables &amp; Environment</td></tr>
+          <tr><td>export VAR=val</td><td>Set environment variable</td></tr>
+          <tr><td>echo $VAR</td><td>Print variable value</td></tr>
+          <tr><td>env</td><td>List all env variables</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <tbody>
+          <tr class="tbl-section"><td colspan="2">Pipes &amp; Combining</td></tr>
+          <tr><td>cmd1 | cmd2</td><td>Pipe output to next command</td></tr>
+          <tr><td>cmd &gt; file</td><td>Redirect output to file</td></tr>
+          <tr><td>cmd &gt;&gt; file</td><td>Append output to file</td></tr>
+          <tr><td>cmd1 &amp;&amp; cmd2</td><td>Run cmd2 if cmd1 succeeded</td></tr>
+          <tr><td>cmd &amp;</td><td>Run in background</td></tr>
+          <tr><td>$(cmd)</td><td>Capture output as string</td></tr>
+          <tr class="tbl-section"><td colspan="2">Keyboard Shortcuts</td></tr>
+          <tr><td>Ctrl+C</td><td>Stop running process</td></tr>
+          <tr><td>Ctrl+R</td><td>Search command history</td></tr>
+          <tr><td>Ctrl+L</td><td>Clear screen</td></tr>
+          <tr><td>Tab</td><td>Autocomplete path/command</td></tr>
+          <tr><td>↑ / ↓</td><td>Navigate history</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 16</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'shell-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'a2-1', type: 'practical', title: 'Write a shell script',
+    desc: "Write a script that: (1) prints today's date, (2) counts how many .js files are in the current directory tree, (3) shows the last 10 commands from your shell history.",
+    criteria: [
+      'The script runs without errors from a fresh terminal session',
+      'Each of the three tasks is handled by a distinct command or pipeline',
+      'You can explain what each line does and why you wrote it that way'
+    ] },
+  { id: 'a2-2', type: 'practical', title: 'curl + jq pipeline',
+    desc: "Run: curl -s https://jsonplaceholder.typicode.com/todos/1 | jq '.title'\nThen modify the jq expression to extract a different field. If you don't have jq, install it: brew install jq or apt install jq.",
+    criteria: [
+      'You ran the command and received output (not a connection or parse error)',
+      'You successfully extracted a different field with a modified jq expression',
+      'You can explain what the pipe | does and why the output changes with different jq filters'
+    ] },
+  { id: 'a2-3', type: 'reflect', title: 'Where will you use this?',
+    desc: 'Which shell skill from this module will you use first in your own work? What would you ask an AI to help you write, and what would you want to understand yourself before running it?',
+    criteria: [
+      'You named a specific skill, not just "shell scripting" in general',
+      'You described something you would ask AI to help with AND something you would want to understand yourself',
+      'Your answer reflects your actual workflow or project, not a hypothetical one'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Navigate the filesystem and manage files and directories from the command line',
+  'Compose shell pipelines using pipes, redirection, and chaining operators (&&, ||)',
+  'Configure environment variables and apply the .env / .env.example pattern',
+  'Write basic shell scripts with variables and exit codes',
+  'Use curl and jq to make HTTP requests and process JSON responses from the terminal'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'sh-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You type <code>node server.js</code> and get "zsh: command not found: node". What is the most likely cause?',
+    options: [
+      'Node.js is not installed anywhere on the system',
+      'The directory containing the node executable is not in your PATH',
+      'You need to use <code>sudo node server.js</code>',
+      'The file server.js does not exist'
+    ],
+    correct: 1,
+    explanation: 'PATH is a colon-separated list of directories the shell searches for executables. If node\'s bin directory is not listed there, the shell cannot find it even if node is installed. Use <code>which node</code> to check, and <code>echo $PATH</code> to inspect.',
+    reviewSlide: 'The PATH — How the Shell Finds Commands'
+  },
+  {
+    id: 'sh-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which command sequence is correct for running the database migration only if npm install succeeds?',
+    options: [
+      '<code>npm install ; psql $DATABASE_URL &lt; schema.sql</code>',
+      '<code>npm install || psql $DATABASE_URL &lt; schema.sql</code>',
+      '<code>npm install &amp;&amp; psql $DATABASE_URL &lt; schema.sql</code>',
+      '<code>npm install | psql $DATABASE_URL &lt; schema.sql</code>'
+    ],
+    correct: 2,
+    explanation: '<code>&amp;&amp;</code> runs the right-hand command only if the left-hand command exits with code 0 (success). <code>;</code> always runs both regardless of success. <code>||</code> runs the second only on failure. <code>|</code> pipes stdout, which is not what we want here.',
+    reviewSlide: 'Chaining Commands — &&, ||, ;'
+  },
+  {
+    id: 'sh-1-3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What does <code>tail -f server.log</code> do?',
+    options: [
+      'Prints the last 10 lines of server.log and exits',
+      'Follows server.log live, printing new lines as they are appended',
+      'Deletes lines from the end of server.log',
+      'Filters server.log for lines matching "f"'
+    ],
+    correct: 1,
+    explanation: 'The <code>-f</code> flag means "follow" — tail keeps the file open and prints each new line as it is written. This is invaluable for watching a live server log. Press Ctrl+C to stop.',
+    reviewSlide: 'Reading File Contents'
+  },
+  {
+    id: 'sh-1-4',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What is the difference between <code>&gt;</code> and <code>&gt;&gt;</code> when redirecting output?',
+    options: [
+      '<code>&gt;</code> appends to a file; <code>&gt;&gt;</code> creates a new file',
+      '<code>&gt;</code> creates or overwrites the file; <code>&gt;&gt;</code> appends to it',
+      '<code>&gt;</code> redirects stderr; <code>&gt;&gt;</code> redirects stdout',
+      'They are identical — both append'
+    ],
+    correct: 1,
+    explanation: '<code>&gt;</code> redirects stdout to a file, overwriting any existing content. <code>&gt;&gt;</code> appends to the file, preserving existing content. Use <code>&gt;&gt;</code> when you want to accumulate output across multiple commands.',
+    reviewSlide: 'Pipes — Connecting Commands'
+  },
+  {
+    id: 'sh-1-5',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Explain what <code>TOKEN=$(curl -s -X POST http://localhost:3001/auth/login -H \'Content-Type: application/json\' -d \'{"email":"a@b.com","password":"pw"}\' | jq -r \'.token\')</code> does. Break it into its parts.',
+    model: 'The outer <code>$(...)</code> is command substitution — it runs the inner command and captures its stdout as a string, assigned to TOKEN. Inside: <code>curl -s -X POST</code> makes a silent POST request; <code>-H</code> sets the Content-Type header; <code>-d</code> sends JSON as the request body. The result (a JSON response) is piped with <code>|</code> to <code>jq -r \'.token\'</code>, which extracts the token field as a raw string (no surrounding quotes). The captured string is stored in the TOKEN variable for use in subsequent commands.',
+    reviewSlide: 'Command Substitution — Capturing Output'
+  },
+  {
+    id: 'sh-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What is the purpose of the shebang line <code>#!/usr/bin/env bash</code> at the top of a script?',
+    options: [
+      'It is a comment and has no effect',
+      'It tells the OS which interpreter to use to run the script',
+      'It sets the PATH for the script',
+      'It marks the file as executable'
+    ],
+    correct: 1,
+    explanation: 'The shebang (<code>#!</code>) followed by a path tells the operating system which program to use to execute the file. <code>/usr/bin/env bash</code> uses env to find bash in PATH, making it more portable than hardcoding <code>/bin/bash</code>.',
+    reviewSlide: 'Writing a Shell Script'
+  },
+  {
+    id: 'sh-2-2',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'You edit <code>~/.zshrc</code> to add a new alias. What must you do for the alias to take effect in your current terminal session?',
+    options: [
+      'Nothing — changes take effect immediately',
+      'Close and reopen the terminal',
+      'Run <code>source ~/.zshrc</code>',
+      'Run <code>export ~/.zshrc</code>'
+    ],
+    correct: 2,
+    explanation: '<code>~/.zshrc</code> is read when a new shell session starts. To apply changes without reopening the terminal, run <code>source ~/.zshrc</code> (or <code>. ~/.zshrc</code>), which re-reads and executes the file in the current session.',
+    reviewSlide: '~/.zshrc — Your Shell\'s Startup File'
+  },
+  {
+    id: 'sh-2-3',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Your Express server is running on port 3001 and you get "address already in use". Which command helps you find what process is occupying that port?',
+    options: [
+      '<code>kill 3001</code>',
+      '<code>ps 3001</code>',
+      '<code>lsof -i :3001</code>',
+      '<code>port list 3001</code>'
+    ],
+    correct: 2,
+    explanation: '<code>lsof -i :3001</code> lists open files (lsof = list open files) filtered to those using port 3001. It shows the process name and PID, which you can then kill. This is the standard approach for "address already in use" errors.',
+    reviewSlide: 'Controlling Running Programs'
+  },
+  {
+    id: 'sh-2-4',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'In a shell script, what does <code>exit 1</code> do?',
+    options: [
+      'Pauses the script for 1 second',
+      'Skips 1 line of the script',
+      'Stops the script and signals failure to the calling process',
+      'Stops the script and signals success to the calling process'
+    ],
+    correct: 2,
+    explanation: '<code>exit</code> terminates the script. A non-zero exit code (like 1) signals failure — this is how <code>&amp;&amp;</code> chains know to stop: the chained command checks the exit code. <code>exit 0</code> signals success. The convention mirrors Unix process exit codes.',
+    reviewSlide: 'Writing a Shell Script'
+  },
+  {
+    id: 'sh-2-5',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Why should you never commit your <code>.env</code> file to git, and what two files does the standard pattern use instead?',
+    model: 'The <code>.env</code> file contains secrets — database connection strings, API keys, JWT secrets. If committed to a public repository, those secrets are exposed and must be treated as compromised immediately. The standard pattern uses: (1) <code>.env</code> — the real secrets file, listed in <code>.gitignore</code>, never committed, different per machine/environment; (2) <code>.env.example</code> — a template with placeholder values, committed to git, which tells collaborators what variables are needed. Production secrets are set via the hosting platform\'s dashboard (e.g. Railway), never in the codebase.',
+    reviewSlide: 'The .env File — Secrets and Config'
+  }
+];
+</script>
+</body>
+</html>

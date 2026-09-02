@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The AI Agent Node — Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #ffa657; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #8a3800; --prompt-border: #c4621a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 52px 72px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+  .section-header { background: linear-gradient(135deg,#200e02 0%,#150901 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(196,98,26,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(196,98,26,.2); font-size: 12px; color: var(--accent); font-weight: 600; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+  .cols { display: grid; gap: 18px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+  .callout { border-radius: 8px; padding: 13px 16px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;    color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-green  { background: rgba(63,185,80,.15);    color: var(--green);  }
+  .badge-yellow { background: rgba(210,153,34,.15);   color: var(--yellow); }
+  .badge-orange { background: rgba(255,166,87,.15);   color: var(--orange); }
+  .badge-blue   { background: rgba(88,166,255,.15);   color: #58a6ff; }
+  .badge-num    { background: rgba(255,166,87,.2); color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td strong { color: var(--text); }
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 26px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(255,166,87,.12); color: var(--accent); border: 1px solid rgba(255,166,87,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .n8n-flow { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: nowrap; overflow-x: auto; }
+  .n8n-node { background: #1c2128; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 100px; flex-shrink: 0; }
+  .n8n-node .node-icon { font-size: 20px; margin-bottom: 4px; }
+  .n8n-node .node-name { font-size: 11px; font-weight: 700; color: var(--text); }
+  .n8n-node .node-type { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .n8n-node.trigger { border-color: var(--green); }
+  .n8n-node.action  { border-color: #58a6ff; }
+  .n8n-node.ai      { border-color: var(--accent); }
+  .n8n-node.logic   { border-color: var(--purple); }
+  .n8n-arrow { color: var(--muted); font-size: 18px; padding: 0 6px; flex-shrink: 0; }
+  #nav { position: fixed; bottom: 26px; right: 36px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 36px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .terminal-body, .diagram { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — The AI Agent Node -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">AI Agent Node</span>
+    <span class="tag">Tool Nodes</span>
+    <span class="tag">Memory</span>
+    <span class="tag">System Prompts</span>
+    <span class="tag">Track E</span>
+  </div>
+  <div class="slide-label">Track E · AI Agents &amp; Automation</div>
+  <h1>The AI Agent<br><span class="accent">Node</span></h1>
+  <p class="subtitle">
+    A deep dive into n8n's built-in agent: tool nodes, memory options, system prompts,
+    and building a Reading List assistant that responds to natural language.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Track E · Deck 4 of 6 · Prerequisites: E1–E3</span>
+  </div>
+</div>
+
+<!-- Slide 2 — What the Agent Node Does Internally -->
+<div class="slide">
+  <div class="slide-label">Under the Hood</div>
+  <h2>What the AI Agent Node Does Internally</h2>
+  <p>The AI Agent node implements the ReAct loop from E1 — without you writing the loop. When n8n executes the agent node, it runs this cycle until the LLM produces a final answer or the iteration limit is reached.</p>
+  <div class="diagram" style="margin-top:12px; font-size:12px; line-height:2.1;">
+n8n passes to LLM:
+  <span class="hi">system_prompt</span>  ← your system prompt field
+  <span class="hi">user_message</span>   ← input item's text (or prompt template)
+  <span class="hi">tool_definitions</span> ← one per child tool node (name + description + schema)
+  <span class="hi">messages_history</span> ← conversation so far (from memory node, if connected)
+
+LLM responds with tool_use → n8n executes the child tool node → result appended
+LLM responds with text → <span class="gr">done</span>, output item contains the final answer
+  </div>
+  <div class="callout callout-blue" style="margin-top:12px; font-size:13px;">
+    <strong>The tool definitions are generated automatically</strong> from the child nodes you connect below the agent. Each tool node's name and description become the tool schema. Write descriptive names and descriptions — the LLM reads them to decide which tool to call.
+  </div>
+  <div class="callout callout-yellow" style="margin-top:8px; font-size:13px;">
+    n8n's default max iterations is 10. The agent stops at 10 even if the task is incomplete. For complex tasks, increase this — but always set a limit.
+  </div>
+</div>
+
+<!-- Slide 3 — The Chat Trigger -->
+<div class="slide">
+  <div class="slide-label">Trigger Type</div>
+  <h2>The Chat Trigger: Interactive Agents</h2>
+  <p>For agents that respond to user messages (rather than a schedule or webhook), use the <strong>Chat Trigger</strong>. It opens a chat interface in n8n's built-in chat panel — no frontend needed for testing.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>Chat Trigger vs other triggers</strong></div>
+      <table>
+        <tr><th>Trigger</th><th>Use when</th></tr>
+        <tr><td>Chat Trigger</td><td>User types a message to the agent (interactive assistant)</td></tr>
+        <tr><td>Webhook</td><td>Another system (your app, Slack) sends the prompt programmatically</td></tr>
+        <tr><td>Schedule</td><td>Agent runs automatically, no user input</td></tr>
+        <tr><td>Manual</td><td>Testing — run once with fixed input from the workflow editor</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:8px;"><strong>Chat Trigger + Memory = persistent assistant</strong></div>
+      <p style="font-size:13px; color:var(--muted);">Without a memory node, every message starts a fresh context — the agent does not remember the previous turn. Connect a <strong>Window Buffer Memory</strong> node to give the agent in-context conversation history. Each chat session maintains its own history.</p>
+      <div class="callout callout-yellow" style="font-size:12px; margin-top:8px;">
+        The Chat Trigger also provides a public chat URL you can share. With n8n Cloud or self-hosted with authentication, this becomes a deployable chatbot endpoint.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — Configuring Tool Nodes -->
+<div class="slide">
+  <div class="slide-label">Tool Nodes</div>
+  <h2>Connecting Tool Nodes to the Agent</h2>
+  <p>Tool nodes connect to the <strong>bottom</strong> of the AI Agent node (not the right side). The agent uses them based on their name and description — the LLM reads both.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>HTTP Request as a tool</strong></div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Node type</td><td>HTTP Request (connected to bottom of agent)</td></tr>
+        <tr><td>Name</td><td><code>list_books</code></td></tr>
+        <tr><td>Description</td><td>"List books in the reading list. Use when the user asks about their books, wants to see what they are reading, or asks about reading status."</td></tr>
+        <tr><td>Method / URL / Auth</td><td>Same as E3 — GET /api/books + bearer token</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:8px;"><strong>Why description quality matters</strong></div>
+      <p style="font-size:13px; color:var(--muted);">The LLM sees the description when deciding whether to call this tool. A vague description like "gets books" leads to incorrect routing. A precise description — including example user queries — guides the LLM reliably.</p>
+      <div class="callout callout-yellow" style="font-size:12px; margin-top:8px;">
+        <strong>Tool names use underscores</strong>, not spaces. The LLM writes <code>list_books</code> in its tool_use response — n8n matches this to the node name. Spaces in tool names cause matching failures.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — Building the Reading Assistant: Tools -->
+<div class="slide">
+  <div class="slide-label">Build</div>
+  <h2>Reading List Assistant: The Tool Set</h2>
+  <p>A useful reading assistant needs tools that cover the core operations. Each tool is an HTTP Request node connected below the agent.</p>
+  <table style="margin-top:12px;">
+    <tr><th>Tool name</th><th>HTTP method + endpoint</th><th>Description (what to put in the field)</th></tr>
+    <tr>
+      <td><code>list_books</code></td>
+      <td>GET /api/books</td>
+      <td>"List all books in the reading list. Supports ?status= filter for unread, reading, or read."</td>
+    </tr>
+    <tr>
+      <td><code>get_book</code></td>
+      <td>GET /api/books/:id</td>
+      <td>"Get a single book by its ID. Use when the user asks about a specific book and you know the ID."</td>
+    </tr>
+    <tr>
+      <td><code>add_book</code></td>
+      <td>POST /api/books</td>
+      <td>"Add a new book to the reading list. Use when the user wants to add a book they mention by title and author."</td>
+    </tr>
+    <tr>
+      <td><code>update_status</code></td>
+      <td>PATCH /api/books/:id</td>
+      <td>"Update a book's reading status to unread, reading, or read. Use when the user says they started or finished a book."</td>
+    </tr>
+    <tr>
+      <td><code>get_stats</code></td>
+      <td>GET /api/books/stats</td>
+      <td>"Get statistics about the reading list: total count, average year, counts by status."</td>
+    </tr>
+  </table>
+  <div class="callout callout-orange" style="margin-top:10px; font-size:13px;">
+    Start with <code>list_books</code> and <code>get_stats</code> only. Add write tools (<code>add_book</code>, <code>update_status</code>) after testing read-only behaviour — this limits risk during development.
+  </div>
+</div>
+
+<!-- Slide 6 — System Prompt Design -->
+<div class="slide">
+  <div class="slide-label">System Prompt</div>
+  <h2>Writing the System Prompt</h2>
+  <p>The system prompt defines the agent's role, constraints, and output format. It is the most important configuration field in the agent node.</p>
+  <div class="prompt-block" style="margin-top:10px;">
+    <div class="prompt-bar">🤖 System prompt — Reading List Assistant</div>
+    <div class="prompt-body" style="font-size:13px;">
+      You are a reading list assistant. You help the user manage and understand their reading list via the Reading List API.<br><br>
+      <strong>Your tools:</strong> list_books (list all books, filter by status), get_book (look up one book by ID), add_book (add a new book), update_status (change a book's status to unread/reading/read), get_stats (summary statistics).<br><br>
+      <strong>Constraints:</strong><br>
+      – For add_book, always confirm title and author before calling the tool.<br>
+      – For update_status, always call list_books first to find the book ID — never guess an ID.<br>
+      – If the user asks to delete a book, explain that deletion is not available through this assistant.<br>
+      – Respond concisely. Do not repeat the full book list unless the user asks for it.<br><br>
+      <em>Return plain text responses, not JSON, unless the user explicitly asks for JSON.</em>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px; font-size:13px;">
+    <strong>Notice the constraints section.</strong> Without "always call list_books first to find the ID", the agent will hallucinate IDs. Explicit tool-use rules in the system prompt prevent the most common agent errors.
+  </div>
+</div>
+
+<!-- Slide 7 — Section Header: Memory -->
+<div class="slide section-header">
+  <div class="pill">Memory</div>
+  <h1>Giving Your Agent<br>a Memory</h1>
+  <p class="subtitle">In-context window buffer vs persistent Postgres memory — when to use each.</p>
+</div>
+
+<!-- Slide 8 — Window Buffer Memory -->
+<div class="slide">
+  <div class="slide-label">Memory Option 1</div>
+  <h2>Window Buffer Memory</h2>
+  <p>Window Buffer Memory keeps the last N conversation turns in the context window. The agent can refer to earlier messages in the same session — but memory is lost when the session ends.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:8px;"><strong>How to connect it</strong></div>
+      <ul class="annot-list">
+        <li><span class="badge badge-orange">1</span><span>Add a <strong>Window Buffer Memory</strong> node to the canvas (search in node panel)</span></li>
+        <li><span class="badge badge-orange">2</span><span>Connect it to the <strong>memory input</strong> of the AI Agent node (separate connection point from tools)</span></li>
+        <li><span class="badge badge-orange">3</span><span>Set <strong>Context Window Length</strong> to 10–20 (number of message pairs to retain)</span></li>
+        <li><span class="badge badge-orange">4</span><span>The agent automatically reads and writes history — no configuration needed beyond the connection</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout callout-yellow" style="font-size:13px; margin-bottom:8px;"><strong>Limits</strong></div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">→</span><span>Memory is in-process only — a workflow restart clears it</span></li>
+        <li><span class="badge badge-yellow">→</span><span>If two users chat simultaneously, they share the same buffer (single-user assumption)</span></li>
+        <li><span class="badge badge-yellow">→</span><span>Large windows consume tokens on every turn — cost grows with window size</span></li>
+      </ul>
+      <div class="callout callout-blue" style="font-size:12px; margin-top:8px;">
+        <strong>Right for:</strong> single-user testing, short-session chatbots, demos. Not for: production multi-user agents.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — Postgres Memory -->
+<div class="slide">
+  <div class="slide-label">Memory Option 2</div>
+  <h2>Postgres Chat Memory</h2>
+  <p>Postgres Chat Memory stores conversation history in a PostgreSQL table. It persists across restarts and supports multiple simultaneous users via a <strong>session ID</strong>.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>Setup</strong></div>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-orange">1</span><span>Add a <strong>Postgres Chat Memory</strong> node</span></li>
+        <li><span class="badge badge-orange">2</span><span>Connect your PostgreSQL credential (same DB as your Reading List API, or a separate one)</span></li>
+        <li><span class="badge badge-orange">3</span><span>n8n creates the <code>n8n_chat_histories</code> table automatically on first use</span></li>
+        <li><span class="badge badge-orange">4</span><span>Set <strong>Session ID</strong> to a unique identifier per user: <code>{{ $json.userId }}</code> or <code>{{ $('Chat Trigger').item.json.sessionId }}</code></span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:8px;"><strong>Why session ID matters</strong></div>
+      <p style="font-size:13px; color:var(--muted);">Without a session ID, all users share one history — each new user sees previous users' conversations. The session ID namespaces the history. For the Chat Trigger, n8n provides a <code>sessionId</code> automatically per browser session.</p>
+      <div class="callout callout-blue" style="font-size:12px; margin-top:8px;">
+        <strong>Right for:</strong> production chatbots, multi-user agents, any scenario where conversation continuity across sessions is required.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Testing the Agent -->
+<div class="slide">
+  <div class="slide-label">Testing</div>
+  <h2>Testing Your Agent Systematically</h2>
+  <p>Test in three layers: tools in isolation, agent routing, then end-to-end conversation.</p>
+  <table style="margin-top:14px;">
+    <tr><th>Layer</th><th>What to test</th><th>How</th></tr>
+    <tr>
+      <td><strong style="color:var(--green);">1 — Tool isolation</strong></td>
+      <td>Each HTTP Request tool node works correctly with the API</td>
+      <td>Run each tool node manually before connecting to the agent. Verify output JSON shape.</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--accent);">2 — Routing</strong></td>
+      <td>The agent picks the right tool for different user inputs</td>
+      <td>Try: "What am I reading?" → expect <code>list_books</code>. "How many books?" → expect <code>get_stats</code>. "Mark DDIA as read" → expect <code>list_books</code> then <code>update_status</code>.</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--purple);">3 — Edge cases</strong></td>
+      <td>Agent behaviour when tools fail or input is ambiguous</td>
+      <td>"Add a book" without title → does the agent ask? Unknown book ID → does it handle the 404 gracefully? Malformed query → does it ask for clarification?</td>
+    </tr>
+  </table>
+  <div class="callout callout-yellow" style="margin-top:12px; font-size:13px;">
+    <strong>Use the execution log.</strong> n8n records every tool call the agent made and the result it received. If the agent gives a wrong answer, the log shows exactly which tools it called and what they returned — no guessing needed.
+  </div>
+</div>
+
+<!-- Slide 11 — Reading the Agent Execution Log -->
+<div class="slide">
+  <div class="slide-label">Debugging</div>
+  <h2>Reading the Agent Execution Log</h2>
+  <p>After running the agent, click the agent node → <strong>Output</strong> tab. You will see the full reasoning trace: every tool call, every result, and the final answer.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:8px;"><strong>What to look for</strong></div>
+      <ul class="annot-list">
+        <li><span class="badge badge-blue">→</span><span><strong>Tool calls in order</strong>: did the agent call tools in a sensible sequence?</span></li>
+        <li><span class="badge badge-blue">→</span><span><strong>Tool results</strong>: did each tool return what you expected? A 401 here means the auth setup in the tool node is wrong.</span></li>
+        <li><span class="badge badge-blue">→</span><span><strong>Iteration count</strong>: if the agent hit max iterations, the task was too complex for its tool set or the system prompt was too vague.</span></li>
+        <li><span class="badge badge-blue">→</span><span><strong>Final answer quality</strong>: did it answer the question, or did it report a tool error to the user?</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>Common fixes from the log</strong></div>
+      <table>
+        <tr><th>What you see</th><th>Fix</th></tr>
+        <tr><td>Wrong tool called</td><td>Improve the tool description to distinguish it from the one that was called</td></tr>
+        <tr><td>Tool called with wrong arguments</td><td>Add schema constraints to the tool's input schema, or clarify in the system prompt</td></tr>
+        <tr><td>Tool result not used</td><td>The system prompt may be overriding the tool result — check for conflicting instructions</td></tr>
+        <tr><td>Hallucinated ID</td><td>Add to system prompt: "always call list_books to find the ID before calling update_status"</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Prompt Reflection</div>
+  <h2>What You Built With vs What You Learned</h2>
+  <p>If you used an AI assistant to generate your system prompt or tool descriptions, work through these before moving to E5.</p>
+  <div class="prompt-block" style="margin-top:10px;">
+    <div class="prompt-bar">🤔 Questions to answer without re-reading the AI's output</div>
+    <div class="prompt-body">
+      <ul>
+        <li>Name every tool connected to your agent. For each: what does the description say? Why would the LLM call this one vs another?</li>
+        <li>What constraint in the system prompt prevents the agent from hallucinating a book ID? Copy the exact sentence.</li>
+        <li>Which memory node did you use? What is the session ID expression? What happens if two users chat simultaneously without a session ID?</li>
+        <li>Run the agent with: "How many unread books do I have?" — look at the execution log. How many tool calls did it make? Were they the ones you expected?</li>
+        <li>What would you change in the system prompt if the agent keeps calling <code>list_books</code> when the user only says hello?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:12px; font-size:13px;">
+    <strong>Up next — E5: Building Agents.</strong> You now have a working agent node with tools and memory. E5 builds three complete agent workflows from scratch — research, summarise-and-tag, and monitor-and-notify — combining everything from E1–E4.
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 12</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'n8n-agent-node-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'e4-1', type: 'practical', title: 'Build the Reading List assistant',
+    desc: 'Build the full Reading List assistant: Chat Trigger → AI Agent Node (Claude) with 5 tool nodes (list_books, get_book, add_book, update_status, get_stats) + Window Buffer Memory. Write the system prompt with at least two explicit constraints. Test with 5 different user queries.',
+    criteria: [
+      'All 5 tool nodes have descriptive names (underscores, no spaces) and accurate descriptions',
+      'The system prompt includes an explicit constraint preventing ID hallucination',
+      'The agent correctly routes at least 4 of 5 test queries to the right tool'
+    ] },
+  { id: 'e4-2', type: 'practical', title: 'Upgrade to Postgres memory',
+    desc: 'Replace Window Buffer Memory with Postgres Chat Memory. Use your existing Reading List database (or a separate one). Configure a session ID so different users maintain separate histories. Verify: start a conversation, note the context, restart n8n or clear the buffer, start a new chat — history should persist in Postgres.',
+    criteria: [
+      'Postgres Chat Memory is connected with a valid PostgreSQL credential',
+      'Session ID is set to an expression (not a static string) that uniquely identifies the chat session',
+      'Conversation history persists across a workflow restart'
+    ] },
+  { id: 'e4-3', type: 'reflect', title: 'Analyse your system prompt',
+    desc: 'Review your system prompt critically. Find one ambiguity that could cause the agent to make a mistake. Rewrite that part to remove the ambiguity. Test the before and after with a query that would have triggered the problem.',
+    criteria: [
+      'You identified a specific ambiguity (not just "it could be clearer")',
+      'Your rewrite addresses the specific failure mode you identified',
+      'You tested with a query that distinguishes old vs new behaviour'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain what the AI Agent node does internally and how it implements the ReAct loop',
+  'Configure tool nodes with names, descriptions, and schemas that enable accurate LLM tool routing',
+  'Write a system prompt with explicit constraints that prevent common agent errors',
+  'Connect Window Buffer Memory and Postgres Chat Memory and explain when to use each',
+  'Use the n8n execution log to diagnose incorrect tool routing and hallucinated arguments'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'e4-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'A user says "Mark my copy of DDIA as finished". Your agent has tools: list_books, get_book, update_status. In what order should the agent call tools, and why?',
+    options: [
+      'update_status only — the user said which book, so no lookup is needed',
+      'get_book → update_status — get the book first, then update it',
+      'list_books → update_status — search the list to find the ID, then update with the correct ID',
+      'update_status → list_books — update first, then confirm the change'
+    ],
+    correct: 2,
+    explanation: 'The user said "DDIA" by name, not by ID. update_status requires an ID. The agent must call list_books first to find the book with title "DDIA" and extract its ID. Then it calls update_status with that ID and status "read". Guessing or hallucinating an ID would update the wrong book.',
+    reviewSlide: 'Building the Reading List Assistant: The Tool Set'
+  },
+  {
+    id: 'e4-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You name a tool node "Get Books from API" (with spaces). What problem does this cause?',
+    options: [
+      'No problem — n8n normalises the name automatically',
+      'The tool cannot be connected to the AI Agent node',
+      'The LLM may fail to match the tool name in its response, causing the tool call to fail',
+      'The tool description is ignored when spaces are in the name'
+    ],
+    correct: 2,
+    explanation: 'The LLM writes the tool name in its tool_use response (e.g., "Get Books from API"). n8n matches this string to the node name. Spaces and capitalisation must match exactly. If they do not match, n8n cannot find the tool and the agent call fails. Use underscores: get_books_from_api.',
+    reviewSlide: 'Connecting Tool Nodes to the Agent'
+  },
+  {
+    id: 'e4-1-3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What is the purpose of the session ID in Postgres Chat Memory?',
+    options: [
+      'It encrypts the conversation history for that user',
+      'It namespaces the history so different users have separate conversation contexts',
+      'It sets the maximum number of messages stored per user',
+      'It identifies which AI model generated each response'
+    ],
+    correct: 1,
+    explanation: 'The session ID is a namespace key. All messages with the same session ID belong to the same conversation. Without it, all users share one history — user B sees user A\'s previous messages. With a session ID per user or per browser session, each conversation is isolated.',
+    reviewSlide: 'Postgres Chat Memory'
+  },
+  {
+    id: 'e4-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'After running the agent, you see in the execution log that the agent called list_books three times for a single user query. What is the most likely cause?',
+    options: [
+      'The API is too slow so n8n retries automatically',
+      'The system prompt says to always verify data, so the agent confirms after each call',
+      'The agent is stuck in a reasoning loop — it called list_books, received data, and did not know how to proceed, so it called again',
+      'Window Buffer Memory stores one call per memory slot, requiring multiple fetches'
+    ],
+    correct: 2,
+    explanation: 'Repeated tool calls usually indicate the agent received the tool result but could not use it to progress toward the answer. Common causes: the system prompt does not tell the agent what to do with the list, the tool description is ambiguous causing re-invocation, or the result format was unexpected. Fix by clarifying the system prompt or adding explicit instructions on what to do after calling list_books.',
+    reviewSlide: 'Reading the Agent Execution Log'
+  },
+  {
+    id: 'e4-2-2',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Your system prompt currently says: "Help the user manage their reading list." A user says "delete DDIA". The agent starts trying to find and delete the book. What change to the system prompt would prevent this, and why is a system prompt constraint safer than just not providing a delete tool?',
+    rubric: 'Add an explicit constraint: "If the user asks to delete a book, explain that this action is not available and suggest marking it as read instead." The system prompt constraint is safer than just omitting the delete tool because: (1) the system prompt also prevents the agent from attempting workarounds (e.g. trying to use PATCH to mark a book as deleted), (2) it provides the user with a helpful alternative rather than a confusing silence, and (3) it documents the design decision explicitly for future maintainers.'
+  }
+];
+</script>
+</body>
+</html>

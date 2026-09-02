@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Web Works — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1e0e 0%,#091409 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: var(--accent); border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-red    { background: rgba(248,81,73,.15);   color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="web-fundamentals-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track A · Foundation</div>
+  <h1>How the <span class="accent">Web Works</span></h1>
+  <div class="subtitle">HTTP · Requests · Responses · REST · JSON</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-blue">HTTP</span>
+    <span class="badge badge-blue">REST</span>
+    <span class="badge badge-blue">JSON</span>
+  </div>
+  <div class="callout callout-blue">This deck fills the vocabulary gap. When AI generates a REST API, it assumes you know what HTTP methods mean, why status codes exist, and what JSON is. By the end you will.</div>
+</div>
+
+<!-- Slide 2 — Client and Server -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Client and Server</h2>
+  <p>Every web interaction is a conversation between two computers: a client that asks for something and a server that responds.</p>
+  <svg viewBox="0 0 560 130" width="100%" height="auto" style="display:block;margin:16px 0;">
+    <defs>
+      <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#58a6ff"/>
+      </marker>
+      <marker id="arr-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#3fb950"/>
+      </marker>
+    </defs>
+    <rect x="10" y="30" width="140" height="60" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="80" y="56" fill="#58a6ff" font-size="14" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">Client</text>
+    <text x="80" y="74" fill="#8b949e" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">Browser / curl / app</text>
+    <rect x="410" y="30" width="140" height="60" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="480" y="56" fill="#3fb950" font-size="14" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">Server</text>
+    <text x="480" y="74" fill="#8b949e" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">Express / Node.js</text>
+    <line x1="152" y1="50" x2="408" y2="50" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+    <text x="280" y="46" fill="#58a6ff" font-size="12" text-anchor="middle" font-family="system-ui,sans-serif">HTTP Request — GET /api/books</text>
+    <line x1="408" y1="78" x2="152" y2="78" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr-green)"/>
+    <text x="280" y="98" fill="#3fb950" font-size="12" text-anchor="middle" font-family="system-ui,sans-serif">HTTP Response — 200 OK + JSON</text>
+  </svg>
+  <div class="cols cols-3" style="margin-top:6px;">
+    <div class="callout callout-blue"><strong>Client</strong> — anything that sends requests. A browser, curl on the terminal, a mobile app, another server.</div>
+    <div class="callout callout-green"><strong>Server</strong> — a program that listens for requests and sends responses. Express is our server framework.</div>
+    <div class="callout callout-yellow"><strong>Protocol</strong> — HTTP is the agreed language both sides speak. You never write raw HTTP — Express and the browser handle it.</div>
+  </div>
+</div>
+
+<!-- Slide 3 — HTTP -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>HTTP — The Language of the Web</h2>
+  <p>HTTP (HyperText Transfer Protocol) is the rulebook that defines how clients and servers communicate. It specifies the format of requests and responses, what methods mean, and what status codes to use.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-blue icon-key">HTTP is <strong>stateless</strong> — each request is completely independent. The server has no memory of previous requests. This is why JWTs exist: each request must carry its own proof of identity.</div>
+      <div class="callout callout-yellow">HTTP/1.1 (text-based) is what you see in curl output. HTTP/2 and HTTP/3 are faster binary versions, but the semantics — methods, headers, status codes — are identical.</div>
+    </div>
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">raw HTTP request (simplified)</span></div>
+        <div class="terminal-body"><span class="kw">GET</span> <span class="url">/api/books</span> <span class="out">HTTP/1.1</span>
+<span class="key">Host:</span> <span class="val">localhost:3001</span>
+<span class="key">Authorization:</span> <span class="val">Bearer eyJhbG...</span>
+<span class="key">Content-Type:</span> <span class="val">application/json</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — HTTP Methods -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>HTTP Methods — What You're Asking For</h2>
+  <p style="margin-bottom:12px;">The method tells the server what operation to perform. These four cover 95% of web APIs.</p>
+  <table>
+    <thead><tr><th>Method</th><th>Meaning</th><th>Has Request Body?</th><th>Typical Success Code</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td>Read data — fetch a resource or list</td><td>No</td><td>200 OK</td></tr>
+      <tr><td>POST</td><td>Create — add a new resource</td><td>Yes (JSON)</td><td>201 Created</td></tr>
+      <tr><td>PATCH</td><td>Update — modify part of a resource</td><td>Yes (JSON)</td><td>200 OK</td></tr>
+      <tr><td>DELETE</td><td>Remove — delete a resource</td><td>No</td><td>200 OK or 204 No Content</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-yellow icon-gotcha" style="margin-top:12px;"><strong>PUT</strong> replaces the entire resource (rarely used in practice). <strong>PATCH</strong> is preferred for partial updates — only send the fields you want to change. The AI-generated API in this course uses PATCH with COALESCE.</div>
+  <div class="callout callout-blue icon-key"><strong>Safe methods</strong> (GET) should never change data. <strong>Idempotent methods</strong> (GET, PUT, DELETE) can be called multiple times with the same result. POST is neither — sending it twice creates two records.</div>
+</div>
+
+<!-- Slide 5 — Status Codes -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>HTTP Status Codes — The Server's Reply</h2>
+  <p>Every HTTP response includes a 3-digit status code. The first digit tells you the category.</p>
+  <div class="cols cols-2" style="margin-top:6px;">
+    <div>
+      <table>
+        <thead><tr><th>Code</th><th>Meaning</th><th>When you see it</th></tr></thead>
+        <tbody>
+          <tr><td>200 OK</td><td>Success</td><td>Successful GET, PATCH, DELETE</td></tr>
+          <tr><td>201 Created</td><td>Resource created</td><td>Successful POST</td></tr>
+          <tr><td>400 Bad Request</td><td>Client sent bad data</td><td>Missing required field, invalid format</td></tr>
+          <tr><td>401 Unauthorized</td><td>Auth failed</td><td>No token, wrong password, expired token</td></tr>
+          <tr><td>403 Forbidden</td><td>Not allowed</td><td>Valid token but insufficient permissions</td></tr>
+          <tr><td>404 Not Found</td><td>Resource missing</td><td>Wrong id, typo in route</td></tr>
+          <tr><td>409 Conflict</td><td>Duplicate</td><td>Email already registered</td></tr>
+          <tr><td>500 Internal Server Error</td><td>Server crashed</td><td>Bug in your code — check the logs</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-green"><strong>2xx — Success.</strong> The request worked. 200 for reads/updates, 201 for creates.</div>
+      <div class="callout callout-yellow"><strong>4xx — Client error.</strong> You sent something wrong. Fix the request, not the server.</div>
+      <div class="callout callout-red icon-gotcha"><strong>5xx — Server error.</strong> The server crashed. Check your terminal logs — there will be a stack trace.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — URL Anatomy -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Anatomy of a URL</h2>
+  <div style="font-family:'SF Mono',monospace; font-size:15px; background:var(--term-bg); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:14px 0; line-height:2.2; word-break:break-all;">
+    <span style="color:var(--accent)">https</span><span style="color:var(--muted)">://</span><span style="color:var(--green)">api.example.com</span><span style="color:var(--yellow)">:3001</span><span style="color:var(--orange)">/api/books</span><span style="color:var(--muted)">?</span><span style="color:var(--purple)">status=reading</span><span style="color:var(--purple)">&amp;limit=10</span>
+  </div>
+  <div class="cols cols-3" style="margin-top:6px;">
+    <div class="callout callout-blue"><strong>Protocol</strong> (<code>https</code>) — http or https. Always use https in production. Encrypts data in transit.</div>
+    <div class="callout callout-green"><strong>Host</strong> (<code>api.example.com</code>) — the server's address. In development: <code>localhost:3001</code>. After Railway deploy: your Railway domain.</div>
+    <div class="callout callout-orange"><strong>Path</strong> (<code>/api/books</code>) — the route on the server. Express matches this to a route handler: <code>app.get('/api/books', ...)</code>.</div>
+  </div>
+  <div class="callout callout-purple icon-tip" style="margin-top:10px;"><strong>Query string</strong> (<code>?status=reading&amp;limit=10</code>) — optional key-value pairs after <code>?</code>, separated by <code>&amp;</code>. Read in Express with <code>req.query.status</code>.</div>
+</div>
+
+<!-- Slide 7 — The Request -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>What a Request Looks Like</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">curl — POST /api/books</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s -X POST</span> <span class="url">http://localhost:3001/api/books</span> <span class="str">\</span>
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer $TOKEN"</span> <span class="str">\</span>
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> <span class="str">\</span>
+  <span class="flag">-d</span> <span class="str">'{"title":"Clean Code","author":"Martin"}'</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">Method</span><span>POST — what operation to perform</span></li>
+        <li><span class="badge badge-yellow">URL</span><span>/api/books — which resource</span></li>
+        <li><span class="badge badge-blue">Header: Authorization</span><span>Bearer token — proves who you are</span></li>
+        <li><span class="badge badge-blue">Header: Content-Type</span><span>application/json — tells server the body is JSON</span></li>
+        <li><span class="badge badge-orange">Body</span><span>the JSON data being sent — Express reads this as <code>req.body</code></span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — The Response -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>What a Response Looks Like</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">HTTP response — 201 Created</span></div>
+        <div class="terminal-body"><span class="gr">HTTP/1.1 201 Created</span>
+<span class="key">Content-Type:</span> <span class="val">application/json</span>
+
+<span class="out">{</span>
+  <span class="key">"id"</span><span class="out">:</span> <span class="val">7</span><span class="out">,</span>
+  <span class="key">"title"</span><span class="out">:</span> <span class="str">"Clean Code"</span><span class="out">,</span>
+  <span class="key">"author"</span><span class="out">:</span> <span class="str">"Martin"</span><span class="out">,</span>
+  <span class="key">"status"</span><span class="out">:</span> <span class="str">"want-to-read"</span><span class="out">,</span>
+  <span class="key">"created_at"</span><span class="out">:</span> <span class="str">"2026-03-08T10:23:41Z"</span>
+<span class="out">}</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-green">201 Created</span><span>The status code — success, resource created</span></li>
+        <li><span class="badge badge-blue">Content-Type</span><span>application/json — tells the client to parse the body as JSON</span></li>
+        <li><span class="badge badge-yellow">Body</span><span>the JSON payload — the created book, returned immediately via <code>RETURNING *</code></span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — JSON -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>JSON — The Language of APIs</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">JSON — object and array</span></div>
+        <div class="terminal-body"><span class="comment">// JSON object</span>
+<span class="out">{</span>
+  <span class="key">"id"</span><span class="out">:</span> <span class="val">1</span><span class="out">,</span>
+  <span class="key">"title"</span><span class="out">:</span> <span class="str">"Clean Code"</span><span class="out">,</span>
+  <span class="key">"rating"</span><span class="out">:</span> <span class="val">5</span><span class="out">,</span>
+  <span class="key">"done"</span><span class="out">:</span> <span class="kw">true</span><span class="out">,</span>
+  <span class="key">"tags"</span><span class="out">: [</span><span class="str">"cs"</span><span class="out">,</span> <span class="str">"refactoring"</span><span class="out">],</span>
+  <span class="key">"notes"</span><span class="out">:</span> <span class="kw">null</span>
+<span class="out">}</span>
+
+<span class="comment">// JSON array</span>
+<span class="out">[</span>
+  <span class="out">{</span> <span class="key">"id"</span><span class="out">:</span> <span class="val">1</span><span class="out">,</span> <span class="key">"title"</span><span class="out">:</span> <span class="str">"Clean Code"</span> <span class="out">},</span>
+  <span class="out">{</span> <span class="key">"id"</span><span class="out">:</span> <span class="val">2</span><span class="out">,</span> <span class="key">"title"</span><span class="out">:</span> <span class="str">"The Pragmatic Programmer"</span> <span class="out">}</span>
+<span class="out">]</span></div>
+      </div>
+    </div>
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-yellow">Strings</span><span>always double quotes — <code>"title"</code> not <code>'title'</code></span></li>
+        <li><span class="badge badge-yellow">Numbers</span><span>no quotes — <code>5</code> not <code>"5"</code></span></li>
+        <li><span class="badge badge-yellow">Booleans</span><span>lowercase — <code>true</code>, <code>false</code></span></li>
+        <li><span class="badge badge-yellow">Null</span><span>lowercase <code>null</code> — means "no value"</span></li>
+        <li><span class="badge badge-red">No trailing commas</span><span><code>{"a":1,"b":2}</code> not <code>{"a":1,"b":2,}</code></span></li>
+        <li><span class="badge badge-red">No comments</span><span>JSON cannot contain <code>//</code> or <code>/* */</code></span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-blue icon-key" style="margin-top:10px;">JSON is not JavaScript — it's a text format that looks like JS object syntax. <code>JSON.parse(text)</code> converts text → JS object. <code>JSON.stringify(obj)</code> converts JS object → text. Express calls these automatically.</div>
+</div>
+
+<!-- Quiz Checkpoint 1 — after JSON -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- Slide 10 — REST -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>REST — A Style, Not a Protocol</h2>
+  <p>REST (REpresentational State Transfer) is a set of conventions for how to structure HTTP APIs. An API that follows them is called RESTful.</p>
+  <div class="cols cols-2" style="margin-top:6px;">
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-blue">Resources are nouns</span><span>URLs identify things, not actions. <code>/books</code> not <code>/getBooks</code> or <code>/fetchAllBooks</code>.</span></li>
+        <li><span class="badge badge-blue">Methods have meaning</span><span>GET reads, POST creates, PATCH updates, DELETE removes. Use the right method.</span></li>
+        <li><span class="badge badge-blue">Stateless</span><span>Each request contains everything the server needs. No sessions stored on the server — hence JWT.</span></li>
+        <li><span class="badge badge-blue">Standard responses</span><span>JSON data + appropriate status codes. 201 for creates, 404 when missing.</span></li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-green icon-key"><strong>Why this matters:</strong> When AI generates an API, it follows REST conventions. Understanding REST lets you spot when the AI broke them — e.g., a DELETE route that also creates a record, or a GET route that modifies data.</div>
+      <div class="callout callout-yellow icon-gotcha"><strong>Not every API is RESTful.</strong> GraphQL, gRPC, and WebSockets are different styles. REST is by far the most common and the default that AI generates.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — RESTful Routes -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>RESTful Routes — The Pattern</h2>
+  <p style="margin-bottom:12px;">REST APIs follow a predictable URL structure. Once you know the pattern, you can guess any API's routes.</p>
+  <table>
+    <thead><tr><th>Method</th><th>URL</th><th>Action</th><th>Express handler</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td>/api/books</td><td>List all books (with optional filter)</td><td><code>app.get('/api/books', ...)</code></td></tr>
+      <tr><td>GET</td><td>/api/books/:id</td><td>Get one book by id</td><td><code>app.get('/api/books/:id', ...)</code></td></tr>
+      <tr><td>POST</td><td>/api/books</td><td>Create a new book</td><td><code>app.post('/api/books', ...)</code></td></tr>
+      <tr><td>PATCH</td><td>/api/books/:id</td><td>Update fields of one book</td><td><code>app.patch('/api/books/:id', ...)</code></td></tr>
+      <tr><td>DELETE</td><td>/api/books/:id</td><td>Delete one book</td><td><code>app.delete('/api/books/:id', ...)</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue icon-tip" style="margin-top:12px;"><code>/api/books/:id</code> — the <code>:id</code> is a route parameter. Express puts it in <code>req.params.id</code>. The <code>/api/</code> prefix is a convention that distinguishes API routes from HTML page routes.</div>
+  <div class="callout callout-yellow"><strong>Nested resources</strong> follow the same pattern: <code>GET /api/books/:id/sessions</code> lists sessions for one book. <code>POST /api/books/:id/sessions</code> creates a new session for that book.</div>
+</div>
+
+<!-- Slide 12 — DNS -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>DNS — Domain Names to IP Addresses</h2>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <svg viewBox="0 0 440 120" width="100%" height="auto" style="display:block;margin-bottom:10px;">
+        <defs>
+          <marker id="dns-arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#8b949e"/>
+          </marker>
+        </defs>
+        <rect x="10" y="40" width="140" height="40" rx="5" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="80" y="65" fill="#e6edf3" font-size="12" text-anchor="middle" font-family="system-ui,sans-serif">api.example.com</text>
+        <rect x="175" y="40" width="120" height="40" rx="5" fill="#161b22" stroke="#d29922" stroke-width="1.5"/>
+        <text x="235" y="65" fill="#e6edf3" font-size="12" text-anchor="middle" font-family="system-ui,sans-serif">DNS Server</text>
+        <rect x="315" y="40" width="115" height="40" rx="5" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="372" y="65" fill="#e6edf3" font-size="12" text-anchor="middle" font-family="system-ui,sans-serif">203.0.113.4</text>
+        <line x1="152" y1="57" x2="173" y2="57" stroke="#8b949e" stroke-width="1.5" marker-end="url(#dns-arr)"/>
+        <text x="162" y="50" fill="#8b949e" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">query</text>
+        <line x1="297" y1="57" x2="313" y2="57" stroke="#8b949e" stroke-width="1.5" marker-end="url(#dns-arr)"/>
+        <text x="305" y="50" fill="#8b949e" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">IP address</text>
+        <text x="220" y="108" fill="#8b949e" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">Every domain name resolves to an IP address — a number that identifies a specific machine</text>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-blue icon-key"><strong>localhost</strong> always resolves to <code>127.0.0.1</code> — your own machine. No DNS lookup needed. This is why <code>http://localhost:3001</code> works without internet.</div>
+      <div class="callout callout-green"><strong>Railway</strong> assigns a domain like <code>your-app.railway.app</code>. DNS resolves this to Railway's servers, which forward requests to your Express process.</div>
+      <div class="callout callout-yellow"><strong>You don't need to configure DNS</strong> for this course. Railway handles it automatically when you deploy.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 13 — How Express Fits -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>How Express Fits In</h2>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span class="badge badge-num">1</span><span><strong>Browser or curl sends an HTTP request</strong> — method, URL, headers, optional body</span></li>
+    <li><span class="badge badge-num">2</span><span><strong>Express receives it</strong> — the <code>app.listen(PORT)</code> call opens a socket waiting for connections</span></li>
+    <li><span class="badge badge-num">3</span><span><strong>Middleware runs</strong> — <code>express.json()</code> parses the body, <code>authenticate</code> checks the JWT, etc.</span></li>
+    <li><span class="badge badge-num">4</span><span><strong>Route handler matches</strong> — Express finds the first <code>app.get/post/patch/delete</code> whose path matches the URL</span></li>
+    <li><span class="badge badge-num">5</span><span><strong>Your code runs</strong> — query the database, apply business logic</span></li>
+    <li><span class="badge badge-num">6</span><span><strong><code>res.json(data)</code> sends the response</strong> — Express formats it as HTTP with the right headers and status code</span></li>
+    <li><span class="badge badge-num">7</span><span><strong>Client receives the response</strong> — browser renders it, curl prints it, your code processes it</span></li>
+  </ul>
+  <div class="callout callout-green icon-hands-on" style="margin-top:12px;">
+    Try it: run <code>node server.js</code> in your project folder, then open a new terminal and run <code>curl http://localhost:3001/api/health</code>. You should see a JSON response.
+    <br><a href="https://expressjs.com/en/starter/hello-world.html" target="_blank" class="breakout-link">Express Hello World guide</a>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 — after Express -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- Slide 14 — AI Reflection -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>What AI Assumes You Know</h2>
+  <div class="callout callout-orange" style="font-size:15px;line-height:1.8;margin-bottom:14px;">When you give an AI a prompt like <em>"Build me a REST API for a reading list"</em>, it immediately makes decisions based on this deck's content: which HTTP methods to use for which routes, which status codes to return, how to structure JSON, how to name URLs using REST conventions, and what headers to include. Understanding these concepts lets you <strong>verify</strong> those decisions — not just accept them.</div>
+  <div class="cols cols-2" style="margin-top:6px;">
+    <div class="callout callout-blue icon-tip"><strong>Questions to ask about AI-generated routes:</strong> Does GET /books/:id return 404 when the id doesn't exist? Does POST return 201, not 200? Does PATCH only update the fields I sent? Does DELETE return a meaningful response?</div>
+    <div class="callout callout-green icon-tip"><strong>Questions to ask about AI-generated JSON:</strong> Are error responses consistent — always <code>{ "error": "..." }</code>? Do list endpoints return arrays, not objects? Are field names consistent across routes — <code>id</code> everywhere, not sometimes <code>bookId</code>?</div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px;">A developer who understands HTTP can spot a bug in AI-generated code before testing it. A developer who just copies and pastes will only find out when something breaks in production.</div>
+</div>
+
+<!-- Slide 15 — Key Terms -->
+<div class="slide">
+  <div class="slide-label">Track A · Foundation</div>
+  <h2>Key Terms</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;">
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>HTTP</strong><br><span style="font-size:13px;color:var(--muted);">The protocol defining how clients and servers communicate</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>Client</strong><br><span style="font-size:13px;color:var(--muted);">Anything that sends requests (browser, curl, mobile app)</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>Server</strong><br><span style="font-size:13px;color:var(--muted);">A program that listens for and responds to HTTP requests</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>Request</strong><br><span style="font-size:13px;color:var(--muted);">A message from client to server: method + URL + headers + body</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>Response</strong><br><span style="font-size:13px;color:var(--muted);">A message from server to client: status code + headers + body</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>Method</strong><br><span style="font-size:13px;color:var(--muted);">GET / POST / PATCH / DELETE — the operation being performed</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>Status Code</strong><br><span style="font-size:13px;color:var(--muted);">3-digit number indicating success (2xx), client error (4xx), server error (5xx)</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>URL</strong><br><span style="font-size:13px;color:var(--muted);">Protocol + host + port + path + query string</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>Route</strong><br><span style="font-size:13px;color:var(--muted);">A path pattern that Express matches: <code>/api/books/:id</code></span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>JSON</strong><br><span style="font-size:13px;color:var(--muted);">Text format for structured data. All API bodies in this course are JSON.</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>REST</strong><br><span style="font-size:13px;color:var(--muted);">Convention: resources as nouns, HTTP methods have meaning, stateless, JSON</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;"><strong>DNS</strong><br><span style="font-size:13px;color:var(--muted);">Translates domain names to IP addresses. localhost = 127.0.0.1.</span></div>
+  </div>
+</div>
+
+</div>
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 17</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'web-fundamentals-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'a1-1', type: 'practical', title: 'curl health check',
+    desc: 'Run: curl -si http://localhost:3001/api/health\nNote the status code, the Content-Type header, and the response body. What does each tell you about the server?',
+    criteria: [
+      'You can identify the status code and explain what it means',
+      'You can name at least two response headers and their purpose',
+      'You can explain why the Content-Type header matters'
+    ] },
+  { id: 'a1-2', type: 'practical', title: 'DevTools network inspection',
+    desc: 'Open any website in your browser. Open DevTools → Network tab. Reload the page. Find the main HTML document request and note: HTTP method, status code, response headers, and how long it took.',
+    criteria: [
+      'You found the HTML document request (not just assets like images or scripts)',
+      'You can distinguish between request headers and response headers',
+      'You noted the time-to-first-byte and can explain what causes variation'
+    ] },
+  { id: 'a1-3', type: 'reflect', title: 'Biggest concept',
+    desc: 'Which HTTP concept in this module was least familiar to you? How would you explain it to a colleague who has never worked with web APIs?',
+    criteria: [
+      'Your explanation avoids jargon, or defines any technical terms you use',
+      'You described the concept in your own words, not copied from the slides',
+      'Your explanation would make sense to a non-technical colleague'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Trace what happens when a browser makes an HTTP request and receives a response',
+  'Interpret HTTP status codes, methods, and headers in the context of real API calls',
+  'Explain the role of DNS in resolving domain names to IP addresses',
+  'Parse and construct JSON data structures used in API communication',
+  'Distinguish between REST and non-REST API design approaches'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  /* ── Checkpoint 1 (after JSON) ─── */
+  {
+    id: 'http-method-safe',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which HTTP method retrieves a resource without modifying it on the server?',
+    options: ['GET', 'POST', 'PATCH', 'PUT'],
+    correct: 0,
+    explanation: 'GET is safe and idempotent — it never modifies server state and can be repeated freely.',
+    reviewSlide: 'HTTP Methods'
+  },
+  {
+    id: 'status-201',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What HTTP status code means "a new resource was successfully created"?',
+    options: ['200 OK', '201 Created', '204 No Content', '202 Accepted'],
+    correct: 1,
+    explanation: '201 Created is the correct response to a successful POST. 200 is for GET/PATCH success.',
+    reviewSlide: 'HTTP Status Codes'
+  },
+  {
+    id: 'url-query',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In the URL `https://api.example.com/books?status=reading`, what is `?status=reading`?',
+    options: ['The path', 'The fragment', 'The query string', 'The hostname'],
+    correct: 2,
+    explanation: 'The query string starts with ? and carries optional key=value parameters for filtering, sorting, or pagination.',
+    reviewSlide: 'URL Anatomy'
+  },
+  {
+    id: 'response-body',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'An API returns `{"id": 1, "title": "Clean Code"}`. Which part of the HTTP response is this in?',
+    options: ['The status line', 'A request header', 'The response body', 'The URL path'],
+    correct: 2,
+    explanation: 'The body carries the actual data payload. The status line has the code, headers have metadata.',
+    reviewSlide: 'HTTP Response'
+  },
+  {
+    id: 'json-self',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Write a valid JSON object for a book with a title, author, and a status of "reading". Include a numeric page count.',
+    model: '{ "title": "The Pragmatic Programmer", "author": "Hunt & Thomas", "status": "reading", "pageCount": 352 }\n\nKey points: keys must be double-quoted strings, string values in double quotes, numbers without quotes, no trailing commas.',
+    reviewSlide: 'JSON'
+  },
+  /* ── Checkpoint 2 (after Express) ─── */
+  {
+    id: 'restful-route',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Which of these is the correct RESTful route to retrieve book with ID 42?',
+    options: ['POST /api/getBook?id=42', 'GET /api/books/42', 'GET /api/getBookById/42', 'FETCH /api/books/42'],
+    correct: 1,
+    explanation: 'REST uses nouns (books) not verbs (getBook). The resource ID goes in the URL path, not a query string. GET retrieves.',
+    reviewSlide: 'RESTful Routes'
+  },
+  {
+    id: 'dns',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What does DNS do?',
+    options: [
+      'Encrypts HTTP traffic',
+      'Translates domain names to IP addresses',
+      'Routes HTTP requests to the correct route handler',
+      'Stores cookies between requests'
+    ],
+    correct: 1,
+    explanation: 'DNS (Domain Name System) translates human-readable domains like api.example.com into IP addresses like 203.0.113.42.',
+    reviewSlide: 'DNS'
+  },
+  {
+    id: 'express-runtime',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Express.js is a framework that runs on top of which runtime?',
+    options: ['Deno', 'Python', 'Node.js', 'Bun'],
+    correct: 2,
+    explanation: 'Express is a Node.js framework. Node.js runs JavaScript on the server using the V8 engine.',
+    reviewSlide: 'How Express Fits In'
+  },
+  {
+    id: 'client-server-self',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Explain the client-server model in your own words. Who initiates requests? Who sends responses? Give one example.',
+    model: 'The client (e.g. a browser or curl) initiates requests by sending an HTTP message to a URL. The server receives the request, processes it (query a database, run logic), and sends back a response with a status code and optional body. Example: your browser (client) sends GET https://api.example.com/books → the Express server queries PostgreSQL → returns JSON with status 200.',
+    reviewSlide: 'Client and Server'
+  }
+];
+</script>
+</body>
+</html>

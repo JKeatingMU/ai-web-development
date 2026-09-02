@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is an AI Agent? — Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #ffa657; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #8a3800; --prompt-border: #c4621a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 52px 72px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#200e02 0%,#150901 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(196,98,26,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(196,98,26,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  .response-block { background: #0d1117; border: 1px solid rgba(63,185,80,.3); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .response-bar { background: rgba(63,185,80,.08); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(63,185,80,.2); font-size: 12px; color: var(--green); font-weight: 600; }
+  .response-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--muted); }
+  .response-body strong { color: var(--text); }
+
+  .cols { display: grid; gap: 18px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+  .cols-40-60 { grid-template-columns: 40fr 60fr; }
+
+  .callout { border-radius: 8px; padding: 13px 16px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;    color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-green  { background: rgba(63,185,80,.15);    color: var(--green);  }
+  .badge-yellow { background: rgba(210,153,34,.15);   color: var(--yellow); }
+  .badge-orange { background: rgba(255,166,87,.15);   color: var(--orange); }
+  .badge-blue   { background: rgba(88,166,255,.15);   color: #58a6ff; }
+  .badge-purple { background: rgba(188,140,255,.15);  color: var(--purple); }
+  .badge-red    { background: rgba(248,81,73,.15);    color: var(--red); }
+  .badge-num    { background: rgba(255,166,87,.2); color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td strong { color: var(--text); }
+
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 26px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(255,166,87,.12); color: var(--accent); border: 1px solid rgba(255,166,87,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  #nav { position: fixed; bottom: 26px; right: 36px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 36px; font-size: 11px; color: var(--muted); font-family: monospace; }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .terminal-body, .diagram { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — What is an AI Agent? -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">AI Agents</span>
+    <span class="tag">LLMs + Tools</span>
+    <span class="tag">ReAct Pattern</span>
+    <span class="tag">Function Calling</span>
+    <span class="tag">Track E</span>
+  </div>
+  <div class="slide-label">Track E · AI Agents &amp; Automation</div>
+  <h1>What is an<br><span class="accent">AI Agent?</span></h1>
+  <p class="subtitle">
+    From chatbot to autonomous agent — the components, the loop, the patterns,
+    and the failure modes you need to understand before building one.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Track E · Deck 1 of 6</span>
+  </div>
+</div>
+
+<!-- Slide 2 — Chatbot vs Agent -->
+<div class="slide">
+  <div class="slide-label">The Core Distinction</div>
+  <h2>Chatbot vs Agent</h2>
+  <p>Both use an LLM. The difference is structure: a chatbot answers one question and stops. An agent pursues a goal across multiple steps, taking actions and observing their effects.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-blue" style="margin-bottom:0;">
+        <strong>Chatbot</strong><br>
+        User sends message → LLM responds → done.<br><br>
+        Single turn. No memory of actions. No tools. No loop.
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-orange">
+        <strong>Agent</strong><br>
+        Goal defined → [reason → act → observe] → [reason → act → observe] → goal reached.<br><br>
+        Multi-step loop. Persistent context. Tool calls. Exit condition.
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:14px;">The word <strong>agentic</strong> describes any system with this loop — the LLM decides what to do next based on what it observes.</p>
+  <div class="callout callout-yellow" style="margin-top:8px;">
+    <strong>Concrete example:</strong> "Find me the three best-reviewed books on machine learning" — a chatbot guesses from training data; an agent searches, fetches review scores, ranks them, and returns a justified answer.
+  </div>
+</div>
+
+<!-- Slide 3 — The Four Components -->
+<div class="slide">
+  <div class="slide-label">Architecture</div>
+  <h2>Four Components of Every Agent</h2>
+  <p>Every agent system — from a simple research helper to a complex orchestration pipeline — is built from the same four parts.</p>
+  <table style="margin-top:14px;">
+    <tr><th>Component</th><th>What it does</th><th>Example</th></tr>
+    <tr>
+      <td><strong style="color:var(--accent);">LLM</strong></td>
+      <td>The reasoning engine — reads the goal, decides what to do next, interprets tool results</td>
+      <td>Claude, GPT-4o, Gemini</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--green);">Tools</strong></td>
+      <td>Functions the LLM can call — search the web, read a file, query a database, call an API, send an email</td>
+      <td><code>get_book_status</code>, <code>web_search</code></td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--purple);">Memory</strong></td>
+      <td>The conversation history passed to the LLM each turn (in-context) plus optional external storage (database, vector store)</td>
+      <td><code>messages</code> array, PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--yellow);">Objective</strong></td>
+      <td>The goal the agent is trying to reach — usually the user's original request, plus any system instructions</td>
+      <td>"Summarise all unread books and email the list"</td>
+    </tr>
+  </table>
+  <div class="callout callout-orange" style="margin-top:14px; font-size:13px;">
+    Remove any one of these and the system stops being agentic. No tools = chatbot. No loop = one-shot generation. No objective = random wandering.
+  </div>
+</div>
+
+<!-- Slide 4 — The ReAct Pattern -->
+<div class="slide">
+  <div class="slide-label">The Core Pattern</div>
+  <h2>The ReAct Loop: Reason → Act → Observe</h2>
+  <p>ReAct (Yao et al., 2022) describes the pattern at the heart of most production agents: the LLM reasons, acts, then incorporates what it observes before reasoning again.</p>
+  <div class="diagram" style="margin-top:12px; font-size:12px; line-height:2;">
+<span class="pu">Goal</span>: "Which books on my reading list are unread?"
+<span class="hi">─────────────────────────────────────────────────────</span>
+<span class="gr">Thought:</span>  I need to query the reading list API for unread books.
+<span class="or">Action:</span>   <span class="fn">get_books</span>({ status: <span class="str">"unread"</span> })
+<span class="ye">Observe:</span>  [{ title: <span class="str">"DDIA"</span>, author: <span class="str">"Kleppmann"</span> }, { title: <span class="str">"SICP"</span>, ... }]
+<span class="hi">─────────────────────────────────────────────────────</span>
+<span class="gr">Thought:</span>  I have the list. I can now answer the user directly.
+<span class="or">Action:</span>   <span class="fn">respond</span>({ answer: <span class="str">"You have 2 unread books: DDIA and SICP."</span> })
+<span class="hi">─────────────────────────────────────────────────────</span>
+<span class="pu">Done.</span>
+  </div>
+  <div class="callout callout-blue" style="margin-top:12px; font-size:13px;">
+    Each iteration adds to the <strong>messages</strong> array. The LLM always sees the full history — goal, all actions taken so far, all observations received. This is how it "knows what it has already tried."
+  </div>
+</div>
+
+<!-- Slide 5 — What are Tools? Function Calling -->
+<div class="slide">
+  <div class="slide-label">Tools &amp; Function Calling</div>
+  <h2>What Are "Tools"?</h2>
+  <p>Tools are typed function definitions you provide to the LLM. The LLM decides which tool to call and with what arguments — <strong>you</strong> execute the function and return the result. The LLM never runs code directly.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:10px;"><strong>You define (JSON Schema)</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px; max-height:200px;">{
+  <span class="key">name</span>: <span class="str">"get_book_status"</span>,
+  <span class="key">description</span>: <span class="str">"Look up a book
+    in the reading list by title"</span>,
+  <span class="key">input_schema</span>: {
+    <span class="key">type</span>: <span class="str">"object"</span>,
+    <span class="key">properties</span>: {
+      <span class="key">title</span>: {
+        <span class="key">type</span>: <span class="str">"string"</span>,
+        <span class="key">description</span>: <span class="str">"Book title"</span>
+      }
+    },
+    <span class="key">required</span>: [<span class="str">"title"</span>]
+  }
+}</div></div>
+    </div>
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:10px;"><strong>LLM returns (tool_use block)</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px; max-height:200px;">{
+  <span class="key">type</span>: <span class="str">"tool_use"</span>,
+  <span class="key">id</span>: <span class="str">"toolu_01..."</span>,
+  <span class="key">name</span>: <span class="str">"get_book_status"</span>,
+  <span class="key">input</span>: {
+    <span class="key">title</span>: <span class="str">"Designing Data-
+      Intensive Applications"</span>
+  }
+}
+
+<span class="comment">// Your code: run the DB query,
+// return the result, continue loop</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — The Agent Loop in Code -->
+<div class="slide">
+  <div class="slide-label">Reading the Code</div>
+  <h2>The Agent Loop in Node.js</h2>
+  <p>This is the essential structure — every production agent is a variation of this pattern.</p>
+  <div class="terminal" style="margin-top:10px;"><div class="terminal-body" style="font-size:12px;">
+<span class="kw">async function</span> <span class="fn">runAgent</span>(userGoal) {
+  <span class="kw">const</span> messages = [{ <span class="key">role</span>: <span class="str">'user'</span>, <span class="key">content</span>: userGoal }];
+
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="str">0</span>; i &lt; <span class="str">5</span>; i++) {           <span class="comment">// ← max 5 iterations (exit condition)</span>
+    <span class="kw">const</span> response = <span class="kw">await</span> claude.messages.create({
+      <span class="key">model</span>: <span class="str">'claude-haiku-4-5-20251001'</span>, <span class="key">tools</span>, messages
+    });
+
+    <span class="kw">if</span> (response.stop_reason === <span class="str">'end_turn'</span>) <span class="kw">break</span>; <span class="comment">// ← LLM is done</span>
+
+    <span class="kw">const</span> toolResults = [];
+    <span class="kw">for</span> (<span class="kw">const</span> block <span class="kw">of</span> response.content) {
+      <span class="kw">if</span> (block.type === <span class="str">'tool_use'</span>) {             <span class="comment">// ← Act</span>
+        <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">executeTool</span>(block.name, block.input);
+        toolResults.push({ <span class="key">type</span>: <span class="str">'tool_result'</span>, <span class="key">tool_use_id</span>: block.id, <span class="key">content</span>: result });
+      }
+    }
+    messages.push({ <span class="key">role</span>: <span class="str">'assistant'</span>, <span class="key">content</span>: response.content }); <span class="comment">// ← history</span>
+    messages.push({ <span class="key">role</span>: <span class="str">'user'</span>, <span class="key">content</span>: toolResults });           <span class="comment">// ← Observe</span>
+  }
+  <span class="kw">return</span> messages;
+}
+  </div></div>
+  <div class="callout callout-yellow" style="font-size:13px; margin-top:10px;">
+    <strong>Three things to find in any agent code:</strong> (1) the loop with a max_iterations limit, (2) the tool execution block, (3) where results are appended to <code>messages</code>.
+  </div>
+</div>
+
+<!-- Slide 7 — Section Header: Agent Patterns -->
+<div class="slide section-header">
+  <div class="pill">Agent Patterns</div>
+  <h1>How Agents Are<br>Structured</h1>
+  <p class="subtitle">Single-agent, multi-agent, human-in-the-loop — three patterns for three different kinds of problem.</p>
+</div>
+
+<!-- Slide 8 — Single Agent -->
+<div class="slide">
+  <div class="slide-label">Pattern 1</div>
+  <h2>Single Agent</h2>
+  <p>One LLM, a set of tools, one goal. The simplest agentic architecture — and the right choice for most tasks.</p>
+  <div class="cols cols-2" style="margin-top:12px; flex:0;">
+    <div class="callout callout-green">
+      <strong>Good for</strong>
+      <ul style="padding-left:18px; margin-top:8px; font-size:13px; color:var(--muted);">
+        <li style="margin-bottom:6px;">Research tasks: "Find all unread books tagged 'CS theory'"</li>
+        <li style="margin-bottom:6px;">Document processing: "Summarise this article and extract key claims"</li>
+        <li style="margin-bottom:6px;">Anything that fits in one context window with its tools</li>
+        <li>Tasks where the full reasoning chain is auditable in one place</li>
+      </ul>
+    </div>
+    <div class="callout callout-yellow">
+      <strong>Limits</strong>
+      <ul style="padding-left:18px; margin-top:8px; font-size:13px; color:var(--muted);">
+        <li style="margin-bottom:6px;">Context window fills up on long tasks</li>
+        <li style="margin-bottom:6px;">One model handles all reasoning — no specialisation</li>
+        <li style="margin-bottom:6px;">Cannot parallelise independent subtasks</li>
+        <li>Slow on complex multi-step workflows</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:14px; font-size:13px;">
+    <strong>Start here.</strong> Build the simplest agent that could work. Add complexity only when you have hit a concrete limit.
+  </div>
+</div>
+
+<!-- Slide 9 — Multi-Agent Systems -->
+<div class="slide">
+  <div class="slide-label">Pattern 2</div>
+  <h2>Multi-Agent Systems</h2>
+  <p>An <strong>orchestrator</strong> agent breaks the goal into subtasks and delegates them to <strong>specialist</strong> agents. Each specialist has a limited, focused tool set.</p>
+  <div class="diagram" style="margin-top:12px; font-size:12px; line-height:2.1;">
+  <span class="hi">Orchestrator</span>
+    ├── <span class="gr">Research Agent</span>  ── tools: web_search, fetch_url
+    ├── <span class="pu">Writer Agent</span>    ── tools: draft_text, check_facts
+    └── <span class="ye">Reviewer Agent</span>  ── tools: compare_versions, flag_issues
+  </div>
+  <div class="cols cols-2" style="margin-top:12px; flex:0;">
+    <div class="callout callout-green" style="font-size:13px;">
+      <strong>When to use</strong><br>
+      Task too long for one context window. Independent subtasks that can run in parallel. Need specialist reasoning at each step (e.g. research vs writing vs reviewing are genuinely different).
+    </div>
+    <div class="callout callout-red" style="font-size:13px;">
+      <strong>Added complexity</strong><br>
+      Orchestrator can misroute. Specialists can disagree. Errors propagate across agents. Debugging requires tracing the full chain. Start single-agent.
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Human-in-the-Loop -->
+<div class="slide">
+  <div class="slide-label">Pattern 3</div>
+  <h2>Human-in-the-Loop</h2>
+  <p>The agent proposes an action; a human approves or rejects it before execution. Required for any <strong>irreversible</strong> or <strong>high-stakes</strong> action.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-red" style="font-size:13px; margin-bottom:10px;">
+        <strong>Actions that must have a human gate</strong>
+        <ul style="padding-left:18px; margin-top:8px;">
+          <li style="margin-bottom:4px;">Sending emails or Slack messages</li>
+          <li style="margin-bottom:4px;">Deleting or modifying production records</li>
+          <li style="margin-bottom:4px;">Deploying to a live environment</li>
+          <li>Spending real money (API calls with cost, purchases)</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-green" style="font-size:13px;">
+        <strong>Three levels of autonomy</strong>
+        <ul style="padding-left:18px; margin-top:8px;">
+          <li style="margin-bottom:6px;"><strong>Full autonomy</strong> — agent acts immediately (safe for low-stakes reads)</li>
+          <li style="margin-bottom:6px;"><strong>Approval gate</strong> — agent proposes, human clicks approve (n8n "Wait" node)</li>
+          <li><strong>Human reviewer</strong> — agent drafts, human edits before anything is sent</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:12px; font-size:13px;">
+    n8n (E2–E4) makes human-in-the-loop straightforward: pause a workflow, send a notification, resume when a human responds.
+  </div>
+</div>
+
+<!-- Slide 11 — Failure Modes -->
+<div class="slide">
+  <div class="slide-label">What Goes Wrong</div>
+  <h2>Four Agent Failure Modes</h2>
+  <p>Agents fail in characteristic ways. Knowing these before you build saves debugging hours.</p>
+  <table style="margin-top:12px;">
+    <tr><th>Failure</th><th>Cause</th><th>Mitigation</th></tr>
+    <tr>
+      <td><strong style="color:var(--red);">Infinite loop</strong></td>
+      <td>No exit condition — tool calls keep triggering new tool calls</td>
+      <td><code>max_iterations</code> limit + hard timeout</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--yellow);">Hallucinated arguments</strong></td>
+      <td>LLM invents parameter values not present in context (a book ID that doesn't exist)</td>
+      <td>Validate inputs before executing the tool; return a clear error if invalid</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--purple);">Context overflow</strong></td>
+      <td>History grows until early context is truncated — agent "forgets" the original goal</td>
+      <td>Summarise history periodically; use external memory for long tasks</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--orange);">Confident wrong answer</strong></td>
+      <td>Agent completes its loop and reports success — but achieved the wrong goal</td>
+      <td>Output schemas; structured assertions on result; human review gates</td>
+    </tr>
+  </table>
+  <div class="callout callout-blue" style="margin-top:12px; font-size:13px;">
+    The most dangerous failure is the last one — the agent is confident. Add structured output validation to catch wrong-but-plausible results before they propagate.
+  </div>
+</div>
+
+<!-- Slide 12 — Reading Agentic Code -->
+<div class="slide">
+  <div class="slide-label">The Reading Checklist</div>
+  <h2>How to Read Agentic Code</h2>
+  <p>When you encounter an agent codebase — whether AI-generated or human-written — work through these five questions before trusting the system.</p>
+  <ul class="annot-list" style="margin-top:16px;">
+    <li>
+      <span class="badge badge-orange">1</span>
+      <span><strong>Where is the loop?</strong> Find the <code>for</code> or <code>while</code> that drives the agent. What is the exit condition? What enforces the maximum iteration count?</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">2</span>
+      <span><strong>What are the tools?</strong> List every tool definition. For each: what can it read? What can it modify? Is any tool destructive or irreversible?</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">3</span>
+      <span><strong>Where is memory stored?</strong> Is the <code>messages</code> array the only memory, or is there a database? What happens to context when the array grows large?</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">4</span>
+      <span><strong>What happens on tool failure?</strong> Find the error handling inside <code>executeTool</code>. Does a failed tool call stop the agent or return an error observation?</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">5</span>
+      <span><strong>Is there a human gate?</strong> Before any irreversible action, is there an approval step? If not — should there be?</span>
+    </li>
+  </ul>
+</div>
+
+<!-- Slide 13 — Agent vs Alternatives -->
+<div class="slide">
+  <div class="slide-label">Decision Guide</div>
+  <h2>Agent, or Something Simpler?</h2>
+  <p>Agents add real complexity. Use the simplest tool that solves the problem.</p>
+  <table style="margin-top:14px;">
+    <tr><th>Situation</th><th>Right tool</th><th>Why</th></tr>
+    <tr>
+      <td>Fixed sequence of API calls, same every time</td>
+      <td><strong style="color:var(--green);">Just write the code</strong></td>
+      <td>No reasoning needed — deterministic sequence is simpler and faster</td>
+    </tr>
+    <tr>
+      <td>Different paths depending on a condition you can enumerate</td>
+      <td><strong style="color:var(--green);">if/else or switch</strong></td>
+      <td>Explicit logic is more auditable and reliable than LLM decision-making</td>
+    </tr>
+    <tr>
+      <td>One external API call with a known schema</td>
+      <td><strong style="color:var(--green);">fetch() + a prompt</strong></td>
+      <td>No loop needed — one-shot generation with the API result in context</td>
+    </tr>
+    <tr>
+      <td>Need to decide <em>which</em> of several tools to use based on ambiguous input</td>
+      <td><strong style="color:var(--accent);">Agent</strong></td>
+      <td>LLM reasoning is the right tool for genuine ambiguity about what to do next</td>
+    </tr>
+    <tr>
+      <td>Multi-step workflow connecting APIs + AI nodes visually</td>
+      <td><strong style="color:var(--accent);">n8n</strong></td>
+      <td>Visual orchestration with human-in-the-loop nodes built in — see E2</td>
+    </tr>
+  </table>
+  <div class="callout callout-yellow" style="margin-top:12px; font-size:13px;">
+    The pattern: reach for the agent when the <em>path</em> is unknown at the time you write the code — not just when the data is unknown.
+  </div>
+</div>
+
+<!-- Slide 14 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Prompt Reflection</div>
+  <h2>What You Built With vs What You Learned</h2>
+  <p>If you used an AI assistant to generate an agent scaffold, work through these before moving to E2.</p>
+  <div class="prompt-block" style="margin-top:10px;">
+    <div class="prompt-bar">🤔 Questions to answer without looking at the AI's explanation</div>
+    <div class="prompt-body">
+      <ul>
+        <li>Where is the loop in the generated code? Copy the line that limits iterations.</li>
+        <li>List every tool in the <code>tools</code> array. For each: what does it read or write?</li>
+        <li>Trace one complete iteration: find the Thought, the Action, and the Observe.</li>
+        <li>Find the <code>stop_reason</code> check. What happens if the LLM never returns <code>end_turn</code>?</li>
+        <li>Is there any irreversible action in the tool list? If so, is there a human gate?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-green" style="margin-top:12px; font-size:13px;">
+    <strong>The goal is not to memorise syntax.</strong> It is to be able to answer "what does this agent do, how does it stop, and what could go wrong?" for any agent code you are asked to trust.
+  </div>
+  <div class="callout callout-orange" style="margin-top:8px; font-size:13px;">
+    <strong>Up next — E2: n8n Fundamentals.</strong> You have seen the agent loop in code. Now you will build the same logic visually — nodes, connections, AI nodes, and the HTTP Request node calling your Reading List API.
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 14</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'ai-agents-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'e1-1', type: 'practical', title: 'Map an agent loop',
+    desc: 'Find or generate a simple agent implementation (Node.js or Python). Draw a diagram showing: the loop, every tool call in one iteration, where the observation goes, and what stops the loop. Annotate the code with these labels.',
+    criteria: [
+      'You identified the loop and its exit condition in the actual code',
+      'You named every tool and described what it reads or writes',
+      'You traced at least one full Reason → Act → Observe iteration in the messages array'
+    ] },
+  { id: 'e1-2', type: 'reflect', title: 'Agent or something simpler?',
+    desc: 'Take a feature you have built or plan to build in this course. Decide: should it be an agent, a fixed sequence of API calls, or an if/else branch? Write a short justification for your decision using the criteria from slide 13.',
+    criteria: [
+      'You named the specific decision criterion that determined your choice',
+      'If you chose "agent": you identified which part of the task is genuinely ambiguous at code-write time',
+      'If you chose something simpler: you explained why deterministic logic is sufficient here'
+    ] },
+  { id: 'e1-3', type: 'practical', title: 'Identify the failure modes',
+    desc: 'Review an agent you have built or found online. For each of the four failure modes (infinite loop, hallucinated arguments, context overflow, confident wrong answer): assess whether the agent is protected. Note any gap.',
+    criteria: [
+      'You checked for a max_iterations or equivalent limit',
+      'You checked whether tool inputs are validated before execution',
+      'You identified whether any tool is irreversible and whether there is a human gate'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain the four components of an AI agent: LLM, tools, memory, and objective',
+  'Trace the ReAct loop (Reason → Act → Observe) through a concrete agent interaction',
+  'Read function-calling code and identify the tool definition, call, and observation pattern',
+  'Distinguish single-agent, multi-agent, and human-in-the-loop architectures and their trade-offs',
+  'Identify the four common agent failure modes and describe how to mitigate each'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'e1-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What is the essential difference between a chatbot and an agent?',
+    options: [
+      'Agents use larger language models than chatbots',
+      'Agents have a Reason → Act → Observe loop that continues until a goal is reached',
+      'Chatbots cannot access the internet but agents can',
+      'Agents always require more than one LLM working together'
+    ],
+    correct: 1,
+    explanation: 'The loop is what makes a system agentic — the LLM reasons about what to do, acts (calls a tool), observes the result, and reasons again. A chatbot answers one question and stops. The model size and internet access are implementation details, not the defining distinction.',
+    reviewSlide: 'Chatbot vs Agent'
+  },
+  {
+    id: 'e1-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In function calling, who decides which tool to call and with what arguments?',
+    options: [
+      'Your code selects the tool based on the user\'s keywords',
+      'The LLM decides — it returns a tool_use block with the tool name and arguments',
+      'The tool definitions specify which conditions trigger each tool',
+      'The user selects the tool from a menu before the LLM responds'
+    ],
+    correct: 1,
+    explanation: 'The LLM reads the tool definitions and decides which tool to call and what arguments to provide — this is returned as a tool_use block in the response. Your code then executes the actual function. The LLM never runs code directly; it only specifies what it wants called.',
+    reviewSlide: 'What Are "Tools"?'
+  },
+  {
+    id: 'e1-1-3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In the agent loop code, what happens when `response.stop_reason === "end_turn"`?',
+    options: [
+      'The loop continues to the next iteration as normal',
+      'An error is thrown because the agent failed to use a tool',
+      'The loop breaks — the LLM has decided it is done and no further tool calls are needed',
+      'The messages array is cleared to free up context space'
+    ],
+    correct: 2,
+    explanation: 'stop_reason === "end_turn" means the LLM chose to respond directly rather than call another tool — it has finished reasoning and has an answer. The loop breaks and the final messages array (containing the full trace) is returned. This is the normal successful completion path.',
+    reviewSlide: 'The Agent Loop in Node.js'
+  },
+  {
+    id: 'e1-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'An agent is asked to "email a summary of all unread books to the user." Which failure mode is most important to guard against here, and why?',
+    options: [
+      'Infinite loop — the summarisation step might trigger repeated tool calls',
+      'Context overflow — book lists can be very long',
+      'No human gate on an irreversible action — the email cannot be unsent',
+      'Hallucinated arguments — the agent might invent book titles'
+    ],
+    correct: 2,
+    explanation: 'Sending an email is irreversible — once sent, it cannot be recalled. This is the canonical case for a human-in-the-loop gate: the agent drafts the summary and proposes sending it, a human reviews and approves. Infinite loops and hallucinated arguments are real risks, but the irreversibility of the email action is the primary concern.',
+    reviewSlide: 'Human-in-the-Loop'
+  },
+  {
+    id: 'e1-2-2',
+    checkpoint: 2,
+    type: 'self',
+    q: 'A task you want to automate: "Every morning, check my reading list and send me a Slack message with books added in the last 24 hours." Should this be an agent, a fixed script, or something else? Justify your answer.',
+    rubric: 'Consider: Is the path ambiguous at code-write time, or is it a fixed sequence (query → format → send)? The task has no decision-making — it is always the same steps. A cron job calling your Reading List API and Slack API is simpler, more reliable, and easier to debug. An agent adds loop complexity with no reasoning benefit here. The agent / n8n distinction matters too: n8n with a Schedule trigger, HTTP Request node, and Slack node is perfect for this.'
+  }
+];
+</script>
+</body>
+</html>

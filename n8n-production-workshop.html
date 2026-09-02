@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Patterns — Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #ffa657; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #8a3800; --prompt-border: #c4621a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 52px 72px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+  .section-header { background: linear-gradient(135deg,#200e02 0%,#150901 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(196,98,26,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(196,98,26,.2); font-size: 12px; color: var(--accent); font-weight: 600; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+  .cols { display: grid; gap: 18px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+  .callout { border-radius: 8px; padding: 13px 16px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;    color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-green  { background: rgba(63,185,80,.15);    color: var(--green);  }
+  .badge-yellow { background: rgba(210,153,34,.15);   color: var(--yellow); }
+  .badge-orange { background: rgba(255,166,87,.15);   color: var(--orange); }
+  .badge-blue   { background: rgba(88,166,255,.15);   color: #58a6ff; }
+  .badge-red    { background: rgba(248,81,73,.15);    color: var(--red); }
+  .badge-num    { background: rgba(255,166,87,.2); color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td strong { color: var(--text); }
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 26px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(255,166,87,.12); color: var(--accent); border: 1px solid rgba(255,166,87,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .n8n-flow { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: nowrap; overflow-x: auto; }
+  .n8n-node { background: #1c2128; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 90px; flex-shrink: 0; }
+  .n8n-node .node-icon { font-size: 18px; margin-bottom: 4px; }
+  .n8n-node .node-name { font-size: 11px; font-weight: 700; color: var(--text); }
+  .n8n-node .node-type { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .n8n-node.trigger { border-color: var(--green); }
+  .n8n-node.action  { border-color: #58a6ff; }
+  .n8n-node.ai      { border-color: var(--accent); }
+  .n8n-node.logic   { border-color: var(--purple); }
+  .n8n-node.error   { border-color: var(--red); }
+  .n8n-arrow { color: var(--muted); font-size: 18px; padding: 0 4px; flex-shrink: 0; }
+  #nav { position: fixed; bottom: 26px; right: 36px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 36px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .terminal-body, .diagram { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Production Patterns -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">Error Handling</span>
+    <span class="tag">Human-in-the-Loop</span>
+    <span class="tag">Monitoring</span>
+    <span class="tag">Cost Management</span>
+    <span class="tag">Track E</span>
+  </div>
+  <div class="slide-label">Track E · AI Agents &amp; Automation</div>
+  <h1>Production<br><span class="accent">Patterns</span></h1>
+  <p class="subtitle">
+    Error workflows, retry logic, human-in-the-loop approval, execution monitoring,
+    and cost management — what separates a demo from a deployable system.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Track E · Deck 6 of 6 · Prerequisites: E1–E5</span>
+  </div>
+</div>
+
+<!-- Slide 2 — What "Production" Means -->
+<div class="slide">
+  <div class="slide-label">Definition</div>
+  <h2>What "Production" Means for n8n Workflows</h2>
+  <p>A workflow that works once in the editor is not a production workflow. Production means: it runs reliably when you are not watching, it fails gracefully, it tells you when something goes wrong, and it does not cost unpredictably.</p>
+  <table style="margin-top:14px;">
+    <tr><th>Concern</th><th>The question to answer</th><th>Covered in</th></tr>
+    <tr><td><strong>Error handling</strong></td><td>What happens when a node fails? Does the workflow stop silently?</td><td>Slides 3–4</td></tr>
+    <tr><td><strong>Retry logic</strong></td><td>For transient failures (rate limits, timeouts) — does it retry?</td><td>Slide 5</td></tr>
+    <tr><td><strong>Human gates</strong></td><td>Before irreversible actions — does a human have to approve?</td><td>Slides 6–7</td></tr>
+    <tr><td><strong>Monitoring</strong></td><td>How do you know a workflow ran, succeeded, or failed?</td><td>Slides 8–9</td></tr>
+    <tr><td><strong>Cost</strong></td><td>How many tokens does each run consume? What does it cost per month?</td><td>Slide 10</td></tr>
+    <tr><td><strong>n8n vs code</strong></td><td>When does the workflow outgrow n8n and need to move to code?</td><td>Slide 11</td></tr>
+  </table>
+</div>
+
+<!-- Slide 3 — Error Workflows -->
+<div class="slide">
+  <div class="slide-label">Error Handling</div>
+  <h2>Error Workflows: What Happens When a Node Fails</h2>
+  <p>By default, when a node fails, n8n marks the execution as failed and stops. Nothing else happens — no alert, no retry. For a scheduled workflow, you will not notice until you check the execution history.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-red" style="font-size:13px; margin-bottom:10px;"><strong>Default behaviour (bad for production)</strong></div>
+      <div class="n8n-flow" style="margin:8px 0;">
+        <div class="n8n-node trigger"><div class="node-icon">⏰</div><div class="node-name">Schedule</div><div class="node-type">Daily</div></div>
+        <div class="n8n-arrow">→</div>
+        <div class="n8n-node action"><div class="node-icon">🌐</div><div class="node-name">API Call</div><div class="node-type">Fails ✗</div></div>
+        <div class="n8n-arrow" style="color:var(--red);">✗</div>
+        <div class="n8n-node error"><div class="node-icon">💀</div><div class="node-name">Silent fail</div><div class="node-type">No alert</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:10px;"><strong>With an Error Workflow (correct)</strong></div>
+      <div class="n8n-flow" style="margin:8px 0;">
+        <div class="n8n-node trigger"><div class="node-icon">⏰</div><div class="node-name">Schedule</div><div class="node-type">Daily</div></div>
+        <div class="n8n-arrow">→</div>
+        <div class="n8n-node action"><div class="node-icon">🌐</div><div class="node-name">API Call</div><div class="node-type">Fails ✗</div></div>
+        <div class="n8n-arrow" style="color:var(--red);">→</div>
+        <div class="n8n-node error"><div class="node-icon">🚨</div><div class="node-name">Error Trigger</div><div class="node-type">Catches failure</div></div>
+        <div class="n8n-arrow">→</div>
+        <div class="n8n-node action"><div class="node-icon">📧</div><div class="node-name">Alert</div><div class="node-type">Email / Slack</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:12px; font-size:13px;">
+    <strong>How to set up:</strong> Create a separate workflow with an <strong>Error Trigger</strong> node as its trigger. In your main workflow settings (⚙ → Error Workflow), select this error workflow. When any node in the main workflow fails, n8n triggers the error workflow automatically, passing error details.
+  </div>
+</div>
+
+<!-- Slide 4 — What the Error Workflow Receives -->
+<div class="slide">
+  <div class="slide-label">Error Handling</div>
+  <h2>What the Error Trigger Receives</h2>
+  <p>The Error Trigger node passes structured error context. Use it to build a useful alert — not just "something failed".</p>
+  <div class="cols cols-55-45" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>Fields available in the error workflow</strong></div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td><code>$json.workflow.name</code></td><td>Name of the workflow that failed</td></tr>
+        <tr><td><code>$json.execution.id</code></td><td>Execution ID (link to log)</td></tr>
+        <tr><td><code>$json.execution.error.message</code></td><td>The error message from the failing node</td></tr>
+        <tr><td><code>$json.execution.error.node.name</code></td><td>Which node failed</td></tr>
+        <tr><td><code>$json.execution.startedAt</code></td><td>When the execution started</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="prompt-block">
+        <div class="prompt-bar">📧 Example alert message</div>
+        <div class="prompt-body" style="font-size:12px;">
+          Subject: n8n workflow failed<br><br>
+          Workflow: <code>{{ $json.workflow.name }}</code><br>
+          Failed node: <code>{{ $json.execution.error.node.name }}</code><br>
+          Error: <code>{{ $json.execution.error.message }}</code><br>
+          Execution ID: <code>{{ $json.execution.id }}</code><br><br>
+          Check execution history in n8n for details.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px; font-size:13px;">
+    One shared error workflow can serve multiple main workflows. Each main workflow points to it in settings. The alert includes the workflow name, so you always know which one failed.
+  </div>
+</div>
+
+<!-- Slide 5 — Retry Logic -->
+<div class="slide">
+  <div class="slide-label">Resilience</div>
+  <h2>Retry Logic: Handling Transient Failures</h2>
+  <p>Some failures are transient: rate limits, temporary API unavailability, network timeouts. Retrying immediately usually works. Permanent failures (wrong URL, invalid auth) should not be retried.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:8px;"><strong>n8n built-in retry</strong></div>
+      <p style="font-size:13px; color:var(--muted);">In any node settings (⚙ → Retry On Fail): set <strong>Retry On Fail</strong> to on, max retries to 3, wait between retries to 5s. n8n will retry the node automatically before marking the execution as failed.</p>
+      <div class="callout callout-blue" style="font-size:12px; margin-top:8px;">
+        <strong>Use for:</strong> HTTP Request nodes calling external APIs, especially those with rate limits or occasional timeouts.
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-yellow" style="font-size:13px; margin-bottom:8px;"><strong>When not to retry</strong></div>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-red">✗</span><span><strong>401 Unauthorized</strong>: retrying will not fix bad credentials — alert immediately</span></li>
+        <li><span class="badge badge-red">✗</span><span><strong>400 Bad Request</strong>: the input data is wrong — a retry sends the same bad data</span></li>
+        <li><span class="badge badge-red">✗</span><span><strong>Write operations</strong>: retrying a POST may create duplicate records if the first attempt partially succeeded</span></li>
+      </ul>
+      <div class="callout callout-orange" style="font-size:12px; margin-top:8px;">
+        For writes: implement idempotency at the API level (UPSERT logic) before enabling retry.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — Section Header: Human-in-the-Loop -->
+<div class="slide section-header">
+  <div class="pill">Human-in-the-Loop</div>
+  <h1>Approval Workflows<br>in n8n</h1>
+  <p class="subtitle">The Wait node and the approval pattern — pausing a workflow until a human decides.</p>
+</div>
+
+<!-- Slide 7 — The Wait Node and Approval Pattern -->
+<div class="slide">
+  <div class="slide-label">Approval Pattern</div>
+  <h2>The Wait Node: Pause Until Human Approves</h2>
+  <p>The Wait node pauses the workflow execution. It generates a unique resume URL. When a human clicks that URL (via an email link, Slack button, or web form), the workflow resumes from the Wait node.</p>
+  <div class="n8n-flow" style="margin-top:12px;">
+    <div class="n8n-node trigger"><div class="node-icon">🤖</div><div class="node-name">Agent</div><div class="node-type">Drafts email</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action"><div class="node-icon">📧</div><div class="node-name">Send Draft</div><div class="node-type">Email to human</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic"><div class="node-icon">⏸</div><div class="node-name">Wait</div><div class="node-type">For approval</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic"><div class="node-icon">🔀</div><div class="node-name">IF approved</div><div class="node-type">Check response</div></div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action"><div class="node-icon">✉️</div><div class="node-name">Send Email</div><div class="node-type">Real send</div></div>
+  </div>
+  <div class="cols cols-2" style="margin-top:10px; flex:0;">
+    <div class="callout callout-orange" style="font-size:13px;">
+      <strong>Wait node config:</strong> Resume type → "On webhook call". n8n generates a URL like <code>https://n8n.example.com/webhook/resume/abc123</code>. Include this URL in the draft email with [Approve] and [Reject] links. The human clicks one — the workflow resumes with the response.
+    </div>
+    <div class="callout callout-yellow" style="font-size:13px;">
+      <strong>Timeout:</strong> Set a maximum wait time (e.g., 24h). If the human does not respond, the workflow continues on the timeout branch — send a reminder or mark as cancelled.
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — Execution History and Monitoring -->
+<div class="slide">
+  <div class="slide-label">Monitoring</div>
+  <h2>Execution History: Your Audit Trail</h2>
+  <p>Every workflow execution is recorded in n8n's <strong>Executions</strong> panel. This is your primary debugging and audit tool — use it to verify that workflows ran, inspect what data flowed, and diagnose failures.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:8px;"><strong>What to check in executions</strong></div>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-blue">→</span><span><strong>Status</strong>: green (success), red (failed), grey (waiting). Any red needs investigation.</span></li>
+        <li><span class="badge badge-blue">→</span><span><strong>Duration</strong>: if a scheduled workflow usually takes 3s and today took 45s, something is slow — likely the LLM call or an API timeout.</span></li>
+        <li><span class="badge badge-blue">→</span><span><strong>Node output</strong>: click any node in a past execution to see exactly what data it received and what it produced.</span></li>
+        <li><span class="badge badge-blue">→</span><span><strong>Item count</strong>: if Split Out usually produces 10 items and today produced 0, the API returned no data.</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:8px;"><strong>Retention settings</strong></div>
+      <p style="font-size:13px; color:var(--muted);">By default n8n retains all executions. For high-frequency workflows (every minute, large payloads), this fills disk rapidly. Set execution retention in Settings → Executions to keep only the last N executions or last N days.</p>
+      <div class="callout callout-yellow" style="font-size:12px; margin-top:8px;">
+        <strong>Recommended:</strong> keep the last 50 executions for scheduled workflows. Keep 200 for agent workflows where debugging trace is more important.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — Alerting on Failure -->
+<div class="slide">
+  <div class="slide-label">Monitoring</div>
+  <h2>Alerting: Know Before Your Users Do</h2>
+  <p>The error workflow (slide 3) handles per-execution failures. For broader health monitoring — "has this workflow not run in 6 hours when it should run every hour?" — you need a watchdog.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:8px;"><strong>Pattern: heartbeat workflow</strong></div>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-orange">1</span><span>Add a final node to each critical workflow: HTTP Request to a monitoring service (e.g., Uptime Robot, Better Stack, or a simple webhook you control)</span></li>
+        <li><span class="badge badge-orange">2</span><span>The monitoring service expects a ping on a schedule. If it misses two pings → alert</span></li>
+        <li><span class="badge badge-orange">3</span><span>This catches "workflow didn't run at all" failures — not just node errors</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout callout-yellow" style="font-size:13px; margin-bottom:8px;"><strong>Minimum viable monitoring for coursework</strong></div>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-yellow">→</span><span>Error Workflow set for every production workflow</span></li>
+        <li><span class="badge badge-yellow">→</span><span>Check Executions panel manually each morning for any red entries</span></li>
+        <li><span class="badge badge-yellow">→</span><span>Add a Slack or email notification at the end of each workflow: "✓ Completed: processed N books at HH:MM"</span></li>
+      </ul>
+      <div class="callout callout-blue" style="font-size:12px; margin-top:8px;">
+        The success notification doubles as a health check: if you expected a notification and didn't get one, the workflow failed silently or didn't run.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Cost Management -->
+<div class="slide">
+  <div class="slide-label">Cost</div>
+  <h2>Managing LLM Cost in Production</h2>
+  <p>LLM API calls cost per token. An agentic workflow that runs 100 times a day on 50 books each time can accumulate real cost quickly if not designed carefully.</p>
+  <table style="margin-top:14px;">
+    <tr><th>Lever</th><th>How to apply it</th><th>Trade-off</th></tr>
+    <tr>
+      <td><strong style="color:var(--green);">Right-size the model</strong></td>
+      <td>Use Haiku for simple summarisation; use Sonnet/Opus only for complex reasoning</td>
+      <td>Haiku is ~10–20× cheaper; adequate for structured extraction</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--green);">Constrain output length</strong></td>
+      <td>Set <code>max_tokens</code> on the LLM node — one sentence summaries don't need 4096 tokens</td>
+      <td>Output tokens cost more than input; cap at 256 for short structured outputs</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--accent);">Filter before LLM calls</strong></td>
+      <td>IF node before the LLM — only call the LLM on items that need it (slide 5's idempotency pattern)</td>
+      <td>Reduces calls proportionally to how many items already have results</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--yellow);">Cache results</strong></td>
+      <td>Store LLM output in the database. On next run, skip items already in the DB.</td>
+      <td>Works for stable data; not for tasks that need fresh reasoning each time</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--yellow);">Set usage alerts</strong></td>
+      <td>Anthropic and OpenAI both offer spend alerts — set a monthly budget alert</td>
+      <td>No performance impact; early warning before costs escalate</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Slide 11 — n8n vs Code: When to Move On -->
+<div class="slide">
+  <div class="slide-label">Architecture Decision</div>
+  <h2>When n8n Outgrows Itself</h2>
+  <p>n8n is excellent for orchestration. It has real limits. Know when a workflow has grown beyond what n8n handles well.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-green" style="font-size:13px; margin-bottom:8px;"><strong>Stay in n8n when</strong></div>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-green">✓</span><span>The workflow is primarily orchestration — connecting existing services</span></li>
+        <li><span class="badge badge-green">✓</span><span>Business stakeholders need to read or modify the workflow logic</span></li>
+        <li><span class="badge badge-green">✓</span><span>Human-in-the-loop approval is central to the design</span></li>
+        <li><span class="badge badge-green">✓</span><span>The team does not want to deploy and maintain custom code infrastructure</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout callout-yellow" style="font-size:13px; margin-bottom:8px;"><strong>Move to code when</strong></div>
+      <ul class="annot-list" style="margin-top:0;">
+        <li><span class="badge badge-yellow">→</span><span>The workflow has more than 3 Code nodes — at that point you are writing a program in a visual IDE with extra friction</span></li>
+        <li><span class="badge badge-yellow">→</span><span>You need unit tests — n8n workflows are not unit-testable</span></li>
+        <li><span class="badge badge-yellow">→</span><span>Performance matters — n8n adds latency per node; code runs in-process</span></li>
+        <li><span class="badge badge-yellow">→</span><span>The agent logic is complex enough that the execution log is insufficient for debugging — you need a proper debugger</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:10px; font-size:13px;">
+    <strong>The hybrid pattern:</strong> use n8n for orchestration (triggers, approvals, notifications) and call your own Node.js microservice for the complex agent logic. Best of both worlds.
+  </div>
+</div>
+
+<!-- Slide 12 — Track E Summary -->
+<div class="slide">
+  <div class="slide-label">Track Complete</div>
+  <h2>Track E: What You Have Built</h2>
+  <p>Six decks from the theory of agents to the operational discipline of running them in production.</p>
+  <table style="margin-top:12px;">
+    <tr><th>Deck</th><th>Key concept</th><th>The skill you have now</th></tr>
+    <tr><td><strong style="color:var(--accent);">E1</strong></td><td>ReAct loop, tools, failure modes</td><td>Read any agent code and narrate what it does</td></tr>
+    <tr><td><strong style="color:var(--accent);">E2</strong></td><td>n8n node model, item model, AI Agent node</td><td>Understand any n8n workflow's structure at a glance</td></tr>
+    <tr><td><strong style="color:var(--accent);">E3</strong></td><td>Full CRUD via HTTP Request, data mapping</td><td>Connect n8n to any JWT-protected REST API</td></tr>
+    <tr><td><strong style="color:var(--accent);">E4</strong></td><td>Tool nodes, system prompts, memory</td><td>Build and tune a conversational AI assistant</td></tr>
+    <tr><td><strong style="color:var(--accent);">E5</strong></td><td>Three agent patterns, chaining, testing</td><td>Design and build from scratch for a new domain</td></tr>
+    <tr><td><strong style="color:var(--accent);">E6</strong></td><td>Error handling, approval, monitoring, cost</td><td>Deploy with confidence, debug quickly, manage cost</td></tr>
+  </table>
+  <div class="callout callout-orange" style="margin-top:14px; font-size:13px;">
+    <strong>The course builds to this.</strong> You have gone from HTTP requests in curl (B4) to autonomous agents running on a schedule, calling your own API, making decisions, and notifying you on failure — with a human gate before anything irreversible happens.
+  </div>
+</div>
+
+<!-- Slide 13 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Prompt Reflection</div>
+  <h2>What You Built With vs What You Learned</h2>
+  <p>Final reflection for Track E. Look back at everything you built across E3–E6.</p>
+  <div class="prompt-block" style="margin-top:10px;">
+    <div class="prompt-bar">🤔 Questions to answer without re-reading notes or AI output</div>
+    <div class="prompt-body">
+      <ul>
+        <li>Name the five things you check to assess whether a workflow is production-ready (from slide 2). For each: is your E5 workflow from the previous deck production-ready on that dimension?</li>
+        <li>Your Summarise &amp; Tag workflow fails at 2am. You wake up and check at 9am. How do you know it failed? What would you see in the executions panel, and what alert should have fired?</li>
+        <li>The error workflow you set up receives a failing execution from a PATCH node. The error message is "Cannot read property id of undefined". What does this tell you? What would you check first?</li>
+        <li>Your agent makes 3 API calls to Claude Haiku per book. You have 200 books. The workflow runs daily. Estimate the monthly token cost. (Haiku: ~$0.00025/1K input tokens, ~$0.00125/1K output tokens. Assume 500 input + 100 output tokens per call.)</li>
+        <li>List two improvements you would make to a workflow you built in this track if you were deploying it for real users rather than for yourself.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-green" style="margin-top:10px; font-size:13px;">
+    <strong>Track E complete.</strong> You built the full stack — from understanding why agents exist to deploying them responsibly. The patterns here apply beyond the Reading List API to any domain: customer data, content pipelines, support automation, research workflows.
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 13</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'n8n-production-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'e6-1', type: 'practical', title: 'Add an error workflow',
+    desc: 'Create a dedicated error workflow with an Error Trigger node. Set it as the error handler for at least two of your E5 workflows. The error workflow should send an email or log to Slack with: workflow name, failing node, error message, and execution ID. Test it by deliberately breaking a node (wrong URL) and verifying the alert fires.',
+    criteria: [
+      'The error workflow is connected to at least two main workflows via Settings → Error Workflow',
+      'The alert message includes workflow name, failing node name, and the error message',
+      'You tested by deliberately causing a failure and confirmed the alert arrived'
+    ] },
+  { id: 'e6-2', type: 'practical', title: 'Add a Wait node approval to the research agent',
+    desc: 'Extend your E5 research agent: after the agent generates recommendations, email them to yourself with [Approve to Add] and [Reject] links using the Wait node\'s resume URL. If approved, call POST /api/books for each recommendation. If rejected or timeout (24h), log "Recommendations rejected" and stop.',
+    criteria: [
+      'The Wait node is configured with webhook resume type and a 24h timeout',
+      'The approval email contains the recommendations and both Approve/Reject links',
+      'The IF node after Wait correctly routes to the add-books path or the reject path'
+    ] },
+  { id: 'e6-3', type: 'reflect', title: 'Production readiness audit',
+    desc: 'Take the complete workflow you are most proud of from Track E. Audit it against the five production dimensions from slide 2 (error handling, retry, human gates, monitoring, cost). Rate each dimension: not started / partial / complete. For any "partial" or "not started", describe what you would need to do to reach "complete".',
+    criteria: [
+      'You assessed all five dimensions honestly, not just the ones you implemented',
+      'For each gap, you described a concrete action (not just "add error handling")',
+      'Your cost estimate is based on actual numbers (tokens, model, frequency) not just "it\'s probably fine"'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Set up an n8n Error Workflow that alerts on any execution failure with structured error context',
+  'Configure retry logic appropriately for transient failures while avoiding retries on permanent errors',
+  'Implement the Wait node approval pattern to pause a workflow pending human review of an irreversible action',
+  'Use the execution history panel to audit workflow runs and diagnose silent or partial failures',
+  'Apply at least two cost management strategies to reduce LLM token consumption in a production workflow'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'e6-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Your scheduled workflow runs every hour. At 3pm you check the execution history and see red ✗ entries for 1pm, 2pm, and 3pm. You set up an error workflow last week. Why might you have NOT received any alerts?',
+    options: [
+      'The error workflow only fires for the first failure — subsequent failures in the same day are suppressed',
+      'The error workflow itself is failing — check its own execution history for errors',
+      'Scheduled workflows do not trigger error workflows — only manual executions do',
+      'Red executions only appear after you manually refresh the panel'
+    ],
+    correct: 1,
+    explanation: 'If the error workflow itself is misconfigured — wrong email credential, invalid Slack webhook, or a node error — it will fail silently. Check the error workflow\'s own execution history. Also check: is the error workflow actually set in the main workflow\'s settings? A common mistake is setting it in the wrong workflow or forgetting to save the setting.',
+    reviewSlide: 'Error Workflows: What Happens When a Node Fails'
+  },
+  {
+    id: 'e6-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Your workflow POSTs a new book to the API. You enable "Retry On Fail" with 3 retries. The API returns 409 Conflict (book already exists). What happens?',
+    options: [
+      'The retry succeeds because 409 is a recoverable error',
+      'n8n retries 3 times, each returning 409, then marks the execution as failed after 3 attempts',
+      'n8n detects the 409 status and skips retries automatically',
+      'The first retry sends a PATCH instead of a POST to fix the conflict'
+    ],
+    correct: 1,
+    explanation: 'n8n\'s retry-on-fail retries on any failure, regardless of HTTP status code. It does not distinguish between transient (503, 429) and permanent (409, 400) failures. All three retries will send the same POST, receive the same 409, and fail. For 409s, the correct fix is an IF node before the POST: check whether the book exists first. If it does, skip the POST.',
+    reviewSlide: 'Retry Logic: Handling Transient Failures'
+  },
+  {
+    id: 'e6-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'A human clicks [Approve] in the approval email. The Wait node receives the webhook. What should the IF node immediately after the Wait node check?',
+    options: [
+      'Whether the email was delivered successfully',
+      'The HTTP status of the webhook call (200 = approve, 404 = reject)',
+      'A field in the webhook body or query parameter that indicates the human\'s decision',
+      'Whether the Wait node timed out before the response arrived'
+    ],
+    correct: 2,
+    explanation: 'The approval email contains two links: one with ?action=approve and one with ?action=reject. When the human clicks, the query parameter is passed to the Wait node\'s webhook. The IF node checks {{ $json.query.action === "approve" }} to route to the add-books path or the reject path. The HTTP status is always 200 (the webhook received the call) — it tells you nothing about the human\'s decision.',
+    reviewSlide: 'The Wait Node: Pause Until Human Approves'
+  },
+  {
+    id: 'e6-2-2',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Your Summarise & Tag workflow runs daily and processes 50 books. Currently it calls Claude Haiku for all 50 books every day, even for books that were summarised last week. Describe two specific changes to the workflow that would reduce the number of LLM calls, and estimate the percentage reduction each change would achieve assuming 10 new books are added per day.',
+    rubric: 'Change 1: Add an IF node before the LLM call to filter to books where notes is null/empty (the idempotency pattern from E5). Effect: instead of 50 calls/day, only 10 calls/day (new books). Reduction: 80% on day 2+. Change 2: Right-size the model — use Haiku instead of Sonnet if not already doing so. Effect: ~10x cost reduction per call (same number of calls, lower unit cost). Or: set max_tokens to 256 for short summaries instead of the default 4096. Effect: cuts output tokens by ~94%, which are the more expensive half. Both changes together could reduce daily cost by 85%+ while maintaining quality for structured extraction tasks.'
+  }
+];
+</script>
+</body>
+</html>

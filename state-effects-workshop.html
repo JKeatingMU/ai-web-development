@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State &amp; Effects — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #bc8cff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #6e40c9; --prompt-border: #9d71e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#1a1040 0%,#0f0a2a 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;       color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);    color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple); color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange); color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-60-40 > *:first-child { flex: 60; }
+  .cols-60-40 > *:last-child  { flex: 40; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(157,113,232,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(157,113,232,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="state-effects-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track C · Frontend</div>
+  <h1>State &amp; <span class="accent">Effects</span></h1>
+  <div class="subtitle">useEffect · Data Fetching · Async Patterns · Custom Hooks</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-purple">useEffect</span>
+    <span class="badge badge-purple">async/await</span>
+    <span class="badge badge-purple">fetch</span>
+    <span class="badge badge-purple">Custom Hooks</span>
+  </div>
+  <div class="callout callout-purple">C1 gave you components and local state. This deck goes deeper — how React handles side effects, how to fetch data from your API, and how to manage loading and error states cleanly. Every pattern here is what AI generates for real applications.</div>
+</div>
+
+<!-- Slide 2 — The Render Cycle -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>The Render Cycle — What Triggers a Re-render?</h2>
+  <p>Before useEffect makes sense, you need to understand when React re-renders. Everything else follows from this.</p>
+  <div class="cols cols-3" style="margin-top:10px;">
+    <div class="callout callout-purple">
+      <strong>State change</strong><br>
+      Calling a setter function (<code>setCount</code>, <code>setBooks</code>) schedules a re-render. React batches multiple setters in one render.
+    </div>
+    <div class="callout callout-yellow">
+      <strong>Props change</strong><br>
+      When a parent re-renders and passes different prop values to a child, the child re-renders too. Same props = no re-render (by default).
+    </div>
+    <div class="callout callout-blue">
+      <strong>Context change</strong><br>
+      If a component consumes a React context and the context value changes, it re-renders. You will meet this in C4 (auth state).
+    </div>
+  </div>
+  <div class="callout callout-orange" style="margin-top:8px;font-size:13px;">Re-renders are cheap — React only updates the DOM where something actually changed. The concern is not re-renders themselves but side effects (API calls, timers) that must not run on every render. That is why useEffect exists.</div>
+</div>
+
+<!-- Slide 3 — What is a Side Effect? -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Side Effects — What They Are and Why They Need Managing</h2>
+  <p>A <strong>side effect</strong> is anything a component does that reaches outside the React render cycle: fetching data, setting a timer, subscribing to an event, updating the document title.</p>
+  <div class="cols cols-50-50" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">wrong — side effect in render</span></div>
+        <div class="terminal-body"><span class="kw">function</span> <span class="fn">BookList</span>() {
+  <span class="comment">// ❌ runs on EVERY render</span>
+  <span class="comment">// creates infinite loop: fetch → setBooks</span>
+  <span class="comment">// → re-render → fetch → setBooks → …</span>
+  fetch(<span class="str">'/api/books'</span>)
+    .<span class="fn">then</span>(r =&gt; r.<span class="fn">json</span>())
+    .<span class="fn">then</span>(data =&gt; <span class="fn">setBooks</span>(data));
+
+  <span class="kw">return</span> &lt;<span class="hi">ul</span>&gt;{books.<span class="fn">map</span>(…)}&lt;/<span class="hi">ul</span>&gt;;
+}</div>
+      </div>
+    </div>
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">correct — side effect in useEffect</span></div>
+        <div class="terminal-body"><span class="kw">function</span> <span class="fn">BookList</span>() {
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="comment">// ✓ runs once after mount</span>
+    fetch(<span class="str">'/api/books'</span>)
+      .<span class="fn">then</span>(r =&gt; r.<span class="fn">json</span>())
+      .<span class="fn">then</span>(data =&gt; <span class="fn">setBooks</span>(data));
+  }, []); <span class="comment">// ← empty array = run once</span>
+
+  <span class="kw">return</span> &lt;<span class="hi">ul</span>&gt;{books.<span class="fn">map</span>(…)}&lt;/<span class="hi">ul</span>&gt;;
+}</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-purple" style="margin-top:8px;font-size:13px;">useEffect separates <em>what to render</em> from <em>what to do after rendering</em>. AI always wraps fetch calls in useEffect — now you understand why.</div>
+</div>
+
+<!-- Slide 4 — useEffect Dependency Array -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>useEffect — The Dependency Array</h2>
+  <p>The second argument to useEffect controls when it runs. This is the most important thing to read in any AI-generated effect.</p>
+  <table style="margin-top:10px;">
+    <thead><tr><th>Second argument</th><th>When the effect runs</th><th>Typical use</th></tr></thead>
+    <tbody>
+      <tr><td>Omitted</td><td>After every render</td><td>Almost never correct — causes infinite loops with state updates</td></tr>
+      <tr><td><code>[]</code> (empty array)</td><td>Once after mount</td><td>Fetch initial data, set up subscriptions, start timers</td></tr>
+      <tr><td><code>[id]</code> (with value)</td><td>After mount, then whenever <code>id</code> changes</td><td>Fetch data that depends on a prop or state value</td></tr>
+      <tr><td><code>[id, filter]</code> (multiple)</td><td>After mount, then when either changes</td><td>Re-fetch when any dependency changes</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-orange" style="margin-top:12px;font-size:13px;"><strong>AI often gets this right but sometimes omits values from the array.</strong> If you use a variable inside useEffect, it should appear in the dependency array — unless it is a setter function (those are stable and can be omitted). Ask AI to explain its dependency array if it is not obvious.</div>
+</div>
+
+<!-- Slide 5 — Async in useEffect -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Async/Await Inside useEffect</h2>
+  <p>useEffect cannot take an async function directly — the callback must return either nothing or a cleanup function, not a Promise. AI works around this with an inner async function.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">the pattern AI always generates</span></div>
+        <div class="terminal-body"><span class="fn">useEffect</span>(() =&gt; {
+  <span class="comment">// Define async function inside the effect</span>
+  <span class="kw">async function</span> <span class="fn">fetchBooks</span>() {
+    <span class="kw">try</span> {
+      <span class="fn">setIsLoading</span>(<span class="val">true</span>);
+      <span class="kw">const</span> res  = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/books'</span>);
+      <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">`HTTP </span>${res.status}<span class="str">`</span>);
+      <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+      <span class="fn">setBooks</span>(data);
+    } <span class="kw">catch</span> (err) {
+      <span class="fn">setError</span>(err.<span class="fn">message</span>);
+    } <span class="kw">finally</span> {
+      <span class="fn">setIsLoading</span>(<span class="val">false</span>);
+    }
+  }
+
+  <span class="comment">// Call it immediately</span>
+  <span class="fn">fetchBooks</span>();
+}, []);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Define then call</strong> — define the async function inside the effect, then call it on the next line. AI always uses this two-step pattern.</div>
+      <div class="callout callout-yellow"><strong>try/catch/finally</strong> — catch handles network errors and non-OK responses. finally always runs — it resets <code>isLoading</code> whether the request succeeded or failed.</div>
+      <div class="callout callout-orange"><strong>res.ok check</strong> — <code>fetch</code> only throws on network failure, not HTTP errors. A 404 or 500 response does not throw. Always check <code>res.ok</code> before calling <code>res.json()</code>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — Effect Cleanup -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Effect Cleanup — Avoiding Memory Leaks</h2>
+  <p>When a component unmounts, any ongoing work (timers, subscriptions, in-flight requests) should be cancelled. useEffect supports a <strong>cleanup function</strong> — the value you return from the effect.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">cleanup with AbortController</span></div>
+        <div class="terminal-body"><span class="fn">useEffect</span>(() =&gt; {
+  <span class="comment">// AbortController lets us cancel the fetch</span>
+  <span class="kw">const</span> controller = <span class="kw">new</span> <span class="fn">AbortController</span>();
+
+  <span class="kw">async function</span> <span class="fn">fetchBooks</span>() {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/books'</span>, {
+        signal: controller.signal  <span class="comment">// ← link to controller</span>
+      });
+      <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+      <span class="fn">setBooks</span>(data);
+    } <span class="kw">catch</span> (err) {
+      <span class="comment">// Ignore abort errors — expected on cleanup</span>
+      <span class="kw">if</span> (err.<span class="fn">name</span> !== <span class="str">'AbortError'</span>) <span class="fn">setError</span>(err.<span class="fn">message</span>);
+    }
+  }
+
+  <span class="fn">fetchBooks</span>();
+
+  <span class="comment">// Return cleanup function — runs on unmount</span>
+  <span class="kw">return</span> () =&gt; controller.<span class="fn">abort</span>();
+}, []);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Return a function</strong> — whatever you return from useEffect is called when the component unmounts (or before the effect re-runs). This is the cleanup slot.</div>
+      <div class="callout callout-yellow"><strong>AbortController</strong> — a browser API for cancelling fetch requests. Pass <code>controller.signal</code> to fetch, call <code>controller.abort()</code> in cleanup. AI generates this for any component that might unmount mid-fetch.</div>
+      <div class="callout callout-orange">Without cleanup, setting state on an unmounted component causes a React warning. With cleanup, the fetch is cancelled before the state update happens.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — Multiple Effects -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Multiple Effects — One Concern Per Effect</h2>
+  <p>You can have as many useEffect calls as you need. AI tends to write one effect per logical concern — this is the right pattern. Mixing unrelated concerns in one effect makes both harder to understand and test.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">separate concerns</span></div>
+        <div class="terminal-body"><span class="comment">// Effect 1: fetch books on mount</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="fn">fetchBooks</span>();
+}, []);
+
+<span class="comment">// Effect 2: update page title when filter changes</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  document.title = filter
+    ? <span class="str">`Books — </span>${filter}<span class="str">`</span>
+    : <span class="str">'My Reading List'</span>;
+}, [filter]);
+
+<span class="comment">// Effect 3: re-fetch when search term changes</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">if</span> (searchTerm.<span class="fn">trim</span>()) <span class="fn">searchBooks</span>(searchTerm);
+}, [searchTerm]);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple">Each effect has its own dependency array. They run independently. Mixing them into one block means one change triggers unrelated work.</div>
+      <div class="callout callout-yellow"><strong>document.title</strong> is a classic side effect — it's outside the React tree. useEffect with a dependency is the correct place for it.</div>
+      <div class="callout callout-green">When AI generates a component with multiple effects, read each one separately. What is its purpose? What triggers it? What does it clean up?</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — Section header: Custom Hooks -->
+<div class="slide section-header">
+  <span class="pill">Custom Hooks</span>
+  <h1>Extracting Logic into <span class="accent">Reusable Hooks</span></h1>
+  <div class="subtitle">When AI generates the same pattern twice, it's time for a hook.</div>
+</div>
+
+<!-- Slide 9 — What is a Custom Hook? -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Custom Hooks — Reusing Stateful Logic</h2>
+  <p>A custom hook is just a function whose name starts with <code>use</code> and that calls React hooks internally. It lets you extract and reuse logic without duplicating useState + useEffect across components.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">hooks/useBooks.ts</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { useState, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">export function</span> <span class="fn">useBooks</span>() {
+  <span class="kw">const</span> [books,     setBooks]     = <span class="fn">useState</span>&lt;<span class="fn">Book</span>[]&gt;([]);
+  <span class="kw">const</span> [isLoading, setIsLoading] = <span class="fn">useState</span>(<span class="val">true</span>);
+  <span class="kw">const</span> [error,     setError]     = <span class="fn">useState</span>&lt;<span class="hi">string</span>|<span class="hi">null</span>&gt;(<span class="val">null</span>);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> controller = <span class="kw">new</span> <span class="fn">AbortController</span>();
+    <span class="kw">async function</span> <span class="fn">load</span>() {
+      <span class="kw">try</span> {
+        <span class="kw">const</span> res  = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/books'</span>, { signal: controller.signal });
+        <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+        <span class="fn">setBooks</span>(data);
+      } <span class="kw">catch</span> (e: <span class="hi">any</span>) {
+        <span class="kw">if</span> (e.name !== <span class="str">'AbortError'</span>) <span class="fn">setError</span>(e.message);
+      } <span class="kw">finally</span> { <span class="fn">setIsLoading</span>(<span class="val">false</span>); }
+    }
+    <span class="fn">load</span>();
+    <span class="kw">return</span> () =&gt; controller.<span class="fn">abort</span>();
+  }, []);
+
+  <span class="kw">return</span> { books, isLoading, error };
+}
+
+<span class="comment">// Usage — clean component:</span>
+<span class="kw">function</span> <span class="fn">BookList</span>() {
+  <span class="kw">const</span> { books, isLoading, error } = <span class="fn">useBooks</span>();
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;Loading…&lt;/<span class="hi">p</span>&gt;;
+  <span class="kw">if</span> (error)     <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;{error}&lt;/<span class="hi">p</span>&gt;;
+  <span class="kw">return</span> &lt;<span class="hi">ul</span>&gt;{books.<span class="fn">map</span>(…)}&lt;/<span class="hi">ul</span>&gt;;
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Naming convention</strong> — must start with <code>use</code>. This is how React knows it is a hook and enforces the rules of hooks (not called conditionally, not called outside components).</div>
+      <div class="callout callout-green"><strong>Returns whatever the consumer needs</strong> — usually an object <code>{ data, isLoading, error }</code>. The component destructures what it needs.</div>
+      <div class="callout callout-yellow">When AI generates a custom hook, ask: what would this component look like without the hook? The answer shows you exactly what complexity the hook is hiding.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Prompt: useFetch generic hook -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Prompt Type: Scaffold</div>
+  <h2>Prompting for a Generic useFetch Hook</h2>
+  <p>Once you understand <code>useBooks</code>, the next step is a generic version that works for any endpoint. This is a prompt where specifying the TypeScript generic is important.</p>
+  <div class="prompt-block">
+    <div class="prompt-bar"><span>✦</span> Prompt — generic data-fetching hook</div>
+    <div class="prompt-body">
+      I'm building a React + TypeScript app. Please generate a generic <em>useFetch&lt;T&gt;</em> custom hook that:<br>
+      <ul>
+        <li>Accepts a URL string as its parameter</li>
+        <li>Returns <code>{ data: T | null, isLoading: boolean, error: string | null }</code></li>
+        <li>Uses AbortController for cleanup on unmount</li>
+        <li>Re-fetches when the URL changes</li>
+        <li>Does not fetch if the URL is an empty string</li>
+      </ul>
+      Show me how to use it to fetch a list of books typed as <em>Book[]</em>. Explain what the TypeScript generic T does here.
+    </div>
+  </div>
+  <div class="callout callout-purple" style="margin-top:8px;font-size:13px;"><strong>Why this prompt works:</strong> the generic <code>T</code> requirement forces AI to generate TypeScript-aware code. The "do not fetch if empty string" requirement prevents unnecessary requests when a URL is conditionally built. The usage example forces AI to show the hook in context.</div>
+</div>
+
+<!-- Slide 11 — Reading the useFetch Output -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Prompt Type: Explain</div>
+  <h2>Reading the Generated useFetch Hook</h2>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">typical AI output — annotated</span></div>
+        <div class="terminal-body"><span class="kw">function</span> <span class="fn">useFetch</span>&lt;T&gt;(url: <span class="hi">string</span>) {
+  <span class="kw">const</span> [data,      setData]      = <span class="fn">useState</span>&lt;T | <span class="hi">null</span>&gt;(<span class="val">null</span>);
+  <span class="kw">const</span> [isLoading, setIsLoading] = <span class="fn">useState</span>(<span class="val">false</span>);
+  <span class="kw">const</span> [error,     setError]     = <span class="fn">useState</span>&lt;<span class="hi">string</span> | <span class="hi">null</span>&gt;(<span class="val">null</span>);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="comment">// ← url in deps: re-runs when url changes</span>
+    <span class="kw">if</span> (!url) <span class="kw">return</span>; <span class="comment">// ← guard: skip empty URL</span>
+
+    <span class="kw">const</span> controller = <span class="kw">new</span> <span class="fn">AbortController</span>();
+    <span class="fn">setIsLoading</span>(<span class="val">true</span>);
+    <span class="fn">setError</span>(<span class="val">null</span>); <span class="comment">// ← reset error on new fetch</span>
+
+    <span class="kw">async function</span> <span class="fn">load</span>() {
+      <span class="kw">try</span> {
+        <span class="kw">const</span> res  = <span class="kw">await</span> <span class="fn">fetch</span>(url, { signal: controller.signal });
+        <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">`HTTP </span>${res.status}<span class="str">`</span>);
+        <span class="kw">const</span> json = <span class="kw">await</span> res.<span class="fn">json</span>();
+        <span class="fn">setData</span>(json <span class="kw">as</span> T);
+      } <span class="kw">catch</span> (e: <span class="hi">any</span>) {
+        <span class="kw">if</span> (e.name !== <span class="str">'AbortError'</span>) <span class="fn">setError</span>(e.message);
+      } <span class="kw">finally</span> { <span class="fn">setIsLoading</span>(<span class="val">false</span>); }
+    }
+    <span class="fn">load</span>();
+    <span class="kw">return</span> () =&gt; controller.<span class="fn">abort</span>();
+  }, [url]); <span class="comment">// ← url is the dependency</span>
+
+  <span class="kw">return</span> { data, isLoading, error };
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>T is a type parameter</strong> — it flows from the call site: <code>useFetch&lt;Book[]&gt;</code> makes <code>data</code> typed as <code>Book[] | null</code>. The hook itself is generic — it does not know or care what T is.</div>
+      <div class="callout callout-yellow"><strong>setError(null)</strong> on each new fetch — clears any previous error so a successful retry is not obscured by the old error message.</div>
+      <div class="callout callout-orange"><strong>json as T</strong> — a type assertion. AI uses this because <code>fetch</code> returns <code>any</code>. It is safe here because you control the URL and know the shape. For external APIs, add runtime validation.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — State Updates and Batching -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>State Batching — Why Multiple Setters Don't Mean Multiple Renders</h2>
+  <p>Calling three setters in a row does not cause three re-renders. React batches state updates triggered in the same event handler or effect into a single render.</p>
+  <div class="cols cols-50-50" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">three setters — one render</span></div>
+        <div class="terminal-body"><span class="kw">async function</span> <span class="fn">load</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchBooks</span>();
+    <span class="comment">// React 18: all three batched → one render</span>
+    <span class="fn">setBooks</span>(data);
+    <span class="fn">setIsLoading</span>(<span class="val">false</span>);
+    <span class="fn">setError</span>(<span class="val">null</span>);
+  } <span class="kw">catch</span> (e) {
+    <span class="comment">// These are also batched</span>
+    <span class="fn">setError</span>(e.message);
+    <span class="fn">setIsLoading</span>(<span class="val">false</span>);
+  }
+}
+
+<span class="comment">// Alternative: combine related state</span>
+<span class="kw">const</span> [state, setState] = <span class="fn">useState</span>({
+  books: [],
+  isLoading: <span class="val">true</span>,
+  error: <span class="val">null</span>
+});
+<span class="comment">// setState({ ...state, books: data, isLoading: false })</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>React 18 automatic batching</strong> — batches updates inside async functions, setTimeout, and promises. Earlier React only batched inside event handlers. AI targeting React 18+ assumes automatic batching.</div>
+      <div class="callout callout-yellow"><strong>Object state</strong> — some AI-generated code combines related state into one object. This is a valid pattern. The spread <code>...state</code> is required to preserve other fields — omitting it replaces the whole object.</div>
+      <div class="callout callout-green">Three separate state variables are easier to read and update independently. Object state reduces setter calls. Both are correct — understand the trade-off.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 13 — useCallback and useMemo -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>useCallback and useMemo — Optimisation Hooks</h2>
+  <p>AI sometimes generates these. Know what they do and when they are — and are not — needed.</p>
+  <div class="cols cols-50-50" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">useCallback — stable function reference</span></div>
+        <div class="terminal-body"><span class="comment">// Without useCallback: new function on every render</span>
+<span class="comment">// This causes child to re-render even if props unchanged</span>
+<span class="kw">const</span> <span class="fn">handleDelete</span> = (<span class="fn">useCallback</span>)((id: <span class="hi">number</span>) =&gt; {
+  <span class="fn">setBooks</span>(prev =&gt; prev.<span class="fn">filter</span>(b =&gt; b.id !== id));
+}, []); <span class="comment">// ← deps: empty = created once</span>
+
+<span class="comment">// useMemo — expensive computation, cached</span>
+<span class="kw">const</span> filteredBooks = <span class="fn">useMemo</span>(() =&gt;
+  books.<span class="fn">filter</span>(b =&gt; b.status === filter),
+  [books, filter] <span class="comment">// recompute only when these change</span>
+);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>useCallback</strong> — memoises a function so it keeps the same reference between renders. Useful when the function is passed as a prop to a memoised child component.</div>
+      <div class="callout callout-yellow"><strong>useMemo</strong> — memoises the result of a computation. Useful when filtering/sorting large arrays that would be recalculated on every render.</div>
+      <div class="callout callout-orange"><strong>Do not add these by default.</strong> AI sometimes over-optimises. A filter on 20 books does not need useMemo. Ask AI: "Is this actually needed here, or is it premature optimisation?"</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 14 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Reflection</div>
+  <h2>Reflect — Reading Effects in AI-Generated Code</h2>
+  <p>When AI generates a component with useEffect, these are the questions that turn reading into understanding.</p>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span style="color:var(--purple);font-weight:700;">01</span><span><strong>What is the dependency array?</strong> Is it empty, does it have values, or is it missing? What does that mean for when this effect runs? If you are not sure, add a <code>console.log</code> and watch the console as you interact.</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">02</span><span><strong>Does the effect return a cleanup function?</strong> If it starts a fetch, sets a timer, or adds an event listener, it should clean up. If AI omitted cleanup, ask it why and whether it is intentional.</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">03</span><span><strong>What triggers a re-fetch?</strong> Trace from UI interaction → state change → dependency change → effect re-runs. If you cannot trace this path, the data flow is not yet understood.</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">04</span><span><strong>What happens on error?</strong> A fetch that only handles the happy path is incomplete. Does AI's error handling display a message, log to console, or silently fail? Is that appropriate for your use case?</span></li>
+  </ul>
+</div>
+
+<!-- Slide 15 — Wrap-up -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>What You Can Now Read — and What Comes Next</h2>
+  <div class="cols cols-50-50" style="margin-top:10px;">
+    <div>
+      <p style="color:var(--text);font-weight:600;margin-bottom:8px;">Covered in this deck:</p>
+      <ul class="annot-list">
+        <li><span>✓</span><span>The render cycle and what triggers re-renders</span></li>
+        <li><span>✓</span><span>Side effects and why they need useEffect</span></li>
+        <li><span>✓</span><span>Dependency arrays — all four cases</span></li>
+        <li><span>✓</span><span>Async/await inside useEffect</span></li>
+        <li><span>✓</span><span>AbortController for fetch cleanup</span></li>
+        <li><span>✓</span><span>Multiple effects, one concern each</span></li>
+        <li><span>✓</span><span>Custom hooks — extracting reusable logic</span></li>
+        <li><span>✓</span><span>State batching, useCallback, useMemo</span></li>
+      </ul>
+    </div>
+    <div>
+      <p style="color:var(--text);font-weight:600;margin-bottom:8px;">Coming up:</p>
+      <div class="callout callout-blue" style="margin-bottom:8px;"><strong>C3 — API Integration</strong> Connect your React app to your Express API — environment variables, CORS, JWT auth headers, and the full request/response cycle from the browser</div>
+      <div class="callout callout-green" style="margin-bottom:8px;"><strong>C4 — Auth in the Browser</strong> Login form, token storage, React Context for auth state, protected routes</div>
+      <div class="callout callout-yellow"><strong>C5 — Routing</strong> React Router v6, nested routes, URL parameters, navigation guards</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <span id="counter">1 / 15</span>
+  <button class="nav-btn" id="prev">&#8592;</button>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → navigate &nbsp;|&nbsp; F fullscreen</div>
+<a id="app-link" href="http://localhost:3001/api/health" target="_blank">localhost:3001 ↗</a>
+<a id="index-link" href="index.html">&#8962; Course</a>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'c2-1', type: 'practical', title: 'Trace the render cycle',
+    desc: 'Add console.log("render") at the top of a component that has a useEffect with a state update inside. Open the browser console. How many times does it log on load? Now remove the [] from useEffect. What happens? Restore [] and explain what you observed.',
+    criteria: [
+      'You can predict how many renders occur for a given useEffect configuration',
+      'You observed the infinite loop and understand why it happens',
+      'You can explain in one sentence what the [] dependency array prevents'
+    ] },
+  { id: 'c2-2', type: 'practical', title: 'Build useFetch',
+    desc: 'Using the prompt from slide 10, generate a useFetch<T> hook. Use it in a component to fetch your book list from the API (or from a public JSON API if your API is not running). Verify loading and error states both work by temporarily changing the URL to something invalid.',
+    criteria: [
+      'The hook returns the correct TypeScript types for data, isLoading, and error',
+      'The error state is populated when the URL is invalid',
+      'AbortController cleanup is present and you can explain what it prevents'
+    ] },
+  { id: 'c2-3', type: 'reflect', title: 'useCallback audit',
+    desc: 'Ask AI to generate a component that uses useCallback. Then ask it: "Is useCallback actually needed here? What would happen without it?" Record both answers. Do you agree with AI\'s assessment?',
+    criteria: [
+      'You can describe what useCallback does in your own words',
+      'You identified whether the use case genuinely benefits from memoisation',
+      'You formed your own opinion and can justify it'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain what triggers a React re-render and why side effects must not run during render',
+  'Use useEffect with the correct dependency array to control when effects run',
+  'Write async fetch logic inside useEffect using the define-then-call async pattern',
+  'Implement AbortController cleanup to prevent memory leaks on unmount',
+  'Extract reusable stateful logic into a custom hook and explain the naming convention',
+  'Recognise when useCallback and useMemo are and are not appropriate optimisations'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  /* ── Checkpoint 1 (after dependency array, slide 4) ─── */
+  {
+    id: 'effect-no-deps',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'useEffect(() => { setCount(c => c + 1); }) — no dependency array. What happens?',
+    options: [
+      'Runs once after mount, then stops',
+      'Never runs',
+      'Causes an infinite render loop',
+      'Runs only when count changes'
+    ],
+    correct: 2,
+    explanation: 'Without a dependency array, the effect runs after every render. setCount triggers a re-render, which triggers the effect again — an infinite loop.',
+    reviewSlide: 'The Dependency Array'
+  },
+  {
+    id: 'effect-with-dep',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'useEffect(() => { fetchUser(id); }, [id]). When does this effect re-run?',
+    options: [
+      'Only once, after mount',
+      'After every render',
+      'After mount, and whenever id changes',
+      'Only when the component unmounts'
+    ],
+    correct: 2,
+    explanation: 'With [id] as the dependency, the effect runs after mount and then again whenever the value of id changes. This is the correct pattern for fetching data that depends on a prop or state.',
+    reviewSlide: 'The Dependency Array'
+  },
+  {
+    id: 'async-useeffect',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Why can\'t you write useEffect(async () => { ... }, []) directly?',
+    options: [
+      'async functions are not supported in React',
+      'useEffect expects the callback to return a cleanup function or nothing — async returns a Promise',
+      'It would cause a TypeScript error only',
+      'It works fine — this is valid React'
+    ],
+    correct: 1,
+    explanation: 'useEffect\'s callback must return either undefined or a cleanup function. An async function always returns a Promise, which React does not know how to use as cleanup. The solution is to define an inner async function and call it.',
+    reviewSlide: 'Async/Await Inside useEffect'
+  },
+  {
+    id: 'fetch-ok',
+    checkpoint: 1,
+    type: 'self',
+    q: 'fetch() does not throw on a 404 response. How should you handle HTTP error status codes in useEffect?',
+    model: 'After awaiting fetch(), check the res.ok property before calling res.json(). res.ok is true for status codes 200-299. For anything else, throw an Error manually — e.g. throw new Error(`HTTP ${res.status}`). This error is then caught by your catch block and stored in the error state. Without this check, a 404 or 500 response will appear to succeed and try to parse an error HTML page as JSON.',
+    reviewSlide: 'Async/Await Inside useEffect'
+  },
+  /* ── Checkpoint 2 (after custom hooks, slide 9) ─── */
+  {
+    id: 'custom-hook-naming',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Why must custom hooks start with "use"?',
+    options: [
+      'It is just a naming convention with no technical effect',
+      'React uses this to enforce the rules of hooks and enable lint warnings',
+      'It makes the function available globally',
+      'TypeScript requires it for type inference'
+    ],
+    correct: 1,
+    explanation: 'React\'s linter (eslint-plugin-react-hooks) uses the "use" prefix to identify hooks and enforce the rules: hooks must not be called conditionally or inside loops. Without the prefix, violations would go undetected.',
+    reviewSlide: 'Custom Hooks'
+  },
+  {
+    id: 'abort-controller',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What problem does AbortController solve in a useEffect fetch?',
+    options: [
+      'It prevents the fetch from being cached by the browser',
+      'It cancels an in-flight request if the component unmounts before it completes',
+      'It retries the fetch if it fails',
+      'It converts the fetch to use async/await syntax'
+    ],
+    correct: 1,
+    explanation: 'Without AbortController, if a component unmounts while a fetch is in progress, the fetch completes and tries to call setState on an unmounted component — causing a memory leak and React warning. AbortController.abort() cancels the request during cleanup.',
+    reviewSlide: 'Effect Cleanup'
+  },
+  {
+    id: 'usememo-when',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'AI generates useMemo to filter a 10-item book list on every render. Is this appropriate?',
+    options: [
+      'Yes — useMemo always improves performance',
+      'No — the computation is trivial; useMemo adds overhead and complexity without benefit',
+      'Yes — filtering always needs memoisation',
+      'No — useMemo does not work with arrays'
+    ],
+    correct: 1,
+    explanation: 'useMemo has its own overhead (storing the cached value, comparing dependencies). For trivial computations like filtering small arrays, the overhead exceeds the benefit. useMemo is appropriate for genuinely expensive computations or to stabilise references passed to memoised children.',
+    reviewSlide: 'useCallback and useMemo'
+  },
+  {
+    id: 'custom-hook-return',
+    checkpoint: 2,
+    type: 'self',
+    q: 'You have fetching logic duplicated in three components. How would you extract it into a custom hook? What would the hook return?',
+    model: 'Create a file hooks/useFetch.ts. Move the useState declarations (data, isLoading, error) and the useEffect with the fetch logic into a function named useFetch<T>(url: string). Return an object { data, isLoading, error }. In each component, replace the duplicated code with const { data, isLoading, error } = useFetch<YourType>(url). The hook encapsulates the repetition; the component only describes what to render based on those three values.',
+    reviewSlide: 'Custom Hooks'
+  }
+];
+</script>
+</body>
+</html>

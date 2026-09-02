@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding Study — Participant Questions</title>
+<style>
+  /* ── Screen styles ── */
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+
+  /* ── Header ── */
+  .doc-header {
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+  .doc-header h1 {
+    font-size: 16pt;
+    font-weight: bold;
+    margin: 0 0 4px;
+    letter-spacing: 0.3px;
+  }
+  .doc-header .subtitle {
+    font-size: 10pt;
+    color: #444;
+    margin: 0;
+  }
+  .doc-header .meta {
+    margin-top: 12px;
+    font-size: 9.5pt;
+    color: #444;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .doc-header .meta strong {
+    color: #1a1a1a;
+  }
+
+  /* ── Section headings ── */
+  .section {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 12pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding: 5px 0;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .section-title .step-tag {
+    font-size: 8pt;
+    font-weight: normal;
+    background: #1a1a1a;
+    color: #fff;
+    padding: 1px 7px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Info box ── */
+  .info-box {
+    background: #f5f5f5;
+    border-left: 3px solid #555;
+    padding: 10px 14px;
+    font-size: 9.5pt;
+    color: #333;
+    margin-bottom: 16px;
+    font-family: -apple-system, Arial, sans-serif;
+  }
+  .info-box strong { color: #1a1a1a; }
+
+  /* ── Questions ── */
+  .question-block {
+    margin-bottom: 18px;
+    page-break-inside: avoid;
+  }
+  .question-label {
+    font-weight: bold;
+    font-size: 10.5pt;
+    margin-bottom: 6px;
+  }
+  .question-label .req {
+    color: #b00;
+    margin-left: 2px;
+  }
+  .question-label .opt-tag {
+    font-weight: normal;
+    font-size: 9pt;
+    color: #666;
+    margin-left: 6px;
+  }
+  .question-hint {
+    font-size: 9pt;
+    color: #555;
+    font-style: italic;
+    margin-bottom: 6px;
+    font-family: -apple-system, Arial, sans-serif;
+  }
+
+  /* ── Answer options ── */
+  .options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .options-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 10pt;
+    font-family: -apple-system, Arial, sans-serif;
+    padding: 4px 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    background: #fafafa;
+  }
+  .options-list li .option-mark {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid #999;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .options-list li.radio .option-mark {
+    border-radius: 50%;
+  }
+  .options-list li .option-text {
+    flex: 1;
+    line-height: 1.4;
+  }
+  .options-list li .option-value {
+    font-size: 8.5pt;
+    color: #888;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── Checkbox style (consent items) ── */
+  .consent-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .consent-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 10pt;
+    font-family: -apple-system, Arial, sans-serif;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    line-height: 1.5;
+  }
+  .consent-list li.required-item { background: #fafafa; }
+  .consent-list li.optional-item { background: #f5fbf5; border-color: #bcd; }
+  .consent-list li .checkbox {
+    width: 15px;
+    height: 15px;
+    border: 1.5px solid #999;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .consent-list li .item-text { flex: 1; }
+  .consent-list li .item-detail {
+    font-size: 8.5pt;
+    color: #555;
+    font-style: italic;
+    margin-top: 3px;
+  }
+
+  /* ── Text input indicator ── */
+  .text-field {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 7px 10px;
+    font-size: 9.5pt;
+    color: #888;
+    font-family: -apple-system, Arial, sans-serif;
+    background: #fafafa;
+    font-style: italic;
+  }
+
+  /* ── Upload indicator ── */
+  .upload-zone {
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    padding: 14px;
+    text-align: center;
+    font-size: 9.5pt;
+    color: #777;
+    font-family: -apple-system, Arial, sans-serif;
+    background: #fafafa;
+  }
+
+  /* ── Footer ── */
+  .doc-footer {
+    margin-top: 36px;
+    padding-top: 14px;
+    border-top: 1px solid #ccc;
+    font-size: 8.5pt;
+    color: #666;
+    font-family: -apple-system, Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  /* ── Print/PDF styles ── */
+  @media print {
+    body { padding: 0; max-width: 100%; }
+    .no-print { display: none; }
+    .section { page-break-inside: avoid; }
+    .question-block { page-break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+
+  /* ── Print button (screen only) ── */
+  .print-btn {
+    display: inline-block;
+    margin-bottom: 24px;
+    padding: 8px 20px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 10pt;
+    cursor: pointer;
+    font-family: -apple-system, Arial, sans-serif;
+  }
+  .print-btn:hover { background: #333; }
+  @media print { .print-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<!-- ── Document Header ── -->
+<div class="doc-header">
+  <h1>Vibe Coding Study — Participant Survey Questions</h1>
+  <p class="subtitle">Complete question text and answer options as presented to participants</p>
+  <div class="meta">
+    <span><strong>Study:</strong> What Do Practitioners Actually Do? Crowdsourced AI Coding Session Transcripts</span>
+    <span><strong>Principal Investigator:</strong> Professor John Keating, Department of Computer Science, Maynooth University</span>
+    <span><strong>Contact:</strong> john.keating@mu.ie</span>
+    <span><strong>Ethics:</strong> Maynooth University SRESC Tier 1</span>
+    <span><strong>Platform:</strong> study.slowvibing.com — four-step wizard (Consent → Session Info → Transcript → Code)</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     STEP 1 — CONSENT
+═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    Participant Information &amp; Consent
+    <span class="step-tag">Step 1 of 4</span>
+  </div>
+
+  <div class="info-box">
+    <strong>Preamble shown to participants:</strong><br>
+    "What Do Practitioners Actually Do? This study collects anonymised AI coding session transcripts to understand linguistic and interaction patterns. Participation takes approximately 5–10 minutes. Ethics approval: Maynooth University SRESC Tier 1."<br><br>
+    "Please read and tick each statement below. All five required items must be checked before you can proceed."
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Required consent items <span class="req">*</span> — all five must be checked</div>
+    <ul class="consent-list">
+      <li class="required-item">
+        <div class="checkbox"></div>
+        <div class="item-text">I understand that I am contributing to an academic research study on AI-assisted coding practitioner patterns.</div>
+      </li>
+      <li class="required-item">
+        <div class="checkbox"></div>
+        <div class="item-text">I understand that my submission will be stored anonymously using a randomly generated ID. No name, email, or other identifying information is collected or linked to my submission.</div>
+      </li>
+      <li class="required-item">
+        <div class="checkbox"></div>
+        <div class="item-text">I confirm that the transcript I am submitting does not contain personal information (names, email addresses, credentials, or other identifying information about myself or others).</div>
+      </li>
+      <li class="required-item">
+        <div class="checkbox"></div>
+        <div class="item-text">I understand that my anonymised data will be stored securely on EU-based servers (Railway, Amsterdam) for up to 10 years after the study closes, in accordance with GDPR Article 89 research exemption, and will then be securely deleted.</div>
+      </li>
+      <li class="required-item">
+        <div class="checkbox"></div>
+        <div class="item-text">I understand that I may withdraw my submission at any time before data analysis begins by contacting the researcher using my anonymous ID. Withdrawal will result in permanent deletion of my submission.</div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Optional items <span class="opt-tag">(optional — participants may still participate without checking these)</span></div>
+    <ul class="consent-list">
+      <li class="optional-item">
+        <div class="checkbox"></div>
+        <div class="item-text">
+          I consent to short anonymised excerpts from my transcript being quoted in academic publications.
+          <div class="item-detail">Optional — you can still participate without this.</div>
+        </div>
+      </li>
+      <li class="optional-item">
+        <div class="checkbox"></div>
+        <div class="item-text">
+          I would like to receive a summary of the study findings when published.
+          <div class="item-detail">Optional — if selected, you will be asked for an email address on the next screen (stored separately from your submission).</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="info-box" style="margin-top:10px;">
+    PI: Professor John Keating, Department of Computer Science, Maynooth University.
+    Contact: john.keating@mu.ie (include your anonymous ID for withdrawal requests).
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     STEP 2 — SESSION INFORMATION
+═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    Session Information
+    <span class="step-tag">Step 2 of 4</span>
+  </div>
+
+  <div class="info-box">
+    "All fields are anonymous. Do not enter any personal information. The app domain field accepts only a brief generic description."
+  </div>
+
+  <!-- Q1 -->
+  <div class="question-block">
+    <div class="question-label">Q1. AI Platform used in the session <span class="req">*</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Claude (web / claude.ai)</div><div class="option-value">Claude (web)</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Claude Code (CLI)</div><div class="option-value">Claude Code</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Gemini AI Studio</div><div class="option-value">Gemini AI Studio</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Gemini CLI</div><div class="option-value">Gemini CLI</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">ChatGPT (web)</div><div class="option-value">ChatGPT</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">GitHub Copilot (IDE)</div><div class="option-value">GitHub Copilot</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Cursor</div><div class="option-value">Cursor</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Windsurf</div><div class="option-value">Windsurf</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Other</div><div class="option-value">Other</div></li>
+    </ul>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-block">
+    <div class="question-label">Q2. Approximate session length <span class="req">*</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Under 1 hour</div><div class="option-value">&lt;1h</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">1–2 hours</div><div class="option-value">1-2h</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">2–4 hours</div><div class="option-value">2-4h</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">More than 4 hours</div><div class="option-value">4h+</div></li>
+    </ul>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-block">
+    <div class="question-label">Q3. How satisfied are you with the overall outcome of this session? <span class="req">*</span></div>
+    <div class="question-hint">1 = did not achieve what I set out to build, 5 = fully achieved my goal.</div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">1 — Very dissatisfied</div><div class="option-value">1</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">2 — Somewhat dissatisfied</div><div class="option-value">2</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">3 — Neutral / partially achieved</div><div class="option-value">3</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">4 — Satisfied</div><div class="option-value">4</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">5 — Very satisfied</div><div class="option-value">5</div></li>
+    </ul>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question-block">
+    <div class="question-label">Q4. Who do you expect to maintain this code going forward? <span class="req">*</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Me — solo project</div><div class="option-value">solo</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">My team (humans)</div><div class="option-value">team</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Primarily an AI assistant</div><div class="option-value">ai</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Mix of human and AI</div><div class="option-value">mixed</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Not expecting maintenance — throwaway / prototype</div><div class="option-value">throwaway</div></li>
+    </ul>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question-block">
+    <div class="question-label">Q5. Did features or capabilities emerge during the session that you hadn't explicitly asked for? <span class="req">*</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Yes — the AI proposed or produced things I hadn't asked for</div><div class="option-value">yes</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">No — I got exactly what I asked for</div><div class="option-value">no</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Unsure</div><div class="option-value">unsure</div></li>
+    </ul>
+  </div>
+
+  <!-- Q6 -->
+  <div class="question-block">
+    <div class="question-label">Q6. Your coding experience <span class="req">*</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">None (no prior coding)</div><div class="option-value">None</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Beginner (&lt; 1 year)</div><div class="option-value">Beginner</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Intermediate (1–5 years)</div><div class="option-value">Intermediate</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Expert (5+ years)</div><div class="option-value">Expert</div></li>
+    </ul>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question-block">
+    <div class="question-label">Q7. Your experience with AI coding assistants <span class="req">*</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">This is my first session</div><div class="option-value">First session</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Fewer than 10 sessions</div><div class="option-value">&lt;10</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">10–50 sessions</div><div class="option-value">10-50</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">More than 50 sessions</div><div class="option-value">50+</div></li>
+    </ul>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question-block">
+    <div class="question-label">Q8. Which best describes your interaction style in this session? <span class="req">*</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Conversational — back-and-forth discussion</div><div class="option-value">Conversational</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Directive — giving precise instructions</div><div class="option-value">Directive</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Exploratory — trying things to see what works</div><div class="option-value">Exploratory</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Systematic — structured, step-by-step approach</div><div class="option-value">Systematic</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Mixed — varied by stage</div><div class="option-value">Mixed</div></li>
+    </ul>
+  </div>
+
+  <!-- Q9 -->
+  <div class="question-block">
+    <div class="question-label">Q9. Would you describe your overall approach as systematic? <span class="opt-tag">(optional)</span></div>
+    <ul class="options-list">
+      <li class="radio"><div class="option-mark"></div><div class="option-text">Yes</div><div class="option-value">true</div></li>
+      <li class="radio"><div class="option-mark"></div><div class="option-text">No</div><div class="option-value">false</div></li>
+    </ul>
+  </div>
+
+  <!-- Q10 — free text -->
+  <div class="question-block">
+    <div class="question-label">Q10. What type of application were you building? <span class="opt-tag">(optional free text, max 200 characters)</span></div>
+    <div class="question-hint">Keep generic — e.g. "e-commerce dashboard", "data viz tool". Do not include project names, company names, or other identifying information.</div>
+    <div class="text-field">Free text entry — e.g. "portfolio website", "data analysis tool", "REST API"</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     STEP 3 — TRANSCRIPT
+═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    Transcript Submission
+    <span class="step-tag">Step 3 of 4</span>
+  </div>
+
+  <div class="info-box">
+    "Paste your AI coding session transcript below, or upload a text file. Minimum 15 exchanges (human + AI turns) required. <strong>Important:</strong> Remove any personal information before submitting (names, emails, credentials, project-specific identifiers)."
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Transcript <span class="req">*</span></div>
+    <div class="question-hint">Accepted formats: paste directly into the text area, or upload a .txt, .md, or .json file (max 5 MB). Minimum 15 exchanges required. The system auto-detects the platform format (Gemini AI Studio, Claude, ChatGPT, GitHub Copilot, or plain alternating turns).</div>
+    <div class="upload-zone">
+      Drop a file here, or click to browse · .txt · .md · .json · max 5 MB
+    </div>
+    <div style="margin-top:10px;">
+      <div class="text-field" style="min-height:60px; display:block;">Transcript text area — paste here</div>
+    </div>
+    <div class="question-hint" style="margin-top:8px;">Live preview: the system displays the number of detected exchanges and the first three human turns for verification before the participant proceeds.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     STEP 4 — CODE UPLOAD
+═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    Code Upload
+    <span class="step-tag">Step 4 of 4 — Optional</span>
+  </div>
+
+  <div class="info-box">
+    "If you share the code produced in your session, we will run an automated ACQI quality analysis and return a PDF report. <strong>Your source code will be permanently deleted within 24 hours</strong> — only the metrics are retained."
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Code ZIP <span class="opt-tag">(optional)</span></div>
+    <div class="question-hint">Accepted format: .zip file containing source code, max 50 MB. The participant may skip this step and submit the transcript only.</div>
+    <div class="upload-zone">
+      Drop your code ZIP here, or click to browse · .zip only · max 50 MB
+    </div>
+    <div class="question-hint" style="margin-top:8px;">On upload, the participant can trigger an ACQI analysis (type explicitness, pure function ratio, decomposability, pattern consistency, structural predictability, McCabe complexity, cognitive complexity, LOC, duplication). A PDF report is generated and available for immediate download. The source code is then scheduled for deletion within 24 hours.</div>
+  </div>
+
+  <div class="question-block" style="margin-top:6px;">
+    <div class="question-label">Submission</div>
+    <div class="question-hint">The participant clicks either <em>"Skip code — submit transcript only"</em> or <em>"Submit transcript →"</em> to complete submission. A randomly generated anonymous ID (format: SV-XXXXXX) is returned on the confirmation screen.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     DATA COLLECTED
+═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">Summary of Data Collected per Submission</div>
+
+  <table style="width:100%; border-collapse:collapse; font-family:-apple-system,Arial,sans-serif; font-size:9.5pt;">
+    <thead>
+      <tr style="background:#f0f0f0;">
+        <th style="text-align:left; padding:6px 10px; border:1px solid #ccc;">Field</th>
+        <th style="text-align:left; padding:6px 10px; border:1px solid #ccc;">Type</th>
+        <th style="text-align:left; padding:6px 10px; border:1px solid #ccc;">Required</th>
+        <th style="text-align:left; padding:6px 10px; border:1px solid #ccc;">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">anonymous_id</td><td style="padding:5px 10px; border:1px solid #ddd;">VARCHAR(12)</td><td style="padding:5px 10px; border:1px solid #ddd;">Auto</td><td style="padding:5px 10px; border:1px solid #ddd;">Generated server-side, e.g. SV-A3F9K2</td></tr>
+      <tr style="background:#fafafa;"><td style="padding:5px 10px; border:1px solid #ddd;">ai_platform</td><td style="padding:5px 10px; border:1px solid #ddd;">TEXT</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q1 — 9 options</td></tr>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">session_length</td><td style="padding:5px 10px; border:1px solid #ddd;">VARCHAR(20)</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q2 — 4 options</td></tr>
+      <tr style="background:#fafafa;"><td style="padding:5px 10px; border:1px solid #ddd;">session_outcome</td><td style="padding:5px 10px; border:1px solid #ddd;">SMALLINT (1–5)</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q3 — 5-point Likert scale</td></tr>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">maintenance_intent</td><td style="padding:5px 10px; border:1px solid #ddd;">VARCHAR(20)</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q4 — 5 options</td></tr>
+      <tr style="background:#fafafa;"><td style="padding:5px 10px; border:1px solid #ddd;">feature_emergence</td><td style="padding:5px 10px; border:1px solid #ddd;">VARCHAR(10)</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q5 — yes / no / unsure</td></tr>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">coding_experience</td><td style="padding:5px 10px; border:1px solid #ddd;">VARCHAR(20)</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q6 — 4 options</td></tr>
+      <tr style="background:#fafafa;"><td style="padding:5px 10px; border:1px solid #ddd;">ai_experience</td><td style="padding:5px 10px; border:1px solid #ddd;">VARCHAR(20)</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q7 — 4 options</td></tr>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">perceived_approach</td><td style="padding:5px 10px; border:1px solid #ddd;">VARCHAR(50)</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Q8 — 5 options</td></tr>
+      <tr style="background:#fafafa;"><td style="padding:5px 10px; border:1px solid #ddd;">self_described_systematic</td><td style="padding:5px 10px; border:1px solid #ddd;">BOOLEAN</td><td style="padding:5px 10px; border:1px solid #ddd;">No</td><td style="padding:5px 10px; border:1px solid #ddd;">Q9 — yes / no</td></tr>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">app_domain</td><td style="padding:5px 10px; border:1px solid #ddd;">TEXT (max 200 chars)</td><td style="padding:5px 10px; border:1px solid #ddd;">No</td><td style="padding:5px 10px; border:1px solid #ddd;">Q10 — free text, generic description only</td></tr>
+      <tr style="background:#fafafa;"><td style="padding:5px 10px; border:1px solid #ddd;">transcript</td><td style="padding:5px 10px; border:1px solid #ddd;">TEXT</td><td style="padding:5px 10px; border:1px solid #ddd;">Yes</td><td style="padding:5px 10px; border:1px solid #ddd;">Minimum 15 exchanges; participant removes PII before submission</td></tr>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">excerpt_consent</td><td style="padding:5px 10px; border:1px solid #ddd;">BOOLEAN</td><td style="padding:5px 10px; border:1px solid #ddd;">No</td><td style="padding:5px 10px; border:1px solid #ddd;">Consent to quote anonymised excerpts in publications</td></tr>
+      <tr style="background:#fafafa;"><td style="padding:5px 10px; border:1px solid #ddd;">findings_consent + email</td><td style="padding:5px 10px; border:1px solid #ddd;">BOOLEAN + VARCHAR</td><td style="padding:5px 10px; border:1px solid #ddd;">No</td><td style="padding:5px 10px; border:1px solid #ddd;">Email stored in a separate table with no FK to submissions (architectural separation)</td></tr>
+      <tr><td style="padding:5px 10px; border:1px solid #ddd;">Code metrics (ACQI, Halstead, etc.)</td><td style="padding:5px 10px; border:1px solid #ddd;">NUMERIC</td><td style="padding:5px 10px; border:1px solid #ddd;">No</td><td style="padding:5px 10px; border:1px solid #ddd;">Optional; source code deleted within 24 h, only metrics retained</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── Footer ── -->
+<div class="doc-footer">
+  <strong>Vibe Coding Study</strong> — Maynooth University, Department of Computer Science.<br>
+  PI: Professor John Keating · john.keating@mu.ie<br>
+  Platform: study.slowvibing.com · Data hosted: Railway EU West (Amsterdam) · Generated: March 2026
+</div>
+
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resources — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; line-height: 1.7; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  /* ── Back link ── */
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: var(--surface); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; margin-bottom: 36px; transition: color .15s, border-color .15s; }
+  .back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Header ── */
+  .page-header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 44px; }
+  .page-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+  .page-header p { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+  /* ── Section ── */
+  .res-section { margin-bottom: 48px; }
+  .res-section h2 { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sec-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: rgba(88,166,255,.12); color: var(--accent); font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'SF Mono', 'Fira Code', monospace; }
+
+  /* ── Card grid ── */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
+
+  /* ── Resource card ── */
+  .res-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; text-decoration: none; color: inherit; transition: border-color .15s; }
+  .res-card:hover { border-color: var(--accent); }
+  .res-card .card-name { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+  .res-card .card-url { font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); margin-bottom: 6px; }
+  .res-card .card-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+  /* ── Demo app callout ── */
+  .demo-callout { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--green); border-radius: 8px; padding: 20px 22px; }
+  .demo-callout .demo-title { font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 6px; }
+  .demo-callout p { font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.6; }
+  .demo-callout a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .demo-callout a:hover { text-decoration: underline; }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; background: rgba(88,166,255,.08); border: 1px solid rgba(88,166,255,.18); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+  /* ── Footer ── */
+  .site-footer { text-align: center; padding-top: 40px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+
+  /* ── Theme toggle ── */
+  #theme-toggle { position: fixed; top: 18px; right: 22px; width: 32px; height: 32px; border-radius: 50%; background: rgba(22,27,34,.9); border: 1px solid #30363d; color: #8b949e; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 500; transition: color .15s, border-color .15s; }
+  #theme-toggle:hover { color: #58a6ff; border-color: #58a6ff; }
+  @media print { #theme-toggle { display: none; } }
+
+  /* ── Light theme ── */
+  body.light-theme { --bg: #f5f0e8; --surface: #faf8f4; --border: #d8cfc0; --text: #2d2520; --muted: #6e6660; --accent: #1d6fe8; --green: #1a7f37; --yellow: #946800; --red: #b91c1c; --purple: #6639d6; --orange: #bf5a0a; }
+  body.light-theme #theme-toggle { background: rgba(245,240,232,.95); border-color: #d8cfc0; color: #6e6660; }
+  body.light-theme #theme-toggle:hover { color: #1d6fe8; border-color: #1d6fe8; }
+  body.light-theme code { background: rgba(29,111,232,.06); border-color: rgba(29,111,232,.15); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-link" href="index.html">&#8592; Course home</a>
+
+  <div class="page-header">
+    <h1>Resources</h1>
+    <p>Tools, documentation, and references used throughout the course.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       1 — GETTING STARTED
+  ═══════════════════════════════════════════════════════ -->
+  <section class="res-section">
+    <h2><span class="sec-num">1</span> Getting Started</h2>
+    <div class="card-grid">
+      <a class="res-card" href="setup-guide.html">
+        <div class="card-name">Setup Guide</div>
+        <div class="card-url">setup-guide.html</div>
+        <div class="card-desc">Cross-platform setup for Node.js, PostgreSQL, and the demo app. Start here.</div>
+      </a>
+      <a class="res-card" href="https://nodejs.org" target="_blank" rel="noopener">
+        <div class="card-name">Node.js</div>
+        <div class="card-url">nodejs.org</div>
+        <div class="card-desc">JavaScript runtime for the server. Download the LTS (Long-Term Support) version.</div>
+      </a>
+      <a class="res-card" href="https://www.postgresql.org" target="_blank" rel="noopener">
+        <div class="card-name">PostgreSQL</div>
+        <div class="card-url">postgresql.org</div>
+        <div class="card-desc">The relational database used throughout the backend track.</div>
+      </a>
+      <a class="res-card" href="https://railway.app" target="_blank" rel="noopener">
+        <div class="card-name">Railway</div>
+        <div class="card-url">railway.app</div>
+        <div class="card-desc">Deployment platform for the API and database. Covered in B7.</div>
+      </a>
+      <a class="res-card" href="https://git-scm.com" target="_blank" rel="noopener">
+        <div class="card-name">Git</div>
+        <div class="card-url">git-scm.com</div>
+        <div class="card-desc">Version control — download and install Git for your platform here.</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       2 — AI TOOLS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="res-section">
+    <h2><span class="sec-num">2</span> AI Tools</h2>
+    <div class="card-grid">
+      <a class="res-card" href="https://claude.ai" target="_blank" rel="noopener">
+        <div class="card-name">Claude</div>
+        <div class="card-url">claude.ai</div>
+        <div class="card-desc">Used as the primary AI partner in B1 prompt engineering examples. Strong at explaining generated code.</div>
+      </a>
+      <a class="res-card" href="https://chatgpt.com" target="_blank" rel="noopener">
+        <div class="card-name">ChatGPT</div>
+        <div class="card-url">chatgpt.com</div>
+        <div class="card-desc">Alternative AI assistant. All four prompt types (Scaffold/Explain/Debug/Extend) work across any tool.</div>
+      </a>
+      <a class="res-card" href="https://github.com/features/copilot" target="_blank" rel="noopener">
+        <div class="card-name">GitHub Copilot</div>
+        <div class="card-url">github.com/copilot</div>
+        <div class="card-desc">In-editor AI completion. Useful for the B2–B5 series when you are working in VS Code.</div>
+      </a>
+      <a class="res-card" href="https://cursor.sh" target="_blank" rel="noopener">
+        <div class="card-name">Cursor</div>
+        <div class="card-url">cursor.sh</div>
+        <div class="card-desc">AI-first code editor. A strong choice for the extend and debug prompt types in B1.</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       3 — OFFICIAL DOCUMENTATION
+  ═══════════════════════════════════════════════════════ -->
+  <section class="res-section">
+    <h2><span class="sec-num">3</span> Official Documentation</h2>
+    <div class="card-grid">
+      <a class="res-card" href="https://developer.mozilla.org" target="_blank" rel="noopener">
+        <div class="card-name">MDN Web Docs</div>
+        <div class="card-url">developer.mozilla.org</div>
+        <div class="card-desc">The canonical reference for HTML, CSS, JavaScript, and HTTP. Bookmark this.</div>
+      </a>
+      <a class="res-card" href="https://nodejs.org/docs/latest/api/" target="_blank" rel="noopener">
+        <div class="card-name">Node.js Docs</div>
+        <div class="card-url">nodejs.org/docs</div>
+        <div class="card-desc">Full API reference for Node's built-in modules (fs, path, http, crypto, etc.).</div>
+      </a>
+      <a class="res-card" href="https://expressjs.com" target="_blank" rel="noopener">
+        <div class="card-name">Express</div>
+        <div class="card-url">expressjs.com</div>
+        <div class="card-desc">The web framework used in Tracks B and D. Routing, middleware, and error handling reference.</div>
+      </a>
+      <a class="res-card" href="https://react.dev" target="_blank" rel="noopener">
+        <div class="card-name">React</div>
+        <div class="card-url">react.dev</div>
+        <div class="card-desc">Official React documentation including hooks reference. Used in Track C.</div>
+      </a>
+      <a class="res-card" href="https://www.postgresql.org/docs/" target="_blank" rel="noopener">
+        <div class="card-name">PostgreSQL Docs</div>
+        <div class="card-url">postgresql.org/docs</div>
+        <div class="card-desc">SQL syntax, data types, and psql reference. Especially useful for B5 (JOINs, pagination).</div>
+      </a>
+      <a class="res-card" href="https://jwt.io" target="_blank" rel="noopener">
+        <div class="card-name">JWT.io</div>
+        <div class="card-url">jwt.io</div>
+        <div class="card-desc">Interactive JWT debugger and specification reference. Used in B3 (Authentication).</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       4 — DEVELOPER TOOLS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="res-section">
+    <h2><span class="sec-num">4</span> Developer Tools</h2>
+    <div class="card-grid">
+      <a class="res-card" href="https://curl.se" target="_blank" rel="noopener">
+        <div class="card-name">curl</div>
+        <div class="card-url">curl.se</div>
+        <div class="card-desc">Command-line HTTP client. Pre-installed on macOS and Linux; see curl.se for Windows. Core tool in B4.</div>
+      </a>
+      <a class="res-card" href="https://jqlang.github.io/jq/" target="_blank" rel="noopener">
+        <div class="card-name">jq</div>
+        <div class="card-url">jqlang.github.io/jq &middot; jqplay.org</div>
+        <div class="card-desc">Command-line JSON processor. Pairs with curl in B4. Use jqplay.org to experiment without installing.</div>
+      </a>
+      <a class="res-card" href="https://git-scm.com" target="_blank" rel="noopener">
+        <div class="card-name">Git</div>
+        <div class="card-url">git-scm.com</div>
+        <div class="card-desc">Version control. Pro Git book is free at git-scm.com/book — essential reading for A3.</div>
+      </a>
+      <a class="res-card" href="https://cli.github.com" target="_blank" rel="noopener">
+        <div class="card-name">GitHub CLI</div>
+        <div class="card-url">cli.github.com</div>
+        <div class="card-desc">Create PRs, manage issues, and interact with GitHub from the terminal. Useful in A3.</div>
+      </a>
+      <a class="res-card" href="https://www.postman.com" target="_blank" rel="noopener">
+        <div class="card-name">Postman</div>
+        <div class="card-url">postman.com</div>
+        <div class="card-desc">GUI-based API client. An alternative to curl if you prefer a visual interface for testing.</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       5 — AI AUTOMATION
+  ═══════════════════════════════════════════════════════ -->
+  <section class="res-section">
+    <h2><span class="sec-num">5</span> AI Automation</h2>
+    <div class="card-grid">
+      <a class="res-card" href="https://n8n.io" target="_blank" rel="noopener">
+        <div class="card-name">n8n</div>
+        <div class="card-url">n8n.io</div>
+        <div class="card-desc">Open-source workflow automation with a built-in AI Agent node. The core tool for Track E.</div>
+      </a>
+      <a class="res-card" href="https://sliplane.io" target="_blank" rel="noopener">
+        <div class="card-name">Sliplane</div>
+        <div class="card-url">sliplane.io</div>
+        <div class="card-desc">Hosting provider for self-hosted n8n instances. Used in Track E for deployment.</div>
+      </a>
+      <a class="res-card" href="https://www.anthropic.com" target="_blank" rel="noopener">
+        <div class="card-name">Claude API / Anthropic</div>
+        <div class="card-url">anthropic.com</div>
+        <div class="card-desc">API access to Claude models. Used in E4 and E5 when calling AI from within n8n workflows.</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       6 — LEARNING SUPPLEMENTS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="res-section">
+    <h2><span class="sec-num">6</span> Learning Supplements</h2>
+    <div class="card-grid">
+      <a class="res-card" href="https://developer.mozilla.org/en-US/docs/Learn" target="_blank" rel="noopener">
+        <div class="card-name">MDN Learn Web Development</div>
+        <div class="card-url">developer.mozilla.org/en-US/docs/Learn</div>
+        <div class="card-desc">Structured learning track covering HTML, CSS, and JavaScript from the ground up. Complements Track A.</div>
+      </a>
+      <a class="res-card" href="https://www.theodinproject.com" target="_blank" rel="noopener">
+        <div class="card-name">The Odin Project</div>
+        <div class="card-url">theodinproject.com</div>
+        <div class="card-desc">Free, project-based full-stack curriculum. Strong complement to Tracks A, B, and C.</div>
+      </a>
+      <a class="res-card" href="https://www.freecodecamp.org" target="_blank" rel="noopener">
+        <div class="card-name">freeCodeCamp</div>
+        <div class="card-url">freecodecamp.org</div>
+        <div class="card-desc">Free certifications in JavaScript, APIs, SQL, and more. Useful for reinforcing Track B concepts.</div>
+      </a>
+      <a class="res-card" href="https://www.postgresqltutorial.com" target="_blank" rel="noopener">
+        <div class="card-name">PostgreSQL Tutorial</div>
+        <div class="card-url">postgresqltutorial.com</div>
+        <div class="card-desc">Practical, example-driven SQL and PostgreSQL guide. Pairs well with A4 and B5.</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       7 — DEMO APP
+  ═══════════════════════════════════════════════════════ -->
+  <section class="res-section">
+    <h2><span class="sec-num">7</span> Demo App</h2>
+    <div class="demo-callout">
+      <div class="demo-title">Reading List API</div>
+      <p>A fully working Node.js + Express + PostgreSQL API is available in <a href="crud-demo/"><code>crud-demo/</code></a>. It is 7 files, ready to clone, extend, and deploy — and it is the exact code built across the B2–B5 series.</p>
+      <p>Routes: <code>POST /auth/register</code>, <code>POST /auth/login</code>, <code>GET /api/health</code>, <code>GET /api/books</code>, <code>POST /api/books</code>, <code>PATCH /api/books/:id</code>, <code>DELETE /api/books/:id</code>.</p>
+      <p><a href="crud-demo/">Open the demo app directory &#8594;</a></p>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    Built with AI &middot; Maynooth University
+  </footer>
+
+</div>
+<script>
+  if (localStorage.getItem('svl_theme') === 'light') document.body.classList.add('light-theme');
+  var themeBtn = document.createElement('button');
+  themeBtn.id = 'theme-toggle';
+  themeBtn.title = 'Toggle light / dark theme';
+  function syncTheme() { themeBtn.textContent = document.body.classList.contains('light-theme') ? '\u263D' : '\u2600'; }
+  syncTheme();
+  themeBtn.addEventListener('click', function() {
+    var isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('svl_theme', isLight ? 'light' : 'dark');
+    syncTheme();
+  });
+  document.body.appendChild(themeBtn);
+</script>
+</body>
+</html>

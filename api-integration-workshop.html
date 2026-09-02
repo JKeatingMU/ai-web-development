@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Integration — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #bc8cff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #6e40c9; --prompt-border: #9d71e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#1a1040 0%,#0f0a2a 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;       color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);    color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple); color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange); color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-60-40 > *:first-child { flex: 60; }
+  .cols-60-40 > *:last-child  { flex: 40; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(157,113,232,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(157,113,232,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="api-integration-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track C · Frontend</div>
+  <h1>API <span class="accent">Integration</span></h1>
+  <div class="subtitle">Connecting React to Express · CORS · Environment Variables · Auth Headers</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-purple">CORS</span>
+    <span class="badge badge-purple">VITE_</span>
+    <span class="badge badge-purple">Bearer token</span>
+    <span class="badge badge-purple">api.ts</span>
+  </div>
+  <div class="callout callout-purple">You have a React front end (C1, C2) and an Express API (Tracks A and B). This deck connects them. It covers the browser security model, environment variables, auth headers, and how to centralise API calls into a reusable module that AI generates and you understand.</div>
+</div>
+
+<!-- Slide 2 — The Two-Server Problem -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>The Two-Server Problem</h2>
+  <p>In development you run two servers simultaneously. They live on different ports — and the browser's same-origin policy blocks requests between different origins. You will see this reported as a <strong>CORS error</strong>; the next slide explains exactly what CORS is and why the browser enforces it.</p>
+  <svg viewBox="0 0 620 140" width="100%" height="auto" style="display:block;margin:14px 0;">
+    <rect x="10"  y="30" width="180" height="70" rx="6" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="100" y="58" fill="#bc8cff" font-size="13" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">Vite Dev Server</text>
+    <text x="100" y="76" fill="#8b949e" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">localhost:5173</text>
+    <text x="100" y="92" fill="#8b949e" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">React app</text>
+    <rect x="430" y="30" width="180" height="70" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="520" y="58" fill="#3fb950" font-size="13" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">Express API</text>
+    <text x="520" y="76" fill="#8b949e" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">localhost:3001</text>
+    <text x="520" y="92" fill="#8b949e" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">your backend</text>
+    <line x1="192" y1="65" x2="428" y2="65" stroke="#f85149" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="310" y="55" fill="#f85149" font-size="12" font-weight="bold" text-anchor="middle" font-family="system-ui,sans-serif">⛔ CORS blocked</text>
+    <text x="310" y="85" fill="#8b949e" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">different origin = browser blocks the request</text>
+  </svg>
+  <div class="cols cols-3" style="margin-top:4px;">
+    <div class="callout callout-red"><strong>The symptom:</strong> your fetch call fails with a CORS error in the browser console. The API is running fine — the browser is blocking the response from reaching your code.</div>
+    <div class="callout callout-yellow"><strong>Two solutions:</strong> configure CORS on the Express server (production approach), or use the Vite proxy (development shortcut). You need to understand both.</div>
+    <div class="callout callout-purple"><strong>In production</strong> both apps often share the same origin — Express serves the built React files. CORS becomes less of an issue, but still matters for external API consumers.</div>
+  </div>
+</div>
+
+<!-- Slide 3 — What is CORS? -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>CORS — The Browser's Same-Origin Policy</h2>
+  <p>CORS (Cross-Origin Resource Sharing) is a browser security mechanism. It prevents a page on one origin from reading responses from a different origin — unless the server explicitly allows it.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <table>
+        <thead><tr><th>Scenario</th><th>Same origin?</th></tr></thead>
+        <tbody>
+          <tr><td>5173 → 5173</td><td style="color:var(--green);">✓ Yes — allowed</td></tr>
+          <tr><td>5173 → 3001</td><td style="color:var(--red);">✗ No — different port</td></tr>
+          <tr><td>app.com → api.app.com</td><td style="color:var(--red);">✗ No — different subdomain</td></tr>
+          <tr><td>http → https</td><td style="color:var(--red);">✗ No — different scheme</td></tr>
+          <tr><td>app.com → app.com</td><td style="color:var(--green);">✓ Yes — same everything</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>CORS is a browser rule, not a server rule.</strong> curl and Postman are not browsers — they never enforce CORS. If your API works in curl but not in React, CORS is the likely cause.</div>
+      <div class="callout callout-yellow">The browser sends a <strong>preflight OPTIONS request</strong> before a POST/PATCH/DELETE with custom headers. Your server must respond correctly to the preflight or the real request never happens.</div>
+      <div class="callout callout-purple">CORS headers are added to the <strong>response</strong> by the server. The browser reads them and decides whether to give the response to your JavaScript.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 — Configuring CORS in Express -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Configuring CORS in Express</h2>
+  <p>The <code>cors</code> npm package adds the correct response headers. AI generates this — understand every option before deploying to production.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">server/index.js</span></div>
+        <div class="terminal-body"><span class="kw">import</span> cors <span class="kw">from</span> <span class="str">'cors'</span>;
+
+<span class="comment">// Development — allow Vite dev server</span>
+app.<span class="fn">use</span>(<span class="fn">cors</span>({
+  origin: <span class="str">'http://localhost:5173'</span>,
+  credentials: <span class="val">true</span>,        <span class="comment">// allow cookies / auth headers</span>
+  methods: [<span class="str">'GET'</span>, <span class="str">'POST'</span>, <span class="str">'PATCH'</span>, <span class="str">'DELETE'</span>],
+  allowedHeaders: [<span class="str">'Content-Type'</span>, <span class="str">'Authorization'</span>],
+}));
+
+<span class="comment">// Production — use environment variable</span>
+<span class="kw">const</span> allowedOrigin = process.env.<span class="hi">CLIENT_URL</span> || <span class="str">'http://localhost:5173'</span>;
+
+app.<span class="fn">use</span>(<span class="fn">cors</span>({
+  origin: allowedOrigin,
+  credentials: <span class="val">true</span>,
+  methods: [<span class="str">'GET'</span>, <span class="str">'POST'</span>, <span class="str">'PATCH'</span>, <span class="str">'DELETE'</span>],
+  allowedHeaders: [<span class="str">'Content-Type'</span>, <span class="str">'Authorization'</span>],
+}));</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>Never use <code>origin: '*'</code> with <code>credentials: true</code></strong> — this is a security error. Browsers reject it. Always name your origin explicitly when sending credentials.</div>
+      <div class="callout callout-yellow"><strong>Authorization header</strong> must be in <code>allowedHeaders</code> — otherwise the browser strips it from the request before it reaches your JWT middleware.</div>
+      <div class="callout callout-purple"><strong>CLIENT_URL env var</strong> — set to your deployed React app's domain in production. AI generates this pattern; it is the correct approach.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — Environment Variables in Vite -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Environment Variables in Vite — The VITE_ Prefix</h2>
+  <p>Your React app needs to know where the API lives. In Vite, environment variables are injected at build time — and only variables prefixed with <code>VITE_</code> are exposed to the browser.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">.env.local (never commit this)</span></div>
+        <div class="terminal-body"><span class="comment"># .env.local — Vite reads this automatically</span>
+<span class="key">VITE_API_URL</span>=<span class="val">http://localhost:3001</span>
+
+<span class="comment"># .env.production — used in production build</span>
+<span class="key">VITE_API_URL</span>=<span class="val">https://api.yourapp.railway.app</span></div>
+      </div>
+      <div class="terminal" style="margin-top:8px;">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">src/api.ts — reading the variable</span></div>
+        <div class="terminal-body"><span class="comment">// import.meta.env — Vite's env object</span>
+<span class="kw">const</span> API_URL = import.meta.env.<span class="hi">VITE_API_URL</span>;
+
+<span class="comment">// Usage:</span>
+<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`</span>${API_URL}<span class="str">/api/books`</span>);</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>VITE_ prefix is required</strong> — Vite strips variables without it. This prevents accidentally exposing secrets (database passwords, private keys) to the browser bundle.</div>
+      <div class="callout callout-yellow"><strong>import.meta.env</strong> — Vite's equivalent of Node's <code>process.env</code>. At build time, Vite replaces these references with the actual string values.</div>
+      <div class="callout callout-purple"><strong>.env.local</strong> is for secrets — add it to <code>.gitignore</code>. Provide a <strong>.env.example</strong> with placeholder values so other developers know what to set.</div>
+      <div class="callout callout-green"><strong>Restart required</strong> — Vite reads env files on startup. After adding or changing a <code>.env</code> file, stop and restart <code>npm run dev</code>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — The Vite Proxy -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>The Vite Proxy — Simpler in Development</h2>
+  <p>Instead of configuring CORS, you can tell Vite to forward API requests to your Express server. The browser sees only one origin — CORS never triggers.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">vite.config.ts</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="str">'vite'</span>;
+<span class="kw">import</span> react <span class="kw">from</span> <span class="str">'@vitejs/plugin-react'</span>;
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  plugins: [<span class="fn">react</span>()],
+  server: {
+    proxy: {
+      <span class="comment">// Any request to /api/** is forwarded to Express</span>
+      <span class="str">'/api'</span>: {
+        target: <span class="str">'http://localhost:3001'</span>,
+        changeOrigin: <span class="val">true</span>,
+      },
+      <span class="str">'/auth'</span>: {
+        target: <span class="str">'http://localhost:3001'</span>,
+        changeOrigin: <span class="val">true</span>,
+      },
+    },
+  },
+});</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple">With the proxy, your React code calls <code>fetch('/api/books')</code> — no full URL needed. Vite intercepts the request and forwards it to Express on port 3001.</div>
+      <div class="callout callout-yellow"><strong>Development only</strong> — the Vite proxy is a dev-server feature. In production your app is built into static files that cannot proxy. You still need CORS configured on Express for production.</div>
+      <div class="callout callout-green">The proxy approach means you can use relative URLs in development and absolute URLs in production by reading <code>VITE_API_URL</code> — or use an empty string for the base URL when the proxy is active.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — Centralising API Calls -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Centralising API Calls — The api.ts Module</h2>
+  <p>Scattering <code>fetch('/api/books', { headers: { Authorization: ... } })</code> across every component is fragile. AI generates a central API module — one place to set the base URL, auth header, and error handling.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">src/api.ts</span></div>
+        <div class="terminal-body"><span class="kw">const</span> BASE = import.meta.env.<span class="hi">VITE_API_URL</span> ?? <span class="str">''</span>;
+
+<span class="kw">function</span> <span class="fn">getHeaders</span>(): <span class="fn">HeadersInit</span> {
+  <span class="kw">const</span> token = localStorage.<span class="fn">getItem</span>(<span class="str">'token'</span>);
+  <span class="kw">return</span> {
+    <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+    ...(token ? { <span class="str">'Authorization'</span>: <span class="str">`Bearer </span>${token}<span class="str">`</span> } : {}),
+  };
+}
+
+<span class="kw">async function</span> <span class="fn">request</span>&lt;T&gt;(
+  path: <span class="hi">string</span>,
+  options: <span class="fn">RequestInit</span> = {}
+): <span class="fn">Promise</span>&lt;T&gt; {
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`</span>${BASE}${path}<span class="str">`</span>, {
+    ...options,
+    headers: { ...<span class="fn">getHeaders</span>(), ...options.headers },
+  });
+  <span class="kw">if</span> (!res.ok) {
+    <span class="kw">const</span> body = <span class="kw">await</span> res.<span class="fn">json</span>().<span class="fn">catch</span>(() =&gt; ({}));
+    <span class="kw">throw new</span> <span class="fn">Error</span>(body.error ?? <span class="str">`HTTP </span>${res.status}<span class="str">`</span>);
+  }
+  <span class="kw">return</span> res.<span class="fn">json</span>() <span class="kw">as</span> <span class="fn">Promise</span>&lt;T&gt;;
+}
+
+<span class="kw">export const</span> api = {
+  <span class="fn">getBooks</span>: () =&gt; <span class="fn">request</span>&lt;<span class="fn">Book</span>[]&gt;(<span class="str">'/api/books'</span>),
+  <span class="fn">addBook</span>: (b: <span class="fn">NewBook</span>) =&gt;
+    <span class="fn">request</span>&lt;<span class="fn">Book</span>&gt;(<span class="str">'/api/books'</span>, { method: <span class="str">'POST'</span>, body: <span class="fn">JSON</span>.<span class="fn">stringify</span>(b) }),
+  <span class="fn">deleteBook</span>: (id: <span class="hi">number</span>) =&gt;
+    <span class="fn">request</span>&lt;<span class="kw">void</span>&gt;(<span class="str">`/api/books/</span>${id}<span class="str">`</span>, { method: <span class="str">'DELETE'</span> }),
+};</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>One source of truth</strong> for the base URL, auth header, and error shape. Change how auth works → edit one file, not every component.</div>
+      <div class="callout callout-yellow"><strong>Spread operator on headers</strong> — <code>{ ...getHeaders(), ...options.headers }</code> lets callers override headers if needed, while always including the defaults.</div>
+      <div class="callout callout-orange"><strong>Error body parsing</strong> — <code>res.json().catch(() =&gt; ({}))</code> gracefully handles non-JSON error responses (e.g. HTML error pages from a crashed server) without throwing a second error.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 — Section header: Prompt Walkthrough -->
+<div class="slide section-header">
+  <span class="pill">Prompt Walkthrough</span>
+  <h1>Generating the <span class="accent">API Layer</span></h1>
+  <div class="subtitle">One prompt to connect your React app to your Express API.</div>
+</div>
+
+<!-- Slide 9 — The Prompt -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Prompt Type: Scaffold</div>
+  <h2>Prompting AI for the API Integration Layer</h2>
+  <div class="prompt-block">
+    <div class="prompt-bar"><span>✦</span> Prompt — full API integration layer</div>
+    <div class="prompt-body">
+      I have a React + TypeScript + Vite front end and an Express REST API with JWT authentication.
+      The API runs on <em>http://localhost:3001</em> in development.<br><br>
+      Please generate:<br>
+      <ul>
+        <li>A <em>vite.config.ts</em> with a proxy that forwards <code>/api</code> and <code>/auth</code> requests to port 3001</li>
+        <li>A <em>src/api.ts</em> module with a generic <code>request&lt;T&gt;</code> function that reads the JWT from localStorage, attaches it as a Bearer token, checks <code>res.ok</code>, and parses error messages from the JSON body</li>
+        <li>Typed API methods: <code>getBooks</code>, <code>addBook</code>, <code>updateBook</code>, <code>deleteBook</code>, <code>login</code>, <code>register</code></li>
+        <li>A <em>.env.example</em> file with the correct variable name</li>
+      </ul>
+      The Book type has: <code>id: number, title: string, author: string, status: 'to-read' | 'reading' | 'read'</code>.<br>
+      Explain what happens when a 401 response is received and whether your code handles it.
+    </div>
+  </div>
+  <div class="callout callout-purple" style="margin-top:8px;font-size:13px;"><strong>Why include the 401 question:</strong> AI often silently ignores auth errors in the API layer. Forcing it to address the question reveals whether it throws, redirects, or leaves it to the caller — and gives you a prompt for the follow-up fix.</div>
+</div>
+
+<!-- Slide 10 — Handling 401s -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Handling Authentication Errors — 401 Unauthorised</h2>
+  <p>A 401 response means the token is missing, expired, or invalid. The API layer is the right place to detect this and redirect to login — not every individual component.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">src/api.ts — 401 handling</span></div>
+        <div class="terminal-body"><span class="kw">async function</span> <span class="fn">request</span>&lt;T&gt;(
+  path: <span class="hi">string</span>,
+  options: <span class="fn">RequestInit</span> = {}
+): <span class="fn">Promise</span>&lt;T&gt; {
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`</span>${BASE}${path}<span class="str">`</span>, {
+    ...options,
+    headers: { ...<span class="fn">getHeaders</span>(), ...options.headers },
+  });
+
+  <span class="comment">// Handle token expiry globally</span>
+  <span class="kw">if</span> (res.status === <span class="val">401</span>) {
+    localStorage.<span class="fn">removeItem</span>(<span class="str">'token'</span>);
+    <span class="comment">// Redirect to login without React Router</span>
+    window.location.href = <span class="str">'/login'</span>;
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Session expired'</span>);
+  }
+
+  <span class="kw">if</span> (!res.ok) {
+    <span class="kw">const</span> body = <span class="kw">await</span> res.<span class="fn">json</span>().<span class="fn">catch</span>(() =&gt; ({}));
+    <span class="kw">throw new</span> <span class="fn">Error</span>(body.error ?? <span class="str">`HTTP </span>${res.status}<span class="str">`</span>);
+  }
+
+  <span class="kw">return</span> res.<span class="fn">json</span>() <span class="kw">as</span> <span class="fn">Promise</span>&lt;T&gt;;
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-orange"><strong>Clear the token first</strong> — before redirecting, remove the expired token. Otherwise the login page loads, the user logs in, and the old token remains causing an immediate re-expiry.</div>
+      <div class="callout callout-yellow"><strong>window.location.href</strong> — a hard navigation, not React Router. This ensures state is fully reset. With React Router you'd use a navigate() hook, but that requires being inside the router — the API module is outside it.</div>
+      <div class="callout callout-purple">Ask AI: "What should happen if the 401 occurs on the login endpoint itself?" (It should not redirect in that case — you're already on login.) This is an edge case AI sometimes misses.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — Using api.ts in Components -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Using api.ts in Components</h2>
+  <p>With the API module in place, components become clean — they describe what to render, not how to talk to the server.</p>
+  <div class="cols cols-50-50" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">BookList.tsx — clean component</span></div>
+        <div class="terminal-body"><span class="kw">import</span> { api } <span class="kw">from</span> <span class="str">'../api'</span>;
+
+<span class="kw">function</span> <span class="fn">BookList</span>() {
+  <span class="kw">const</span> [books, setBooks]         = <span class="fn">useState</span>&lt;<span class="fn">Book</span>[]&gt;([]);
+  <span class="kw">const</span> [isLoading, setIsLoading] = <span class="fn">useState</span>(<span class="val">true</span>);
+  <span class="kw">const</span> [error, setError]         = <span class="fn">useState</span>&lt;<span class="hi">string</span>|<span class="hi">null</span>&gt;(<span class="val">null</span>);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    api.<span class="fn">getBooks</span>()
+      .<span class="fn">then</span>(<span class="fn">setBooks</span>)
+      .<span class="fn">catch</span>(e =&gt; <span class="fn">setError</span>(e.message))
+      .<span class="fn">finally</span>(() =&gt; <span class="fn">setIsLoading</span>(<span class="val">false</span>));
+  }, []);
+
+  <span class="kw">async function</span> <span class="fn">handleDelete</span>(id: <span class="hi">number</span>) {
+    <span class="kw">await</span> api.<span class="fn">deleteBook</span>(id);
+    <span class="fn">setBooks</span>(prev =&gt; prev.<span class="fn">filter</span>(b =&gt; b.id !== id));
+  }
+
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;Loading…&lt;/<span class="hi">p</span>&gt;;
+  <span class="kw">if</span> (error)     <span class="kw">return</span> &lt;<span class="hi">p</span>&gt;{error}&lt;/<span class="hi">p</span>&gt;;
+  <span class="kw">return</span> (
+    &lt;<span class="hi">ul</span>&gt;
+      {books.<span class="fn">map</span>(b =&gt;
+        &lt;<span class="hi">li</span> <span class="key">key</span>={b.id}&gt;
+          {b.title}
+          &lt;<span class="hi">button</span> <span class="key">onClick</span>={() =&gt; <span class="fn">handleDelete</span>(b.id)}&gt;Delete&lt;/<span class="hi">button</span>&gt;
+        &lt;/<span class="hi">li</span>&gt;
+      )}
+    &lt;/<span class="hi">ul</span>&gt;
+  );
+}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Optimistic UI</strong> — <code>handleDelete</code> awaits the API call, then filters the local state. A more responsive version removes from state first, then reverses on error. Ask AI to show you both approaches.</div>
+      <div class="callout callout-yellow">The component does not know or care about the base URL, auth headers, or error parsing. All of that lives in <code>api.ts</code>. This is separation of concerns in practice.</div>
+      <div class="callout callout-green">Notice <code>api.getBooks().then(setBooks)</code> — because <code>getBooks</code> returns a typed Promise, you can chain directly. No need for a wrapper async function for simple cases.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Token Storage -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Token Storage — localStorage vs sessionStorage vs Cookies</h2>
+  <p>AI will often default to <code>localStorage</code> for the JWT. Understand the trade-offs before accepting that choice.</p>
+  <table style="margin-top:10px;">
+    <thead><tr><th>Storage</th><th>Persists across tabs?</th><th>Persists after close?</th><th>XSS risk</th><th>CSRF risk</th></tr></thead>
+    <tbody>
+      <tr><td>localStorage</td><td style="color:var(--green);">Yes</td><td style="color:var(--green);">Yes</td><td style="color:var(--red);">High — JS readable</td><td style="color:var(--green);">Low</td></tr>
+      <tr><td>sessionStorage</td><td style="color:var(--red);">No</td><td style="color:var(--red);">No</td><td style="color:var(--red);">High — JS readable</td><td style="color:var(--green);">Low</td></tr>
+      <tr><td>httpOnly cookie</td><td style="color:var(--green);">Yes</td><td style="color:var(--green);">Yes</td><td style="color:var(--green);">Low — not JS readable</td><td style="color:var(--red);">Higher</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-orange" style="margin-top:12px;font-size:13px;"><strong>The real question to ask AI:</strong> "You stored the JWT in localStorage. What are the XSS implications, and under what threat model would you choose httpOnly cookies instead?" This single question reveals whether AI is making a considered choice or a default one. For a learning project, localStorage is fine. For production handling sensitive data, evaluate carefully.</div>
+</div>
+
+<!-- Slide 13 — Debugging CORS -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>Debugging CORS — Reading the Error</h2>
+  <p>CORS errors are verbose. Knowing which part of the message to read saves significant time.</p>
+  <div class="cols cols-55-45" style="margin-top:6px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">browser console — CORS error anatomy</span></div>
+        <div class="terminal-body"><span class="or">Access to fetch at</span>
+  <span class="url">'http://localhost:3001/api/books'</span>
+<span class="or">from origin</span>
+  <span class="url">'http://localhost:5173'</span>
+<span class="or">has been blocked by CORS policy:</span>
+
+<span class="comment">Case 1 — no CORS header at all:</span>
+<span class="or">No 'Access-Control-Allow-Origin' header
+is present on the requested resource.</span>
+<span class="comment">→ cors() not installed or not before routes</span>
+
+<span class="comment">Case 2 — wrong origin:</span>
+<span class="or">The 'Access-Control-Allow-Origin' header
+has value 'https://example.com' that is
+not equal to the supplied origin.</span>
+<span class="comment">→ origin: in cors() config doesn't match</span>
+
+<span class="comment">Case 3 — preflight failed:</span>
+<span class="or">Response to preflight request doesn't
+pass access control check.</span>
+<span class="comment">→ Authorization missing from allowedHeaders</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-purple"><strong>Check middleware order</strong> — <code>app.use(cors(...))</code> must come before route definitions. If it's after, requests hit the routes before CORS headers are added.</div>
+      <div class="callout callout-yellow"><strong>Check the Network tab</strong> — look at the OPTIONS preflight request. What status did it return? What headers came back? This tells you whether the server responded at all or whether Express rejected the preflight route.</div>
+      <div class="callout callout-green">curl to the same endpoint works? Then it is definitely CORS — not a server bug. This rules out half the problem space immediately.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 14 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend · Reflection</div>
+  <h2>Reflect — Evaluating the API Layer AI Built</h2>
+  <p>The API module is infrastructure — it touches every feature. Read it more carefully than any other generated file.</p>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span style="color:var(--purple);font-weight:700;">01</span><span><strong>Where is the token read from?</strong> localStorage? sessionStorage? A cookie? Was this an explicit design choice in the prompt, or an AI default? Do you agree with it for your use case?</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">02</span><span><strong>What happens on a 401?</strong> Does the code redirect, throw, or silently fail? Test it: expire or delete the token, make a request, and observe what happens. Does the user experience match your expectation?</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">03</span><span><strong>Are all HTTP methods covered?</strong> GET and POST are easy — did AI correctly set <code>Content-Type</code> on POST bodies? Did it include PATCH and DELETE? Test each endpoint with a real request.</span></li>
+    <li><span style="color:var(--purple);font-weight:700;">04</span><span><strong>What does the TypeScript tell you?</strong> If you call <code>api.addBook()</code> with the wrong shape, does TypeScript catch it? Open the type hover in your editor and verify the parameter types match your API schema.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 15 — Wrap-up -->
+<div class="slide">
+  <div class="slide-label">Track C · Frontend</div>
+  <h2>What You Can Now Do — and What Comes Next</h2>
+  <div class="cols cols-50-50" style="margin-top:10px;">
+    <div>
+      <p style="color:var(--text);font-weight:600;margin-bottom:8px;">Covered in this deck:</p>
+      <ul class="annot-list">
+        <li><span>✓</span><span>The two-server problem and why CORS exists</span></li>
+        <li><span>✓</span><span>Same-origin policy — what counts as a different origin</span></li>
+        <li><span>✓</span><span>Configuring <code>cors()</code> in Express with explicit options</span></li>
+        <li><span>✓</span><span>VITE_ environment variables and <code>import.meta.env</code></span></li>
+        <li><span>✓</span><span>The Vite proxy for development</span></li>
+        <li><span>✓</span><span>A centralised <code>api.ts</code> with typed methods</span></li>
+        <li><span>✓</span><span>Global 401 handling and token cleanup</span></li>
+        <li><span>✓</span><span>Token storage trade-offs</span></li>
+        <li><span>✓</span><span>Debugging CORS errors from the browser console</span></li>
+      </ul>
+    </div>
+    <div>
+      <p style="color:var(--text);font-weight:600;margin-bottom:8px;">Coming up:</p>
+      <div class="callout callout-blue" style="margin-bottom:8px;"><strong>C4 — Auth in the Browser</strong> Login form, registration, React Context for auth state, protecting routes before React Router is added</div>
+      <div class="callout callout-green" style="margin-bottom:8px;"><strong>C5 — Routing</strong> React Router v6, nested routes, URL parameters, protected route wrappers, useNavigate</div>
+      <div class="callout callout-yellow"><strong>D1 — CORS &amp; Contracts</strong> Shared TypeScript types between client and server, API design contracts, monorepo patterns</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <span id="counter">1 / 15</span>
+  <button class="nav-btn" id="prev">&#8592;</button>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → navigate &nbsp;|&nbsp; F fullscreen</div>
+<a id="app-link" href="http://localhost:3001/api/health" target="_blank">localhost:3001 ↗</a>
+<a id="index-link" href="index.html">&#8962; Course</a>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'api-integration-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'c3-1', type: 'practical', title: 'Reproduce the CORS error',
+    desc: 'Start your Express API on port 3001 and your Vite dev server on 5173 (no proxy configured). In a component, fetch from the full URL http://localhost:3001/api/health. Open the browser console. Screenshot the CORS error. Then add the cors() middleware to Express with origin: "http://localhost:5173" and confirm the error resolves.',
+    criteria: [
+      'You observed the CORS error in the browser console (not a network error, not a 404)',
+      'Adding cors() with the correct origin resolved the error',
+      'You can explain in one sentence why the error happened and what cors() does to fix it'
+    ] },
+  { id: 'c3-2', type: 'practical', title: 'Build api.ts',
+    desc: 'Using the prompt from slide 9, generate a src/api.ts module. Add a VITE_API_URL variable to .env.local. Use api.getBooks() in a component inside useEffect. Verify the books load. Then temporarily break the token (set localStorage.setItem("token", "bad")) and confirm the 401 handling redirects or throws correctly.',
+    criteria: [
+      'api.ts has a generic request<T> function with correct TypeScript types',
+      'Authorization header is attached when a token exists in localStorage',
+      'A 401 response removes the token and either redirects or throws a recognisable error'
+    ] },
+  { id: 'c3-3', type: 'reflect', title: 'Token storage decision',
+    desc: 'Ask AI: "You stored the JWT in localStorage. What XSS attack could exploit this, and when would you choose httpOnly cookies instead?" Evaluate the response. Write 2-3 sentences of your own assessment of the trade-off for the reading list application specifically.',
+    criteria: [
+      'You can describe an XSS scenario that would steal a localStorage token',
+      'You understand what httpOnly prevents and its CSRF trade-off',
+      'Your assessment is specific to the threat model of a learning project vs a production app'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain the same-origin policy and why the browser blocks cross-origin requests',
+  'Configure the cors() middleware in Express with explicit origin, methods, and allowedHeaders',
+  'Use VITE_ prefixed environment variables and read them via import.meta.env in React',
+  'Set up the Vite dev proxy to forward API requests without CORS in development',
+  'Build a centralised api.ts module with typed methods, auth headers, and global error handling',
+  'Handle 401 responses globally by clearing the token and redirecting to login',
+  'Evaluate the trade-offs between localStorage, sessionStorage, and httpOnly cookies for token storage'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  /* ── Checkpoint 1 (after CORS config, slide 4) ─── */
+  {
+    id: 'cors-what',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Your React app on localhost:5173 fetches from localhost:3001. Why does the browser block this?',
+    options: [
+      'The Express server rejected the request',
+      'The ports are different, so these are different origins — the browser enforces same-origin policy',
+      'localhost is not a valid hostname for fetch',
+      'fetch requires HTTPS to work'
+    ],
+    correct: 1,
+    explanation: 'The same-origin policy requires matching protocol, hostname, AND port. Ports 5173 and 3001 differ, making these different origins. The browser blocks the response unless the server sends CORS headers explicitly allowing the request.',
+    reviewSlide: 'What is CORS?'
+  },
+  {
+    id: 'cors-curl',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Your API request fails with a CORS error in the browser but works perfectly in curl. What does this tell you?',
+    options: [
+      'The server is down intermittently',
+      'The request works — CORS is enforced by the browser, not the server',
+      'curl is bypassing authentication',
+      'The API endpoint has a bug that only appears in browsers'
+    ],
+    correct: 1,
+    explanation: 'CORS is a browser security policy. curl, Postman, and server-to-server requests are not browsers and do not enforce CORS. If curl works, the server is running correctly — CORS configuration is the only issue.',
+    reviewSlide: 'CORS — The Browser\'s Same-Origin Policy'
+  },
+  {
+    id: 'vite-prefix',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You set API_URL=http://localhost:3001 in .env.local. import.meta.env.API_URL returns undefined. Why?',
+    options: [
+      'Vite does not support .env.local files',
+      'You need to restart the dev server',
+      'Vite only exposes variables with the VITE_ prefix to the browser bundle',
+      'import.meta.env only works in TypeScript files'
+    ],
+    correct: 2,
+    explanation: 'Vite deliberately strips variables without the VITE_ prefix from the browser bundle to prevent accidentally exposing secrets. Rename it to VITE_API_URL and it becomes available as import.meta.env.VITE_API_URL.',
+    reviewSlide: 'Environment Variables in Vite'
+  },
+  {
+    id: 'cors-wildcard',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Why can\'t you use origin: "*" (allow all origins) when your API requires an Authorization header?',
+    model: 'Browsers refuse requests with credentials (Authorization headers, cookies) when the server responds with Access-Control-Allow-Origin: *. This is intentional — a wildcard origin with credentials would allow any website to make authenticated requests to your API on behalf of your users. You must specify an explicit origin (e.g. "http://localhost:5173") when credentials are involved.',
+    reviewSlide: 'Configuring CORS in Express'
+  },
+  /* ── Checkpoint 2 (after api.ts and 401 handling, slide 11) ─── */
+  {
+    id: 'api-module-why',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What is the main benefit of centralising all fetch calls in a single api.ts module?',
+    options: [
+      'It makes requests faster',
+      'It eliminates CORS errors',
+      'Auth headers, base URL, and error handling are configured once — changes apply everywhere',
+      'It prevents TypeScript errors'
+    ],
+    correct: 2,
+    explanation: 'When fetch calls are scattered across components, changing how auth works (e.g. moving from localStorage to a cookie, or changing the header name) requires editing every component. A central api.ts means one edit propagates everywhere.',
+    reviewSlide: 'Centralising API Calls'
+  },
+  {
+    id: 'token-401',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'A 401 response arrives from the API. In your api.ts, you call localStorage.removeItem("token") then throw an Error. Why remove the token before throwing?',
+    options: [
+      'localStorage.removeItem is required before throw in JavaScript',
+      'So the next request does not send an invalid token in the Authorization header',
+      'To trigger a re-render in React',
+      'To prevent the browser from caching the response'
+    ],
+    correct: 1,
+    explanation: 'If you throw without removing the token, the next request will send the same expired token and get another 401. Removing it first means the next request goes out without an Authorization header — the user is effectively logged out.',
+    reviewSlide: 'Handling Authentication Errors'
+  },
+  {
+    id: 'vite-proxy',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'With the Vite proxy configured to forward /api to localhost:3001, which URL do you use in your fetch calls?',
+    options: [
+      'http://localhost:3001/api/books',
+      'http://localhost:5173/api/books',
+      '/api/books',
+      'api/books'
+    ],
+    correct: 2,
+    explanation: 'With the proxy, you use a relative URL: /api/books. The Vite dev server intercepts it and forwards to localhost:3001. Your code has no hard-coded port, which makes switching environments (dev/production) easier.',
+    reviewSlide: 'The Vite Proxy'
+  },
+  {
+    id: 'localstorage-xss',
+    checkpoint: 2,
+    type: 'self',
+    q: 'AI stored your JWT in localStorage. Describe one scenario where this creates a security risk, and one context where the risk is acceptable.',
+    model: 'Risk scenario: an XSS vulnerability (e.g. rendering unsanitised user input) allows an attacker to inject script that reads localStorage.getItem("token") and sends it to a remote server. The attacker now has a valid token and can make authenticated requests. Acceptable context: an internal learning tool or personal project with no sensitive data, where the threat model does not include XSS attacks from untrusted content. For a production app handling financial or health data, httpOnly cookies (not accessible to JavaScript) would be a safer choice despite the added CSRF complexity.',
+    reviewSlide: 'Token Storage'
+  }
+];
+</script>
+</body>
+</html>

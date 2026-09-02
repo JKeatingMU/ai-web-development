@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build &amp; Deploy — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #d29922; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #7d5a00; --prompt-border: #c49b2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#1a1200 0%,#0f0b00 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: #ffd059; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: #58a6ff; }
+  .terminal-body .hi     { color: #58a6ff; }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;       color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);    color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple); color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange); color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-60-40 > *:first-child { flex: 60; }
+  .cols-60-40 > *:last-child  { flex: 40; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-num    { background: var(--highlight); color: #ffd059; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(196,155,42,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(196,155,42,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+<script src="deploy-workshop.scripts.js"></script>
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h1>Build &amp; <span class="accent">Deploy</span></h1>
+  <div class="subtitle">npm run build · Railway · Environment variables · Live database · Testing in production</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-yellow">Vite build</span>
+    <span class="badge badge-yellow">Railway</span>
+    <span class="badge badge-yellow">schema.sql</span>
+    <span class="badge badge-yellow">env vars</span>
+  </div>
+  <div class="callout callout-yellow">A working app on localhost is a prototype. A deployed app with a live database, environment-managed secrets, and a public URL is a product. This deck walks through every step — from <code>npm run build</code> to testing your first live API call.</div>
+  <div class="callout callout-orange" style="margin-top:8px;font-size:13px;"><strong>Prerequisites:</strong> This deck deploys a complete fullstack application. You need a working API (B2–B3), a React frontend (C1–C4), the stack connected (D1), and auth wired end-to-end (D2). If any of those are not working locally, fix them before deploying — a broken app becomes a harder-to-debug broken app once it is running on a server you cannot see.</div>
+</div>
+
+<!-- Slide 2 — What npm run build Does -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>What <code>npm run build</code> Does</h2>
+  <p>Vite transforms your React source — TypeScript, JSX, imports, env vars — into a handful of optimised static files that any web server can serve.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">terminal</span></div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">cd client &amp;&amp; npm run build</span>
+
+<span class="out">vite v5.x building for production...
+✓ 42 modules transformed.
+dist/index.html                   0.46 kB
+dist/assets/index-Bk9mTfgD.js  148.32 kB │ gzip: 48.21 kB
+dist/assets/index-DiwrgTda.css    2.14 kB │ gzip: 0.62 kB
+✓ built in 1.24s</span>
+
+<span class="comment"># client/dist/ is now ready to be served</span></div>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">client/dist/ structure</span></div>
+        <div class="terminal-body">client/dist/
+├── index.html          <span class="comment">← entry point for all routes</span>
+└── assets/
+    ├── index-Bk9m.js  <span class="comment">← all JS bundled + minified</span>
+    └── index-Diwg.css <span class="comment">← all CSS bundled + minified</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>VITE_ variables are baked in at build time.</strong> <code>import.meta.env.VITE_API_URL</code> becomes a literal string in the bundle. If your API URL changes after building, you must rebuild.</div>
+      <div class="callout callout-orange"><strong>In production, VITE_API_URL should be empty or omitted</strong> — Express serves the API from the same origin, so all <code>/api/...</code> paths resolve without a hostname prefix. Check <code>api.ts</code>: <code>const BASE = import.meta.env.VITE_API_URL ?? ''</code>.</div>
+      <div class="callout callout-blue"><strong>The hashed filenames</strong> (e.g. <code>index-Bk9m.js</code>) change on every build — Vite adds a content hash so browsers don't serve stale cached files after a deploy. This is automatic.</div>
+      <div class="callout callout-purple"><strong>Do not commit <code>client/dist/</code> to Git.</strong> Railway builds it from source. Add <code>client/dist</code> to <code>.gitignore</code>. Committing it bloats the repo and causes confusion about which version is deployed.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3 — Pre-Deploy Checklist -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Pre-Deploy Checklist</h2>
+  <p>Fix these before pushing to Railway. Most deployment failures trace back to one item on this list.</p>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span class="badge badge-num">1</span><span><strong><code>.gitignore</code> covers secrets:</strong> confirm <code>.env</code> is listed. Run <code>git status</code> and verify no <code>.env</code> file appears in the staged or untracked list. A leaked JWT_SECRET or DATABASE_URL is a serious incident.</span></li>
+    <li><span class="badge badge-num">2</span><span><strong><code>.env.example</code> is up to date:</strong> every environment variable your server reads must appear in <code>.env.example</code> with a placeholder value. This is your deployment reference — Railway config comes from here.</span></li>
+    <li><span class="badge badge-num">3</span><span><strong><code>package.json</code> start script:</strong> Railway runs <code>npm start</code>. Confirm <code>"start": "node server/index.js"</code> exists in the root or server <code>package.json</code>. Missing this produces "no start script found" deploy errors.</span></li>
+    <li><span class="badge badge-num">4</span><span><strong>Port is dynamic:</strong> <code>const PORT = process.env.PORT || 3001</code>. Railway assigns a random port via the <code>PORT</code> env var. Hardcoding 3001 causes the health check to fail on Railway.</span></li>
+    <li><span class="badge badge-num">5</span><span><strong>Build command set:</strong> Railway needs to build the React app. Either add a root-level build script (<code>"build": "cd client &amp;&amp; npm install &amp;&amp; npm run build"</code>) or configure it in the Railway dashboard settings.</span></li>
+    <li><span class="badge badge-num">6</span><span><strong>No hardcoded localhost URLs:</strong> search the codebase for <code>localhost:3001</code> and <code>localhost:5173</code> in non-test files. Any that appear in server code or shared types will break in production.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 4 — Section Header: Railway -->
+<div class="slide section-header">
+  <div class="pill">Part 2 — Railway</div>
+  <h1>Deploying to <span class="accent">Railway</span></h1>
+  <div class="subtitle">Web service · PostgreSQL plugin · Environment variables · Schema setup</div>
+</div>
+
+<!-- Slide 5 — Railway Setup -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Railway Setup — Step by Step</h2>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span class="badge badge-num">1</span><span><strong>Create project:</strong> railway.app → New Project → Deploy from GitHub repo. Select your repository. Railway detects Node.js automatically.</span></li>
+    <li><span class="badge badge-num">2</span><span><strong>Add PostgreSQL:</strong> in the project dashboard → + New → Database → PostgreSQL. Railway provisions a managed database and sets <code>DATABASE_URL</code> in your service's environment automatically.</span></li>
+    <li><span class="badge badge-num">3</span><span><strong>Set environment variables:</strong> Service → Variables tab. Add all variables from your <code>.env.example</code>: <code>JWT_SECRET</code>, <code>NODE_ENV=production</code>, <code>CLIENT_ORIGIN</code> (your Railway domain — set this after the first deploy).</span></li>
+    <li><span class="badge badge-num">4</span><span><strong>Set build + start commands:</strong> Settings → Build Command: <code>cd client &amp;&amp; npm install &amp;&amp; npm run build</code>. Start Command: <code>node server/index.js</code> (or <code>npm start</code>).</span></li>
+    <li><span class="badge badge-num">5</span><span><strong>Deploy:</strong> push to your main branch — Railway builds and deploys automatically. Watch the build logs for errors.</span></li>
+    <li><span class="badge badge-num">6</span><span><strong>Run schema.sql:</strong> after the first deploy, connect to the Railway PostgreSQL instance and run your schema. See the next slide for how.</span></li>
+    <li><span class="badge badge-num">7</span><span><strong>Set CLIENT_ORIGIN:</strong> copy your Railway domain (e.g. <code>https://myapp.up.railway.app</code>) and add it as <code>CLIENT_ORIGIN</code> in Variables. Redeploy.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 6 — Running schema.sql on Railway -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Running Your Schema on Railway PostgreSQL</h2>
+  <p>Railway's managed database doesn't have your tables yet. Run <code>schema.sql</code> once after the first deploy using either the Railway shell or a local connection via the Railway CLI.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">Option A — Railway CLI (recommended)</span></div>
+        <div class="terminal-body"><span class="comment"># Install Railway CLI</span>
+<span class="prompt">$</span> <span class="cmd">npm install -g @railway/cli</span>
+
+<span class="comment"># Authenticate</span>
+<span class="prompt">$</span> <span class="cmd">railway login</span>
+
+<span class="comment"># Link to your project</span>
+<span class="prompt">$</span> <span class="cmd">railway link</span>
+
+<span class="comment"># Run schema against Railway DB
+# (uses DATABASE_URL from Railway env)</span>
+<span class="prompt">$</span> <span class="cmd">railway run psql $DATABASE_URL &lt; schema.sql</span>
+
+<span class="comment"># Verify tables were created</span>
+<span class="prompt">$</span> <span class="cmd">railway run psql $DATABASE_URL -c "\dt"</span>
+<span class="out">         List of relations
+ Schema │   Name   │ Type  │ Owner
+────────┼──────────┼───────┼───────
+ public │ books    │ table │ ...
+ public │ users    │ table │ ...</span></div>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">Option B — Railway dashboard → PostgreSQL → Query</span></div>
+        <div class="terminal-body"><span class="comment"># Paste schema.sql contents into the
+# Railway dashboard query editor and run</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>Run once — not on every deploy.</strong> <code>schema.sql</code> typically contains <code>CREATE TABLE</code> statements. Running it twice on a database with data will fail or drop data if you used <code>DROP TABLE IF EXISTS</code>. For subsequent changes, use <code>ALTER TABLE</code> migrations.</div>
+      <div class="callout callout-orange"><strong>Use <code>IF NOT EXISTS</code>:</strong> write <code>CREATE TABLE IF NOT EXISTS</code> in your schema so re-running is safe in development. Railway's DB is fresh on first deploy so this is mostly a safety net for local resets.</div>
+      <div class="callout callout-blue"><strong>DATABASE_URL format:</strong> Railway provides a full PostgreSQL connection string. Your <code>pg</code> Pool picks it up automatically: <code>new Pool(&#123; connectionString: process.env.DATABASE_URL &#125;)</code>. No other DB config needed.</div>
+      <div class="callout callout-purple"><strong>After running the schema,</strong> test the health endpoint: <code>curl https://your-app.up.railway.app/api/health</code>. If it returns <code>&#123; "ok": true &#125;</code>, the server is up and connected to the database.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 — Environment Variables in Production -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Environment Variables in Production</h2>
+  <p>Every secret that lives in your local <code>.env</code> must be set in Railway's dashboard. Never commit secrets to Git.</p>
+  <table style="margin-top:10px;">
+    <thead><tr><th>Variable</th><th>Value in Railway</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>DATABASE_URL</td>
+        <td>Set automatically by Railway PostgreSQL plugin</td>
+        <td>Do not set manually — Railway manages this</td>
+      </tr>
+      <tr>
+        <td>JWT_SECRET</td>
+        <td>A long random string (32+ chars)</td>
+        <td>Generate with <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code></td>
+      </tr>
+      <tr>
+        <td>NODE_ENV</td>
+        <td><code>production</code></td>
+        <td>Some packages behave differently in production (logging, error detail)</td>
+      </tr>
+      <tr>
+        <td>CLIENT_ORIGIN</td>
+        <td><code>https://myapp.up.railway.app</code></td>
+        <td>Set after first deploy when you know the domain</td>
+      </tr>
+      <tr>
+        <td>PORT</td>
+        <td>Do not set — Railway provides it</td>
+        <td>Your code reads <code>process.env.PORT || 3001</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="cols cols-2" style="margin-top:10px;">
+    <div class="callout callout-orange"><strong>JWT_SECRET in production must be different from development.</strong> If the same secret is used in both environments, a token signed in development is valid in production — a security hole.</div>
+    <div class="callout callout-yellow"><strong>After setting variables, redeploy.</strong> Railway does not restart your service when env vars change — you must trigger a redeploy manually or push a new commit.</div>
+  </div>
+</div>
+
+<!-- Slide 8 — Testing Your Live Deployment -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Testing the Live Deployment</h2>
+  <p>Test in layers — API first, then auth, then the full frontend flow. Diagnose from the bottom up.</p>
+  <div class="cols cols-55-45" style="margin-top:8px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">terminal — replace with your domain</span></div>
+        <div class="terminal-body"><span class="comment"># 1. Health check — server + DB connected</span>
+<span class="prompt">$</span> curl https://myapp.up.railway.app/api/health
+<span class="gr">{"ok":true}</span>
+
+<span class="comment"># 2. Register a user</span>
+<span class="prompt">$</span> curl -s -X POST \
+  https://myapp.up.railway.app/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret123"}' | jq .
+<span class="gr">{"message":"Created"}</span>
+
+<span class="comment"># 3. Login — capture the token</span>
+<span class="prompt">$</span> TOKEN=$(curl -s -X POST \
+  https://myapp.up.railway.app/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret123"}' \
+  | jq -r .token)
+
+<span class="comment"># 4. Authenticated request</span>
+<span class="prompt">$</span> curl -s \
+  https://myapp.up.railway.app/api/books \
+  -H "Authorization: Bearer $TOKEN" | jq .
+<span class="gr">[]</span>
+
+<span class="comment"># 5. Add a book</span>
+<span class="prompt">$</span> curl -s -X POST \
+  https://myapp.up.railway.app/api/books \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"The Pragmatic Programmer","author":"Hunt &amp; Thomas","status":"reading"}' | jq .
+<span class="gr">{"id":1,"title":"The Pragmatic Programmer",...}</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="callout callout-yellow"><strong>Test with curl before the browser.</strong> curl removes browser-layer issues (CORS, caching, React Router) — if curl works, the API is correct and any remaining issues are frontend.</div>
+      <div class="callout callout-blue"><strong>If the health check fails:</strong> check Railway build logs. The most common causes are a missing start script, a hardcoded port, or a missing dependency that was accidentally in <code>devDependencies</code>.</div>
+      <div class="callout callout-orange"><strong>If login returns 500:</strong> JWT_SECRET is probably not set in Railway. Verify in Variables → confirm the key is spelled exactly as <code>process.env.JWT_SECRET</code> reads it in your code.</div>
+      <div class="callout callout-purple"><strong>If the React app loads but API calls fail:</strong> open DevTools → Network → look at a failing API request. Check the URL it is calling — if it still says <code>localhost:3001</code>, <code>VITE_API_URL</code> is set in Railway and overriding the empty default.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — Common Deploy Failures -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Common Deploy Failures</h2>
+  <table style="margin-top:10px;">
+    <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Build fails: "Cannot find module 'express'"</td>
+        <td>express is in <code>devDependencies</code> instead of <code>dependencies</code></td>
+        <td>Move to <code>dependencies</code>: <code>npm install express --save</code></td>
+      </tr>
+      <tr>
+        <td>Build fails: "No start script found"</td>
+        <td>Railway looks for <code>"start"</code> in <code>package.json</code> and finds nothing</td>
+        <td>Add <code>"start": "node server/index.js"</code> to root <code>package.json</code></td>
+      </tr>
+      <tr>
+        <td>App deploys but returns 502 on every request</td>
+        <td>Server crashes on startup — usually a missing env var or a bad DB connection</td>
+        <td>Check Railway deploy logs; confirm DATABASE_URL and JWT_SECRET are set</td>
+      </tr>
+      <tr>
+        <td>Health check passes, API returns 500</td>
+        <td>Schema not run — tables don't exist yet</td>
+        <td>Run <code>schema.sql</code> against Railway DB via CLI or dashboard query editor</td>
+      </tr>
+      <tr>
+        <td>React app loads, all API calls return CORS error</td>
+        <td>CLIENT_ORIGIN not set or set to wrong value</td>
+        <td>Set <code>CLIENT_ORIGIN=https://your-app.up.railway.app</code> and redeploy</td>
+      </tr>
+      <tr>
+        <td>API calls go to localhost:3001 from production</td>
+        <td>VITE_API_URL is set in Railway environment to localhost</td>
+        <td>Remove VITE_API_URL from Railway — it should only be set in local <code>.env</code> during development</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Slide 10 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Prompt Reflection</h2>
+  <p>Deployment surfaces assumptions you made during development. Reflect on what the process revealed.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-yellow">
+        <strong>The environment gap:</strong><br>
+        Development uses <code>.env</code> files; production uses platform env vars. Which variables caused you the most trouble to transfer? What would make this process less error-prone — in your project structure or your prompts?
+      </div>
+      <div class="callout callout-blue">
+        <strong>Build-time vs runtime config:</strong><br>
+        <code>VITE_API_URL</code> is baked in at build time. <code>PORT</code> is read at runtime. If you needed to change the API URL after deploying without rebuilding, would that be possible? What would you need to change in your architecture?
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="callout callout-orange">
+        <strong>The first curl test:</strong><br>
+        What was the first error you encountered when testing the live API with curl? Walk through how you diagnosed it — what did you check first, what did the error message tell you, and what was the actual cause?
+      </div>
+      <div class="callout callout-purple">
+        <strong>AI and deployment:</strong><br>
+        Deployment configuration is infrastructure, not application code. Did you use AI to help with the Railway setup or the build script? How useful was AI for this part of the project compared to the application code itself?
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11 — Wrap-up -->
+<div class="slide">
+  <div class="slide-label">Track D · Fullstack</div>
+  <h2>Wrap-up</h2>
+  <div class="subtitle">What you have built and can now do</div>
+  <ul class="annot-list" style="margin-top:10px;">
+    <li><span class="badge badge-green">&#10003;</span><span>Run <code>npm run build</code> to produce a static React bundle and explain what Vite does with TypeScript, imports, and environment variables</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Apply the pre-deploy checklist — <code>.gitignore</code>, <code>.env.example</code>, dynamic PORT, build command, no hardcoded localhost</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Set up a Railway project with a PostgreSQL plugin, configure environment variables, and deploy via GitHub push</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Run <code>schema.sql</code> against a Railway PostgreSQL database using the Railway CLI</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Test a live deployment in layers — health check, register, login, protected request — using curl before opening the browser</span></li>
+    <li><span class="badge badge-green">&#10003;</span><span>Diagnose the six most common deploy failures from Railway logs and error responses</span></li>
+  </ul>
+  <div class="callout callout-yellow" style="margin-top:14px;"><strong>Track D complete. You have built and deployed a fullstack app.</strong> A React frontend, an Express + PostgreSQL API, end-to-end authentication, and a live public URL — all built with AI, all understood line by line.</div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <span id="counter">1 / 11</span>
+  <button class="nav-btn" id="prev-btn" title="Previous (←)">&#8592;</button>
+  <button class="nav-btn" id="next-btn" title="Next (→)">&#8594;</button>
+</div>
+<div id="progress"></div>
+<span id="hint">← → keys to navigate</span>
+<a href="http://localhost:3001/api/health" id="app-link" target="_blank" rel="noopener">localhost:3001 &#8599;</a>
+<a href="index.html" id="index-link">&#8962; Course</a>
+
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_NAME = 'deploy-workshop';
+window.DECK_OBJECTIVES = [
+  'Explain what npm run build produces and why VITE_ variables are baked in at build time rather than read at runtime',
+  'Apply the six-point pre-deploy checklist to identify common issues before pushing to Railway',
+  'Set up a Railway project with a PostgreSQL plugin, configure environment variables, and trigger a deploy via GitHub push',
+  'Run schema.sql against a Railway PostgreSQL database using the Railway CLI',
+  'Test a live deployment in layers using curl — health, register, login, protected request — before testing in the browser',
+  'Diagnose the six most common Railway deploy failures from logs and error responses'
+];
+window.DECK_ASSESSMENTS = [
+  {
+    id: 'a1',
+    title: 'Deploy to Railway',
+    description: 'Follow the setup steps in slide 5. Deploy your Reading List app to Railway with a PostgreSQL database. Verify the health endpoint returns {"ok":true} on your public Railway URL.',
+    points: 4
+  },
+  {
+    id: 'a2',
+    title: 'Live API curl test',
+    description: 'Run the full curl test sequence from slide 8 against your live Railway URL — health, register, login, GET /api/books with Bearer token, POST a book. Screenshot or paste the terminal output.',
+    points: 2
+  },
+  {
+    id: 'a3',
+    title: 'Deployment reflection',
+    description: 'Answer the four reflection questions from slide 10 in writing. Pay particular attention to the "build-time vs runtime config" question — it tests understanding of a subtle but important architectural distinction.',
+    points: 2
+  }
+];
+window.DECK_QUESTIONS = [
+  {
+    id: 'q1', type: 'mcq',
+    question: 'VITE_API_URL is set to https://api.example.com in your .env file. You run npm run build. Six months later you move to a new API URL. What must you do to update the frontend?',
+    options: [
+      'Update the Railway env var — the frontend reads it at runtime',
+      'Update the .env file and rebuild — the URL is baked into the JS bundle at build time',
+      'Update the .env file and restart the server — Vite reloads env vars on server restart',
+      'Nothing — the frontend always falls back to the base URL on 404'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q2', type: 'mcq',
+    question: 'Your Express server hardcodes port 3001: app.listen(3001). The app deploys to Railway but every request returns 502. What is the cause?',
+    options: [
+      'Railway blocks port 3001 for security reasons',
+      'Railway assigns a different PORT via environment variable; listening on 3001 means no traffic reaches the server',
+      'Port 3001 conflicts with the Railway PostgreSQL port',
+      'Express requires app.listen() to use process.env.PORT in production'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q3', type: 'mcq',
+    question: 'You deploy successfully but GET /api/books returns "relation books does not exist". What is the most likely cause?',
+    options: [
+      'The DATABASE_URL environment variable is not set',
+      'The schema.sql file was not run against the Railway PostgreSQL database after the first deploy',
+      'Railway PostgreSQL uses a different SQL dialect than local PostgreSQL',
+      'The books table was created in devDependencies and is not available in production'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q4', type: 'self',
+    question: 'Explain the difference between VITE_API_URL (a build-time variable) and PORT (a runtime variable). Why is PORT read at runtime but VITE_API_URL is not?'
+  },
+  {
+    id: 'q5', type: 'mcq',
+    question: 'After setting CLIENT_ORIGIN in Railway, the React app still shows CORS errors when making API calls. What should you do first?',
+    options: [
+      'Clear the browser cache and try again',
+      'Redeploy the service — Railway does not restart automatically when environment variables change',
+      'Change CLIENT_ORIGIN to * temporarily to confirm CORS is the issue',
+      'Uninstall and reinstall the cors npm package'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q6', type: 'self',
+    question: 'You have a working Railway deployment. A teammate clones the repo and wants to run it locally. List exactly which files and steps they need — starting from git clone — to get the app running with a local database.'
+  }
+];
+
+(function() {
+  var slides = document.querySelectorAll('.slide');
+  var total  = slides.length;
+  var idx    = 0;
+
+  function show(n) {
+    slides[idx].classList.remove('active');
+    idx = Math.max(0, Math.min(n, total - 1));
+    slides[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((idx / (total - 1)) * 100) + '%';
+    if (window.localStorage) localStorage.setItem('svl_deploy-workshop', idx);
+    if (window.localStorage) localStorage.setItem('svl_deploy-workshop_total', total);
+    if (idx > parseInt(localStorage.getItem('svl_deploy-workshop_max') || '0'))
+      localStorage.setItem('svl_deploy-workshop_max', idx);
+  }
+
+  document.getElementById('prev-btn').addEventListener('click', function() { show(idx - 1); });
+  document.getElementById('next-btn').addEventListener('click', function() { show(idx + 1); });
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') show(idx + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   show(idx - 1);
+  });
+
+  var saved = window.localStorage ? parseInt(localStorage.getItem('svl_deploy-workshop') || '0') : 0;
+  if (saved > 0 && saved < total) show(saved);
+  else show(0);
+
+  if (window.initHUD)        initHUD();
+  if (window.initLO)         initLO();
+  if (window.initAssessments) initAssessments();
+  if (window.initAudio)      initAudio();
+  if (window.initAnnotation) initAnnotation();
+  if (window.initScripts)    initScripts();
+  if (window.initQuiz)       initQuiz();
+})();
+</script>
+</body>
+</html>

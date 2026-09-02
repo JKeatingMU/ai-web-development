@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testing Web APIs with curl — A Developer's Workflow</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 60px 80px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 16px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 32px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 20px; color: var(--muted); line-height: 1.5; margin-bottom: 32px; max-width: 680px; }
+  p { font-size: 17px; color: var(--muted); line-height: 1.7; margin-bottom: 12px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 13px; background: rgba(110,118,129,.1); padding: 2px 6px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1525 0%,#090f1c 100%); justify-content: center; align-items: center; text-align: center; gap: 16px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 16px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 16px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 18px 22px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 14px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .out    { color: var(--muted); }
+
+  .cols { display: grid; gap: 24px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-60-40 { grid-template-columns: 60fr 40fr; }
+
+  .callout { border-radius: 8px; padding: 16px 20px; font-size: 15px; line-height: 1.6; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.08);  border-color: var(--accent); color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.08);   border-color: var(--green);  color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.08);  border-color: var(--yellow); color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.08);   border-color: var(--red);    color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.08);  border-color: var(--orange); color: var(--text); }
+
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+  .annot-list li { display: flex; gap: 14px; align-items: flex-start; font-size: 15px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-flag   { background: rgba(255,166,87,.15); color: var(--orange); }
+  .badge-green  { background: rgba(63,185,80,.15);  color: var(--green);  }
+  .badge-method { background: rgba(88,166,255,.15); color: var(--accent); }
+  .badge-num    { background: rgba(88,166,255,.2);  color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+
+  .method { display: inline-block; border-radius: 4px; font-size: 12px; font-weight: 700; padding: 2px 8px; font-family: monospace; }
+  .GET    { background: rgba(63,185,80,.2);  color: var(--green); }
+  .POST   { background: rgba(88,166,255,.2); color: var(--accent); }
+  .PATCH  { background: rgba(210,153,34,.2); color: var(--yellow); }
+  .DELETE { background: rgba(248,81,73,.2);  color: var(--red); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 9px 12px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.5; }
+  td code { font-size: 12px; }
+  td strong { color: var(--text); }
+
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.8; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .re { color: var(--red); }
+
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 14px; color: var(--muted); margin-top: 32px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+
+  #nav { position: fixed; bottom: 30px; right: 40px; display: flex; align-items: center; gap: 12px; z-index: 100; }
+  #counter { font-size: 13px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 20px; right: 40px; font-size: 12px; color: var(--muted); font-family: monospace; }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .filetree       { overflow: auto; max-height: min(45vh, 320px); }
+  .terminal-body, .diagram, .filetree { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar, .filetree::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track, .filetree::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb, .filetree::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover, .filetree::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- ══ SLIDE 1 — TITLE ════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 1 — Testing Web APIs with curl -->
+<div class="slide title-slide active">
+  
+<div class="slide-label">Workshop · Web API Development · Part 3 of 3</div>
+  <h1>Testing Web APIs<br>with <span class="accent">curl</span></h1>
+  <p class="subtitle">
+    How developers inspect, authenticate, and verify HTTP APIs directly from the command
+    line — demonstrated on the Reading List API built in Parts 1 and 2.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Requires: Parts 1 &amp; 2 (CRUD API + Authentication)</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2 — WHY curl ════════════════════════════════════════════════ -->
+
+
+<!-- Slide 2 — Why curl? -->
+<div class="slide">
+  
+<div class="slide-label">Motivation</div>
+  <h2>Why curl?</h2>
+  <p>curl is a command-line tool that sends HTTP requests and shows responses. It is the universal language of web API testing.</p>
+  <div class="cols cols-2" style="margin-top:16px;">
+    <div>
+      <ul class="annot-list">
+        <li><span class="badge badge-green">✓</span> <span><strong>No install friction</strong> — ships with macOS, Linux, WSL; zero setup</span></li>
+        <li><span class="badge badge-green">✓</span> <span><strong>Scriptable</strong> — embed in bash scripts, CI pipelines, Makefiles</span></li>
+        <li><span class="badge badge-green">✓</span> <span><strong>Exact</strong> — you see precisely what is sent and received, no abstraction</span></li>
+        <li><span class="badge badge-green">✓</span> <span><strong>Universal</strong> — every API, every language, every server</span></li>
+        <li><span class="badge badge-green">✓</span> <span><strong>Agent-readable</strong> — AI coding assistants reason about curl natively</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout callout-blue icon-key">
+        <strong>The mental model shift:</strong><br><br>
+        A browser hides everything. A GUI client (Postman) adds a UI layer. curl forces you to think in raw HTTP — exactly what the server sees.
+      </div>
+      <div class="callout callout-yellow" style="margin-top:12px;">
+        <strong>Real context:</strong> Every command in this deck was used to test the Reading List API we built in Parts 1 and 2.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3 — ANATOMY ═════════════════════════════════════════════════ -->
+
+
+<!-- Slide 3 — Anatomy of a curl Command -->
+<div class="slide">
+  
+<div class="slide-label">Fundamentals</div>
+  <h2>Anatomy of a curl Command</h2>
+  <div class="terminal" style="margin-top:20px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash</span></div>
+    <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> <span class="flag">-d</span> <span class="str">'{"key":"value"}'</span> <span class="url">http://localhost:3001/api/endpoint</span></div>
+  </div>
+  <div class="cols cols-2" style="margin-top:8px;">
+    <ul class="annot-list">
+      <li><span class="badge badge-flag">-s</span> <span><strong>Silent mode</strong> — suppresses the progress bar, keeps output clean</span></li>
+      <li><span class="badge badge-flag">-X POST</span> <span><strong>HTTP method</strong> — GET is default; specify POST, PATCH, DELETE explicitly</span></li>
+      <li><span class="badge badge-flag">-H</span> <span><strong>Header</strong> — add any HTTP header; repeat for multiple headers</span></li>
+    </ul>
+    <ul class="annot-list">
+      <li><span class="badge badge-flag">-d</span> <span><strong>Data / body</strong> — the request body; tells curl to POST automatically</span></li>
+      <li><span class="badge badge-flag">-o file</span> <span><strong>Output to file</strong> — saves response body to disk instead of stdout</span></li>
+      <li><span class="badge badge-flag">| jq .</span> <span><strong>Pretty-print</strong> — pipe JSON output through <code>jq</code> to format and colour it</span></li>
+    </ul>
+  </div>
+  <div class="callout callout-blue icon-tip" style="margin-top:14px;">
+    <strong>Rule of thumb:</strong> always use <code>-s</code> and pipe to <code>jq</code> when testing JSON APIs. The signal-to-noise ratio is much better.
+  </div>
+</div>
+
+<!-- ══ SLIDE 4 — HTTP METHODS ═══════════════════════════════════════════ -->
+
+
+<!-- Slide 4 — HTTP Methods — What Each One Means -->
+<div class="slide">
+  
+<div class="slide-label">Fundamentals</div>
+  <h2>HTTP Methods — What Each One Means</h2>
+  <p>REST APIs use HTTP methods as verbs. Understanding them is essential before testing anything.</p>
+  <table style="margin-top:16px;">
+    <tr><th>Method</th><th>curl flag</th><th>Meaning</th><th>Reading List API</th></tr>
+    <tr><td><span class="method GET">GET</span></td><td><code>(default)</code></td><td>Read — never modifies anything</td><td><strong>List books, get one book, stats</strong></td></tr>
+    <tr><td><span class="method POST">POST</span></td><td><code>-X POST</code></td><td>Create or trigger an action</td><td><strong>Register, login, add a book</strong></td></tr>
+    <tr><td><span class="method PATCH">PATCH</span></td><td><code>-X PATCH</code></td><td>Partially update an existing resource</td><td><strong>Update status, rating, notes</strong></td></tr>
+    <tr><td><span class="method DELETE">DELETE</span></td><td><code>-X DELETE</code></td><td>Remove a resource</td><td><strong>Delete a book</strong></td></tr>
+  </table>
+  <div class="callout callout-yellow icon-key" style="margin-top:20px;">
+    <strong>GET is safe and idempotent.</strong> Run it as many times as you like — no side effects. POST and PATCH change server state — be deliberate.
+  </div>
+</div>
+
+<!-- ══ SLIDE 5 — SECTION: STRATEGY ════════════════════════════════════════ -->
+
+
+<!-- Slide 5 — The Testing Strategy -->
+<div class="slide section-header">
+  <div class="pill">Part 1</div>
+  <h1>The Testing <span class="accent">Strategy</span></h1>
+  <p class="subtitle">Start simple. Confirm the server is alive. Then work outward — auth first, then data.</p>
+</div>
+
+<!-- ══ SLIDE 6 — HEALTH CHECK ══════════════════════════════════════════ -->
+
+
+<!-- Slide 6 — The Health Check -->
+<div class="slide">
+  
+<div class="slide-label">Step 1 — Confirm the server is running</div>
+  <h2>The Health Check</h2>
+  <p>Always your first call. No auth needed. Confirms the server is running and responsive.</p>
+  <div class="terminal">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — health check</span></div>
+    <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/health</span> <span class="flag">| jq .</span>
+
+<span class="out">{
+  "status": "ok",
+  "ts": "2026-03-04T10:22:14.887Z"
+}</span></div>
+  </div>
+  <div class="cols cols-2" style="margin-top:8px; gap:16px;">
+    <div class="callout callout-green">
+      <strong>If this works:</strong> Node.js is running, Express is listening on port 3001, database connection is configured. Proceed to auth.
+    </div>
+    <div class="callout callout-orange icon-gotcha">
+      <strong>If this fails:</strong> <code>curl: (7) Failed to connect</code> — the server isn't running. Start it: <code>npm run dev</code>
+    </div>
+  </div>
+  <div class="callout callout-blue icon-gotcha" style="margin-top:12px;">
+    <strong>Lesson:</strong> Never assume the server is running. Verify it explicitly. This one habit saves enormous debugging time.
+  </div>
+</div>
+
+<!-- ══ SLIDE 7 — SECTION: AUTH ══════════════════════════════════════════ -->
+
+
+<!-- Slide 7 — Authentication — Getting a Token -->
+<div class="slide section-header">
+  <div class="pill">Part 2</div>
+  <h1>Authentication — <span class="accent">Getting a Token</span></h1>
+  <p class="subtitle">Register once, log in to get a JWT, capture it in a variable. Every protected request carries that token.</p>
+</div>
+
+<!-- ══ SLIDE 8 — REGISTER ══════════════════════════════════════════════ -->
+
+
+<!-- Slide 8 — Register a New Account -->
+<div class="slide">
+  
+<div class="slide-label">Authentication — Step 1</div>
+  <h2>Register a New Account</h2>
+  <p>Registration is a one-time step. It creates a user record with a hashed password — no token is returned at this stage.</p>
+  <div class="terminal">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — register</span></div>
+    <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/register</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"correct-horse-battery"}'</span> \
+  | <span class="cmd">jq</span> <span class="str">.</span>
+
+<span class="out">{
+  "id": 1,
+  "email": "alice@example.com",
+  "created_at": "2026-03-04T10:01:00.000Z"
+}</span>   <span class="out">← no password_hash in response — intentional</span>
+
+<span class="out"><span class="comment"># Try to register the same email again</span></span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/register</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"different"}'</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "email already registered" }</span>   <span class="out">← 409 Conflict</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 9 — LOGIN: CAPTURE JWT ════════════════════════════════════ -->
+
+
+<!-- Slide 9 — Login and Capture the JWT -->
+<div class="slide">
+  
+<div class="slide-label">Authentication — Step 2</div>
+  <h2>Login and Capture the JWT</h2>
+  <p>Login exchanges your credentials for a JWT. Capture it immediately into a shell variable — never copy-paste tokens by hand.</p>
+  <div class="terminal">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — login + capture token</span></div>
+    <div class="terminal-body"><span class="comment"># Login — capture JWT in one step using $() command substitution</span>
+<span class="prompt">$</span> <span class="key">TOKEN</span>=<span class="val">$(</span><span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/login</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"correct-horse-battery"}'</span> \
+  | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.token'</span><span class="val">)</span>
+
+<span class="comment"># Confirm token was captured</span>
+<span class="prompt">$</span> echo ${<span class="key">TOKEN</span>:0:60}
+<span class="out">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWls...</span>
+
+<span class="comment"># Decode and inspect the payload — it's just base64</span>
+<span class="prompt">$</span> echo <span class="key">$TOKEN</span> | <span class="cmd">cut</span> <span class="flag">-d.</span> <span class="flag">-f2</span> | <span class="cmd">base64</span> <span class="flag">-d</span> 2>/dev/null | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{
+  "sub": 1,
+  "email": "alice@example.com",
+  "iat": 1709552000,
+  "exp": 1709638400
+}</span>   <span class="out">← "exp" is 24h after "iat"</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10 — HOW JWT AUTH WORKS ═══════════════════════════════════ -->
+
+
+<!-- Slide 10 — How JWT Authentication Works -->
+<div class="slide">
+  
+<div class="slide-label">Authentication — Concept</div>
+  <h2>How JWT Authentication Works</h2>
+  <div class="diagram" style="margin-top:16px;">
+<span class="hi">Client (curl)</span>                              <span class="hi">Server (Express)</span>
+
+  1. POST /auth/login  ─────────────────▶  bcrypt.compare(password, hash)
+     { email, password }                   jwt.sign({ sub, email }, JWT_SECRET)
+  2.                   ◀─────────────────  { "token": "eyJ..." }
+
+  3. GET /api/books
+     <span class="pu">Authorization: Bearer eyJ...</span>  ────▶  jwt.verify(token, JWT_SECRET)
+                                            Attach payload to req.user
+                                            Call next() → run route handler
+  4.                   ◀─────────────────  [ { book data... } ]
+
+  <span class="ye">Token valid for 24h. No database lookup on steps 3/4 — stateless.</span>
+  <span class="ye">Secret key is the only thing that must stay private.</span>
+  </div>
+  <div class="callout callout-blue icon-key" style="margin-top:14px;">
+    <strong>Authorization: Bearer</strong> — the standard HTTP header format for token authentication. <code>Bearer</code> signals a token follows (as opposed to <code>Basic</code> which uses base64-encoded username:password).
+  </div>
+</div>
+
+<!-- ══ SLIDE 11 — SECTION: DATA ══════════════════════════════════════════ -->
+
+
+<!-- Slide 11 — Reading & Writing Data -->
+<div class="slide section-header">
+  <div class="pill">Part 3</div>
+  <h1>Reading &amp; Writing <span class="accent">Data</span></h1>
+  <p class="subtitle">Full CRUD — every route, every response, every error case.</p>
+</div>
+
+<!-- ══ SLIDE 12 — CREATE ════════════════════════════════════════════════ -->
+
+
+<!-- Slide 12 — POST — Adding Books -->
+<div class="slide">
+  
+<div class="slide-label">CRUD — Create</div>
+  <h2>POST — Adding Books</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — POST /api/books</span></div>
+    <div class="terminal-body"><span class="comment"># Add a book — Authorization header required on all /api/books routes</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"title":"The Pragmatic Programmer","author":"Hunt &amp; Thomas","genre":"CS"}'</span> \
+  | <span class="cmd">jq</span> <span class="str">.</span>
+
+<span class="out">{
+  "id": 1,
+  "title": "The Pragmatic Programmer",
+  "author": "Hunt &amp; Thomas",
+  "genre": "CS",
+  "status": "want-to-read",
+  "rating": null,
+  "notes": null,
+  "created_at": "2026-03-04T10:05:00.000Z"
+}</span>
+
+<span class="comment"># Test validation — missing required field</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"title":"No Author"}'</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "title and author are required" }</span>   <span class="out">← 400 Bad Request</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 13 — READ ══════════════════════════════════════════════════ -->
+
+
+<!-- Slide 13 — GET — Listing, Filtering, Single Book -->
+<div class="slide">
+  
+<div class="slide-label">CRUD — Read</div>
+  <h2>GET — Listing, Filtering, Single Book</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — GET routes</span></div>
+    <div class="terminal-body"><span class="comment"># List all books</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  | <span class="cmd">jq</span> <span class="str">'.[].title'</span>
+<span class="out">"The Pragmatic Programmer"
+"Clean Code"
+"Designing Data-Intensive Applications"</span>
+
+<span class="comment"># Filter by status — ?status= is a query parameter</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">"http://localhost:3001/api/books?status=reading"</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  | <span class="cmd">jq</span> <span class="str">'.[].title'</span>
+<span class="out">"Clean Code"</span>
+
+<span class="comment"># Get one book by id</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/1</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  | <span class="cmd">jq</span> <span class="str">'{id,title,status}'</span>
+<span class="out">{ "id": 1, "title": "The Pragmatic Programmer", "status": "want-to-read" }</span>
+
+<span class="comment"># 404 — id that doesn't exist</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/999</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "Not found" }</span></div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- ══ SLIDE 14 — UPDATE AND DELETE ════════════════════════════════════ -->
+
+
+<!-- Slide 14 — PATCH and DELETE -->
+<div class="slide">
+  
+<div class="slide-label">CRUD — Update &amp; Delete</div>
+  <h2>PATCH and DELETE</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — PATCH + DELETE</span></div>
+    <div class="terminal-body"><span class="comment"># Mark a book as done — only send the fields that change (COALESCE handles the rest)</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X PATCH</span> <span class="url">http://localhost:3001/api/books/1</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"status":"done","rating":5,"notes":"Essential reading."}'</span> \
+  | <span class="cmd">jq</span> <span class="str">'{id,title,status,rating}'</span>
+
+<span class="out">{
+  "id": 1,
+  "title": "The Pragmatic Programmer",
+  "status": "done",
+  "rating": 5
+}</span>   <span class="out">← title and author unchanged — COALESCE preserved them</span>
+
+<span class="comment"># Delete a book</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X DELETE</span> <span class="url">http://localhost:3001/api/books/3</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "deleted": 3 }</span>
+
+<span class="comment"># Confirm it's gone</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/3</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "Not found" }</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 15 — STATS ════════════════════════════════════════════════ -->
+
+
+<!-- Slide 15 — Reading Statistics -->
+<div class="slide">
+  
+<div class="slide-label">CRUD — Aggregates</div>
+  <h2>Reading Statistics</h2>
+  <div class="terminal" style="margin-top:16px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — GET /api/books/stats</span></div>
+    <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/stats</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  | <span class="cmd">jq</span> <span class="str">.</span>
+
+<span class="out">{
+  "total": "5",
+  "want_to_read": "2",
+  "reading": "2",
+  "done": "1",
+  "avg_rating": "5.0"
+}</span></div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:20px;">
+    This is a single SQL query using <code>COUNT(*) FILTER (WHERE ...)</code> — the database does all the aggregation, no post-processing in JavaScript. One request to the server, one result object back.
+  </div>
+  <div class="callout callout-yellow icon-gotcha" style="margin-top:12px;">
+    <strong>Route ordering matters:</strong> <code>/api/books/stats</code> must be defined <em>before</em> <code>/api/books/:id</code> in server.js, otherwise Express treats <code>"stats"</code> as an id parameter and the route never matches.
+  </div>
+</div>
+
+<!-- ══ SLIDE 16 — READING ERRORS ════════════════════════════════════════ -->
+
+
+<!-- Slide 16 — Reading Error Responses -->
+<div class="slide">
+  
+<div class="slide-label">Debugging</div>
+  <h2>Reading Error Responses</h2>
+  <p>APIs communicate failures through HTTP status codes and JSON error bodies. Use <code>-i</code> to see both.</p>
+  <div class="cols cols-2" style="margin-top:12px; gap:18px; align-items:start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — -i shows response headers</span></div>
+      <div class="terminal-body"><span class="comment"># No token</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-i</span> <span class="url">http://localhost:3001/api/books</span>
+<span class="out">HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{"error":"No token provided"}</span>
+
+<span class="comment"># Malformed/expired token</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-i</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer not-a-real-jwt"</span>
+<span class="out">HTTP/1.1 401 Unauthorized
+
+{"error":"Invalid or expired token"}</span></div>
+    </div>
+    <table>
+      <tr><th>Status</th><th>Meaning</th><th>Common cause</th></tr>
+      <tr><td><code>200 OK</code></td><td>Success</td><td>—</td></tr>
+      <tr><td><code>201 Created</code></td><td>Resource created</td><td>Successful POST that creates a new record</td></tr>
+      <tr><td><code>400 Bad Request</code></td><td>Client sent bad data</td><td>Missing required field, validation failure</td></tr>
+      <tr><td><code>401 Unauthorized</code></td><td>Auth failed</td><td>No token, invalid token, expired token, wrong password</td></tr>
+      <tr><td><code>404 Not Found</code></td><td>Resource missing</td><td>Wrong id, typo in route</td></tr>
+      <tr><td><code>409 Conflict</code></td><td>Duplicate resource</td><td>Email already registered</td></tr>
+      <tr><td><code>500 Internal Server Error</code></td><td>Server crashed</td><td>Check server console logs</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══ SLIDE 17 — SECTION: CHAINING ════════════════════════════════════ -->
+
+
+<!-- Slide 17 — Chaining Commands — The Full Workflow -->
+<div class="slide section-header">
+  <div class="pill">Part 4</div>
+  <h1>Chaining Commands — <span class="accent">The Full Workflow</span></h1>
+  <p class="subtitle">Real testing strings multiple curl calls together into a repeatable script.</p>
+</div>
+
+<!-- ══ SLIDE 18 — JQ GUIDE ══════════════════════════════════════════════ -->
+
+
+<!-- Slide 18 — jq — Your JSON Swiss Army Knife -->
+<div class="slide">
+  
+<div class="slide-label">Tool: jq</div>
+  <h2>jq — Your JSON Swiss Army Knife</h2>
+  <p>jq is a command-line JSON processor. Pair it with curl constantly.</p>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">jq patterns</span></div>
+    <div class="terminal-body"><span class="comment"># Pretty-print everything</span>
+... | <span class="cmd">jq</span> <span class="str">.</span>
+
+<span class="comment"># Extract one field as raw string (no quotes)</span>
+... | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.token'</span>
+
+<span class="comment"># Pick specific fields from an object</span>
+... | <span class="cmd">jq</span> <span class="str">'{id,title,status,rating}'</span>
+
+<span class="comment"># Extract titles from array of books</span>
+... | <span class="cmd">jq</span> <span class="str">'.[].title'</span>
+
+<span class="comment"># First 3 items of array</span>
+... | <span class="cmd">jq</span> <span class="str">'.[0:3]'</span>
+
+<span class="comment"># Filter array — only books with rating >= 4</span>
+... | <span class="cmd">jq</span> <span class="str">'[.[] | select(.rating >= 4)]'</span>
+
+<span class="comment"># Count items</span>
+... | <span class="cmd">jq</span> <span class="str">'length'</span></div>
+  </div>
+  <div class="callout callout-blue icon-tip" style="margin-top:12px;">
+    Install: <code>brew install jq</code> (macOS) · <code>winget install jqlang.jq</code> (Windows) · <code>sudo apt install jq</code> (Linux). One of the most useful tools any backend developer can know. <strong>jqplay.org</strong> — interactive playground.
+    <a href="https://jqlang.github.io/jq/tutorial/" target="_blank" class="breakout-link">jq Tutorial ↗</a>
+  </div>
+</div>
+
+<!-- ══ SLIDE 19 — FULL PIPELINE SCRIPT ═════════════════════════════════ -->
+
+
+<!-- Slide 19 — A Complete Test Script -->
+<div class="slide">
+  
+<div class="slide-label">Putting it all together</div>
+  <h2>A Complete Test Script</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — full Reading List API test</span></div>
+    <div class="terminal-body"><span class="comment">#!/bin/bash
+# Full CRUD test: health → register → login → create → read → update → delete</span>
+
+<span class="comment"># 1. Health check</span>
+<span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/health</span> | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.status'</span>
+
+<span class="comment"># 2. Register (skip if user already exists)</span>
+<span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/register</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"test@example.com","password":"test-password-1"}'</span> | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.email // .error'</span>
+
+<span class="comment"># 3. Login — capture JWT</span>
+<span class="key">TOKEN</span>=<span class="val">$(</span><span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/login</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"test@example.com","password":"test-password-1"}'</span> | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.token'</span><span class="val">)</span>
+
+<span class="comment"># 4. Create a book — capture the id</span>
+<span class="key">BOOK_ID</span>=<span class="val">$(</span><span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"title":"Clean Code","author":"Robert C. Martin"}'</span> | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.id'</span><span class="val">)</span>
+
+<span class="comment"># 5. Mark as done + rate it</span>
+<span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X PATCH</span> <span class="url">http://localhost:3001/api/books/<span class="key">$BOOK_ID</span></span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"status":"done","rating":4}'</span> | <span class="cmd">jq</span> <span class="str">'{id,status,rating}'</span>
+
+<span class="comment"># 6. Check stats</span>
+<span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/stats</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> | <span class="cmd">jq</span> <span class="str">.</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 20 — SECTION: BIGGER PICTURE ═══════════════════════════════ -->
+
+
+<!-- Slide 20 — Why This Still Matters -->
+<div class="slide section-header">
+  <div class="pill">Part 5</div>
+  <h1>Why This Still <span class="accent">Matters</span></h1>
+  <p class="subtitle">Even as AI agents take on more development work, understanding what happens at the HTTP level remains essential.</p>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- ══ SLIDE 21 — AGENTS AND curl ═══════════════════════════════════════ -->
+
+
+<!-- Slide 21 — AI Agents Use curl Too -->
+<div class="slide">
+  
+<div class="slide-label">The Bigger Picture</div>
+  <h2>AI Agents Use curl Too</h2>
+  <p>The commands in this deck were not written ahead of time. They were generated by Claude Code during live development of the Vibe Coding Study research platform, executed to verify each change worked.</p>
+  <div class="cols cols-2" style="margin-top:16px;">
+    <div class="callout callout-blue">
+      <strong>What the agent does:</strong>
+      <ul style="margin-top:8px; padding-left:18px; line-height:2; color:var(--muted);">
+        <li>Writes server code</li>
+        <li>Generates curl commands to test it</li>
+        <li>Reads the JSON response</li>
+        <li>Diagnoses errors from the body + status code</li>
+        <li>Fixes the code and re-tests</li>
+      </ul>
+    </div>
+    <div class="callout callout-green">
+      <strong>What the human still does:</strong>
+      <ul style="margin-top:8px; padding-left:18px; line-height:2; color:var(--muted);">
+        <li>Approves or rejects each action</li>
+        <li>Interprets unexpected results</li>
+        <li>Decides when the test is sufficient</li>
+        <li>Understands the intent behind the API</li>
+        <li>Spots what the agent missed</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-yellow icon-tip" style="margin-top:16px;">
+    <strong>The skill compounds:</strong> A developer who understands curl can supervise an AI agent's API testing far more effectively. You know what to look for, what to question, and when something is wrong.
+  </div>
+</div>
+
+<!-- ══ SLIDE 22 — THE DEVELOPMENT LOOP ════════════════════════════════ -->
+
+
+<!-- Slide 22 — The Development Loop -->
+<div class="slide">
+  
+<div class="slide-label">The Bigger Picture</div>
+  <h2>The Development Loop</h2>
+  <div class="diagram" style="margin-top:16px;">
+                    <span class="hi">Write code</span>
+                         │
+                         ▼
+              <span class="gr">curl -s /api/health</span>                  ← Is the server running?
+                         │
+                         ▼
+              <span class="pu">TOKEN=$(curl -s -X POST /auth/login)</span>  ← Can I authenticate?
+                         │
+                         ▼
+              <span class="ye">curl -s -X POST /api/books -H "Authorization: Bearer $TOKEN" ...</span>
+                         │
+              ┌──────────┴──────────────┐
+              ▼                         ▼
+        <span class="gr">{ "id": 1, "title": ... }</span>     <span class="re">{ "error": "..." }</span>
+              │                         │
+         <span class="gr">Ship it</span>                <span class="re">Read the error → Fix → Repeat</span>
+  </div>
+  <p style="margin-top:20px;">
+    This loop — write, test with curl, read the response, diagnose, fix — is the core of backend development. Fast, precise, and completely independent of any browser or GUI tool.
+  </p>
+</div>
+
+<!-- ══ SLIDE 23 — KEY TAKEAWAYS ════════════════════════════════════════ -->
+
+
+<!-- Slide 23 — Key Takeaways -->
+<div class="slide">
+  
+<div class="slide-label">Summary</div>
+  <h2>Key Takeaways</h2>
+  <ul class="annot-list" style="margin-top:20px; gap:16px;">
+    <li><span class="badge badge-num">1</span> <span><strong>Start with the health check.</strong> Always confirm the server is running before testing anything else.</span></li>
+    <li><span class="badge badge-num">2</span> <span><strong>Register once, capture the JWT immediately.</strong> Use <code>TOKEN=$(curl ... | jq -r '.token')</code>. Never copy-paste tokens by hand.</span></li>
+    <li><span class="badge badge-num">3</span> <span><strong>Authorization: Bearer, not x-custom-token.</strong> The standard header for JWT authentication is <code>Authorization: Bearer &lt;token&gt;</code>.</span></li>
+    <li><span class="badge badge-num">4</span> <span><strong>Use -i when debugging auth.</strong> Seeing the HTTP status (401 vs 404 vs 500) tells you immediately where the failure is.</span></li>
+    <li><span class="badge badge-num">5</span> <span><strong>Chain your commands.</strong> Health → register → login → create → read → update → delete is a script, not seven separate manual steps.</span></li>
+    <li><span class="badge badge-num">6</span> <span><strong>This is the language of APIs.</strong> Every web framework, cloud service, and AI API speaks HTTP. curl speaks it fluently.</span></li>
+  </ul>
+</div>
+
+<!-- ══ SLIDE 24 — QUICK REFERENCE ══════════════════════════════════════ -->
+
+
+<!-- Slide 24 — curl + jq Quick Reference -->
+<div class="slide">
+  
+<div class="slide-label">Reference Card</div>
+  <h2>curl + jq Quick Reference</h2>
+  <div class="cols cols-2" style="margin-top:12px; gap:20px;">
+    <table>
+      <tr><th>Flag</th><th>Meaning</th></tr>
+      <tr><td><code>-s</code></td><td>Silent (no progress bar)</td></tr>
+      <tr><td><code>-X POST</code></td><td>Set HTTP method</td></tr>
+      <tr><td><code>-H "..."</code></td><td>Add a request header</td></tr>
+      <tr><td><code>-d '{...}'</code></td><td>Set JSON request body</td></tr>
+      <tr><td><code>-o file</code></td><td>Write response to file</td></tr>
+      <tr><td><code>-i</code></td><td>Include response headers + status</td></tr>
+      <tr><td><code>-v</code></td><td>Verbose — show everything</td></tr>
+      <tr><td><code>| jq .</code></td><td>Pretty-print JSON response</td></tr>
+      <tr><td><code>| jq -r '.x'</code></td><td>Extract field as raw string</td></tr>
+    </table>
+    <table>
+      <tr><th>Pattern</th><th>Purpose</th></tr>
+      <tr><td><code>TOKEN=$(curl ...)</code></td><td>Capture response into variable</td></tr>
+      <tr><td><code>-H "Authorization: Bearer $TOKEN"</code></td><td>Pass JWT to protected route</td></tr>
+      <tr><td><code>jq '{id,title,status}'</code></td><td>Project specific fields</td></tr>
+      <tr><td><code>jq '.[].title'</code></td><td>Extract field from array</td></tr>
+      <tr><td><code>jq 'select(.rating >= 4)'</code></td><td>Filter array by condition</td></tr>
+      <tr><td><code>cut -d. -f2 | base64 -d</code></td><td>Decode JWT payload</td></tr>
+      <tr><td><code>jq '.email // .error'</code></td><td>Print field if present, else error</td></tr>
+    </table>
+  </div>
+  <div class="callout callout-blue" style="margin-top:14px; font-size:13px;">
+    <strong>Install jq:</strong>
+    <span style="display:inline-flex; flex-wrap:wrap; gap:6px 16px; margin-top:4px;">
+      <span><strong>macOS:</strong> <code>brew install jq</code></span>
+      <span><strong>Windows:</strong> <code>winget install jqlang.jq</code></span>
+      <span><strong>Linux:</strong> <code>sudo apt install jq</code> &nbsp;or&nbsp; <code>sudo yum install jq</code></span>
+    </span>
+    &nbsp;·&nbsp; <strong>curl docs:</strong> <code>man curl</code> &nbsp;·&nbsp; <strong>jq playground:</strong> jqplay.org
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 24</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'curl-testing-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'b4-1', type: 'practical', title: 'Write a full test script',
+    desc: 'Write a shell script that: registers a user, logs in and captures the JWT, then runs at least 5 API tests (GET, POST, PATCH, DELETE, one error case). Use jq to validate each response.',
+    criteria: [
+      'The script runs end-to-end without manual intervention',
+      'Each response is validated with jq (not just printed to the terminal)',
+      'At least one test checks an error case, not just the happy path'
+    ] },
+  { id: 'b4-2', type: 'practical', title: 'Trigger error responses',
+    desc: "Using curl, deliberately trigger: a 401 (invalid/missing token), a 404 (nonexistent resource), and a 400 (invalid input). Confirm each matches your route's error handling logic.",
+    criteria: [
+      'You can show the exact curl command used for each case',
+      'Each returns the expected status code (not 500, not 200)',
+      'You traced each error back to the specific line in your route handler that produces it'
+    ] },
+  { id: 'b4-3', type: 'reflect', title: 'Limits of curl testing',
+    desc: 'What kinds of bugs are hardest to catch with curl testing? When would you need integration tests, a test framework, or browser testing instead? Where does this approach break down?',
+    criteria: [
+      'You named a specific class of bug that curl testing cannot easily catch',
+      'You named a specific tool you would reach for instead (Jest, Playwright, k6, etc.)',
+      'Your answer is based on a real limitation you encountered or can reason through concretely'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Use curl to send HTTP requests and interpret response bodies, headers, and status codes',
+  'Capture a JWT from a login response and use it in subsequent authenticated requests',
+  'Write a shell script that runs a complete CRUD test sequence automatically',
+  'Use jq to filter and extract data from JSON API responses in the terminal',
+  'Diagnose common API failures — connection refused, 401, 404, 422 — using curl output alone'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'curl-1a',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What does the <code>-s</code> flag do in a curl command?',
+    options: [
+      'Sets the HTTP method to SSL',
+      'Suppresses the progress bar for cleaner output',
+      'Sends the request synchronously',
+      'Saves the response to a file'
+    ],
+    correct: 1,
+    explanation: 'The -s (silent) flag suppresses curl\'s progress meter and error messages, which is essential when piping output to jq — otherwise the progress bar corrupts the JSON.',
+    reviewSlide: 'Anatomy of a curl Command'
+  },
+  {
+    id: 'curl-1b',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You run <code>curl -s http://localhost:3001/api/books</code> and receive <code>{"error":"No token provided"}</code>. What status code did the server most likely return?',
+    options: ['400 Bad Request', '403 Forbidden', '401 Unauthorized', '404 Not Found'],
+    correct: 2,
+    explanation: '401 Unauthorized means authentication is required but was not provided. The middleware saw no Authorization header and rejected the request before the route handler ran.',
+    reviewSlide: 'Reading Error Responses'
+  },
+  {
+    id: 'curl-1c',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which command correctly captures a JWT token from a login response into a shell variable?',
+    options: [
+      'TOKEN=curl -s -X POST .../auth/login -d \'{"email":"a","password":"b"}\'',
+      'TOKEN=$(curl -s -X POST .../auth/login -H "Content-Type: application/json" -d \'{"email":"a","password":"b"}\' | jq -r \'.token\')',
+      'TOKEN=$(curl .../auth/login | grep token)',
+      'export TOKEN | curl -s .../auth/login | jq .token'
+    ],
+    correct: 1,
+    explanation: 'The $() syntax captures command output into a variable. jq -r extracts the .token field as a raw string (no surrounding quotes), which is required for use in the Authorization header.',
+    reviewSlide: 'Login and Capture the JWT'
+  },
+  {
+    id: 'curl-1d',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which flag lets you see the HTTP status code (e.g. 401) in the curl output?',
+    options: ['-s', '-v only', '-i', '-X'],
+    correct: 2,
+    explanation: 'The -i flag includes response headers in the output, which includes the status line (HTTP/1.1 401 Unauthorized). It is the quickest way to see a status code without full verbose mode.',
+    reviewSlide: 'Reading Error Responses'
+  },
+  {
+    id: 'curl-1e',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Explain why you should always send <code>-H "Content-Type: application/json"</code> when POSTing JSON data with curl. What happens if you omit it?',
+    model: 'The Content-Type header tells the server how to interpret the request body. Express\'s express.json() middleware only parses the body if Content-Type is application/json. Without it, req.body will be undefined or empty, and the server will likely return a 400 Bad Request or treat the body as missing — even though you sent data with -d.',
+    reviewSlide: 'Anatomy of a curl Command'
+  },
+  {
+    id: 'curl-2a',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'In the jq filter <code>jq -r \'.token\'</code>, what does the <code>-r</code> flag do?',
+    options: [
+      'Recursively searches nested objects',
+      'Reverses the output order',
+      'Outputs raw string without surrounding quotes',
+      'Reads input from a file'
+    ],
+    correct: 2,
+    explanation: 'Without -r, jq wraps string output in double quotes: "eyJ...". With -r it outputs the raw string: eyJ... — which is what you need when assigning to a variable or using in an Authorization header.',
+    reviewSlide: 'jq — Your JSON Swiss Army Knife'
+  },
+  {
+    id: 'curl-2b',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'You want to extract only the <code>title</code> of every book from a JSON array response. Which jq expression is correct?',
+    options: [
+      'jq \'.title\'',
+      'jq \'.[].title\'',
+      'jq \'.data.title\'',
+      'jq \'select(.title)\''
+    ],
+    correct: 1,
+    explanation: '.[].title iterates over each element of the array (.[]) and extracts the .title field from each. .title alone would fail on an array, and select() is for filtering rather than field extraction.',
+    reviewSlide: 'jq — Your JSON Swiss Army Knife'
+  },
+  {
+    id: 'curl-2c',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'In the full test script, <code>BOOK_ID=$(curl ... | jq -r \'.id\')</code> is used after creating a book. Why capture the id this way rather than hardcoding it as 1?',
+    options: [
+      'The server randomly assigns ids',
+      'The id depends on existing rows — hardcoding 1 breaks if other records exist',
+      'jq cannot handle numeric ids without -r',
+      'It is required for the Authorization header to work'
+    ],
+    correct: 1,
+    explanation: 'SERIAL ids increment from the highest existing value. If other books already exist, the new book may get id 5 or 50. Capturing the id dynamically makes the script work regardless of database state.',
+    reviewSlide: 'A Complete Test Script'
+  },
+  {
+    id: 'curl-2d',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What is the core insight behind the development loop shown in slide 22?',
+    options: [
+      'You should write all tests before writing any code',
+      'curl replaces the need for any other testing tool',
+      'The cycle of write → test with curl → read response → fix is the fundamental backend workflow',
+      'AI agents have made manual curl testing obsolete'
+    ],
+    correct: 2,
+    explanation: 'The loop — write code, test with curl, read the JSON response and status code, diagnose, fix — is the repeatable core workflow of backend development. It applies whether you are testing manually or supervising an AI agent.',
+    reviewSlide: 'The Development Loop'
+  },
+  {
+    id: 'curl-2e',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Walk through what happens step-by-step when you run <code>curl -s -X GET http://localhost:3001/api/books -H "Authorization: Bearer $TOKEN"</code> against the Reading List API. Include what happens on both the client (curl) and server (Express) sides.',
+    model: 'curl constructs an HTTP GET request with the Authorization header containing the JWT and sends it to port 3001. Express receives it and routes it to GET /api/books. The authenticate middleware extracts the token from the header and calls jwt.verify() — if valid, it attaches the payload to req.user and calls next(). The route handler runs a SQL query against the books table filtered by the authenticated user, then sends the result as JSON. curl receives the HTTP response and (with -s) outputs just the body to stdout.',
+    reviewSlide: 'How JWT Authentication Works'
+  }
+];
+</script>
+</body>
+</html>

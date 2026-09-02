@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adding Authentication — JWT Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1525 0%,#090f1c 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+  .terminal-body .re     { color: var(--red); }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(56,139,253,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(56,139,253,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.75; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 3px; }
+
+  .cols { display: grid; gap: 18px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-60-40 { grid-template-columns: 60fr 40fr; }
+  .cols-40-60 { grid-template-columns: 40fr 60fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+
+  .callout { border-radius: 8px; padding: 13px 16px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-flag   { background: rgba(255,166,87,.15);   color: var(--orange); }
+  .badge-green  { background: rgba(63,185,80,.15);    color: var(--green);  }
+  .badge-yellow { background: rgba(210,153,34,.15);   color: var(--yellow); }
+  .badge-purple { background: rgba(188,140,255,.15);  color: var(--purple); }
+  .badge-red    { background: rgba(248,81,73,.15);    color: var(--red);    }
+  .badge-num    { background: rgba(88,166,255,.2); color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+
+  .method { display: inline-block; border-radius: 4px; font-size: 12px; font-weight: 700; padding: 2px 8px; font-family: monospace; }
+  .GET    { background: rgba(63,185,80,.2);  color: var(--green); }
+  .POST   { background: rgba(88,166,255,.2); color: var(--accent); }
+  .PATCH  { background: rgba(210,153,34,.2); color: var(--yellow); }
+  .DELETE { background: rgba(248,81,73,.2);  color: var(--red); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.5; }
+  td code { font-size: 11px; }
+  td strong { color: var(--text); }
+
+  .filetree { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .filetree .dir  { color: var(--accent); font-weight: 600; }
+  .filetree .file { color: var(--term-text); }
+  .filetree .new  { color: var(--green); font-weight: 600; }
+  .filetree .note { color: #5c6370; font-style: italic; }
+
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .re { color: var(--red); }
+
+  .jwt-part { border-radius: 6px; padding: 8px 14px; font-family: 'SF Mono',monospace; font-size: 12px; font-weight: 700; display: inline-block; margin: 2px; word-break: break-all; }
+  .jwt-header  { background: rgba(248,81,73,.15);    color: #ff6b6b; border: 1px solid rgba(248,81,73,.3); }
+  .jwt-payload { background: rgba(63,185,80,.15);    color: #4ec56c; border: 1px solid rgba(63,185,80,.3); }
+  .jwt-sig     { background: rgba(88,166,255,.15);   color: #79b8ff; border: 1px solid rgba(88,166,255,.3); }
+  .jwt-dot     { color: var(--muted); font-weight: 700; font-size: 18px; line-height: 1; vertical-align: middle; }
+
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 26px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  #nav { position: fixed; bottom: 26px; right: 36px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 36px; font-size: 11px; color: var(--muted); font-family: monospace; }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .filetree       { overflow: auto; max-height: min(45vh, 320px); }
+  .terminal-body, .diagram, .filetree { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar, .filetree::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track, .filetree::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb, .filetree::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover, .filetree::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- ══ SLIDE 1 — TITLE ════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 1 — Adding Authentication to a REST API -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">JWT</span><span class="tag">bcrypt</span>
+    <span class="tag">Middleware</span><span class="tag">Auth Workshop · Part 2 of 3</span>
+  </div>
+  
+<div class="slide-label">Workshop · Authentication &amp; Security</div>
+  <h1>Adding <span class="accent">Authentication</span><br>to a REST API</h1>
+  <p class="subtitle">
+    How to prove who you are to a web API — using JSON Web Tokens, bcrypt password hashing,
+    and Express middleware. With comparisons to the alternatives.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Builds on: Building a CRUD API with AI · Part 2 of 3</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2 — AUTH VS AUTHZ ═══════════════════════════════════════════════ -->
+
+
+<!-- Slide 2 — Authentication vs Authorisation -->
+<div class="slide">
+  
+<div class="slide-label">Concepts First</div>
+  <h2>Authentication vs Authorisation</h2>
+  <p>These two words are often confused. They solve different problems and live in different parts of your code.</p>
+  <div class="cols cols-2" style="margin-top:14px; gap:18px;">
+    <div class="callout callout-blue" style="padding:20px 22px;">
+      <strong style="font-size:17px;">Authentication</strong><br>
+      <em style="color:var(--muted); font-style:italic; font-size:13px;">"Who are you?"</em>
+      <p style="margin-top:10px; font-size:14px; color:var(--muted);">
+        Verifying identity. The user proves they are who they claim to be — typically with a password, a token, or a biometric.
+      </p>
+      <p style="font-size:14px; color:var(--muted);">
+        <strong>Examples:</strong> logging in with email + password, OAuth with Google, a hardware security key.
+      </p>
+      <p style="font-size:14px; color:var(--muted); margin-top:6px;">
+        <strong>In our app:</strong> <code>POST /auth/login</code> — verify password, issue a JWT.
+      </p>
+    </div>
+    <div class="callout callout-purple" style="padding:20px 22px;">
+      <strong style="font-size:17px;">Authorisation</strong><br>
+      <em style="color:var(--muted); font-style:italic; font-size:13px;">"What are you allowed to do?"</em>
+      <p style="margin-top:10px; font-size:14px; color:var(--muted);">
+        Determining what an authenticated identity is permitted to access or modify. You can be logged in but not permitted to do everything.
+      </p>
+      <p style="font-size:14px; color:var(--muted);">
+        <strong>Examples:</strong> admin vs regular user, read-only vs read-write, your books vs other users' books.
+      </p>
+      <p style="font-size:14px; color:var(--muted); margin-top:6px;">
+        <strong>In our app:</strong> future work — for now, any authenticated user can do everything.
+      </p>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:14px; font-size:14px;">
+    <strong>This workshop covers authentication only.</strong> Authorisation (roles, permissions, ownership) is the natural next step once auth is working.
+  </div>
+</div>
+
+<!-- ══ SLIDE 3 — OPTIONS LANDSCAPE ══════════════════════════════════════════ -->
+
+
+<!-- Slide 3 — Four Ways to Authenticate an API -->
+<div class="slide">
+  
+<div class="slide-label">The Landscape</div>
+  <h2>Four Ways to Authenticate an API</h2>
+  <table style="margin-top:14px;">
+    <tr><th>Approach</th><th>How it works</th><th>Best for</th><th>Used in this workshop</th></tr>
+    <tr>
+      <td><strong>Session tokens</strong></td>
+      <td>Server generates a random token, stores it in the database with an expiry. Client sends it in a header on every request. Server looks it up.</td>
+      <td>Traditional web apps, admin dashboards, anywhere you need instant revocation</td>
+      <td>Vibe Coding Study admin API — <code>x-admin-token</code> header</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--accent);">JSON Web Tokens (JWT)</strong></td>
+      <td>Server signs a token containing the user's identity. Client sends it in <code>Authorization: Bearer</code>. Server verifies the signature — no DB lookup needed.</td>
+      <td>Scalable APIs, microservices, mobile apps, SPAs</td>
+      <td><strong style="color:var(--green);">← This workshop</strong></td>
+    </tr>
+    <tr>
+      <td><strong>API keys</strong></td>
+      <td>Long-lived credentials, often stored as a hash in the database. Client sends them in a header or query parameter.</td>
+      <td>Machine-to-machine (server to server), developer APIs (Stripe, GitHub)</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>OAuth 2.0 / OIDC</strong></td>
+      <td>"Sign in with Google/GitHub." You delegate identity verification to a trusted third party. You receive an access token.</td>
+      <td>Consumer apps where users already have Google/GitHub accounts</td>
+      <td>—</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ══ SLIDE 4 — SECTION: UNDERSTANDING JWT ══════════════════════════════════ -->
+
+
+<!-- Slide 4 — Understanding JWT -->
+<div class="slide section-header">
+  <div class="pill">Part 1</div>
+  <h1>Understanding <span class="accent">JWT</span></h1>
+  <p class="subtitle">Before writing a line of code — understand exactly what a JWT is, what it contains, and why it can be trusted.</p>
+</div>
+
+<!-- ══ SLIDE 5 — WHAT IS A JWT ═══════════════════════════════════════════════ -->
+
+
+<!-- Slide 5 — A JWT is Three Base64 Strings Joined by Dots -->
+<div class="slide">
+  
+<div class="slide-label">JWT Anatomy</div>
+  <h2>A JWT is Three Base64 Strings Joined by Dots</h2>
+  <p>Every JWT looks like this — three sections, each separately encoded, joined by <code>.</code></p>
+  <div style="margin: 16px 0; background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; line-height: 2.2; word-break: break-all;">
+    <span class="jwt-part jwt-header">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span><span class="jwt-dot">.</span><span class="jwt-part jwt-payload">eyJzdWIiOjEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTcwOTU1MjAwMCwiZXhwIjoxNzA5NjM4NDAwfQ</span><span class="jwt-dot">.</span><span class="jwt-part jwt-sig">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+  </div>
+  <div class="cols cols-3" style="gap:14px; margin-top:8px;">
+    <div class="callout callout-orange" style="font-size:13px;">
+      <strong style="color:var(--orange);">Header</strong><br>
+      Algorithm + token type.<br><br>
+      Decodes to:<br>
+      <code>{"alg":"HS256","typ":"JWT"}</code>
+    </div>
+    <div class="callout callout-green" style="font-size:13px;">
+      <strong style="color:#4ec56c;">Payload</strong><br>
+      The claims — who you are, when the token expires.<br><br>
+      Decodes to:<br>
+      <code>{"sub":1,"email":"user@example.com","exp":...}</code>
+    </div>
+    <div class="callout callout-blue" style="font-size:13px;">
+      <strong>Signature</strong><br>
+      HMAC of header + payload, signed with the server's <code>JWT_SECRET</code>.<br><br>
+      Cannot be faked without the secret.
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 6 — THE PAYLOAD ══════════════════════════════════════════════════ -->
+
+
+<!-- Slide 6 — What Goes Inside — Claims -->
+<div class="slide">
+  
+<div class="slide-label">JWT — The Payload</div>
+  <h2>What Goes Inside — Claims</h2>
+  <p>The payload is a JSON object of <em>claims</em> — statements about the user and the token itself. Standard claim names are short for compactness.</p>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">JWT payload (decoded)</span></div>
+    <div class="terminal-body">{
+  <span class="hi">"sub"</span>:   1,                    <span class="comment">// subject — the user's id in your database</span>
+  <span class="hi">"email"</span>: <span class="str">"user@example.com"</span>,  <span class="comment">// custom claim we added</span>
+  <span class="hi">"iat"</span>:   1709552000,           <span class="comment">// issued at — Unix timestamp</span>
+  <span class="hi">"exp"</span>:   1709638400            <span class="comment">// expires at — 24 hours after iat</span>
+}</div>
+  </div>
+  <div class="cols cols-2" style="gap:14px; margin-top:12px;">
+    <div class="callout callout-red icon-gotcha">
+      <strong>⚠ The payload is NOT encrypted</strong><br>
+      It is only Base64-encoded — anyone can decode it and read it. Never put passwords, credit card numbers, or secrets in a JWT payload. Only put data that is safe to be public: user id, email, role.
+    </div>
+    <div class="callout callout-blue icon-key">
+      <strong>The signature IS tamper-proof</strong><br>
+      If anyone modifies the payload (e.g., changes <code>sub: 1</code> to <code>sub: 99</code>), the signature no longer matches. <code>jwt.verify()</code> throws an error and the request is rejected.
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 7 — JWT FLOW ════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 7 — How JWT Authentication Works End-to-End -->
+<div class="slide">
+  
+<div class="slide-label">JWT — The Full Flow</div>
+  <h2>How JWT Authentication Works End-to-End</h2>
+  <div class="diagram" style="margin-top:14px;">
+<span class="hi">Registration (once)</span>
+  POST /auth/register { email, password }
+  → Server hashes password with bcrypt → stores in users table
+  → Returns { id, email, created_at }       <span class="comment">← no token yet</span>
+
+<span class="hi">Login</span>
+  POST /auth/login { email, password }
+  → Server fetches user from DB, runs bcrypt.compare()
+  → If valid: jwt.sign({ sub: id, email }, JWT_SECRET, { expiresIn: '24h' })
+  → Returns { token: "eyJ..." }             <span class="comment">← client stores this token</span>
+
+<span class="hi">Every protected request</span>
+  GET /api/books
+  Authorization: Bearer eyJ...
+  → Middleware calls jwt.verify(token, JWT_SECRET)
+  → If valid: attaches payload to req.user, calls next()
+  → Route handler runs                      <span class="comment">← response returned</span>
+
+  <span class="ye">The server never stores the token. No DB lookup on every request.</span>
+  <span class="ye">The secret is the only thing that must be kept safe.</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 8 — SECTION: BUILDING IT ════════════════════════════════════════ -->
+
+
+<!-- Slide 8 — Building It — The Code -->
+<div class="slide section-header">
+  <div class="pill">Part 2</div>
+  <h1>Building It — <span class="accent">The Code</span></h1>
+  <p class="subtitle">Five changes to the Reading List API. Every file, every line, explained.</p>
+</div>
+
+<!-- ══ SLIDE 9 — WHAT CHANGES ════════════════════════════════════════════════ -->
+
+
+<!-- Slide 9 — Five Changes to the Existing App -->
+<div class="slide">
+  
+<div class="slide-label">What We're Adding</div>
+  <h2>Five Changes to the Existing App</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div class="filetree">
+<span class="dir">reading-list-api/</span>
+├── <span class="file">package.json</span>              <span class="note">← add bcrypt + jsonwebtoken</span>
+├── <span class="file">.env.example</span>             <span class="note">← add JWT_SECRET</span>
+├── <span class="file">schema.sql</span>               <span class="note">← add users table</span>
+├── <span class="file">db.js</span>                    <span class="note">(unchanged)</span>
+├── <span class="new">auth.js</span>                  <span class="note">← NEW: register + login routes</span>
+├── <span class="new">middleware/</span>
+│   └── <span class="new">authenticate.js</span>      <span class="note">← NEW: JWT verification middleware</span>
+└── <span class="file">server.js</span>               <span class="note">← add authenticate to book routes</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>Two new packages:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:2; color:var(--muted);">
+          <li><code>bcrypt</code> — hashes passwords before storing</li>
+          <li>One-way: verify a password against a hash, but cannot reverse</li>
+          <li><code>jsonwebtoken</code> — signs and verifies JWTs using your secret</li>
+        </ul>
+      </div>
+      <div class="callout callout-green" style="font-size:13px;">
+        <strong>The middleware pattern:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:2; color:var(--muted);">
+          <li>Runs <em>between</em> receiving a request and the route handler</li>
+          <li>Verifies the JWT and attaches the user to <code>req.user</code></li>
+          <li>Calls <code>next()</code> to proceed, or returns 401 to reject</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10 — SCHEMA: USERS TABLE ════════════════════════════════════════ -->
+
+
+<!-- Slide 10 — The Users Table -->
+<div class="slide">
+  
+<div class="slide-label">File: schema.sql</div>
+  <h2>The Users Table</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">schema.sql — users table</span></div>
+      <div class="terminal-body"><span class="kw">CREATE TABLE IF NOT EXISTS</span> users (
+  id            <span class="hi">SERIAL PRIMARY KEY</span>,
+  email         TEXT  <span class="hi">UNIQUE NOT NULL</span>,
+  password_hash TEXT  <span class="hi">NOT NULL</span>,
+  created_at    TIMESTAMPTZ <span class="hi">NOT NULL DEFAULT NOW()</span>
+);</div>
+    </div>
+    <ul class="annot-list" style="margin-top:4px;">
+      <li><span class="badge badge-yellow">UNIQUE</span> <span><strong>Unique constraint</strong> on email — the database rejects duplicate registrations with error code <code>23505</code>. Our register route catches this and returns 409 Conflict.</span></li>
+      <li class="icon-gotcha"><span class="badge badge-yellow">password_hash</span> <span><strong>Never store passwords.</strong> We store only the bcrypt hash. Even if the database is compromised, an attacker cannot recover the original passwords.</span></li>
+      <li><span class="badge badge-red">NOT password</span> <span>The column is deliberately named <code>password_hash</code> to make it obvious in code reviews that this is a hash, not a plaintext password.</span></li>
+    </ul>
+  </div>
+  <div class="callout callout-red" style="margin-top:12px; font-size:13px;">
+    <strong>Run the migration:</strong> <code>psql $DATABASE_URL -c "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());"</code>
+  </div>
+</div>
+
+<!-- ══ SLIDE 11 — BCRYPT ══════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 11 — bcrypt — Why We Hash Passwords -->
+<div class="slide">
+  
+<div class="slide-label">Concept: bcrypt</div>
+  <h2>bcrypt — Why We Hash Passwords</h2>
+  <div class="cols cols-2" style="margin-top:14px; gap:18px;">
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">How bcrypt works</span></div>
+        <div class="terminal-body"><span class="kw">import</span> bcrypt <span class="kw">from</span> <span class="str">'bcrypt'</span>;
+
+<span class="comment">// On registration — hash once, store forever</span>
+<span class="kw">const</span> hash = <span class="kw">await</span> bcrypt.<span class="fn">hash</span>(<span class="str">'my-password'</span>, <span class="val">12</span>);
+<span class="comment">// → "$2b$12$X9fKh3mN..." (60 characters)</span>
+
+<span class="comment">// On login — compare, never reverse</span>
+<span class="kw">const</span> valid = <span class="kw">await</span> bcrypt.<span class="fn">compare</span>(<span class="str">'my-password'</span>, hash);
+<span class="comment">// → true (correct password)</span>
+
+<span class="kw">const</span> valid2 = <span class="kw">await</span> bcrypt.<span class="fn">compare</span>(<span class="str">'wrong'</span>, hash);
+<span class="comment">// → false (wrong password)</span></div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue icon-key" style="font-size:13px;">
+        <strong>The salt rounds (12):</strong><br>
+        bcrypt deliberately runs slowly — 2¹² = 4096 iterations. This means an attacker brute-forcing millions of password guesses per second is slowed to a few hundred per second. Higher rounds = more security, but slower login.
+      </div>
+      <div class="callout callout-green" style="font-size:13px;">
+        <strong>Salted by default:</strong><br>
+        bcrypt automatically generates a random salt and embeds it in the hash. Two users with the same password will have different hashes. You never handle the salt explicitly.
+      </div>
+      <div class="callout callout-red icon-gotcha" style="font-size:13px;">
+        <strong>bcrypt is one-way.</strong> You cannot recover a password from a hash. If a user forgets their password, you must let them reset it — you cannot "look it up".
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 12 — auth.js REGISTER ═══════════════════════════════════════════ -->
+
+
+<!-- Slide 12 — The Register Route -->
+<div class="slide">
+  
+<div class="slide-label">File: auth.js</div>
+  <h2>The Register Route</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:18px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">auth.js — POST /auth/register</span></div>
+      <div class="terminal-body">router.<span class="fn">post</span>(<span class="str">'/register'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { email, password } = req.<span class="hi">body</span>;
+
+  <span class="comment">// Validate inputs</span>
+  <span class="kw">if</span> (!email || !password)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">400</span>).<span class="fn">json</span>({ error: <span class="str">'email and password required'</span> });
+  <span class="kw">if</span> (password.length < <span class="val">8</span>)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">400</span>).<span class="fn">json</span>({ error: <span class="str">'password must be ≥ 8 characters'</span> });
+
+  <span class="comment">// Hash the password — never store the plaintext</span>
+  <span class="kw">const</span> hash = <span class="kw">await</span> bcrypt.<span class="fn">hash</span>(password, <span class="hi">SALT_ROUNDS</span>);
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(
+      <span class="str">`INSERT INTO users (email, password_hash)
+       VALUES ($1, $2) RETURNING id, email, created_at`</span>,
+      [email, hash]
+    );
+    res.<span class="fn">status</span>(<span class="val">201</span>).<span class="fn">json</span>(result.rows[<span class="val">0</span>]);
+
+  } <span class="kw">catch</span> (err) {
+    <span class="comment">// PostgreSQL unique constraint violation = duplicate email</span>
+    <span class="kw">if</span> (err.code === <span class="hi">'23505'</span>)
+      <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">409</span>).<span class="fn">json</span>({ error: <span class="str">'email already registered'</span> });
+    <span class="kw">throw</span> err;
+  }
+});</div>
+    </div>
+    <ul class="annot-list" style="margin-top:4px;">
+      <li><span class="badge badge-yellow">400</span> <span><strong>Bad Request</strong> for missing fields or weak password — client error, client should fix it</span></li>
+      <li><span class="badge badge-yellow">409</span> <span><strong>Conflict</strong> for duplicate email — the resource already exists</span></li>
+      <li><span class="badge badge-flag">err.code 23505</span> <span>PostgreSQL's error code for UNIQUE constraint violation — we catch it to return a helpful message instead of a 500</span></li>
+      <li><span class="badge badge-green">RETURNING</span> <span>Returns id, email, created_at — but <strong>never</strong> password_hash</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SLIDE 13 — auth.js LOGIN ═══════════════════════════════════════════════ -->
+
+
+<!-- Slide 13 — The Login Route -->
+<div class="slide">
+  
+<div class="slide-label">File: auth.js</div>
+  <h2>The Login Route</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:18px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">auth.js — POST /auth/login</span></div>
+      <div class="terminal-body">router.<span class="fn">post</span>(<span class="str">'/login'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { email, password } = req.<span class="hi">body</span>;
+
+  <span class="comment">// Fetch user by email</span>
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(
+    <span class="str">'SELECT * FROM users WHERE email = $1'</span>, [email]
+  );
+  <span class="kw">if</span> (result.rows.length === <span class="val">0</span>)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid credentials'</span> });
+
+  <span class="comment">// Verify password against stored hash</span>
+  <span class="kw">const</span> user = result.rows[<span class="val">0</span>];
+  <span class="kw">const</span> valid = <span class="kw">await</span> bcrypt.<span class="fn">compare</span>(password, user.password_hash);
+  <span class="kw">if</span> (!valid)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid credentials'</span> });
+
+  <span class="comment">// Sign a JWT — valid for 24 hours</span>
+  <span class="kw">const</span> token = jwt.<span class="fn">sign</span>(
+    { <span class="hi">sub</span>: user.id, <span class="hi">email</span>: user.email },
+    process.env.<span class="hi">JWT_SECRET</span>,
+    { expiresIn: <span class="str">'24h'</span> }
+  );
+  res.<span class="fn">json</span>({ token });
+});</div>
+    </div>
+    <ul class="annot-list" style="margin-top:4px;">
+      <li><span class="badge badge-yellow">401</span> <span><strong>Same error message</strong> for "user not found" and "wrong password" — never reveal which one is true, or an attacker can enumerate valid emails</span></li>
+      <li><span class="badge badge-flag">jwt.sign</span> <span>Creates the token. Payload: <code>{sub, email}</code>. Secret from env. Expiry: 24h. The library encodes, signs, and base64-encodes automatically.</span></li>
+      <li class="icon-gotcha"><span class="badge badge-green">JWT_SECRET</span> <span>Must be a long, random, kept-private string. If an attacker learns it, they can forge tokens for any user.</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SLIDE 14 — MIDDLEWARE ══════════════════════════════════════════════════ -->
+
+
+<!-- Slide 14 — The Middleware Function -->
+<div class="slide">
+  
+<div class="slide-label">File: middleware/authenticate.js</div>
+  <h2>The Middleware Function</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:18px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">middleware/authenticate.js</span></div>
+      <div class="terminal-body"><span class="kw">import</span> jwt <span class="kw">from</span> <span class="str">'jsonwebtoken'</span>;
+
+<span class="kw">export function</span> <span class="fn">authenticate</span>(req, res, next) {
+
+  <span class="comment">// 1. Extract token from Authorization header</span>
+  <span class="kw">const</span> authHeader = req.headers.<span class="hi">authorization</span>;
+  <span class="kw">if</span> (!authHeader?.<span class="fn">startsWith</span>(<span class="str">'Bearer '</span>)) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">401</span>).<span class="fn">json</span>({ error: <span class="str">'No token provided'</span> });
+  }
+
+  <span class="comment">// 2. Strip "Bearer " prefix to get the token string</span>
+  <span class="kw">const</span> token = authHeader.<span class="fn">slice</span>(<span class="val">7</span>);
+
+  <span class="kw">try</span> {
+    <span class="comment">// 3. Verify signature + expiry</span>
+    <span class="kw">const</span> payload = jwt.<span class="fn">verify</span>(token, process.env.<span class="hi">JWT_SECRET</span>);
+    <span class="comment">// 4. Attach user info to request for route handlers to use</span>
+    req.<span class="hi">user</span> = payload;
+    <span class="fn">next</span>();  <span class="comment">// ← pass control to the route handler</span>
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid or expired token'</span> });
+  }
+}</div>
+    </div>
+    <ul class="annot-list" style="margin-top:4px;">
+      <li class="icon-tip"><span class="badge badge-flag">next()</span> <span>The Express middleware signature is always <code>(req, res, next)</code>. Calling <code>next()</code> tells Express to proceed to the next handler. Not calling it stops the chain.</span></li>
+      <li class="icon-key"><span class="badge badge-flag">req.user</span> <span>After verification, we attach the decoded payload to <code>req</code>. Route handlers can then read <code>req.user.sub</code> (the user id) or <code>req.user.email</code>.</span></li>
+      <li class="icon-key"><span class="badge badge-yellow">jwt.verify</span> <span>Throws if the signature is invalid or the token has expired. The catch block returns 401 in both cases.</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- ══ SLIDE 15 — WIRING UP server.js ════════════════════════════════════════ -->
+
+
+<!-- Slide 15 — Wiring It All Together -->
+<div class="slide">
+  
+<div class="slide-label">File: server.js</div>
+  <h2>Wiring It All Together</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">server.js — changes only</span></div>
+    <div class="terminal-body"><span class="comment">// Add two new imports at the top</span>
+<span class="kw">import</span> authRouter     <span class="kw">from</span> <span class="str">'./auth.js'</span>;
+<span class="kw">import</span> { authenticate } <span class="kw">from</span> <span class="str">'./middleware/authenticate.js'</span>;
+
+<span class="comment">// Mount the auth router — no authentication required on these routes</span>
+app.<span class="fn">use</span>(<span class="str">'/auth'</span>, authRouter);     <span class="comment">// POST /auth/register, POST /auth/login</span>
+
+<span class="comment">// Add authenticate as the second argument to every books route</span>
+app.<span class="fn">get</span>(<span class="str">'/api/books'</span>,        <span class="hi">authenticate</span>, <span class="kw">async</span> (req, res) => { ... });
+app.<span class="fn">get</span>(<span class="str">'/api/books/stats'</span>,  <span class="hi">authenticate</span>, <span class="kw">async</span> (req, res) => { ... });
+app.<span class="fn">get</span>(<span class="str">'/api/books/:id'</span>,    <span class="hi">authenticate</span>, <span class="kw">async</span> (req, res) => { ... });
+app.<span class="fn">post</span>(<span class="str">'/api/books'</span>,       <span class="hi">authenticate</span>, <span class="kw">async</span> (req, res) => { ... });
+app.<span class="fn">patch</span>(<span class="str">'/api/books/:id'</span>,  <span class="hi">authenticate</span>, <span class="kw">async</span> (req, res) => { ... });
+app.<span class="fn">delete</span>(<span class="str">'/api/books/:id'</span>, <span class="hi">authenticate</span>, <span class="kw">async</span> (req, res) => { ... });</div>
+  </div>
+  <div class="callout callout-blue icon-tip" style="margin-top:12px; font-size:14px;">
+    <strong>The middleware pattern:</strong> Express route handlers accept <code>(method, path, ...handlers)</code>. By inserting <code>authenticate</code> before the async function, Express runs it first. If authenticate calls <code>next()</code>, the async function runs. If it returns 401, the async function never runs.
+  </div>
+</div>
+
+<!-- ══ SLIDE 16 — SECTION: TESTING ══════════════════════════════════════════ -->
+
+
+<!-- Slide 16 — Testing Auth with curl -->
+<div class="slide section-header">
+  <div class="pill">Part 3</div>
+  <h1>Testing Auth<br>with <span class="accent">curl</span></h1>
+  <p class="subtitle">Register, log in, capture the JWT, use it — and verify every error case.</p>
+</div>
+
+<!-- ══ SLIDE 17 — REGISTER AND LOGIN ════════════════════════════════════════ -->
+
+
+<!-- Slide 17 — Register, Login, Capture the Token -->
+<div class="slide">
+  
+<div class="slide-label">Testing — Register &amp; Login</div>
+  <h2>Register, Login, Capture the Token</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — register + login</span></div>
+    <div class="terminal-body"><span class="comment"># Register a new user</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/register</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"correct-horse-battery"}'</span> \
+  | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "id": 1, "email": "alice@example.com", "created_at": "2026-03-04T..." }</span>
+
+<span class="comment"># Login and capture the JWT in one step</span>
+<span class="prompt">$</span> <span class="key">TOKEN</span>=<span class="val">$(</span><span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/login</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"correct-horse-battery"}'</span> \
+  | <span class="cmd">jq</span> <span class="flag">-r</span> <span class="str">'.token'</span><span class="val">)</span>
+
+<span class="comment"># Confirm token was captured (first 50 chars)</span>
+<span class="prompt">$</span> echo ${<span class="key">TOKEN</span>:0:50}
+<span class="out">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE...</span></div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:10px; font-size:14px;">
+    The token is stored in <code>$TOKEN</code> for the rest of the shell session. No copy-pasting. Every subsequent request reuses it automatically.
+  </div>
+</div>
+
+<!-- ══ SLIDE 18 — USING THE TOKEN ════════════════════════════════════════════ -->
+
+
+<!-- Slide 18 — The Authorization: Bearer Pattern -->
+<div class="slide">
+  
+<div class="slide-label">Testing — Using the Token</div>
+  <h2>The Authorization: Bearer Pattern</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — authenticated requests</span></div>
+    <div class="terminal-body"><span class="comment"># Add a book — note Authorization: Bearer header</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"title":"The Pragmatic Programmer","author":"Hunt &amp; Thomas"}'</span> \
+  | <span class="cmd">jq</span> <span class="str">{id,title,status}'</span>
+<span class="out">{ "id": 1, "title": "The Pragmatic Programmer", "status": "want-to-read" }</span>
+
+<span class="comment"># Fetch books</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  | <span class="cmd">jq</span> <span class="str">'.[].title'</span>
+<span class="out">"The Pragmatic Programmer"</span>
+
+<span class="comment"># Mark it as done with a rating</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X PATCH</span> <span class="url">http://localhost:3001/api/books/1</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer <span class="key">$TOKEN</span>"</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"status":"done","rating":5}'</span> \
+  | <span class="cmd">jq</span> <span class="str">'{status,rating}'</span>
+<span class="out">{ "status": "done", "rating": 5 }</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 19 — ERROR CASES ════════════════════════════════════════════════ -->
+
+
+<!-- Slide 19 — Verify Every Failure Mode -->
+<div class="slide">
+  
+<div class="slide-label">Testing — Error Cases</div>
+  <h2>Verify Every Failure Mode</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — auth error cases</span></div>
+    <div class="terminal-body"><span class="comment"># No token at all</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "No token provided" }</span>   <span class="comment">← 401</span>
+
+<span class="comment"># Malformed token</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer not-a-real-jwt"</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "Invalid or expired token" }</span>   <span class="comment">← 401</span>
+
+<span class="comment"># Duplicate email registration</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/register</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"another-password"}'</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "email already registered" }</span>   <span class="comment">← 409</span>
+
+<span class="comment"># Wrong password</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/auth/login</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"email":"alice@example.com","password":"wrong"}'</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "Invalid credentials" }</span>   <span class="comment">← 401 (same message as "user not found")</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 20 — DECODE THE JWT ════════════════════════════════════════════ -->
+
+
+<!-- Slide 20 — Decoding a JWT — It's Just Base64 -->
+<div class="slide">
+  
+<div class="slide-label">Testing — Inspect the Token</div>
+  <h2>Decoding a JWT — It's Just Base64</h2>
+  <p>The payload is not encrypted — only signed. You can decode and read it without the secret.</p>
+  <div class="terminal" style="margin-top:10px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — decode JWT payload</span></div>
+    <div class="terminal-body"><span class="comment"># A JWT has three parts: header.payload.signature</span>
+<span class="comment"># Extract the payload (part 2) and base64-decode it</span>
+<span class="prompt">$</span> echo <span class="key">$TOKEN</span> | <span class="cmd">cut</span> <span class="flag">-d.</span> <span class="flag">-f2</span> | <span class="cmd">base64</span> <span class="flag">-d</span> 2>/dev/null | <span class="cmd">jq</span> <span class="str">.</span>
+
+<span class="out">{
+  "sub": 1,
+  "email": "alice@example.com",
+  "iat": 1709552000,
+  "exp": 1709638400
+}</span>
+
+<span class="comment"># Convert exp to a human-readable date</span>
+<span class="prompt">$</span> <span class="cmd">date</span> <span class="flag">-r</span> 1709638400
+<span class="out">Wed  5 Mar 2026 10:00:00 GMT</span>   <span class="comment">← 24 hours after login</span></div>
+  </div>
+  <div class="cols cols-2" style="gap:14px; margin-top:10px;">
+    <div class="callout callout-yellow icon-gotcha" style="font-size:13px;">
+      <strong>⚠ The payload is visible to anyone who has the token.</strong> The token travels over the network (HTTPS encrypts it in transit, but not at rest). Never put anything sensitive in the payload.
+    </div>
+    <div class="callout callout-green icon-key" style="font-size:13px;">
+      <strong>But nobody can forge it.</strong> Changing <code>"sub": 1</code> to <code>"sub": 99</code> would invalidate the signature. <code>jwt.verify()</code> would throw and the request would get 401.
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 21 — SECTION: ALTERNATIVES ═════════════════════════════════════ -->
+
+
+<!-- Slide 21 — The Alternatives -->
+<div class="slide section-header">
+  <div class="pill">Part 4</div>
+  <h1>The <span class="accent">Alternatives</span></h1>
+  <p class="subtitle">JWT is not always the right choice. Understanding the tradeoffs helps you pick the right tool.</p>
+</div>
+
+<!-- ══ SLIDE 22 — SESSION TOKENS ════════════════════════════════════════════ -->
+
+
+<!-- Slide 22 — Session Tokens — Simple and Revokable -->
+<div class="slide">
+  
+<div class="slide-label">Alternative 1</div>
+  <h2>Session Tokens — Simple and Revokable</h2>
+  <div class="cols cols-2" style="margin-top:14px; gap:18px;">
+    <div>
+      <div class="callout callout-blue" style="margin-bottom:12px;">
+        <strong>How it works:</strong>
+        <ul class="annot-list" style="margin-top:8px; gap:6px;">
+          <li><span class="badge badge-num">1</span> <span>User logs in → server generates a 32-byte random token</span></li>
+          <li><span class="badge badge-num">2</span> <span>Token stored in <code>sessions</code> table with <code>user_id</code> + <code>expires_at</code></span></li>
+          <li><span class="badge badge-num">3</span> <span>Client sends token in header: <code>x-session-token: abc123</code></span></li>
+          <li><span class="badge badge-num">4</span> <span>Server does <code>SELECT * FROM sessions WHERE token=$1 AND expires_at > NOW()</code></span></li>
+        </ul>
+      </div>
+      <div class="callout callout-green" style="font-size:13px;">
+        <strong>Instant revocation:</strong> delete the row from the sessions table and the token stops working immediately — no need to wait for expiry.
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-green" style="margin-bottom:12px;">
+        <strong>Advantages over JWT:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:1.9; font-size:13px; color:var(--muted);">
+          <li>Can revoke a specific session instantly (logout, security breach)</li>
+          <li>Simpler to reason about — it's just a database lookup</li>
+          <li>Payload is not visible to the client</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow" style="font-size:13px;">
+        <strong>Disadvantages vs JWT:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:1.9; color:var(--muted);">
+          <li>Database lookup on <em>every</em> request (slower at scale)</li>
+          <li>Doesn't work across multiple servers without a shared DB</li>
+        </ul>
+      </div>
+      <div class="callout callout-blue" style="margin-top:10px; font-size:13px;">
+        <strong>Used in:</strong> the Vibe Coding Study admin API — <code>admin_sessions</code> table, <code>x-admin-token</code> header.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 23 — API KEYS ════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 23 — API Keys — For Machine-to-Machine -->
+<div class="slide">
+  
+<div class="slide-label">Alternative 2</div>
+  <h2>API Keys — For Machine-to-Machine</h2>
+  <div class="cols cols-2" style="margin-top:14px; gap:18px;">
+    <div>
+      <div class="callout callout-purple" style="margin-bottom:12px; padding:18px;">
+        <strong>How it works:</strong><br><br>
+        <ul style="padding-left:16px; line-height:2; font-size:14px; color:var(--muted);">
+          <li>Admin generates a long random key: <code>sk-abc123...</code></li>
+          <li>Key (or its hash) stored in the database</li>
+          <li>Client sends it in every request:<br><code>Authorization: Bearer sk-abc123...</code><br>or <code>X-API-Key: sk-abc123...</code></li>
+          <li>Server looks it up in the DB</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-green" style="margin-bottom:10px; font-size:13px;">
+        <strong>Best for:</strong> server-to-server communication where a human doesn't log in. A cronjob hitting your API. A CI pipeline deploying your app. A third-party service calling a webhook.
+      </div>
+      <div class="callout callout-yellow" style="font-size:13px;">
+        <strong>Limitations:</strong> keys are usually long-lived (no automatic expiry) — if leaked, they must be manually rotated. Not suitable for end-user authentication.
+      </div>
+      <div class="callout callout-blue" style="margin-top:10px; font-size:13px;">
+        <strong>You've seen this pattern everywhere:</strong> Stripe <code>sk_live_...</code>, OpenAI <code>sk-proj-...</code>, Anthropic <code>sk-ant-...</code> — all API keys.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 24 — OAUTH ════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 24 — OAuth 2.0 / OpenID Connect — Delegated Identity -->
+<div class="slide">
+  
+<div class="slide-label">Alternative 3</div>
+  <h2>OAuth 2.0 / OpenID Connect — Delegated Identity</h2>
+  <div class="cols cols-2" style="margin-top:14px; gap:18px;">
+    <div>
+      <div class="diagram" style="font-size:12px; line-height:1.9;">
+<span class="hi">User</span>            <span class="hi">Your App</span>           <span class="hi">Google</span>
+
+  1. Click "Sign in with Google"
+         ↓
+  2.                ──redirect──▶
+  3.                             User logs in at Google
+  4.                ◀──code─────
+  5. Exchange code for tokens ──▶
+  6.                ◀──id_token──
+  7. Verify token, extract email
+  8. Create/find user in your DB
+  9. Issue your own JWT/session
+  <span class="ye">↑ your app never sees the password</span>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-green" style="margin-bottom:10px; font-size:13px;">
+        <strong>Advantages:</strong>
+        <ul style="padding-left:16px; margin-top:6px; line-height:1.9; color:var(--muted);">
+          <li>You never handle passwords at all</li>
+          <li>Users trust Google/GitHub more than you</li>
+          <li>MFA comes free (if the user has it on Google)</li>
+          <li>No "forgot password" flow to build</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow" style="font-size:13px;">
+        <strong>Complexity cost:</strong> OAuth involves redirect flows, PKCE, token exchange, and handling multiple providers. Libraries like <code>passport.js</code> or <code>lucia-auth</code> do the heavy lifting, but there is still significant setup.
+      </div>
+      <div class="callout callout-blue" style="margin-top:10px; font-size:13px;">
+        <strong>When to use it:</strong> consumer-facing apps where users have Google/GitHub accounts. Not worth the complexity for internal tools or research platforms.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- ══ SLIDE 25 — COMPARISON TABLE ══════════════════════════════════════════ -->
+
+
+<!-- Slide 25 — When to Use Which -->
+<div class="slide">
+  
+<div class="slide-label">Reference</div>
+  <h2>When to Use Which</h2>
+  <table style="margin-top:14px;">
+    <tr><th>Approach</th><th>Revokable?</th><th>DB lookup per request?</th><th>Best for</th></tr>
+    <tr>
+      <td><strong>JWT</strong> <span style="color:var(--green); font-size:11px;">← this workshop</span></td>
+      <td>Not without a denylist</td>
+      <td>No — stateless</td>
+      <td>Scalable APIs, mobile apps, SPAs, microservices</td>
+    </tr>
+    <tr>
+      <td><strong>Session tokens</strong></td>
+      <td>Yes — delete the row</td>
+      <td>Yes — every request</td>
+      <td>Admin tools, anything needing instant logout/revoke</td>
+    </tr>
+    <tr>
+      <td><strong>API keys</strong></td>
+      <td>Yes — delete the row</td>
+      <td>Yes</td>
+      <td>Machine-to-machine, developer APIs, CI/CD pipelines</td>
+    </tr>
+    <tr>
+      <td><strong>OAuth 2.0 / OIDC</strong></td>
+      <td>Depends on provider</td>
+      <td>No (token-based)</td>
+      <td>Consumer apps — "Sign in with Google/GitHub"</td>
+    </tr>
+  </table>
+  <div class="callout callout-yellow" style="margin-top:16px; font-size:14px;">
+    <strong>Practical rule:</strong> JWT for new APIs where scalability matters. Session tokens if you need instant revocation or are building something simple. OAuth when your users are consumers who already have Google/GitHub. API keys for machine-to-machine only.
+  </div>
+</div>
+
+<!-- ══ SLIDE 26 — JWT SECURITY GOTCHAS ═══════════════════════════════════════ -->
+
+
+<!-- Slide 26 — JWT Security — What to Get Right -->
+<div class="slide">
+  
+<div class="slide-label">Security Notes</div>
+  <h2>JWT Security — What to Get Right</h2>
+  <ul class="annot-list" style="margin-top:18px; gap:14px;">
+    <li class="icon-gotcha"><span class="badge badge-red">!</span> <span><strong>Keep JWT_SECRET secret and long.</strong> At least 32 random characters. Generate with: <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code>. Never commit it.</span></li>
+    <li class="icon-gotcha"><span class="badge badge-red">!</span> <span><strong>Always verify with jwt.verify(), never jwt.decode().</strong> <code>decode()</code> skips signature verification — it just base64-decodes. Using it for auth is like accepting a passport without checking if it's real.</span></li>
+    <li class="icon-gotcha"><span class="badge badge-red">!</span> <span><strong>Set a short expiry.</strong> <code>expiresIn: '24h'</code> is reasonable. Avoid "never expires" tokens — if one is leaked, the damage is unbounded.</span></li>
+    <li><span class="badge badge-yellow">~</span> <span><strong>Use HTTPS in production.</strong> JWT tokens in headers are encrypted by TLS — but only in transit. If you use HTTP, tokens can be intercepted.</span></li>
+    <li><span class="badge badge-green">✓</span> <span><strong>Never put sensitive data in the payload.</strong> It is readable by anyone who has the token. User id and email are fine. Passwords, credit card numbers, admin flags — never.</span></li>
+    <li><span class="badge badge-green">✓</span> <span><strong>Same error message for wrong email and wrong password.</strong> Returning different messages lets attackers enumerate valid accounts.</span></li>
+  </ul>
+</div>
+
+<!-- ══ SLIDE 27 — KEY TAKEAWAYS ══════════════════════════════════════════════ -->
+
+
+<!-- Slide 27 — Key Takeaways -->
+<div class="slide">
+  
+<div class="slide-label">Summary</div>
+  <h2>Key Takeaways</h2>
+  <ul class="annot-list" style="margin-top:20px; gap:14px;">
+    <li><span class="badge badge-num">1</span> <span><strong>Authentication = who you are. Authorisation = what you can do.</strong> They are separate problems solved separately.</span></li>
+    <li><span class="badge badge-num">2</span> <span><strong>Never store plaintext passwords.</strong> Always hash with bcrypt using at least 12 salt rounds. You can never reverse a bcrypt hash.</span></li>
+    <li><span class="badge badge-num">3</span> <span><strong>A JWT is signed, not encrypted.</strong> The payload is readable by anyone. Put only non-sensitive identity data inside (<code>sub</code>, <code>email</code>).</span></li>
+    <li><span class="badge badge-num">4</span> <span><strong>Middleware is the right place for auth.</strong> One function, added to every protected route as a second argument. Routes stay clean.</span></li>
+    <li><span class="badge badge-num">5</span> <span><strong>Return the same error for wrong email and wrong password.</strong> Different messages let attackers enumerate valid accounts.</span></li>
+    <li><span class="badge badge-num">6</span> <span><strong>JWT_SECRET must be secret, long, and random.</strong> It is the only thing protecting every user account in your system.</span></li>
+  </ul>
+</div>
+
+<!-- ══ SLIDE 28 — WHAT'S NEXT ════════════════════════════════════════════════ -->
+
+
+<!-- Slide 28 — Where to Go From Here -->
+<div class="slide">
+  
+<div class="slide-label">Going Further</div>
+  <h2>Where to Go From Here</h2>
+  <div class="cols cols-3" style="margin-top:16px; gap:14px;">
+    <div class="callout callout-blue" style="height:100%;">
+      <strong>Authorisation — per-user data</strong><br>
+      <span style="font-size:13px; color:var(--muted); display:block; margin-top:8px; line-height:1.7;">
+        Add <code>user_id</code> to the books table. Use <code>req.user.sub</code> in queries so users only see their own books: <code>WHERE user_id = $1</code>. Return 403 if someone tries to modify another user's book.
+      </span>
+    </div>
+    <div class="callout callout-purple" style="height:100%;">
+      <strong>Refresh tokens</strong><br>
+      <span style="font-size:13px; color:var(--muted); display:block; margin-top:8px; line-height:1.7;">
+        Short-lived access tokens (15 min) + long-lived refresh tokens (30 days, stored in DB). Better security: a leaked access token expires quickly. Clients use the refresh token to get a new access token silently.
+      </span>
+    </div>
+    <div class="callout callout-green" style="height:100%;">
+      <strong>Rate limiting</strong><br>
+      <span style="font-size:13px; color:var(--muted); display:block; margin-top:8px; line-height:1.7;">
+        Protect <code>/auth/login</code> from brute-force attacks. Add <code>express-rate-limit</code>: max 5 login attempts per IP per 15 minutes. Prompt: "Add rate limiting to the auth routes using express-rate-limit."
+      </span>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:14px; font-size:14px;">
+    <strong>Next up — Workshop 3:</strong> Testing the fully authenticated Reading List API end-to-end with curl. Register → login → CRUD cycle → error verification → stats.
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 28</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+window.DECK_NAME = 'auth-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'b3-1', type: 'practical', title: 'Extend JWT middleware',
+    desc: 'Add a role field to your JWT payload (user or admin). Create a requireAdmin middleware that returns 403 if role !== "admin". Add one admin-only route and test it with curl using both token types.',
+    criteria: [
+      'Both token types (user and admin) are tested with curl and return the correct status codes',
+      'The admin route returns 403 (not 401) for a valid but non-admin token',
+      'You can explain why the role check happens after signature verification, not before'
+    ] },
+  { id: 'b3-2', type: 'practical', title: 'Test token rejection',
+    desc: 'Using curl: (1) make a request with no token, (2) with a tampered token, (3) with a correctly expired token. Confirm your middleware returns 401 in all three cases.',
+    criteria: [
+      'You tested all three cases and can show the curl commands you used',
+      'All three return 401 (not 500, not 200)',
+      'You know which part of the middleware catches each type of failure'
+    ] },
+  { id: 'b3-3', type: 'reflect', title: 'bcrypt and security',
+    desc: "Why do we store a bcrypt hash rather than the original password? What would an attacker need to crack it? What does the work factor (salt rounds) control, and what are the trade-offs?",
+    criteria: [
+      'You explained what a rainbow table attack is and why bcrypt prevents it',
+      'You described what the work factor controls (iterations / compute time per hash)',
+      'You identified the trade-off: a higher work factor makes login deliberately slower'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain how JWT works: structure (header, payload, signature), signing, and verification',
+  'Implement user registration with bcrypt password hashing and safe, uniform error messages',
+  'Build an Express authentication middleware that verifies JWTs and attaches the payload to req.user',
+  'Protect routes by composing middleware and trace the full auth flow from request to response',
+  'Apply JWT security best practices: secret management, token expiry, payload content, and revocation limitations'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'auth-1-bcrypt-oneway',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'A user forgets their password. Why can the server not simply look it up and email it to them?',
+    options: [
+      'The email address is stored in a separate table with no foreign key',
+      'bcrypt hashing is one-way — the original password cannot be recovered from the stored hash',
+      'The password is encrypted with the JWT_SECRET and the key has rotated',
+      'GDPR prevents servers from storing passwords at all'
+    ],
+    correct: 1,
+    explanation: 'bcrypt produces a one-way hash. Given only the hash, it is computationally infeasible to recover the original password. The server must offer a password reset flow — it cannot reverse the hash.',
+    reviewSlide: 'bcrypt — Why We Hash Passwords'
+  },
+  {
+    id: 'auth-1-payload-not-encrypted',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which of the following is safe to include in a JWT payload?',
+    options: [
+      'The user\'s password hash',
+      'A credit card number',
+      'The user\'s database id and email address',
+      'The server\'s JWT_SECRET'
+    ],
+    correct: 2,
+    explanation: 'The JWT payload is Base64-encoded, not encrypted — anyone with the token can decode and read it. Only non-sensitive identity data like user id and email belong there. Secrets and credentials must never be placed in a JWT.',
+    reviewSlide: 'What Goes Inside — Claims'
+  },
+  {
+    id: 'auth-1-middleware',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In the authenticate middleware, what happens if jwt.verify() throws an error?',
+    options: [
+      'The error propagates to the route handler and crashes the server',
+      'next() is called with the error so Express logs it',
+      'The catch block returns a 401 response and the route handler never executes',
+      'The middleware calls next() and the route handler decides what to do'
+    ],
+    correct: 2,
+    explanation: 'The try/catch wraps jwt.verify(). If verification fails (invalid signature, expired token), the catch block returns res.status(401).json(...) immediately. Because the response is sent, the route handler is never invoked.',
+    reviewSlide: 'The Middleware Function'
+  },
+  {
+    id: 'auth-1-401-same-message',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'The login route returns "Invalid credentials" for both wrong email and wrong password. Why not return a more specific error message?',
+    options: [
+      'Express does not allow different messages for different error conditions',
+      'Specific messages let attackers enumerate valid email addresses in the database',
+      'The bcrypt library does not distinguish between the two failure modes',
+      'Returning the same message is required by the HTTP specification for 401 responses'
+    ],
+    correct: 1,
+    explanation: 'If "user not found" and "wrong password" returned different messages, an attacker could test email addresses until they get "wrong password" — confirming that email is registered. A single vague message prevents account enumeration.',
+    reviewSlide: 'The Login Route'
+  },
+  {
+    id: 'auth-1-reflection',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Trace through the complete flow when a user calls POST /auth/login with the correct email and password. Name each file or function involved and what it does.',
+    model: 'The request hits the login route in auth.js. The route queries the users table via db.js using a parameterised SELECT. If the user is found, bcrypt.compare() checks the submitted password against the stored hash — this is the slow, deliberate hash comparison. If it matches, jwt.sign() creates a signed token containing {sub: user.id, email} with a 24h expiry using the JWT_SECRET from process.env. The token string is returned in the response body as {token: "eyJ..."}.',
+    reviewSlide: 'The Login Route'
+  },
+  {
+    id: 'auth-2-jwt-not-revokable',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'A user logs out of your JWT-authenticated app. Why might their token still work for the next 23 hours?',
+    options: [
+      'The server cache has not been cleared yet',
+      'JWTs are stateless — the server does not store them, so deleting them client-side does not invalidate them server-side',
+      'The database takes time to propagate the logout across all connections',
+      'jwt.verify() only checks expiry, not whether the user is logged out'
+    ],
+    correct: 1,
+    explanation: 'JWTs are stateless — the server verifies the signature and expiry but has no record of which tokens are "active". Deleting the token from the client prevents it being sent, but the token itself remains valid until expiry. A token denylist (stored in DB or cache) is needed for true revocation.',
+    reviewSlide: 'When to Use Which'
+  },
+  {
+    id: 'auth-2-session-vs-jwt',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Which authentication approach requires a database lookup on every request?',
+    options: [
+      'JWT — to verify the signature',
+      'Session tokens — to look up the token in the sessions table',
+      'OAuth 2.0 — to verify the access token with the provider',
+      'API keys — only on the first request'
+    ],
+    correct: 1,
+    explanation: 'Session tokens are stored in the database. Every request requires a SELECT to find the token row and check its expiry. JWTs are verified cryptographically with no DB access. This is the main scalability trade-off between the two approaches.',
+    reviewSlide: 'Session Tokens — Simple and Revokable'
+  },
+  {
+    id: 'auth-2-jwt-decode-vs-verify',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'A developer uses jwt.decode() instead of jwt.verify() in the authenticate middleware. What is the security consequence?',
+    options: [
+      'The token will expire immediately',
+      'The middleware will reject all valid tokens',
+      'Anyone can forge a token with any payload — the signature is never checked',
+      'The payload will be double-encoded'
+    ],
+    correct: 2,
+    explanation: 'jwt.decode() only base64-decodes the payload — it does not verify the signature. An attacker can create a token with any payload (e.g., {sub: 1, email: "admin@example.com"}) without knowing the secret, and the middleware would accept it as valid.',
+    reviewSlide: 'JWT Security — What to Get Right'
+  },
+  {
+    id: 'auth-2-oauth-tradeoff',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What is the main complexity cost of implementing OAuth 2.0 compared to JWT with email/password?',
+    options: [
+      'OAuth requires bcrypt, which has a higher computational cost',
+      'OAuth requires storing more data per user in the database',
+      'OAuth involves redirect flows, token exchange, and handling multiple provider configurations',
+      'OAuth tokens expire much faster than JWTs'
+    ],
+    correct: 2,
+    explanation: 'OAuth 2.0 introduces a multi-step redirect flow: the user is sent to the provider, authenticates there, a code is returned, the code is exchanged for tokens, and the identity token must be verified. Managing this flow and multiple providers adds significant implementation complexity.',
+    reviewSlide: 'OAuth 2.0 / OpenID Connect — Delegated Identity'
+  },
+  {
+    id: 'auth-2-reflection',
+    checkpoint: 2,
+    type: 'self',
+    q: 'You are building a REST API for a mobile app. You want authentication that works without a database lookup on every request, but you also need to be able to revoke access immediately when a user is suspended. Which approach or combination would you use, and why?',
+    model: 'Pure JWT is stateless and fast but cannot be revoked before expiry. A short-lived JWT (e.g., 15 minutes) combined with a long-lived refresh token stored in the database is the standard solution: revoke by deleting the refresh token row, so a suspended user cannot get a new access token after the current one expires (at most 15 minutes of continued access). Session tokens provide instant revocation but require a DB lookup on every request. The hybrid approach balances scalability with revocability.',
+    reviewSlide: 'When to Use Which'
+  }
+];
+</script>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start Here — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #56d4e4; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1c6e7c; --prompt-border: #3daabb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 50px 70px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#071a1c 0%,#040f10 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: #89e4ee; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow: auto; max-height: min(55vh, 400px); white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .ye     { color: var(--yellow); }
+  .terminal-body .or     { color: var(--orange); }
+
+  .terminal-body::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.7; border-left-width: 3px; border-left-style: solid; margin: 6px 0; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;        color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+  .callout-teal   { background: rgba(86,212,228,.07);  border-color: var(--accent);  color: var(--text); }
+
+  .cols { display: flex; gap: 20px; align-items: stretch; }
+  .cols-2 > * { flex: 1; min-width: 0; }
+  .cols-3 > * { flex: 1; min-width: 0; }
+  .cols-55-45 > *:first-child { flex: 55; }
+  .cols-55-45 > *:last-child  { flex: 45; }
+  .cols-50-50 > * { flex: 1; min-width: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid rgba(48,54,61,.6); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'SF Mono',monospace; font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono',monospace; }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-blue   { background: rgba(88,166,255,.15);  color: #58a6ff;       border: 1px solid rgba(88,166,255,.3); }
+  .badge-orange { background: rgba(255,166,87,.15);  color: var(--orange); border: 1px solid rgba(255,166,87,.3); }
+  .badge-red    { background: rgba(248,81,73,.15);   color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+  .badge-teal   { background: rgba(86,212,228,.15);  color: var(--accent); border: 1px solid rgba(86,212,228,.3); }
+  .badge-num    { background: var(--highlight); color: white; }
+
+  .annot-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .annot-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .annot-list li span:last-child { flex: 1; }
+
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — Title -->
+<div class="slide active">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h1><span class="accent">Start Here</span></h1>
+  <div class="subtitle">Prompting mindset · Reading AI code · How this course works</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <span class="badge badge-teal">Prompting</span>
+    <span class="badge badge-teal">Critical Reading</span>
+    <span class="badge badge-teal">Orientation</span>
+  </div>
+  <div class="callout callout-teal">This is not a technical module. There is no code to run here — yet. This is the mindset that makes everything else in the course work: how to direct AI effectively, how to read what it produces, and what to do when it is wrong.</div>
+</div>
+
+<!-- Slide 2 — The Development Loop -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>The Development Loop</h2>
+  <p>Most people assume AI-assisted development looks like: write a prompt, get working code, ship it. The reality is more involved — and that is not a problem.</p>
+  <div class="cols cols-50-50" style="margin-top:10px;gap:16px;">
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--red);margin-bottom:8px;">What people assume</div>
+      <div class="callout callout-red" style="font-size:13px;line-height:2;">
+        Write prompt<br>
+        <span style="color:var(--muted);font-size:11px;">↓</span><br>
+        AI writes code<br>
+        <span style="color:var(--muted);font-size:11px;">↓</span><br>
+        <strong>Ship it ✓</strong>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);margin-bottom:8px;">What actually happens</div>
+      <div class="callout callout-green" style="font-size:13px;line-height:1.9;">
+        Write a specific prompt<br>
+        <span style="color:var(--muted);font-size:11px;">↓</span><br>
+        AI generates code<br>
+        <span style="color:var(--muted);font-size:11px;">↓</span><br>
+        <strong>Read every line</strong><br>
+        <span style="color:var(--muted);font-size:11px;">↓</span><br>
+        Ask questions · Understand patterns<br>
+        <span style="color:var(--muted);font-size:11px;">↓</span><br>
+        Test edge cases · Fill the gaps<br>
+        <span style="color:var(--muted);font-size:11px;">↓</span><br>
+        Integrate · Refine · Prompt again
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:10px;"><strong>The prompt is the smallest part.</strong> Reading, understanding, and integrating the output is the work.</p>
+</div>
+
+<!-- Slide 3 — The Reading Promise -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>The Reading Promise</h2>
+  <p style="margin-bottom:16px;">Before you accept any AI-generated code in this course, there is one rule:</p>
+  <div class="callout callout-teal" style="font-size:18px;padding:20px 24px;line-height:1.6;margin-bottom:16px;">
+    <strong>Read every line before you move on.</strong>
+  </div>
+  <div class="cols cols-3" style="margin-top:6px;">
+    <div class="callout callout-green"><strong>If you can explain it</strong> — you own it. You can debug it, extend it, and defend it to a colleague in a code review.</div>
+    <div class="callout callout-yellow"><strong>If you can't explain it</strong> — flag it. Use the Explain move (covered next), look it up, or cut it out. Do not ship what you cannot explain.</div>
+    <div class="callout callout-red"><strong>If no one can explain it</strong> — it is technical debt, not a feature. Velocity is worthless if the codebase becomes unmaintainable within weeks.</div>
+  </div>
+  <p style="margin-top:12px;">This is not about being slow. It is about the difference between a developer who <em>owns</em> their code and one who is merely a conduit between AI and production.</p>
+</div>
+
+<!-- Slide 4 — Two Kinds of AI Use -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>Two Kinds of AI Use</h2>
+  <p style="margin-bottom:12px;">The same AI tool can be used in two fundamentally different ways. The difference is not the tool — it is the habit that surrounds it.</p>
+  <table>
+    <thead><tr><th></th><th>Surface Use</th><th>Directed Use</th></tr></thead>
+    <tbody>
+      <tr><td>Prompt style</td><td>"Build me a login page"</td><td>Stack · state shape · API contract · error handling spec · constraints</td></tr>
+      <tr><td>After generation</td><td>Paste and run immediately</td><td>Read every line before running</td></tr>
+      <tr><td>When it works</td><td>Ship it and move on</td><td>Understand why it works before extending it</td></tr>
+      <tr><td>When it breaks</td><td>Ask the AI to fix it</td><td>Diagnose the cause first, then prompt to fix</td></tr>
+      <tr><td>Long-term outcome</td><td>Fast but fragile — code you do not own</td><td>Slower initially, but you can maintain and extend it</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-yellow" style="margin-top:12px;">Most "vibe coding" failures are surface use failures. The developers who get the most from AI use directed mode — they have just internalised it so well it feels fast.</div>
+</div>
+
+<!-- Slide 5 — Anatomy of a Good Prompt -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>Anatomy of a Good Prompt</h2>
+  <p style="margin-bottom:10px;">Specific prompts produce specific code. Vague prompts produce guesses. The difference in output quality is dramatic:</p>
+  <div class="cols cols-50-50" style="gap:14px;">
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--red);margin-bottom:6px;">Without context</div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">prompt.txt</span></div>
+        <div class="terminal-body" style="white-space:pre-wrap;"><span class="out">Build me a login page in React.</span></div>
+      </div>
+      <div class="callout callout-red" style="font-size:12px;margin-top:6px;">AI will assume a stack, invent state management, choose its own error messages, and probably import a library you do not want.</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);margin-bottom:6px;">With context</div>
+      <div class="terminal">
+        <div class="terminal-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="terminal-label">prompt.txt</span></div>
+        <div class="terminal-body" style="white-space:pre-wrap;font-size:12px;"><span class="out">Generate a LoginPage component.
+Stack: React 19 + TypeScript + React Router v6.
+State: email, password (strings),
+  error (string | null), loading (boolean).
+On submit: POST /auth/login with { email, password }.
+  Success → store token in localStorage under
+  'token', navigate('/', { replace: true }).
+  401/400 → show 'Invalid credentials' (one message
+  for both — do not reveal which field is wrong).
+Loading: disable submit, show 'Signing in…'.
+No third-party form libraries.</span></div>
+      </div>
+      <div class="callout callout-green" style="font-size:12px;margin-top:6px;">AI now has exact state shape, API contract, navigation behaviour, error copy, and constraints. Output matches the actual requirements.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6 — The Four Moves -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>The Four Moves</h2>
+  <p style="margin-bottom:12px;">Every useful AI interaction in software development fits one of four patterns. This course uses them throughout — B1 covers them in full depth.</p>
+  <table>
+    <thead><tr><th>Move</th><th>Purpose</th><th>When to use it</th></tr></thead>
+    <tbody>
+      <tr><td>Scaffold</td><td>Generate a complete first version of something new</td><td>Starting a new component, route, schema, or service from scratch</td></tr>
+      <tr><td>Explain</td><td>Ask the AI to explain what it just produced</td><td>After every Scaffold — before running the code</td></tr>
+      <tr><td>Debug</td><td>Give the AI an error and ask for a root-cause fix</td><td>When something fails with an error you cannot immediately diagnose</td></tr>
+      <tr><td>Extend</td><td>Add functionality to existing working code</td><td>After you understand and own the current implementation</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-teal" style="margin-top:12px;"><strong>Always Explain after you Scaffold.</strong> Never Extend code you cannot explain. Debug by diagnosing first — resist the urge to paste the error and ask for a magic fix.</div>
+</div>
+
+<!-- Slide 7 — Section Header: What AI Gets Wrong -->
+<div class="slide section-header">
+  <div class="slide-label" style="color:rgba(137,228,238,.5);">Start Here · Orientation</div>
+  <div class="pill">Part 2</div>
+  <h1>What AI <span class="accent">Gets Wrong</span></h1>
+  <div class="subtitle">Understanding limitations before you trust the output</div>
+</div>
+
+<!-- Slide 8 — How AI Fails at Code -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>How AI Fails at Code</h2>
+  <p style="margin-bottom:10px;">AI models produce confident, plausible-looking code. It can be wrong in several distinct ways — knowing the failure modes lets you look for them.</p>
+  <table>
+    <thead><tr><th>Failure Type</th><th>What It Looks Like</th><th>How to Catch It</th></tr></thead>
+    <tbody>
+      <tr><td>API hallucination</td><td><code>res.sendJSON()</code> — function does not exist in Express</td><td>Run it; check the exact function name in the library docs</td></tr>
+      <tr><td>Outdated syntax</td><td>React Router v5 <code>&lt;Switch&gt;</code> in a v6 project</td><td>Know your versions — check <code>package.json</code> before reading output</td></tr>
+      <tr><td>Missing security</td><td>No input validation, no error sanitisation, hardcoded secret</td><td>Ask: where does user data go? Is any secret visible in the code?</td></tr>
+      <tr><td>Incomplete error handling</td><td>Only the happy path — no catch, no finally, no 404 case</td><td>Ask: what happens if the database is down? If the user sends bad data?</td></tr>
+      <tr><td>Confident wrong logic</td><td>Off-by-one in pagination, wrong comparison operator in a filter</td><td>Test with edge cases — empty list, page 0, boundary values, negative numbers</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-yellow" style="margin-top:10px;">AI does not know it is wrong. It will not flag uncertainty unless you ask. The confidence of the output is not a signal of its correctness.</div>
+</div>
+
+<!-- Slide 9 — The Reading Checklist -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>The Reading Checklist</h2>
+  <p style="margin-bottom:14px;">Before accepting any AI-generated code block — in this course or in any project — work through these five questions:</p>
+  <ul class="annot-list">
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">1</span><span><strong>Can I explain every line without looking it up?</strong> If not, use the Explain move before moving on. Understanding is the gate.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">2</span><span><strong>Are there security implications?</strong> Look for user input, authentication, SQL queries, environment variables, and hardcoded values.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">3</span><span><strong>Does the error handling cover the likely failure modes?</strong> Check for missing catch blocks, unhandled rejections, and absent status codes.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">4</span><span><strong>Does this pattern match the rest of the codebase?</strong> Inconsistent patterns create maintenance burden. Ask the AI to match your existing conventions if needed.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">5</span><span><strong>If this breaks in production, will I know why?</strong> Adequate logging, clear error messages, and meaningful status codes make future debugging possible.</span></li>
+  </ul>
+  <div class="callout callout-teal" style="margin-top:12px;">You will see this checklist at the end of every module in this course. Five questions, every time, for every block of generated code.</div>
+</div>
+
+<!-- Slide 10 — The Vibe Coding Debate -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>The Vibe Coding Debate</h2>
+  <p style="margin-bottom:12px;">Since the term emerged in early 2025, "vibe coding" has divided the developer community. Both sides have a point — and the real answer is in the habit.</p>
+  <div class="cols cols-3" style="margin-top:6px;">
+    <div class="callout callout-red">
+      <strong style="display:block;margin-bottom:6px;">Critics say</strong>
+      <span style="font-size:13px;">"You are building technical debt at speed. You ship code you cannot explain. When something breaks at 2am, you will have no idea where to start."</span>
+    </div>
+    <div class="callout callout-green">
+      <strong style="display:block;margin-bottom:6px;">Defenders say</strong>
+      <span style="font-size:13px;">"The leverage is extraordinary. You can build real products. Architecture and system design matter more than memorising syntax you can always look up."</span>
+    </div>
+    <div class="callout callout-teal">
+      <strong style="display:block;margin-bottom:6px;">This course's position</strong>
+      <span style="font-size:13px;">Both are right. The reading habit is the dividing line. With it, vibe coding is a superpower. Without it, it is technical debt manufactured at speed.</span>
+    </div>
+  </div>
+  <p style="margin-top:12px;">The critics describe <strong>surface use</strong>. The defenders describe <strong>directed use</strong>. This course is the latter — and the reading habit is what makes the difference.</p>
+</div>
+
+<!-- Slide 11 — How to Use This Course -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>How to Use This Course</h2>
+  <p style="margin-bottom:12px;">Practical advice before you open Track A.</p>
+  <ul class="annot-list">
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">1</span><span><strong>Follow the track order: A → B → C → D.</strong> Later tracks assume vocabulary from earlier ones. You can skip ahead, but you will hit unexplained terms.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">2</span><span><strong>Take the quizzes seriously.</strong> They reveal gaps. A wrong answer here is cheaper than a wrong assumption in production code.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">3</span><span><strong>Run the demo app yourself.</strong> Reading code and running code are different experiences. The demo app is there — clone it, run it, break it intentionally.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">4</span><span><strong>The prompt reflection at the end of every module is not optional.</strong> It is where learning consolidates. Five minutes of structured reflection is worth an hour of passive reading.</span></li>
+    <li><span class="badge badge-num" style="min-width:24px;text-align:center;flex-shrink:0;">5</span><span><strong>When stuck, ask for an explanation — not just a fix.</strong> "Explain why this fails and what the correct pattern is" teaches you. "Fix this" teaches the AI.</span></li>
+  </ul>
+</div>
+
+<!-- Slide 12 — Before You Start -->
+<div class="slide">
+  <div class="slide-label">Start Here · Orientation</div>
+  <h2>Before You Start</h2>
+  <p style="margin-bottom:16px;">This is the only reflection slide in this course that does not ask you to evaluate a prompt — because you have not used one yet.</p>
+  <div class="callout callout-teal" style="font-size:16px;padding:18px 22px;margin-bottom:16px;line-height:1.6;">
+    <strong>Write down one assumption</strong> you currently hold about AI-assisted coding that you are not yet sure is true. Keep it — we will revisit it after B1.
+  </div>
+  <div class="cols cols-3" style="margin-top:6px;">
+    <div class="callout callout-green">
+      <strong>Track A — Foundations</strong><br>
+      <span style="font-size:13px;">No AI prompts yet. Learn the vocabulary: HTTP, the terminal, Git, databases. These are the concepts AI assumes you already know.</span>
+    </div>
+    <div class="callout callout-blue">
+      <strong>Track B — Backend API</strong><br>
+      <span style="font-size:13px;">First real prompts. Scaffold a REST API with AI, then read every line of what it produces using the four moves.</span>
+    </div>
+    <div class="callout callout-teal">
+      <strong>Tracks C &amp; D — Full Stack</strong><br>
+      <span style="font-size:13px;">Connect a React frontend to the API, handle auth end-to-end, and deploy to production. The stack is complete.</span>
+    </div>
+  </div>
+  <p style="margin-top:14px;font-size:14px;">When you are ready: <strong>open A1 — How the Web Works.</strong></p>
+</div>
+
+</div><!-- #deck -->
+
+<script>
+window.DECK_NAME = 'start-here';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 's0-1', type: 'build', title: 'Write a scaffold prompt',
+    desc: 'Choose a feature (or pick one: a registration form, a book detail page, a search filter component). Write a scaffold prompt for it that includes: stack with version numbers, state shape with field types, API endpoint and expected response shape, error handling for at least one failure mode, and at least one explicit constraint. Then write the one-sentence "bad" version of the same prompt. Explain what information is lost.',
+    criteria: [
+      'Your prompt includes a named stack with explicit version numbers',
+      'The state shape specifies field names and types',
+      'The API contract names the endpoint and expected response shape',
+      'Error handling for at least one failure mode is included',
+      'The bad version is a single sentence without any of this context'
+    ] },
+  { id: 's0-2', type: 'evaluate', title: 'Apply the reading checklist',
+    desc: 'Take any piece of AI-generated code — from a previous project, an online example, or the demo app in this course. Apply the five-point reading checklist to it. For each of the five questions, write one sentence stating whether the code passes or fails that check, and why.',
+    criteria: [
+      'All five checklist questions are addressed',
+      'Each answer is specific to the code, not a generic observation',
+      'At least one finding is supported with a reference to a specific line or pattern in the code',
+      'You are honest about any lines you cannot fully explain'
+    ] },
+  { id: 's0-3', type: 'reflect', title: 'Your vibe coding position',
+    desc: 'Write 100–200 words on your current position on AI-assisted development. What do you think the single most important safeguard is for someone using AI to write production code? Your answer should reference the distinction between surface use and directed use.',
+    criteria: [
+      'Your position is clearly stated in the first two sentences',
+      'You reference at least one specific failure mode or risk',
+      'Your safeguard recommendation is concrete and actionable',
+      'You reference the surface vs directed use distinction from this module'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Describe the AI-assisted development loop and identify where reading and understanding fit within it',
+  'Distinguish between surface-level and directed AI use and explain why the distinction matters for long-term maintainability',
+  'Write a scaffold prompt that includes stack context, state shape, API contract, error handling requirements, and constraints',
+  'Identify the four prompt move types — Scaffold, Explain, Debug, Extend — and the appropriate situation for each',
+  'List at least four failure modes of AI code generation and the corresponding strategy for catching each',
+  'Apply the five-point reading checklist to evaluate any piece of AI-generated code'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'surface-prompt',
+    checkpoint: 1,
+    type: 'mcq',
+    q: '"Build me a login page in React." What is the primary problem with this prompt?',
+    options: [
+      'It should specify TypeScript rather than JavaScript',
+      'It is too short — prompts must be at least 50 words to be useful',
+      'It lacks stack context, state shape, API contract, and error handling requirements',
+      'Prompts should not specify the framework — let the AI choose'
+    ],
+    correct: 2,
+    explanation: 'Without stack version, state shape, API contract, and error requirements the AI invents all of these. The output will not match your actual codebase — and you will spend more time correcting it than you would have spent writing a good prompt.',
+    reviewSlide: 'Anatomy of a Good Prompt'
+  },
+  {
+    id: 'hallucination',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'AI generates `res.sendJSON()` — a method that does not exist in Express. This is an example of:',
+    options: [
+      'A syntax error that a linter will catch before running',
+      'An API hallucination — an invented function name that sounds plausible',
+      'A version mismatch between Express 4 and Express 5',
+      'A TypeScript type error caught at compile time'
+    ],
+    correct: 1,
+    explanation: 'API hallucinations are invented function names or method calls. The correct method is res.json(). Linters will not catch this — it only fails at runtime when the code executes. Checking the library docs for exact function signatures catches these.',
+    reviewSlide: 'How AI Fails at Code'
+  },
+  {
+    id: 'explain-move',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'After AI generates a new middleware function, you use the Explain move. What are you asking it to do?',
+    options: [
+      'Explain what the bug in the middleware is',
+      'Explain the requirements you originally provided',
+      'Explain what it just generated, line by line',
+      'Explain how to extend the middleware with new functionality'
+    ],
+    correct: 2,
+    explanation: 'The Explain move asks the AI to walk through its own output. This verifies that the code does what you think it does — and surfaces cases where the AI misunderstood your requirements before you run anything.',
+    reviewSlide: 'The Four Moves'
+  },
+  {
+    id: 'loop-time',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In AI-assisted development, which activity takes the most time?',
+    options: [
+      'Writing prompts',
+      'Waiting for the AI model to generate a response',
+      'Reading, understanding, testing, and integrating the generated code',
+      'Running the test suite against generated code'
+    ],
+    correct: 2,
+    explanation: 'Writing a prompt takes seconds. The AI responds in seconds. But understanding the output, asking follow-up questions, integrating it into the existing codebase, and testing edge cases is where time actually goes — just as reading someone else\'s code in a review takes far longer than writing it.',
+    reviewSlide: 'The Development Loop'
+  },
+  {
+    id: 'checklist-recall',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Without looking back, write down as many of the five reading checklist questions as you can remember. For any you miss, describe what aspect of code quality that question was covering.',
+    model: '1. Can I explain every line without looking it up?\n2. Are there security implications (user input, auth, SQL, env vars, hardcoded values)?\n3. Does the error handling cover the likely failure modes?\n4. Does this pattern match the rest of the codebase?\n5. If this breaks in production, will I know why?\n\nItems most commonly missed: 4 (consistency/conventions) and 5 (observability/logging). These are invisible in development but create serious problems in team contexts and production environments.',
+    reviewSlide: 'The Reading Checklist'
+  },
+  {
+    id: 'surface-vs-directed',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Describe the difference between surface use and directed use of AI in your own words. Give one concrete example of each — from your own experience or a scenario you can imagine.',
+    model: 'Surface use: accepting AI output without reading or verifying it — pasting the generated code and running it. Example: asking "add authentication" and running the output without checking how passwords are stored or what the JWT secret handling looks like.\n\nDirected use: writing specific prompts with stack, requirements, and constraints; reading every line before running; using Explain to understand anything unclear; testing edge cases before integrating. Example: writing a detailed scaffold prompt for a registration route specifying bcrypt rounds, uniform error messages, and exact validation rules — then reading the output line by line before running it.',
+    reviewSlide: 'Two Kinds of AI Use'
+  }
+];
+</script>
+</body>
+</html>

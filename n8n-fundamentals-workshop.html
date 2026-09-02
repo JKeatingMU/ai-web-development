@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>n8n Fundamentals — Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #ffa657; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #8a3800; --prompt-border: #c4621a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 52px 72px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#200e02 0%,#150901 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(196,98,26,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(196,98,26,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  .response-block { background: #0d1117; border: 1px solid rgba(63,185,80,.3); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .response-bar { background: rgba(63,185,80,.08); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(63,185,80,.2); font-size: 12px; color: var(--green); font-weight: 600; }
+  .response-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--muted); }
+  .response-body strong { color: var(--text); }
+
+  .cols { display: grid; gap: 18px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+  .cols-40-60 { grid-template-columns: 40fr 60fr; }
+
+  .callout { border-radius: 8px; padding: 13px 16px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: #58a6ff;    color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+  .callout-red    { background: rgba(248,81,73,.07);   border-color: var(--red);     color: var(--text); }
+
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-green  { background: rgba(63,185,80,.15);    color: var(--green);  }
+  .badge-yellow { background: rgba(210,153,34,.15);   color: var(--yellow); }
+  .badge-orange { background: rgba(255,166,87,.15);   color: var(--orange); }
+  .badge-blue   { background: rgba(88,166,255,.15);   color: #58a6ff; }
+  .badge-purple { background: rgba(188,140,255,.15);  color: var(--purple); }
+  .badge-red    { background: rgba(248,81,73,.15);    color: var(--red); }
+  .badge-num    { background: rgba(255,166,87,.2); color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td strong { color: var(--text); }
+
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 26px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(255,166,87,.12); color: var(--accent); border: 1px solid rgba(255,166,87,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  /* n8n node diagram styles */
+  .n8n-flow { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: nowrap; overflow-x: auto; }
+  .n8n-node { background: #1c2128; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 100px; flex-shrink: 0; }
+  .n8n-node .node-icon { font-size: 20px; margin-bottom: 4px; }
+  .n8n-node .node-name { font-size: 11px; font-weight: 700; color: var(--text); }
+  .n8n-node .node-type { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .n8n-node.trigger { border-color: var(--green); }
+  .n8n-node.action  { border-color: #58a6ff; }
+  .n8n-node.ai      { border-color: var(--accent); }
+  .n8n-node.logic   { border-color: var(--purple); }
+  .n8n-arrow { color: var(--muted); font-size: 18px; padding: 0 6px; flex-shrink: 0; }
+
+  #nav { position: fixed; bottom: 26px; right: 36px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 36px; font-size: 11px; color: var(--muted); font-family: monospace; }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .terminal-body, .diagram { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- Slide 1 — n8n Fundamentals -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">n8n</span>
+    <span class="tag">Visual Workflows</span>
+    <span class="tag">HTTP Request</span>
+    <span class="tag">AI Agent Node</span>
+    <span class="tag">Track E</span>
+  </div>
+  <div class="slide-label">Track E · AI Agents &amp; Automation</div>
+  <h1>n8n<br><span class="accent">Fundamentals</span></h1>
+  <p class="subtitle">
+    Nodes, the item model, expressions, credentials, and the HTTP Request node —
+    the core concepts you need before building agentic workflows with n8n.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Track E · Deck 2 of 6 · Prerequisite: E1</span>
+  </div>
+</div>
+
+<!-- Slide 2 — What is n8n? -->
+<div class="slide">
+  <div class="slide-label">Overview</div>
+  <h2>What is n8n?</h2>
+  <p>n8n (pronounced "n-eight-n") is an open-source workflow automation tool. You build workflows visually by connecting <strong>nodes</strong> — each node does one thing. Nodes pass data between themselves as <strong>items</strong>.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div class="callout callout-orange">
+      <strong>What makes n8n relevant here</strong>
+      <ul style="padding-left:18px; margin-top:8px; font-size:13px;">
+        <li style="margin-bottom:6px;">Built-in <strong>AI Agent node</strong> — runs the ReAct loop you learned in E1 without writing the loop code yourself</li>
+        <li style="margin-bottom:6px;"><strong>HTTP Request node</strong> — calls any REST API, including your Reading List API</li>
+        <li style="margin-bottom:6px;"><strong>400+ integrations</strong> — Slack, Gmail, Postgres, Google Sheets, and more, as pre-built nodes</li>
+        <li>Self-hostable — run locally for development, deploy for production</li>
+      </ul>
+    </div>
+    <div class="callout callout-blue">
+      <strong>n8n vs writing agent code (E1)</strong>
+      <ul style="padding-left:18px; margin-top:8px; font-size:13px;">
+        <li style="margin-bottom:6px;">The loop, tool routing, and message history are handled by n8n — you configure, not code</li>
+        <li style="margin-bottom:6px;">Human-in-the-loop approval is a node, not a pattern to implement</li>
+        <li style="margin-bottom:6px;">Connections between steps are visual — easier to audit and explain</li>
+        <li>But: less flexible than code for complex logic; n8n expressions have limits</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3 — The Core Concept: Nodes and Connections -->
+<div class="slide">
+  <div class="slide-label">Core Concept</div>
+  <h2>Nodes and Connections</h2>
+  <p>A workflow is a directed graph. Each node receives data, does something, and passes output to the next node. The connection between nodes is the data flow — there is no explicit "pass data" step.</p>
+  <div class="n8n-flow">
+    <div class="n8n-node trigger">
+      <div class="node-icon">⏰</div>
+      <div class="node-name">Schedule</div>
+      <div class="node-type">Trigger</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action">
+      <div class="node-icon">🌐</div>
+      <div class="node-name">HTTP Request</div>
+      <div class="node-type">Action</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic">
+      <div class="node-icon">🔀</div>
+      <div class="node-name">IF</div>
+      <div class="node-type">Logic</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node ai">
+      <div class="node-icon">🤖</div>
+      <div class="node-name">AI Agent</div>
+      <div class="node-type">AI</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action">
+      <div class="node-icon">📧</div>
+      <div class="node-name">Send Email</div>
+      <div class="node-type">Action</div>
+    </div>
+  </div>
+  <table style="margin-top:10px;">
+    <tr><th>Node type</th><th>Role</th><th>Examples</th></tr>
+    <tr><td><strong style="color:var(--green);">Trigger</strong></td><td>Starts the workflow — on a schedule, webhook, or event</td><td>Schedule, Webhook, Gmail Trigger</td></tr>
+    <tr><td><strong style="color:#58a6ff;">Action</strong></td><td>Reads or writes data in an external service</td><td>HTTP Request, Postgres, Slack</td></tr>
+    <tr><td><strong style="color:var(--purple);">Logic</strong></td><td>Routes or transforms data</td><td>IF, Switch, Merge, Code</td></tr>
+    <tr><td><strong style="color:var(--accent);">AI</strong></td><td>Runs an LLM or agent step</td><td>AI Agent, Basic LLM Chain, Summarise</td></tr>
+  </table>
+</div>
+
+<!-- Slide 4 — The Item Model -->
+<div class="slide">
+  <div class="slide-label">Fundamental Concept</div>
+  <h2>The Item Model</h2>
+  <p>n8n passes data as an array of <strong>items</strong> between nodes. Each item is a JSON object with a <code>json</code> field. When a node receives multiple items, it processes each one independently.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:10px;"><strong>What one item looks like</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px; max-height:180px;">[
+  {
+    <span class="key">json</span>: {
+      <span class="key">id</span>: <span class="str">1</span>,
+      <span class="key">title</span>: <span class="str">"DDIA"</span>,
+      <span class="key">author</span>: <span class="str">"Kleppmann"</span>,
+      <span class="key">status</span>: <span class="str">"unread"</span>
+    }
+  },
+  {
+    <span class="key">json</span>: {
+      <span class="key">id</span>: <span class="str">2</span>,
+      <span class="key">title</span>: <span class="str">"SICP"</span>,
+      <span class="key">author</span>: <span class="str">"Abelson"</span>,
+      <span class="key">status</span>: <span class="str">"reading"</span>
+    }
+  }
+]</div></div>
+    </div>
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:10px;"><strong>Why this matters</strong></div>
+      <ul class="annot-list">
+        <li><span class="badge badge-orange">→</span><span>HTTP Request returns the API response wrapped in an item. To access a field: <code>{{ $json.title }}</code></span></li>
+        <li><span class="badge badge-orange">→</span><span>If your API returns an array, n8n wraps the whole array in one item. Use <strong>Split Out</strong> to turn it into multiple items — one per book.</span></li>
+        <li><span class="badge badge-orange">→</span><span>A node that receives 5 items runs its logic 5 times — once per item. This is how "process each book" works.</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5 — Expressions -->
+<div class="slide">
+  <div class="slide-label">Dynamic Values</div>
+  <h2>Expressions: Referencing Data Between Nodes</h2>
+  <p>Static values are typed directly into a field. Dynamic values — data from previous nodes — are written as <strong>expressions</strong> using double curly braces: <code>{{ }}</code>.</p>
+  <table style="margin-top:14px;">
+    <tr><th>Expression</th><th>Returns</th><th>Use case</th></tr>
+    <tr>
+      <td><code>{{ $json.title }}</code></td>
+      <td>The <code>title</code> field from the current item</td>
+      <td>Include a book title in a message body</td>
+    </tr>
+    <tr>
+      <td><code>{{ $json.id }}</code></td>
+      <td>The <code>id</code> field from the current item</td>
+      <td>Build a URL: <code>https://api/books/{{ $json.id }}</code></td>
+    </tr>
+    <tr>
+      <td><code>{{ $node["HTTP Request"].json.status }}</code></td>
+      <td>The <code>status</code> field from a specific named node</td>
+      <td>Reference a node that isn't the immediate parent</td>
+    </tr>
+    <tr>
+      <td><code>{{ $items().length }}</code></td>
+      <td>Number of items in the current batch</td>
+      <td>Include item count in a summary message</td>
+    </tr>
+    <tr>
+      <td><code>{{ new Date().toISOString() }}</code></td>
+      <td>Current timestamp</td>
+      <td>Timestamp in a log or email subject</td>
+    </tr>
+  </table>
+  <div class="callout callout-yellow" style="margin-top:14px; font-size:13px;">
+    <strong>The expression editor</strong> (click the expression icon next to any field) has autocomplete for <code>$json</code>, <code>$node</code>, and built-in n8n variables. Use it — do not guess syntax from memory.
+  </div>
+</div>
+
+<!-- Slide 6 — Section Header: Working With APIs -->
+<div class="slide section-header">
+  <div class="pill">Working With APIs</div>
+  <h1>The HTTP Request Node<br>&amp; Credentials</h1>
+  <p class="subtitle">How to call any REST API from n8n — including your Reading List API.</p>
+</div>
+
+<!-- Slide 7 — Credentials -->
+<div class="slide">
+  <div class="slide-label">Authentication</div>
+  <h2>Credentials: Storing Auth Securely</h2>
+  <p>n8n stores API keys, passwords, and tokens in <strong>credentials</strong> — encrypted, named objects you create once and reference in nodes. Never paste secrets directly into node fields.</p>
+  <div class="cols cols-2" style="margin-top:14px; flex:0;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px;">
+        <strong>For your Reading List API (JWT)</strong>
+        <ol style="padding-left:18px; margin-top:8px; font-size:13px; color:var(--muted);">
+          <li style="margin-bottom:6px;">Go to <strong>Settings → Credentials → New</strong></li>
+          <li style="margin-bottom:6px;">Choose <strong>Header Auth</strong></li>
+          <li style="margin-bottom:6px;">Name: <code>Reading List API</code></li>
+          <li style="margin-bottom:6px;">Header name: <code>Authorization</code></li>
+          <li>Header value: <code>Bearer &lt;your-jwt&gt;</code></li>
+        </ol>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>For Anthropic (Claude)</strong>
+        <ol style="padding-left:18px; margin-top:8px; font-size:13px; color:var(--muted);">
+          <li style="margin-bottom:6px;">Create a <strong>Anthropic</strong> credential (type is built in)</li>
+          <li style="margin-bottom:6px;">Paste your <code>sk-ant-...</code> API key</li>
+          <li style="margin-bottom:6px;">Reference it in: AI Agent node → Model → Claude → Credential</li>
+          <li>n8n encrypts and stores it — never visible in workflow JSON exports</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-red" style="margin-top:12px; font-size:13px;">
+    <strong>Never export workflow JSON and commit it to git if it contains inline credentials.</strong> Always use the Credentials system — the workflow JSON will then contain only a credential reference ID, not the secret itself.
+  </div>
+</div>
+
+<!-- Slide 8 — HTTP Request Node -->
+<div class="slide">
+  <div class="slide-label">The Core Node</div>
+  <h2>The HTTP Request Node</h2>
+  <p>The HTTP Request node calls any REST API. You configure it like a curl command — method, URL, headers, body. Use expressions to make values dynamic.</p>
+  <div class="cols cols-55-45" style="margin-top:12px;">
+    <div>
+      <table>
+        <tr><th>Field</th><th>Value for GET /api/books</th></tr>
+        <tr><td>Method</td><td><code>GET</code></td></tr>
+        <tr><td>URL</td><td><code>http://localhost:3001/api/books</code></td></tr>
+        <tr><td>Authentication</td><td>Header Auth → Reading List API credential</td></tr>
+        <tr><td>Query Parameters</td><td>Optional: <code>status = unread</code></td></tr>
+        <tr><td>Response Format</td><td>JSON (default)</td></tr>
+      </table>
+      <div class="callout callout-yellow" style="margin-top:10px; font-size:13px;">
+        For <strong>POST /api/books</strong>: set Method to <code>POST</code>, Body → JSON, and fill the body fields using expressions: <code>{{ $json.title }}</code>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:10px;"><strong>Dynamic URL with item ID</strong></div>
+      <div class="terminal"><div class="terminal-body" style="font-size:12px;">Method: <span class="hi">PATCH</span>
+
+URL:
+<span class="url">http://localhost:3001/api/books/
+  <span class="fn">{{ $json.id }}</span></span>
+
+Body (JSON):
+{
+  <span class="key">"status"</span>: <span class="fn">{{ $json.newStatus }}</span>
+}
+
+<span class="comment">← expression evaluates per item
+← $json.id from previous node</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9 — Calling the API: Worked Example -->
+<div class="slide">
+  <div class="slide-label">Worked Example</div>
+  <h2>Workflow: List Unread Books, Format, Send to Slack</h2>
+  <div class="n8n-flow" style="margin-top:10px;">
+    <div class="n8n-node trigger">
+      <div class="node-icon">⏰</div>
+      <div class="node-name">Schedule</div>
+      <div class="node-type">Every morning</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action">
+      <div class="node-icon">🌐</div>
+      <div class="node-name">HTTP Request</div>
+      <div class="node-type">GET /api/books?status=unread</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic">
+      <div class="node-icon">📋</div>
+      <div class="node-name">Split Out</div>
+      <div class="node-type">books array → items</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic">
+      <div class="node-icon">🔧</div>
+      <div class="node-name">Code</div>
+      <div class="node-type">Format message</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action">
+      <div class="node-icon">💬</div>
+      <div class="node-name">Slack</div>
+      <div class="node-type">Send message</div>
+    </div>
+  </div>
+  <div class="cols cols-2" style="margin-top:12px; flex:0;">
+    <div>
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>Split Out node</strong><br>
+        The API returns <code>{ "books": [...] }</code> — one item, one array. Split Out extracts <code>books</code> and turns it into multiple items — one per book. Now downstream nodes process each book independently.
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-orange" style="font-size:13px;">
+        <strong>Code node (JS)</strong><br>
+        <code>return items.map(item =&gt; ({ json: { text: `📚 ${item.json.title} by ${item.json.author}` } }));</code><br><br>
+        Transforms each book item into a formatted message string.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10 — Section Header: The AI Agent Node -->
+<div class="slide section-header">
+  <div class="pill">The AI Layer</div>
+  <h1>The AI Agent Node</h1>
+  <p class="subtitle">How n8n implements the ReAct loop from E1 — without writing the loop yourself.</p>
+</div>
+
+<!-- Slide 11 — AI Agent Node Explained -->
+<div class="slide">
+  <div class="slide-label">AI Agent Node</div>
+  <h2>The AI Agent Node: What It Does</h2>
+  <p>The AI Agent node runs the Reason → Act → Observe loop internally. You configure: the model, the tools it can use, the memory, and the system prompt. n8n handles the loop.</p>
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div>
+      <div class="callout callout-orange" style="font-size:13px; margin-bottom:10px;"><strong>Configuration</strong></div>
+      <table>
+        <tr><th>Setting</th><th>What to put here</th></tr>
+        <tr><td>Model</td><td>Claude (Anthropic credential) or OpenAI</td></tr>
+        <tr><td>System Prompt</td><td>The agent's role + constraints</td></tr>
+        <tr><td>Prompt (user)</td><td>The goal — usually from a previous node via expression</td></tr>
+        <tr><td>Tools</td><td>Sub-nodes connected below the agent node</td></tr>
+        <tr><td>Memory</td><td>Buffer Memory node (in-context) or external DB</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:10px;"><strong>Tools are child nodes</strong></div>
+      <div class="diagram" style="font-size:12px; line-height:1.8; max-height:180px;">
+<span class="or">AI Agent</span>
+├── <span class="gr">HTTP Request Tool</span>
+│     (GET /api/books)
+├── <span class="gr">HTTP Request Tool</span>
+│     (PATCH /api/books/:id)
+└── <span class="pu">Code Tool</span>
+      (custom logic)
+      </div>
+      <p style="font-size:12px; margin-top:6px;">Each child node is a tool the agent can call. The agent decides which one to invoke based on the task.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12 — Worked Example: AI Agent Workflow -->
+<div class="slide">
+  <div class="slide-label">Worked Example</div>
+  <h2>AI Agent Workflow: Summarise and Categorise</h2>
+  <p>Goal: "For each unread book, look it up, summarise in one sentence what it covers, and suggest which category it belongs to."</p>
+  <div class="n8n-flow" style="margin-top:12px;">
+    <div class="n8n-node trigger">
+      <div class="node-icon">🔗</div>
+      <div class="node-name">Webhook</div>
+      <div class="node-type">Manual trigger</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action">
+      <div class="node-icon">🌐</div>
+      <div class="node-name">HTTP Request</div>
+      <div class="node-type">GET /api/books?status=unread</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node logic">
+      <div class="node-icon">📋</div>
+      <div class="node-name">Split Out</div>
+      <div class="node-type">One item per book</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node ai">
+      <div class="node-icon">🤖</div>
+      <div class="node-name">AI Agent</div>
+      <div class="node-type">Claude + tools</div>
+    </div>
+    <div class="n8n-arrow">→</div>
+    <div class="n8n-node action">
+      <div class="node-icon">🌐</div>
+      <div class="node-name">HTTP Request</div>
+      <div class="node-type">PATCH /api/books/:id</div>
+    </div>
+  </div>
+  <div class="prompt-block" style="margin-top:12px;">
+    <div class="prompt-bar">🤖 AI Agent — System Prompt</div>
+    <div class="prompt-body" style="font-size:13px;">
+      You are a reading assistant. For each book title given, write a one-sentence summary of what the book covers and suggest one category from: [Computer Science, Systems, Programming, Career, Other]. Return only JSON: <em>{"summary": "...", "category": "..."}</em>. Do not search the web — use your training knowledge.
+    </div>
+  </div>
+</div>
+
+<!-- Slide 13 — Reading an n8n Workflow -->
+<div class="slide">
+  <div class="slide-label">The Reading Checklist</div>
+  <h2>How to Read an n8n Workflow</h2>
+  <p>When you open an unfamiliar workflow — or review one an AI has generated — work through these questions.</p>
+  <ul class="annot-list" style="margin-top:16px;">
+    <li>
+      <span class="badge badge-orange">1</span>
+      <span><strong>Where does it start?</strong> Find the trigger node (green border, leftmost). Is it a webhook, schedule, or manual trigger? What starts the workflow?</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">2</span>
+      <span><strong>What data flows?</strong> Trace the item structure from the first HTTP Request node. Is the API response an array that needs Split Out? What fields does downstream logic reference?</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">3</span>
+      <span><strong>Where are the credentials?</strong> Check each action node — is authentication configured via a credential, or is a key pasted inline? Inline keys are a problem.</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">4</span>
+      <span><strong>What does the AI Agent do?</strong> Find the system prompt. List the tool nodes connected below it. Identify what the agent can read vs what it can modify.</span>
+    </li>
+    <li>
+      <span class="badge badge-orange">5</span>
+      <span><strong>Is there a human gate?</strong> For any irreversible action (send email, PATCH/DELETE a record), is there a "Wait for Approval" node before it executes?</span>
+    </li>
+  </ul>
+</div>
+
+<!-- Slide 14 — Prompt Reflection -->
+<div class="slide">
+  <div class="slide-label">Prompt Reflection</div>
+  <h2>What You Built With vs What You Learned</h2>
+  <p>If you used an AI assistant to generate an n8n workflow (or asked it to explain one), answer these before moving to E3.</p>
+  <div class="prompt-block" style="margin-top:10px;">
+    <div class="prompt-bar">🤔 Questions to answer without re-reading the AI's explanation</div>
+    <div class="prompt-body">
+      <ul>
+        <li>Name every node in the workflow. For each: what type is it, and what does it do?</li>
+        <li>Find one expression in the workflow. Explain what data it reads and from where.</li>
+        <li>Does the workflow handle multiple items at once? If so, where does it split or merge them?</li>
+        <li>Where are credentials stored? Confirm no secrets appear in the workflow's node configuration fields.</li>
+        <li>Is there any irreversible action? If so, is there a human gate before it?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-green" style="margin-top:12px; font-size:13px;">
+    <strong>The goal is fluency, not memorisation.</strong> You should be able to look at any n8n workflow and narrate what it does — node by node — in plain English. That is the skill E3 and E4 build on.
+  </div>
+  <div class="callout callout-orange" style="margin-top:8px; font-size:13px;">
+    <strong>Up next — E3: Calling APIs in n8n.</strong> You will build the Reading List API connection hands-on: HTTP Request node, credential setup, expressions, Split Out, and a working CRUD workflow from trigger to result.
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 14</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'n8n-fundamentals-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'e2-1', type: 'practical', title: 'Build a Reading List workflow',
+    desc: 'Build an n8n workflow that: (1) triggers on a schedule or manual run, (2) calls GET /api/books?status=unread on your Reading List API, (3) splits the result into individual items, and (4) logs each book title to n8n\'s output. Use a Header Auth credential — no inline tokens.',
+    criteria: [
+      'The HTTP Request node uses a credential, not an inline JWT',
+      'Split Out correctly turns the books array into individual items',
+      'The output of the workflow shows one item per book with the title field accessible'
+    ] },
+  { id: 'e2-2', type: 'practical', title: 'Add an AI Agent node',
+    desc: 'Extend your workflow from Assessment 1. After the Split Out node, add an AI Agent node that reads the book title and returns a one-sentence summary of what the book likely covers. Connect Claude via Anthropic credentials. Display the summary in the workflow output.',
+    criteria: [
+      'The AI Agent system prompt specifies the task clearly and constrains the output format',
+      'The Anthropic credential is configured — no API key visible in node fields',
+      'The agent output (summary) is accessible as a JSON field in the next node'
+    ] },
+  { id: 'e2-3', type: 'reflect', title: 'n8n vs code: when would you choose each?',
+    desc: 'Compare building the "list unread books" workflow in n8n vs in Node.js (as you would have done in Track B). What does n8n make easier? What does it make harder or less flexible? Give a specific example of a task that belongs in code rather than n8n.',
+    criteria: [
+      'You named at least two concrete advantages of n8n for this task',
+      'You named at least one concrete limitation (not just "it\'s different")',
+      'Your code-preferred example is specific — you named the task and explained why code is better'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Explain the node-and-connection model of n8n and describe what a trigger, action, logic, and AI node each do',
+  'Describe the item model and explain why Split Out is needed when an API returns an array',
+  'Write n8n expressions to reference data from the current item and from named nodes',
+  'Configure HTTP Request nodes with Header Auth credentials to call a JWT-protected REST API',
+  'Set up an AI Agent node with a model, system prompt, and tool nodes'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'e2-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Your Reading List API returns `{ "books": [{...}, {...}, {...}] }`. You connect an HTTP Request node to a Slack node. The Slack node receives one item. What node do you need between HTTP Request and Slack to send one Slack message per book?',
+    options: [
+      'Merge — to combine the books into a single message',
+      'Split Out — to turn the books array into separate items',
+      'IF — to filter which books to send',
+      'Code — to manually loop over the array'
+    ],
+    correct: 1,
+    explanation: 'The HTTP Request node wraps the entire API response in one item. Split Out extracts a specified array field (here, "books") and creates one item per element. After Split Out, each book is its own item and downstream nodes process each independently — one Slack message per book.',
+    reviewSlide: 'The Item Model'
+  },
+  {
+    id: 'e2-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You want the HTTP Request node URL to include the book ID from the previous node. Which expression correctly builds the URL?',
+    options: [
+      '`http://localhost:3001/api/books/` + id',
+      '`http://localhost:3001/api/books/{{ $json.id }}`',
+      '`http://localhost:3001/api/books/?id={{ $json.id }}`',
+      '`http://localhost:3001/api/books/$json.id`'
+    ],
+    correct: 1,
+    explanation: 'n8n expressions use double curly brace syntax: {{ $json.id }} accesses the id field from the current item\'s JSON. The URL becomes a path parameter (not a query parameter) — /api/books/:id is the correct REST pattern for a single-resource GET. The other options either use wrong syntax or wrong URL structure.',
+    reviewSlide: 'Expressions: Referencing Data Between Nodes'
+  },
+  {
+    id: 'e2-1-3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What is the correct way to store your JWT token for the Reading List API in n8n?',
+    options: [
+      'Paste it directly into the Authorization header field of the HTTP Request node',
+      'Store it as an environment variable in the n8n server configuration',
+      'Create a Header Auth credential with Authorization as the name and Bearer <token> as the value',
+      'Add it as a query parameter: ?token=<jwt>'
+    ],
+    correct: 2,
+    explanation: 'n8n Credentials encrypt and store secrets separately from the workflow. Header Auth with Authorization / Bearer <token> is the correct type for JWT. Pasting directly into node fields means the token appears in workflow JSON exports. Query parameters are not standard for JWT auth and are logged by servers.',
+    reviewSlide: 'Credentials: Storing Auth Securely'
+  },
+  {
+    id: 'e2-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'In the AI Agent node, tools are connected as child nodes below the agent. What determines which tool the agent calls?',
+    options: [
+      'The order the tool nodes are connected — the agent always tries the first one',
+      'The user\'s input — if it contains a URL, the HTTP Request tool is used',
+      'The LLM — it reads the tool descriptions and decides which to call based on the current task',
+      'n8n routes the tool call based on the node type (action nodes go first)'
+    ],
+    correct: 2,
+    explanation: 'The AI Agent node passes tool definitions (name, description, input schema) to the LLM. The LLM reads these descriptions and decides which tool to invoke — the same function-calling mechanism described in E1. This is why good tool descriptions matter: they are what the LLM uses to decide.',
+    reviewSlide: 'The AI Agent Node: What It Does'
+  },
+  {
+    id: 'e2-2-2',
+    checkpoint: 2,
+    type: 'self',
+    q: 'You want to build a workflow that: each morning, fetches all unread books, uses an AI agent to write a one-sentence summary for each, and emails you the formatted list. Sketch the node sequence (node type and purpose for each). Identify one place where a human gate should exist and explain why.',
+    rubric: 'Expected sequence: Schedule trigger → HTTP Request (GET /api/books?status=unread) → Split Out (books array) → AI Agent (summarise each book) → Merge or Aggregate (combine summaries) → Gmail/Send Email. The human gate should be before the email send — once sent, it cannot be recalled. An alternative: the agent produces a draft, a "Wait for Approval" node pauses, a human reviews, then Gmail sends. Bonus: the student might note that "summarise" doesn\'t modify data, so the AI agent step itself is low-risk — only the email send needs a gate.'
+  }
+];
+</script>
+</body>
+</html>

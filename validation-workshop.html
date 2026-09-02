@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validation &amp; Error Handling</title>
+<style>
+  :root {
+    --bg: #0d1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --orange: #f0883e;
+    --purple: #bc8cff; --red: #f85149;
+    --term-bg: #010409; --term-text: #e6edf3;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow: hidden; }
+
+  /* ── Slides ── */
+  .slide { display: none; width: 100vw; height: 100vh; padding: 48px 64px 36px; flex-direction: column; background: var(--slide-bg); position: relative; overflow: hidden; }
+  .slide.active { display: flex; }
+  .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--purple)); }
+
+  /* ── Typography ── */
+  h1 { font-size: 2.8rem; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+  h2 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 6px; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+  p  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; background: rgba(88,166,255,.1); border: 1px solid rgba(88,166,255,.2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  ul li { font-size: 14px; color: var(--muted); padding-left: 16px; position: relative; line-height: 1.6; }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  ul li strong { color: var(--text); }
+
+  /* ── Slide label ── */
+  .slide-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+  /* ── Columns ── */
+  .cols { display: flex; gap: 24px; }
+  .cols-50-50 > * { flex: 1; }
+  .cols-55-45 > *:first-child { flex: 55; } .cols-55-45 > *:last-child { flex: 45; }
+  .cols-40-60 > *:first-child { flex: 40; } .cols-40-60 > *:last-child { flex: 60; }
+  .cols-60-40 > *:first-child { flex: 60; } .cols-60-40 > *:last-child { flex: 40; }
+
+  /* ── Callouts ── */
+  .callout { border-radius: 8px; padding: 12px 16px; font-size: 13px; border-left: 3px solid; line-height: 1.7; }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .callout ul { margin-top: 6px; }
+  .callout-blue   { background: rgba(88,166,255,.08);  border-color: var(--accent);  color: var(--muted); }
+  .callout-blue   strong { color: var(--accent); }
+  .callout-green  { background: rgba(63,185,80,.08);   border-color: var(--green);   color: var(--muted); }
+  .callout-green  strong { color: var(--green); }
+  .callout-yellow { background: rgba(210,153,34,.08);  border-color: var(--yellow);  color: var(--muted); }
+  .callout-yellow strong { color: var(--yellow); }
+  .callout-orange { background: rgba(240,136,62,.08);  border-color: var(--orange);  color: var(--muted); }
+  .callout-orange strong { color: var(--orange); }
+  .callout-purple { background: rgba(188,140,255,.08); border-color: var(--purple);  color: var(--muted); }
+  .callout-purple strong { color: var(--purple); }
+
+  /* ── Terminal ── */
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .terminal-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: #21262d; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red    { background: #ff5f57; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green  { background: #28c840; }
+  .terminal-label { font-size: 11px; color: var(--muted); margin-left: 6px; font-family: inherit; }
+  .terminal-body  { padding: 16px 20px; font-size: 12.5px; line-height: 1.85; color: var(--term-text); white-space: pre; overflow-x: auto; }
+  .terminal-body .prompt { color: var(--green); user-select: none; }
+  .terminal-body .cmt    { color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .str    { color: #a5d6ff; }
+  .terminal-body .kw     { color: var(--accent); font-weight: 600; }
+  .terminal-body .fn     { color: var(--yellow); }
+  .terminal-body .num    { color: var(--orange); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .or     { color: var(--orange); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .pu     { color: var(--purple); }
+
+  /* ── Diagram ── */
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+  .diagram .re { color: var(--red); }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 8px 12px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td code { font-size: 12px; }
+  td strong { color: var(--text); }
+
+  /* ── Prompt block ── */
+  .prompt-block { background: rgba(188,140,255,.06); border: 1px solid rgba(188,140,255,.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: var(--muted); line-height: 1.8; }
+  .prompt-block .label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--purple); margin-bottom: 8px; }
+
+  /* ── Title slide ── */
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 28px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  /* ── Part marker ── */
+  .part-slide { justify-content: center; align-items: flex-start; }
+  .part-slide .part-num { font-size: 7rem; font-weight: 800; color: rgba(88,166,255,.12); line-height: 1; letter-spacing: -6px; margin-bottom: 8px; }
+  .part-slide h2 { font-size: 2.4rem; }
+  .part-slide p  { font-size: 15px; margin-top: 10px; max-width: 520px; }
+
+  /* ── Nav ── */
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .terminal-body, .diagram { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── annot-list helper ── */
+  .annot-list { display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── Reading checklist ── */
+  .checklist { display: flex; flex-direction: column; gap: 10px; }
+  .checklist-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .checklist-item .check { width: 18px; height: 18px; border: 1px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 1px; background: rgba(88,166,255,.04); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 1 — TITLE
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">Track B — Backend</span>
+    <span class="tag">~70 min</span>
+    <span class="tag">Node.js + Express</span>
+  </div>
+  <h1>Validation &amp;<br>Error Handling</h1>
+  <p style="font-size:1.2rem; color:var(--muted); margin-top:16px; max-width:560px; line-height:1.6;">
+    Reject bad input before it enters your database, and return useful error messages when things go wrong
+  </p>
+  <div class="meta">
+    <span>Prerequisites: B1–B5 (Reading List API with JWT + extensions)</span>
+    <span>Reading List API running locally</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 2 — WHY IT MATTERS
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Motivation</div>
+  <h2>What Happens Without Validation</h2>
+  <div class="cols cols-50-50" style="margin-top:18px; gap:20px; align-items:flex-start;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-orange">
+        <strong>Bad data enters the database</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Books with no title — queries break downstream</li>
+          <li>Status values outside your allowed set</li>
+          <li>Numbers stored as strings, causing sort failures</li>
+          <li>Empty strings that pass <code>NOT NULL</code> checks</li>
+        </ul>
+      </div>
+      <div class="callout callout-orange">
+        <strong>Errors reach users raw</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li><code>Cannot read properties of undefined</code></li>
+          <li>PostgreSQL constraint error text leaked to client</li>
+          <li>500 responses with no body when an await fails</li>
+          <li>No consistent error shape for the frontend to handle</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-green">
+        <strong>What good validation gives you</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Reject bad requests at the boundary — never touch the DB</li>
+          <li>A 400 response with a clear <code>error</code> field the client can display</li>
+          <li>Consistent error shape everywhere in the API</li>
+          <li>Easier debugging — the error appears where the data was wrong</li>
+        </ul>
+      </div>
+      <div class="callout callout-blue">
+        <strong>What this deck covers</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Manual validation in route handlers</li>
+          <li>Centralised error middleware + <code>AppError</code></li>
+          <li><code>asyncHandler</code> to remove try/catch boilerplate</li>
+          <li>Schema validation with Zod</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 3 — FOUR LAYERS
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Architecture</div>
+  <h2>Where Validation Lives</h2>
+  <p style="margin-bottom:16px;">Validation is not a single place — it is a layered defence. Each layer catches what the one above it missed.</p>
+  <div class="cols cols-50-50" style="gap:20px; align-items:flex-start;">
+    <div class="diagram"><span class="hi">Layer 1 — Client (browser / app)</span>
+  HTML required, type=&quot;number&quot;, React form libraries
+  <span class="gr">✓</span> Fast feedback   <span class="or">✗</span> Bypassable — anyone can use curl
+
+<span class="hi">Layer 2 — Route handler (our focus today)</span>
+  Check required fields, types, lengths before hitting DB
+  <span class="gr">✓</span> Always runs     <span class="gr">✓</span> Full control over error shape
+
+<span class="hi">Layer 3 — Database constraints</span>
+  NOT NULL, CHECK, UNIQUE, FK constraints in PostgreSQL
+  <span class="gr">✓</span> Last line of defence   <span class="or">✗</span> Raw DB errors need translation
+
+<span class="hi">Layer 4 — Business logic</span>
+  Is this user allowed to edit this book?
+  Does the status transition make sense?</div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Rule of thumb</strong>
+        Validate at the boundary where data enters your system. The route handler is that boundary for HTTP requests — after this layer, you should be able to trust your data.
+      </div>
+      <div class="callout callout-yellow">
+        <strong>DB constraints are not a replacement</strong>
+        A PostgreSQL <code>NOT NULL</code> violation returns a raw pg error. If you don't catch it, Express sends a 500. Validate first in the route handler, so the DB is a safety net, not the first reporter.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 4 — MANUAL VALIDATION
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Manual Validation</div>
+  <h2>Checking Required Fields</h2>
+  <p style="margin-bottom:14px;">The simplest approach: check the fields you care about before touching the database. Return 400 early if anything is wrong.</p>
+  <div class="cols cols-55-45" style="gap:20px; align-items:flex-start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">server.js — POST /api/books</span></div>
+      <div class="terminal-body"><span class="kw">router</span>.<span class="fn">post</span>(<span class="str">'/'</span>, authenticate, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { title, author, genre, status } = req.body;
+
+  <span class="cmt">// Required field check</span>
+  <span class="kw">if</span> (!title || !author) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({
+      error: <span class="str">'title and author are required'</span>
+    });
+  }
+
+  <span class="cmt">// Type + length check</span>
+  <span class="kw">if</span> (<span class="kw">typeof</span> title !== <span class="str">'string'</span> || title.<span class="fn">trim</span>().<span class="fn">length</span> === <span class="num">0</span>) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({
+      error: <span class="str">'title must be a non-empty string'</span>
+    });
+  }
+
+  <span class="cmt">// Allowed values check</span>
+  <span class="kw">const</span> ALLOWED = [<span class="str">'want_to_read'</span>, <span class="str">'reading'</span>, <span class="str">'read'</span>];
+  <span class="kw">if</span> (status && !ALLOWED.<span class="fn">includes</span>(status)) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({
+      error: <span class="str">`status must be one of: ${ALLOWED.join(', ')}`</span>
+    });
+  }
+
+  <span class="cmt">// All good — insert</span>
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(
+    <span class="str">'INSERT INTO books (title, author, genre, status, user_id)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *'</span>,
+    [title.<span class="fn">trim</span>(), author.<span class="fn">trim</span>(), genre || <span class="kw">null</span>, status || <span class="str">'want_to_read'</span>, req.user.id]
+  );
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>(result.rows[<span class="num">0</span>]);
+});</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Three checks to always make</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2;">
+          <li><strong>Required:</strong> is it present at all?</li>
+          <li><strong>Type + length:</strong> is it the right shape?</li>
+          <li><strong>Allowed values:</strong> is it in the permitted set?</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow">
+        <strong><code>!title</code> catches more than you think</strong>
+        This is truthy-falsy shorthand. It catches <code>undefined</code>, <code>null</code>, <code>""</code>, and <code>0</code>. For strings, follow up with <code>.trim().length === 0</code> to also catch <code>"   "</code>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 5 — VALIDATE HELPER
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Manual Validation</div>
+  <h2>The Validate Helper Pattern</h2>
+  <p style="margin-bottom:14px;">When you have the same checks in multiple routes, extract them into a reusable function.</p>
+  <div class="cols cols-55-45" style="gap:20px; align-items:flex-start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">middleware/validate.js</span></div>
+      <div class="terminal-body"><span class="cmt">// Returns an error string, or null if valid</span>
+<span class="kw">export function</span> <span class="fn">validateBook</span>(body, requireAll = <span class="kw">false</span>) {
+  <span class="kw">const</span> { title, author, genre, status } = body;
+  <span class="kw">const</span> ALLOWED = [<span class="str">'want_to_read'</span>, <span class="str">'reading'</span>, <span class="str">'read'</span>];
+
+  <span class="kw">if</span> (requireAll && (!title || !author)) {
+    <span class="kw">return</span> <span class="str">'title and author are required'</span>;
+  }
+  <span class="kw">if</span> (title !== <span class="kw">undefined</span> && (<span class="kw">typeof</span> title !== <span class="str">'string'</span> || !title.<span class="fn">trim</span>())) {
+    <span class="kw">return</span> <span class="str">'title must be a non-empty string'</span>;
+  }
+  <span class="kw">if</span> (author !== <span class="kw">undefined</span> && (<span class="kw">typeof</span> author !== <span class="str">'string'</span> || !author.<span class="fn">trim</span>())) {
+    <span class="kw">return</span> <span class="str">'author must be a non-empty string'</span>;
+  }
+  <span class="kw">if</span> (status !== <span class="kw">undefined</span> && !ALLOWED.<span class="fn">includes</span>(status)) {
+    <span class="kw">return</span> <span class="str">`status must be one of: ${ALLOWED.join(', ')}`</span>;
+  }
+  <span class="kw">return null</span>; <span class="cmt">// valid</span>
+}
+
+
+<span class="cmt">// server.js — use in POST and PATCH routes</span>
+<span class="kw">import</span> { validateBook } <span class="kw">from</span> <span class="str">'./middleware/validate.js'</span>;
+
+<span class="kw">router</span>.<span class="fn">post</span>(<span class="str">'/'</span>, authenticate, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> err = <span class="fn">validateBook</span>(req.body, <span class="kw">true</span>);
+  <span class="kw">if</span> (err) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({ error: err });
+  <span class="cmt">// ... insert</span>
+});
+
+<span class="kw">router</span>.<span class="fn">patch</span>(<span class="str">'/:id'</span>, authenticate, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> err = <span class="fn">validateBook</span>(req.body, <span class="kw">false</span>); <span class="cmt">// fields optional</span>
+  <span class="kw">if</span> (err) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({ error: err });
+  <span class="cmt">// ... update with COALESCE</span>
+});</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Why a separate file</strong>
+        The same validation rules apply to POST (all required) and PATCH (all optional). One function with a <code>requireAll</code> flag keeps the logic in one place — change the rules once, both routes update.
+      </div>
+      <div class="callout callout-green">
+        <strong>Return null for success</strong>
+        Returning a string on error and <code>null</code> on success is a simple convention. The route checks <code>if (err)</code> — null is falsy, so it only blocks when there is a real error.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 6 — QUIZ CHECKPOINT 1
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 7 — SECTION HEADER: ERROR HANDLING
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide part-slide">
+  <div class="part-num">02</div>
+  <div class="slide-label" style="margin-bottom:6px;">Part 2 of 3</div>
+  <h2>Centralised Error Handling</h2>
+  <p>Express has a built-in mechanism for catching errors from any route and sending a consistent response. Stop writing the same <code>catch</code> block everywhere.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 8 — ERROR MIDDLEWARE
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Error Middleware</div>
+  <h2>The Four-Argument Error Handler</h2>
+  <p style="margin-bottom:14px;">Express recognises error-handling middleware by its four parameters. Register it <em>after</em> all routes — it only runs when a route calls <code>next(err)</code> or throws (with asyncHandler).</p>
+  <div class="cols cols-55-45" style="gap:20px; align-items:flex-start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">server.js — register last</span></div>
+      <div class="terminal-body"><span class="cmt">// All routes registered above this line</span>
+app.<span class="fn">use</span>(<span class="str">'/api/books'</span>, booksRouter);
+app.<span class="fn">use</span>(<span class="str">'/auth'</span>, authRouter);
+
+<span class="cmt">// Error middleware — must be registered AFTER routes</span>
+<span class="cmt">// Four params: (err, req, res, next)</span>
+app.<span class="fn">use</span>(<span class="kw">function</span>(err, req, res, next) {
+  <span class="kw">const</span> status  = err.status  || <span class="num">500</span>;
+  <span class="kw">const</span> message = err.message || <span class="str">'Internal server error'</span>;
+
+  <span class="kw">if</span> (status === <span class="num">500</span>) {
+    console.<span class="fn">error</span>(err); <span class="cmt">// log full stack for 500s only</span>
+  }
+
+  res.<span class="fn">status</span>(status).<span class="fn">json</span>({ error: message });
+});</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>How errors reach this handler</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2;">
+          <li>Synchronous: <code>next(new Error(...))</code> in a route</li>
+          <li>With asyncHandler: any <code>throw</code> or rejected promise</li>
+          <li>Without asyncHandler: you must wrap every await in try/catch and call <code>next(err)</code></li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow">
+        <strong>Don't log everything</strong>
+        A 400 (bad input) is the client's fault — logging it as an error creates noise. Only log 500s, which indicate a bug in your code.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 9 — AppError CLASS
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Error Handling</div>
+  <h2>AppError — Carrying a Status Code</h2>
+  <p style="margin-bottom:14px;"><code>Error</code> objects don't have a <code>status</code> property by default. A small subclass adds one so your error middleware can use it directly.</p>
+  <div class="cols cols-55-45" style="gap:20px; align-items:flex-start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">middleware/AppError.js</span></div>
+      <div class="terminal-body"><span class="kw">export class</span> <span class="fn">AppError</span> <span class="kw">extends</span> Error {
+  <span class="fn">constructor</span>(message, status = <span class="num">500</span>) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.status = status;
+  }
+}
+
+
+<span class="cmt">// Usage in any route</span>
+<span class="kw">import</span> { AppError } <span class="kw">from</span> <span class="str">'./middleware/AppError.js'</span>;
+
+<span class="cmt">// Instead of: res.status(404).json({ error: 'Not found' })</span>
+<span class="kw">throw new</span> <span class="fn">AppError</span>(<span class="str">'Book not found'</span>, <span class="num">404</span>);
+
+<span class="cmt">// Instead of: res.status(403).json({ error: 'Forbidden' })</span>
+<span class="kw">throw new</span> <span class="fn">AppError</span>(<span class="str">'You do not own this book'</span>, <span class="num">403</span>);
+
+<span class="cmt">// Instead of: res.status(400).json({ error: '...' })</span>
+<span class="kw">throw new</span> <span class="fn">AppError</span>(<span class="str">'title and author are required'</span>, <span class="num">400</span>);
+
+
+<span class="cmt">// Error middleware reads it automatically</span>
+app.<span class="fn">use</span>(<span class="kw">function</span>(err, req, res, next) {
+  res.<span class="fn">status</span>(err.status || <span class="num">500</span>).<span class="fn">json</span>({ error: err.message });
+});</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Why extends Error?</strong>
+        Inheriting from <code>Error</code> gives you a <code>.message</code>, a <code>.stack</code>, and correct <code>instanceof</code> checks. You are just adding a <code>.status</code> field on top — minimal footprint.
+      </div>
+      <div class="callout callout-green">
+        <strong>Default to 500</strong>
+        The default status of 500 means that if you throw an AppError without specifying a code (or if an unexpected error reaches the handler), the client gets "Internal server error" and you get a log entry to investigate.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 10 — asyncHandler
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Error Handling</div>
+  <h2>asyncHandler — No More Try/Catch</h2>
+  <p style="margin-bottom:14px;">Express does not catch rejected promises from async route handlers automatically. <code>asyncHandler</code> wraps your handler and forwards any error to <code>next()</code> for you.</p>
+  <div class="cols cols-55-45" style="gap:20px; align-items:flex-start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">middleware/asyncHandler.js + usage</span></div>
+      <div class="terminal-body"><span class="cmt">// One tiny wrapper</span>
+<span class="kw">export function</span> <span class="fn">asyncHandler</span>(fn) {
+  <span class="kw">return function</span>(req, res, next) {
+    Promise.<span class="fn">resolve</span>(<span class="fn">fn</span>(req, res, next)).<span class="fn">catch</span>(next);
+  };
+}
+
+
+<span class="cmt">// BEFORE — every route needs try/catch</span>
+<span class="kw">router</span>.<span class="fn">get</span>(<span class="str">'/'</span>, authenticate, <span class="kw">async</span> (req, res) => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(<span class="str">'SELECT * FROM books'</span>);
+    res.<span class="fn">json</span>(result.rows);
+  } <span class="kw">catch</span> (err) {
+    next(err); <span class="cmt">// easy to forget</span>
+  }
+});
+
+
+<span class="cmt">// AFTER — throw anywhere, error middleware handles it</span>
+<span class="kw">router</span>.<span class="fn">get</span>(<span class="str">'/'</span>, authenticate, <span class="fn">asyncHandler</span>(<span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(<span class="str">'SELECT * FROM books'</span>);
+  res.<span class="fn">json</span>(result.rows);
+}));
+
+<span class="kw">router</span>.<span class="fn">get</span>(<span class="str">'/:id'</span>, authenticate, <span class="fn">asyncHandler</span>(<span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(<span class="str">'SELECT * FROM books WHERE id=$1'</span>, [req.params.id]);
+  <span class="kw">if</span> (!result.rows.length) <span class="kw">throw new</span> <span class="fn">AppError</span>(<span class="str">'Book not found'</span>, <span class="num">404</span>);
+  res.<span class="fn">json</span>(result.rows[<span class="num">0</span>]);
+}));</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>How it works</strong>
+        The wrapper calls your async function, which returns a Promise. If that Promise rejects, <code>.catch(next)</code> passes the error to Express's error pipeline — same as calling <code>next(err)</code> yourself.
+      </div>
+      <div class="callout callout-green">
+        <strong>Already in express-async-errors</strong>
+        If you <code>npm install express-async-errors</code> and <code>import</code> it once, Express patches itself to catch async errors automatically — no wrapper needed. Either approach works; the manual version teaches what's happening.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 11 — ERROR RESPONSE SHAPE
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Error Handling</div>
+  <h2>Designing Good Error Responses</h2>
+  <div class="cols cols-50-50" style="margin-top:16px; gap:20px; align-items:flex-start;">
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div class="callout callout-orange">
+        <strong>Avoid these patterns</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2;">
+          <li>A bare status code with no body — client can't display anything</li>
+          <li>Raw PostgreSQL error text leaked to the client</li>
+          <li>Different shapes per route: <code>{message}</code> here, <code>{err}</code> there</li>
+          <li>Exposing a stack trace in production</li>
+        </ul>
+      </div>
+      <div class="callout callout-green">
+        <strong>Consistent error shape</strong>
+        Always <code>{ error: "human-readable message" }</code>. Optionally add <code>code</code> for machine-readable codes the frontend can <code>switch</code> on.
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Response examples</span></div>
+        <div class="terminal-body"><span class="cmt">// Good — consistent, human-readable</span>
+HTTP <span class="num">400</span>
+{ <span class="str">"error"</span>: <span class="str">"title and author are required"</span> }
+
+HTTP <span class="num">404</span>
+{ <span class="str">"error"</span>: <span class="str">"Book not found"</span> }
+
+HTTP <span class="num">403</span>
+{ <span class="str">"error"</span>: <span class="str">"You do not own this book"</span> }
+
+HTTP <span class="num">409</span>
+{ <span class="str">"error"</span>: <span class="str">"A book with that title already exists"</span> }
+
+
+<span class="cmt">// Optional — add machine-readable code</span>
+HTTP <span class="num">400</span>
+{
+  <span class="str">"error"</span>: <span class="str">"title and author are required"</span>,
+  <span class="str">"code"</span>:  <span class="str">"MISSING_FIELDS"</span>
+}
+
+
+<span class="cmt">// Catch pg UNIQUE violation and translate it</span>
+<span class="kw">if</span> (err.code === <span class="str">'23505'</span>) {
+  <span class="kw">throw new</span> <span class="fn">AppError</span>(<span class="str">'Title already exists'</span>, <span class="num">409</span>);
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 12 — STATUS CODES
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Reference</div>
+  <h2>HTTP Status Codes for APIs</h2>
+  <p style="margin-bottom:14px;">Use the most specific code that fits. Clients (and developers with curl) read these to understand what went wrong.</p>
+  <div class="cols cols-50-50" style="gap:24px; align-items:flex-start;">
+    <table>
+      <thead><tr><th>Code</th><th>Meaning</th><th>When to use</th></tr></thead>
+      <tbody>
+        <tr><td><strong>200</strong></td><td>OK</td><td>Successful GET, PATCH, DELETE</td></tr>
+        <tr><td><strong>201</strong></td><td>Created</td><td>Successful POST (return new resource)</td></tr>
+        <tr><td><strong>204</strong></td><td>No Content</td><td>Success with no response body (rare in REST APIs)</td></tr>
+        <tr><td><strong>400</strong></td><td>Bad Request</td><td>Invalid input, missing fields, wrong types</td></tr>
+        <tr><td><strong>401</strong></td><td>Unauthorized</td><td>Missing or invalid JWT</td></tr>
+        <tr><td><strong>403</strong></td><td>Forbidden</td><td>Authenticated, but not allowed to do this</td></tr>
+        <tr><td><strong>404</strong></td><td>Not Found</td><td>Resource does not exist (or you don't want to reveal it)</td></tr>
+        <tr><td><strong>409</strong></td><td>Conflict</td><td>Duplicate (UNIQUE constraint violation)</td></tr>
+        <tr><td><strong>422</strong></td><td>Unprocessable</td><td>Semantically invalid (structurally correct but fails business logic)</td></tr>
+        <tr><td><strong>500</strong></td><td>Server Error</td><td>Unhandled exception — always a bug to fix</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>401 vs 403</strong>
+        <strong>401</strong> means "I don't know who you are" — the client should log in. <strong>403</strong> means "I know who you are, and you are not allowed" — logging in again won't help.
+      </div>
+      <div class="callout callout-yellow">
+        <strong>404 for ownership checks</strong>
+        If a user requests <code>/api/books/42</code> and book 42 belongs to someone else, return 404 rather than 403. This avoids confirming that the resource exists at all.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 13 — QUIZ CHECKPOINT 2
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 14 — SECTION HEADER: ZOD
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide part-slide">
+  <div class="part-num">03</div>
+  <div class="slide-label" style="margin-bottom:6px;">Part 3 of 3</div>
+  <h2>Schema Validation with Zod</h2>
+  <p>Manual checks work, but they don't scale. Zod lets you define the shape of valid data once, then parse any input against it — with automatic error messages and TypeScript type inference.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 15 — ZOD BASICS
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Zod</div>
+  <h2>Defining a Schema</h2>
+  <p style="margin-bottom:14px;">Install once: <code>npm install zod</code>. Then describe the shape of your data with <code>z.object()</code> and a chain of validators.</p>
+  <div class="cols cols-55-45" style="gap:20px; align-items:flex-start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">schemas/book.js</span></div>
+      <div class="terminal-body"><span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">'zod'</span>;
+
+<span class="kw">export const</span> CreateBookSchema = z.<span class="fn">object</span>({
+  title:  z.<span class="fn">string</span>().<span class="fn">min</span>(<span class="num">1</span>, <span class="str">'Title cannot be empty'</span>),
+  author: z.<span class="fn">string</span>().<span class="fn">min</span>(<span class="num">1</span>, <span class="str">'Author cannot be empty'</span>),
+  genre:  z.<span class="fn">string</span>().<span class="fn">optional</span>(),
+  status: z.<span class="fn">enum</span>([<span class="str">'want_to_read'</span>, <span class="str">'reading'</span>, <span class="str">'read'</span>]).<span class="fn">optional</span>(),
+});
+
+<span class="kw">export const</span> UpdateBookSchema = z.<span class="fn">object</span>({
+  title:  z.<span class="fn">string</span>().<span class="fn">min</span>(<span class="num">1</span>).<span class="fn">optional</span>(),
+  author: z.<span class="fn">string</span>().<span class="fn">min</span>(<span class="num">1</span>).<span class="fn">optional</span>(),
+  genre:  z.<span class="fn">string</span>().<span class="fn">optional</span>(),
+  status: z.<span class="fn">enum</span>([<span class="str">'want_to_read'</span>, <span class="str">'reading'</span>, <span class="str">'read'</span>]).<span class="fn">optional</span>(),
+}).<span class="fn">refine</span>(
+  data => Object.<span class="fn">keys</span>(data).<span class="fn">length</span> > <span class="num">0</span>,
+  { message: <span class="str">'At least one field must be provided'</span> }
+);
+
+
+<span class="cmt">/* Zod validators at a glance */</span>
+<span class="cmt">// z.string()             — must be a string</span>
+<span class="cmt">// .min(1)                — at least 1 character</span>
+<span class="cmt">// .max(200)              — at most 200 characters</span>
+<span class="cmt">// .optional()            — field may be absent</span>
+<span class="cmt">// .default('want_to_read')— fill in if absent</span>
+<span class="cmt">// z.number().int().positive() — positive integer</span>
+<span class="cmt">// z.boolean()            — must be true or false</span>
+<span class="cmt">// z.enum([...])          — must be one of the values</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Schema = documentation + validation</strong>
+        A Zod schema is both the validation logic and the documentation for what your route accepts. Anyone reading <code>CreateBookSchema</code> immediately knows the contract.
+      </div>
+      <div class="callout callout-purple">
+        <strong>TypeScript bonus</strong>
+        If you are using TypeScript, <code>z.infer&lt;typeof CreateBookSchema&gt;</code> gives you a type for free. You never write a separate interface that can drift out of sync with your validation.
+      </div>
+      <div class="callout callout-yellow">
+        <strong>.refine() for business rules</strong>
+        <code>.refine()</code> runs custom logic that goes beyond type checking — like "at least one field must be present" for a PATCH route.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 16 — ZOD IN EXPRESS
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Zod</div>
+  <h2>Using safeParse in a Route</h2>
+  <p style="margin-bottom:14px;"><code>safeParse</code> returns an object with a <code>.success</code> flag instead of throwing. This keeps your validation clean without a surrounding try/catch.</p>
+  <div class="cols cols-55-45" style="gap:20px; align-items:flex-start;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">server.js — POST /api/books with Zod</span></div>
+      <div class="terminal-body"><span class="kw">import</span> { CreateBookSchema } <span class="kw">from</span> <span class="str">'./schemas/book.js'</span>;
+
+<span class="kw">router</span>.<span class="fn">post</span>(<span class="str">'/'</span>, authenticate, <span class="fn">asyncHandler</span>(<span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> result = CreateBookSchema.<span class="fn">safeParse</span>(req.body);
+
+  <span class="kw">if</span> (!result.success) {
+    <span class="kw">const</span> messages = result.error.issues
+      .<span class="fn">map</span>(i => i.message)
+      .<span class="fn">join</span>(<span class="str">', '</span>);
+    <span class="kw">throw new</span> <span class="fn">AppError</span>(messages, <span class="num">400</span>);
+  }
+
+  <span class="cmt">// result.data is now typed and guaranteed valid</span>
+  <span class="kw">const</span> { title, author, genre, status } = result.data;
+
+  <span class="kw">const</span> row = <span class="kw">await</span> <span class="fn">query</span>(
+    <span class="str">'INSERT INTO books (title, author, genre, status, user_id)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *'</span>,
+    [title, author, genre || <span class="kw">null</span>, status || <span class="str">'want_to_read'</span>, req.user.id]
+  );
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>(row.rows[<span class="num">0</span>]);
+}));
+
+
+<span class="cmt">/* parse() vs safeParse() */</span>
+<span class="cmt">// z.parse(data)       — throws ZodError on failure (needs try/catch)</span>
+<span class="cmt">// z.safeParse(data)   — returns { success, data } or { success, error }</span>
+<span class="cmt">// Prefer safeParse in Express routes — no extra try/catch needed</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-green">
+        <strong>result.data is trusted</strong>
+        After a successful safeParse, <code>result.data</code> has been coerced and validated. If a field had <code>.default('want_to_read')</code>, it is already filled in. You do not need to re-check anything before using it.
+      </div>
+      <div class="callout callout-blue">
+        <strong>Multiple errors at once</strong>
+        Zod collects all validation failures in <code>result.error.issues</code>. Joining them into a single message string gives the client all the problems in one response — better than returning one error at a time.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 17 — AI PROMPTING
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide">
+  <div class="slide-label">Building with AI</div>
+  <h2>Prompting for Validation &amp; Error Handling</h2>
+  <div class="cols cols-50-50" style="margin-top:16px; gap:20px; align-items:flex-start;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="prompt-block">
+        <div class="label">Prompt — Add Zod validation</div>
+        I have an Express route: POST /api/books with body fields title (required), author (required), genre (optional string), status (optional, must be one of: want_to_read, reading, read). Add Zod schema validation using safeParse. Return 400 with joined error messages if validation fails. Use my existing AppError class and asyncHandler. Show only the schema file and the updated route — do not rewrite the whole server.
+      </div>
+      <div class="prompt-block">
+        <div class="label">Prompt — Centralised error middleware</div>
+        Add Express error-handling middleware to my server.js. It should use err.status (defaulting to 500) and err.message. Log the full error only for 500s. Return JSON with a single "error" field. Show where in the file it should be registered relative to the routes.
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Give the AI your existing code</strong>
+        Paste your current route handler into the prompt. Ask for validation to be added to it — not a new version that might use different patterns. "Add to this route" is better than "write me a route".
+      </div>
+      <div class="callout callout-yellow">
+        <strong>Ask for targeted changes</strong>
+        AI tends to rewrite the whole file. Specify: "Show only the schema definition and the changed route — leave the rest of server.js unchanged." You can then apply the diff yourself.
+      </div>
+      <div class="callout callout-green">
+        <strong>Read every line</strong>
+        Generated validation code often uses slightly different field names or misses your allowed-values list. Check that the schema matches your actual DB column constraints before running it.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 18 — PROMPT REFLECTION
+═══════════════════════════════════════════════════════════════ -->
+
+<div class="slide" style="justify-content:center;">
+  <div style="max-width:640px; width:100%; display:flex; flex-direction:column; gap:20px;">
+    <div style="text-align:center; margin-bottom:4px;">
+      <div class="slide-label" style="margin-bottom:6px;">Prompt Reflection</div>
+      <h2 style="margin-bottom:0;">What did you actually build?</h2>
+    </div>
+    <div class="callout callout-purple">
+      <strong>Think back through this session</strong>
+      <ul style="padding-left:14px; margin-top:8px; line-height:2.2;">
+        <li>Which validation approach did you use — manual, helper function, or Zod? Why?</li>
+        <li>Did you add an error middleware? Where in server.js did it need to go?</li>
+        <li>Did asyncHandler eliminate try/catch from your routes?</li>
+        <li>What HTTP status codes did your routes return before today — and what do they return now?</li>
+        <li>If you prompted an AI for validation code, what did you have to fix before it was correct?</li>
+      </ul>
+    </div>
+    <div class="callout callout-blue">
+      <strong>The core shift</strong>
+      Validation is about drawing a line: everything inside the line is data you trust; everything outside is data you checked. Error handling is about communicating clearly when the line is crossed. Both are habits, not afterthoughts.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     NAV + SCRIPTS
+═══════════════════════════════════════════════════════════════ -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <button class="nav-btn" id="prev">&#8249;</button>
+  <span id="counter">1 / 18</span>
+  <button class="nav-btn" id="next">&#8250;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+  }
+  window.deckShow = show;
+
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') show(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                     show(current - 1);
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+</script>
+<script>
+window.DECK_NAME = 'validation-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'b6-1', type: 'practical', title: 'Add manual validation to POST /api/books',
+    desc: 'Add checks for required fields (title, author), type and length, and allowed status values. Return 400 with a descriptive error message if anything fails. Test with curl using missing fields, empty strings, and invalid status values.',
+    criteria: [
+      'POST with missing title returns 400 with a clear error message',
+      'POST with status="finished" returns 400 (not in allowed set)',
+      'POST with title of only spaces returns 400 (trim check)',
+      'Valid POST still returns 201 with the created book'
+    ] },
+  { id: 'b6-2', type: 'practical', title: 'Add AppError + asyncHandler + error middleware',
+    desc: 'Create AppError.js and asyncHandler.js. Register error-handling middleware at the bottom of server.js. Refactor at least two routes to use asyncHandler and throw AppError instead of inline try/catch. Verify the 404 case on GET /api/books/:id.',
+    criteria: [
+      'AppError class exists with message and status properties',
+      'asyncHandler wraps at least two route handlers',
+      'Error middleware registered after all routes in server.js',
+      'GET /api/books/9999 returns 404 JSON, not a 500 or empty body'
+    ] },
+  { id: 'b6-3', type: 'practical', title: 'Replace manual validation with Zod',
+    desc: 'Install Zod. Create a CreateBookSchema and UpdateBookSchema. Replace the manual validation in POST /api/books and PATCH /api/books/:id with safeParse calls. The UpdateBookSchema should reject requests with no fields at all using .refine().',
+    criteria: [
+      'npm install zod and schema file created',
+      'POST uses CreateBookSchema.safeParse — manual checks removed',
+      'PATCH uses UpdateBookSchema — .refine() rejects empty body',
+      'Error messages from Zod issues are joined and returned as a 400 response'
+    ] }
+];
+</script>
+<script>
+window.DECK_QUESTIONS = [
+  { checkpoint: 1, type: 'mcq', q: 'Which HTTP status code is correct for a missing required field in a POST request?',
+    options: ['400 Bad Request', '401 Unauthorized', '404 Not Found', '422 Unprocessable Entity'],
+    correct: 0, explanation: '400 is the standard code for malformed or invalid client input, including missing required fields.' },
+  { checkpoint: 1, type: 'mcq', q: 'You call !title in an Express route handler. Which of the following does this NOT catch?',
+    options: ['undefined', 'null', 'An empty string ""', 'A string with only spaces "   "'],
+    correct: 3, explanation: '!title catches undefined, null, and "". A string of spaces is truthy, so it passes — you need .trim().length === 0 to catch it.' },
+  { checkpoint: 1, type: 'mcq', q: 'Where should you validate request data from an HTTP client?',
+    options: ['Only in the database with constraints', 'Only on the client so the server is never called', 'In the route handler, before any database query', 'After the database query, once the data is saved'],
+    correct: 2, explanation: 'Validate at the route handler boundary, before touching the database. DB constraints are a safety net, not the primary validator.' },
+  { checkpoint: 2, type: 'mcq', q: 'How many arguments does Express error-handling middleware take?',
+    options: ['2 (req, res)', '3 (req, res, next)', '4 (err, req, res, next)', '5 (err, req, res, next, done)'],
+    correct: 2, explanation: 'Express identifies error-handling middleware specifically by the presence of four parameters. Omit one and it is treated as a regular middleware.' },
+  { checkpoint: 2, type: 'mcq', q: 'What does asyncHandler do?',
+    options: ['Makes async routes run faster', 'Automatically validates request bodies', 'Catches errors in async route functions and passes them to next()', 'Replaces Express with a Promise-based framework'],
+    correct: 2, explanation: 'asyncHandler wraps your async function and calls .catch(next) on the returned Promise, so any thrown error or rejected await reaches the error middleware.' },
+  { checkpoint: 2, type: 'mcq', q: 'What does Zod\'s safeParse() return when validation fails?',
+    options: ['It throws a ZodError exception', 'An object with { success: false, error: ZodError }', 'null', 'A 400 HTTP response automatically'],
+    correct: 1, explanation: 'safeParse never throws. It always returns an object. On failure, success is false and error contains the ZodError with an issues array.' }
+];
+</script>
+<script src="deck-extras.js"></script>
+</body>
+</html>

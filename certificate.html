@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Certificate — Learning Web Development by Building with AI</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #e3b341; --purple: #bc8cff;
+    --track-a: #3fb950; --track-b: #58a6ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; line-height: 1.7; }
+
+  /* ── Screen controls ── */
+  .screen-controls {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 100;
+  }
+  .screen-controls a { font-size: 13px; color: var(--muted); text-decoration: none; font-family: 'SF Mono','Fira Code',monospace; }
+  .screen-controls a:hover { color: var(--accent); }
+  .btn-print {
+    padding: 7px 18px; border-radius: 6px; font-size: 13px; font-weight: 600;
+    background: rgba(88,166,255,.15); border: 1px solid rgba(88,166,255,.4);
+    color: var(--accent); cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .btn-print:hover { background: rgba(88,166,255,.25); }
+
+  /* ── Certificate container ── */
+  .cert { max-width: 860px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  /* ── Header ── */
+  .cert-header {
+    text-align: center; padding: 40px 32px 36px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 28px;
+    border-top: 4px solid var(--accent);
+  }
+  .cert-course-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    font-family: 'SF Mono','Fira Code',monospace; color: var(--accent); margin-bottom: 18px;
+  }
+  .cert-headline { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .cert-headline span { color: var(--accent); }
+  .cert-sub { font-size: 15px; color: var(--muted); margin-bottom: 28px; }
+  .cert-name-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .cert-name-wrap { display: inline-flex; align-items: center; gap: 10px; }
+  #cert-name {
+    font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -0.3px;
+    border: none; border-bottom: 2px solid var(--border); background: transparent;
+    text-align: center; min-width: 280px; padding: 4px 8px; font-family: inherit;
+    outline: none; transition: border-color .2s;
+  }
+  #cert-name:focus { border-bottom-color: var(--accent); }
+  #cert-name::placeholder { color: #484f58; font-weight: 400; font-size: 18px; }
+  .cert-date { font-size: 13px; color: var(--muted); margin-top: 18px; font-family: 'SF Mono','Fira Code',monospace; }
+
+  /* ── Section headings ── */
+  .cert-section { margin-bottom: 28px; }
+  .cert-section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: 'SF Mono','Fira Code',monospace; color: var(--muted);
+    padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+  }
+
+  /* ── Module grid ── */
+  .module-grid { display: flex; flex-direction: column; gap: 8px; }
+  .module-row {
+    display: grid; grid-template-columns: 36px 1fr 110px 80px 36px;
+    align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px;
+  }
+  .module-row.not-started { opacity: 0.45; }
+  .mod-code {
+    font-size: 10px; font-weight: 700; font-family: 'SF Mono','Fira Code',monospace;
+    letter-spacing: 0.06em;
+  }
+  .mod-code.track-a { color: var(--track-a); }
+  .mod-code.track-b { color: var(--track-b); }
+  .mod-title { color: var(--text); font-weight: 500; }
+  .mod-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .mod-bar { flex: 1; height: 4px; background: #21262d; border-radius: 2px; overflow: hidden; }
+  .mod-bar-fill { height: 100%; border-radius: 2px; }
+  .mod-bar-fill.track-a { background: var(--track-a); }
+  .mod-bar-fill.track-b { background: var(--track-b); }
+  .mod-bar-label { font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted); white-space: nowrap; }
+  .mod-tasks {
+    font-size: 11px; font-family: 'SF Mono','Fira Code',monospace;
+    text-align: center;
+  }
+  .mod-tasks.partial { color: var(--yellow); }
+  .mod-tasks.full { color: var(--green); }
+  .mod-tasks.none { color: #484f58; }
+  .mod-reflect { font-size: 14px; text-align: center; }
+  .mod-reflect.has { color: var(--purple); }
+  .mod-reflect.none { color: #30363d; }
+
+  /* ── Reflections ── */
+  .reflection-cards { display: flex; flex-direction: column; gap: 12px; }
+  .reflection-card {
+    padding: 16px 18px; background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--purple); border-radius: 8px;
+  }
+  .reflection-card-meta {
+    font-size: 11px; font-weight: 700; font-family: 'SF Mono','Fira Code',monospace;
+    letter-spacing: 0.06em; margin-bottom: 8px; display: flex; gap: 10px; align-items: center;
+  }
+  .reflection-card-code { color: var(--purple); }
+  .reflection-card-title { color: var(--muted); }
+  .reflection-card-text {
+    font-size: 13px; color: #c9d1d9; line-height: 1.7;
+    font-style: italic; white-space: pre-wrap;
+  }
+  .no-reflections { font-size: 13px; color: #484f58; font-style: italic; text-align: center; padding: 20px; }
+
+  /* ── Theme toggle (in screen-controls bar) ── */
+  .btn-theme { padding: 7px 14px; border-radius: 6px; font-size: 15px; background: rgba(22,27,34,.6); border: 1px solid #30363d; color: #8b949e; cursor: pointer; font-family: inherit; transition: color .15s, border-color .15s; line-height: 1; }
+  .btn-theme:hover { color: #58a6ff; border-color: #58a6ff; }
+
+  /* ── Light theme ── */
+  body.light-theme { --bg: #f5f0e8; --surface: #faf8f4; --border: #d8cfc0; --text: #2d2520; --muted: #6e6660; --accent: #1d6fe8; --green: #1a7f37; --yellow: #946800; --purple: #6639d6; --track-a: #1a7f37; --track-b: #1d6fe8; }
+  body.light-theme .screen-controls { background: #f5f0e8; border-bottom-color: #d8cfc0; }
+  body.light-theme .mod-bar { background: #ddd6ca; }
+  body.light-theme .mod-tasks.none { color: #b5afa8; }
+  body.light-theme .mod-reflect.none { color: #ddd6ca; }
+  body.light-theme .reflection-card-text { color: #4a4540; }
+  body.light-theme .no-reflections { color: #b5afa8; }
+  body.light-theme #cert-name { border-bottom-color: #d8cfc0; }
+  body.light-theme #cert-name::placeholder { color: #b5afa8; }
+  body.light-theme .summ-ta::placeholder { color: #b5afa8; }
+  body.light-theme .btn-print { background: rgba(29,111,232,.12); border-color: rgba(29,111,232,.3); color: #1d6fe8; }
+  body.light-theme .btn-theme { background: rgba(245,240,232,.8); border-color: #d8cfc0; color: #6e6660; }
+  body.light-theme .btn-theme:hover { color: #1d6fe8; border-color: #1d6fe8; }
+
+  /* ── AI Declaration ── */
+  .ai-declaration {
+    background: rgba(88,166,255,.05); border: 1px solid rgba(88,166,255,.2);
+    border-left: 3px solid var(--accent); border-radius: 8px; padding: 20px 22px;
+  }
+  .ai-declaration p { font-size: 14px; color: var(--text); line-height: 1.8; }
+  .ai-declaration p + p { margin-top: 10px; }
+
+  /* ── Summative reflection ── */
+  .summ-fields { display: flex; flex-direction: column; gap: 16px; }
+  .summ-field { display: flex; flex-direction: column; gap: 6px; }
+  .summ-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .summ-ta {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit;
+    padding: 12px 16px; resize: vertical; line-height: 1.7; outline: none;
+    transition: border-color .2s;
+  }
+  .summ-ta:focus { border-color: var(--purple); }
+  .summ-ta::placeholder { color: #484f58; font-style: italic; }
+  .summ-paste-msg { font-size: 12px; color: var(--yellow); font-style: italic; min-height: 1.4em; opacity: 0; transition: opacity .2s; }
+  .summ-paste-msg.visible { opacity: 1; }
+
+  @media print {
+    .summ-ta { background: #f8f9fa; border-color: #ddd; color: #111; }
+    .summ-label { color: #111; }
+    .summ-paste-msg { display: none; }
+  }
+
+  /* ── Footer ── */
+  .cert-footer {
+    text-align: center; font-size: 12px; color: #484f58;
+    border-top: 1px solid var(--border); padding-top: 24px; margin-top: 32px;
+    line-height: 1.8;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PRINT STYLES
+  ════════════════════════════════════════════════════════════ */
+  @media print {
+    body { background: #fff; color: #111; }
+    .screen-controls { display: none; }
+    .cert { padding: 20px 0; }
+    .cert-header { background: #f8f9fa; border-color: #ccc; border-top-color: #1a5cbb; }
+    .cert-course-label { color: #1a5cbb; }
+    .cert-headline span { color: #1a5cbb; }
+    #cert-name { color: #111; border-bottom-color: #999; }
+    .cert-date { color: #555; }
+    .cert-section-title { color: #555; border-color: #ddd; }
+    .module-row { background: #f8f9fa; border-color: #ddd; }
+    .module-row.not-started { opacity: 0.35; }
+    .mod-title { color: #111; }
+    .mod-bar { background: #e0e0e0; }
+    .mod-bar-fill.track-a { background: #2a7a3a; }
+    .mod-bar-fill.track-b { background: #1a5cbb; }
+    .mod-code.track-a { color: #2a7a3a; }
+    .mod-code.track-b { color: #1a5cbb; }
+    .mod-tasks.partial { color: #9a7010; }
+    .mod-tasks.full { color: #2a7a3a; }
+    .reflection-card { background: #f8f9fa; border-color: #ddd; border-left-color: #7a4ab0; }
+    .reflection-card-code { color: #7a4ab0; }
+    .ai-declaration { background: #f0f4ff; border-color: #b0c0e0; border-left-color: #1a5cbb; }
+    .ai-declaration p { color: #111; }
+    .cert-footer { color: #999; border-color: #ddd; }
+    a { color: inherit !important; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-controls">
+  <a href="index.html">&#8592; Course home</a>
+  <button class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="cert">
+
+  <!-- ── Header ── -->
+  <div class="cert-header">
+    <div class="cert-course-label">Learning Web Development by Building with AI</div>
+    <div class="cert-headline">Learning <span>Progress</span> Certificate</div>
+    <div class="cert-sub">A personal record of self-directed study</div>
+    <div class="cert-name-label">This record belongs to</div>
+    <div class="cert-name-wrap">
+      <input id="cert-name" type="text" placeholder="Enter your name" maxlength="80" spellcheck="false">
+    </div>
+    <div class="cert-date" id="cert-date"></div>
+  </div>
+
+  <!-- ── Module progress ── -->
+  <div class="cert-section">
+    <div class="cert-section-title">Module Progress</div>
+    <div class="module-grid" id="module-grid"></div>
+  </div>
+
+  <!-- ── Reflections ── -->
+  <div class="cert-section">
+    <div class="cert-section-title">Module Reflections</div>
+    <div class="reflection-cards" id="reflection-cards"></div>
+  </div>
+
+  <!-- ── Summative reflection ── -->
+  <div class="cert-section">
+    <div class="cert-section-title">Summative Reflection</div>
+    <div class="summ-fields">
+      <div class="summ-field">
+        <label class="summ-label" for="summ-1">The single most important thing I learned</label>
+        <textarea id="summ-1" class="summ-ta" placeholder="Write your most important takeaway from this course as a whole&#8230;" rows="4"></textarea>
+        <div class="summ-paste-msg" id="summ-1-msg">Please write your reflection — pasting is disabled.</div>
+      </div>
+      <div class="summ-field">
+        <label class="summ-label" for="summ-2">What I would build next</label>
+        <textarea id="summ-2" class="summ-ta" placeholder="Describe the project or feature you want to build with these skills&#8230;" rows="4"></textarea>
+        <div class="summ-paste-msg" id="summ-2-msg">Please write your reflection — pasting is disabled.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AI Declaration ── -->
+  <div class="cert-section">
+    <div class="cert-section-title">AI Learning Declaration</div>
+    <div class="ai-declaration">
+      <p>This certificate documents a self-directed learning journey completed using the course <em>Learning Web Development by Building with AI</em>. AI coding assistants were used throughout as active learning tools — generating code that was then read, understood, tested, and critiqued by the learner.</p>
+      <p>The course methodology requires that the learner reads and evaluates every line of generated code rather than accepting output blindly. Prompt reflection exercises embedded in each module encouraged explicit consideration of what the AI produced, why, and what required human judgement or correction.</p>
+      <p>This is a personal learning record. It is not an accredited qualification.</p>
+    </div>
+  </div>
+
+  <div class="cert-footer">
+    Generated on <span id="footer-date"></span> from browser local storage &middot;
+    Learning Web Development by Building with AI &middot; Maynooth University
+  </div>
+
+</div>
+
+<script>
+  if (localStorage.getItem('svl_theme') === 'light') document.body.classList.add('light-theme');
+  (function() {
+    var themeBtn = document.createElement('button');
+    themeBtn.className = 'btn-theme';
+    themeBtn.title = 'Toggle light / dark theme';
+    function syncTheme() { themeBtn.textContent = document.body.classList.contains('light-theme') ? '\u263D' : '\u2600'; }
+    syncTheme();
+    themeBtn.addEventListener('click', function() {
+      var isLight = document.body.classList.toggle('light-theme');
+      localStorage.setItem('svl_theme', isLight ? 'light' : 'dark');
+      syncTheme();
+    });
+    var controls = document.querySelector('.screen-controls');
+    if (controls) controls.insertBefore(themeBtn, controls.querySelector('.btn-print'));
+  }());
+// ── Summative reflection fields ─────────────────────────────
+[['summ-1', 'svl_cert_reflect_overall'], ['summ-2', 'svl_cert_reflect_next']].forEach(function(pair) {
+  var ta = document.getElementById(pair[0]);
+  var key = pair[1];
+  var msg = document.getElementById(pair[0] + '-msg');
+  ta.value = localStorage.getItem(key) || '';
+  ta.addEventListener('input', function() { localStorage.setItem(key, ta.value); });
+  ta.addEventListener('paste', function(e) {
+    e.preventDefault();
+    msg.classList.add('visible');
+    clearTimeout(msg._t);
+    msg._t = setTimeout(function() { msg.classList.remove('visible'); }, 2800);
+  });
+});
+
+var MODULES = [
+  { code: 'A1', title: 'How the Web Works',       track: 'a', key: 'web-fundamentals-workshop'   },
+  { code: 'A2', title: 'Terminal & Shell',         track: 'a', key: 'shell-workshop'               },
+  { code: 'A3', title: 'Git & GitHub',             track: 'a', key: 'git-workshop'                 },
+  { code: 'A4', title: 'Database Concepts',        track: 'a', key: 'database-workshop'            },
+  { code: 'A5', title: 'Document Databases',       track: 'a', key: 'mongodb-workshop'             },
+  { code: 'A6', title: 'REST & HTTP APIs',         track: 'a', key: 'rest-workshop'                },
+  { code: 'B1', title: 'Prompt Engineering',       track: 'b', key: 'prompt-engineering-workshop'  },
+  { code: 'B2', title: 'CRUD API with AI',         track: 'b', key: 'ai-crud-workshop'             },
+  { code: 'B3', title: 'Authentication',           track: 'b', key: 'auth-workshop'                },
+  { code: 'B4', title: 'Testing with curl',        track: 'b', key: 'curl-testing-workshop'        },
+  { code: 'B5', title: 'Extending APIs',           track: 'b', key: 'extending-api-workshop'       }
+];
+
+// ── Name field ──────────────────────────────────────────────
+var nameInput = document.getElementById('cert-name');
+nameInput.value = localStorage.getItem('svl_learner_name') || '';
+nameInput.addEventListener('input', function() {
+  localStorage.setItem('svl_learner_name', nameInput.value);
+});
+
+// ── Dates ───────────────────────────────────────────────────
+var now = new Date();
+var dateStr = now.toLocaleDateString('en-IE', { year: 'numeric', month: 'long', day: 'numeric' });
+document.getElementById('cert-date').textContent = 'Generated ' + dateStr;
+document.getElementById('footer-date').textContent = dateStr;
+
+// ── Module grid ─────────────────────────────────────────────
+var grid = document.getElementById('module-grid');
+var reflections = [];
+
+MODULES.forEach(function(mod) {
+  var k = 'svl_' + mod.key;
+  var maxRaw   = parseInt(localStorage.getItem(k + '_max')          || '-1', 10);
+  var total    = parseInt(localStorage.getItem(k + '_total')        || '0',  10);
+  var assesD   = parseInt(localStorage.getItem(k + '_assess_done')  || '0',  10);
+  var assesT   = parseInt(localStorage.getItem(k + '_assess_total') || '3',  10);
+  var reflect  = (localStorage.getItem(k + '_reflect') || '').trim();
+
+  var started = maxRaw >= 0 && total > 0;
+  var pct     = started ? Math.min(100, Math.round((maxRaw + 1) / total * 100)) : 0;
+  var slideLabel = started ? (maxRaw + 1) + '\u202f/\u202f' + total : 'Not started';
+
+  var row = document.createElement('div');
+  row.className = 'module-row' + (started ? '' : ' not-started');
+
+  // Code
+  var code = document.createElement('div');
+  code.className = 'mod-code track-' + mod.track;
+  code.textContent = mod.code;
+  row.appendChild(code);
+
+  // Title
+  var title = document.createElement('div');
+  title.className = 'mod-title';
+  title.textContent = mod.title;
+  row.appendChild(title);
+
+  // Progress bar
+  var barWrap = document.createElement('div');
+  barWrap.className = 'mod-bar-wrap';
+  var bar = document.createElement('div');
+  bar.className = 'mod-bar';
+  var fill = document.createElement('div');
+  fill.className = 'mod-bar-fill track-' + mod.track;
+  fill.style.width = pct + '%';
+  bar.appendChild(fill);
+  var barLbl = document.createElement('div');
+  barLbl.className = 'mod-bar-label';
+  barLbl.textContent = slideLabel;
+  barWrap.appendChild(bar);
+  barWrap.appendChild(barLbl);
+  row.appendChild(barWrap);
+
+  // Tasks
+  var tasks = document.createElement('div');
+  var taskClass = assesD === 0 ? 'none' : assesD >= assesT ? 'full' : 'partial';
+  tasks.className = 'mod-tasks ' + taskClass;
+  tasks.title = assesD + ' of ' + assesT + ' tasks completed';
+  tasks.textContent = '\u2605\u202f' + assesD + '\u202f/\u202f' + assesT;
+  row.appendChild(tasks);
+
+  // Reflection
+  var ref = document.createElement('div');
+  ref.className = 'mod-reflect ' + (reflect ? 'has' : 'none');
+  ref.title = reflect ? 'Reflection written' : 'No reflection yet';
+  ref.textContent = '\u270e';
+  row.appendChild(ref);
+
+  grid.appendChild(row);
+
+  if (reflect) {
+    reflections.push({ code: mod.code, title: mod.title, text: reflect });
+  }
+});
+
+// ── Reflections ─────────────────────────────────────────────
+var refContainer = document.getElementById('reflection-cards');
+if (reflections.length === 0) {
+  var empty = document.createElement('div');
+  empty.className = 'no-reflections';
+  empty.textContent = 'No reflections written yet. Open a module deck, click \u2605, and write your response to the Reflect task.';
+  refContainer.appendChild(empty);
+} else {
+  reflections.forEach(function(r) {
+    var card = document.createElement('div');
+    card.className = 'reflection-card';
+    var meta = document.createElement('div');
+    meta.className = 'reflection-card-meta';
+    var codeSpan = document.createElement('span');
+    codeSpan.className = 'reflection-card-code';
+    codeSpan.textContent = r.code;
+    var titleSpan = document.createElement('span');
+    titleSpan.className = 'reflection-card-title';
+    titleSpan.textContent = r.title;
+    meta.appendChild(codeSpan);
+    meta.appendChild(titleSpan);
+    card.appendChild(meta);
+    var text = document.createElement('div');
+    text.className = 'reflection-card-text';
+    text.textContent = r.text.length > 600 ? r.text.slice(0, 600) + '\u2026' : r.text;
+    card.appendChild(text);
+    refContainer.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extending Your API — Pagination &amp; Relational Data</title>
+<style>
+  :root {
+    --bg: #0d1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --orange: #f0883e;
+    --purple: #bc8cff; --red: #f85149;
+    --term-bg: #010409; --term-text: #e6edf3;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow: hidden; }
+
+  /* ── Slides ── */
+  .slide { display: none; width: 100vw; height: 100vh; padding: 48px 64px 36px; flex-direction: column; background: var(--slide-bg); position: relative; overflow: hidden; }
+  .slide.active { display: flex; }
+  .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--purple)); }
+
+  /* ── Typography ── */
+  h1 { font-size: 2.8rem; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+  h2 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 6px; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+  p  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; background: rgba(88,166,255,.1); border: 1px solid rgba(88,166,255,.2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  ul li { font-size: 14px; color: var(--muted); padding-left: 16px; position: relative; line-height: 1.6; }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  ul li strong { color: var(--text); }
+
+  /* ── Slide label ── */
+  .slide-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+  /* ── Columns ── */
+  .cols { display: flex; gap: 24px; }
+  .cols-50-50 > * { flex: 1; }
+  .cols-55-45 > *:first-child { flex: 55; } .cols-55-45 > *:last-child { flex: 45; }
+  .cols-40-60 > *:first-child { flex: 40; } .cols-40-60 > *:last-child { flex: 60; }
+  .cols-60-40 > *:first-child { flex: 60; } .cols-60-40 > *:last-child { flex: 40; }
+
+  /* ── Callouts ── */
+  .callout { border-radius: 8px; padding: 12px 16px; font-size: 13px; border-left: 3px solid; line-height: 1.7; }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .callout ul { margin-top: 6px; }
+  .callout-blue   { background: rgba(88,166,255,.08);  border-color: var(--accent);  color: var(--muted); }
+  .callout-blue   strong { color: var(--accent); }
+  .callout-green  { background: rgba(63,185,80,.08);   border-color: var(--green);   color: var(--muted); }
+  .callout-green  strong { color: var(--green); }
+  .callout-yellow { background: rgba(210,153,34,.08);  border-color: var(--yellow);  color: var(--muted); }
+  .callout-yellow strong { color: var(--yellow); }
+  .callout-orange { background: rgba(240,136,62,.08);  border-color: var(--orange);  color: var(--muted); }
+  .callout-orange strong { color: var(--orange); }
+  .callout-purple { background: rgba(188,140,255,.08); border-color: var(--purple);  color: var(--muted); }
+  .callout-purple strong { color: var(--purple); }
+
+  /* ── Terminal ── */
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .terminal-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: #21262d; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red    { background: #ff5f57; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green  { background: #28c840; }
+  .terminal-label { font-size: 11px; color: var(--muted); margin-left: 6px; font-family: inherit; }
+  .terminal-body  { padding: 16px 20px; font-size: 12.5px; line-height: 1.85; color: var(--term-text); white-space: pre; overflow-x: auto; }
+  .terminal-body .prompt { color: var(--green); user-select: none; }
+  .terminal-body .cmt    { color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .str    { color: #a5d6ff; }
+  .terminal-body .kw     { color: var(--accent); font-weight: 600; }
+  .terminal-body .fn     { color: var(--yellow); }
+  .terminal-body .num    { color: var(--orange); }
+  .terminal-body .gr     { color: var(--green); }
+  .terminal-body .or     { color: var(--orange); }
+  .terminal-body .hi     { color: var(--accent); }
+  .terminal-body .pu     { color: var(--purple); }
+
+  /* ── File tree ── */
+  .filetree { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .filetree .dir  { color: var(--accent); font-weight: 600; }
+  .filetree .file { color: var(--term-text); }
+  .filetree .new  { color: var(--green); font-weight: 600; }
+  .filetree .note { color: #5c6370; font-style: italic; }
+
+  /* ── Diagram ── */
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 8px 12px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td code { font-size: 12px; }
+  td strong { color: var(--text); }
+
+  /* ── Prompt block ── */
+  .prompt-block { background: rgba(188,140,255,.06); border: 1px solid rgba(188,140,255,.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: var(--muted); line-height: 1.8; }
+  .prompt-block .label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--purple); margin-bottom: 8px; }
+
+  /* ── Title slide ── */
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 28px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  /* ── Part marker ── */
+  .part-slide { justify-content: center; align-items: flex-start; }
+  .part-slide .part-num { font-size: 7rem; font-weight: 800; color: rgba(88,166,255,.12); line-height: 1; letter-spacing: -6px; margin-bottom: 8px; }
+  .part-slide h2 { font-size: 2.4rem; }
+  .part-slide p  { font-size: 15px; margin-top: 10px; max-width: 520px; }
+
+  /* ── Nav ── */
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .filetree       { overflow: auto; max-height: min(45vh, 320px); }
+  .terminal-body, .diagram, .filetree { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar, .filetree::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track, .filetree::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb, .filetree::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover, .filetree::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 1 — TITLE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 1 — Extending Your API -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">Part 4 of 4</span>
+    <span class="tag">~75 min</span>
+    <span class="tag">Node.js + PostgreSQL</span>
+  </div>
+  <h1>Extending<br>Your API</h1>
+  <p style="font-size:1.2rem; color:var(--muted); margin-top:16px; max-width:560px; line-height:1.6;">
+    Pagination &amp; Relational Data — adding the features every production API needs
+  </p>
+  <div class="meta">
+    <span>Prerequisites: Parts 1–3 (Reading List API with JWT auth)</span>
+    <span>Reading List API running locally</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 2 — WHAT WE'RE ADDING
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 2 — Two Things Every Real API Needs -->
+<div class="slide">
+  
+<div class="slide-label">Overview</div>
+  <h2>Two Things Every Real API Needs</h2>
+  <div class="cols cols-50-50" style="margin-top:20px; gap:20px; align-items:flex-start;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Part 1 — Pagination</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Return results in pages, not all at once</li>
+          <li>Query params: <code>?page=2&amp;limit=20</code></li>
+          <li>Response includes <code>total</code> and <code>pages</code></li>
+          <li>Validate and cap inputs</li>
+        </ul>
+      </div>
+      <div class="callout callout-purple">
+        <strong>Part 2 — A Second Table</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Add a <code>reading_sessions</code> table</li>
+          <li>Foreign key links sessions → books</li>
+          <li>JOIN queries to combine data</li>
+          <li>Nested routes: <code>/api/books/:id/sessions</code></li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="diagram"><span class="hi">BEFORE:</span>  GET /api/books
+
+  Response: [ book, book, book, ... ]   <span class="or">← all 5,000 books</span>
+  No metadata. Slow. Unusable at scale.
+
+
+<span class="hi">AFTER:</span>   GET /api/books?page=2&amp;limit=20
+
+  Response: {
+    <span class="gr">data:  [ book, book, book, ... ]</span>   <span class="or">← 20 books</span>
+    <span class="gr">total: 5000,</span>
+    <span class="gr">page:  2,</span>
+    <span class="gr">limit: 20,</span>
+    <span class="gr">pages: 250</span>
+  }</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 3 — PART 1 MARKER
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 3 — Pagination -->
+<div class="slide part-slide">
+  <div class="part-num">01</div>
+  <h2>Pagination</h2>
+  <p>Every list endpoint that can grow should be paginated.<br>We'll add offset-based pagination to <code>GET /api/books</code>.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 4 — WHY PAGINATION MATTERS
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 4 — Why It Matters -->
+<div class="slide">
+  
+<div class="slide-label">Pagination</div>
+  <h2>Why It Matters</h2>
+  <div class="cols cols-50-50" style="margin-top:18px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-orange">
+        <strong>Without pagination</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>10 books: fine</li>
+          <li>10,000 books: DB fetches everything, sends 4 MB of JSON</li>
+          <li>Client renders a 10,000-row list — UI freezes</li>
+          <li>One request can take down a small server</li>
+        </ul>
+      </div>
+      <div class="callout callout-green">
+        <strong>With pagination</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>DB fetches 20 rows — fast regardless of total size</li>
+          <li>Client gets predictable, bounded responses</li>
+          <li>UI can show "Page 3 of 250" or an infinite scroll trigger</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue icon-key">
+        <strong>The rule</strong>
+        If an endpoint returns a list that could ever grow beyond a few dozen rows, paginate it from the start. Retrofitting pagination later breaks every existing client.
+      </div>
+      <div class="callout callout-blue">
+        <strong>Two parameters</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li><code>page</code> — which page (1-indexed)</li>
+          <li><code>limit</code> — how many per page (cap at 100)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 5 — OFFSET VS CURSOR
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 5 — Two Patterns — Which Should You Use? -->
+<div class="slide">
+  
+<div class="slide-label">Pagination</div>
+  <h2>Two Patterns — Which Should You Use?</h2>
+  <div style="margin-top:16px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Offset / Page</th>
+          <th>Cursor / Keyset</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SQL</strong></td>
+          <td><code>LIMIT 20 OFFSET 40</code></td>
+          <td><code>WHERE id &gt; 123 LIMIT 20</code></td>
+        </tr>
+        <tr>
+          <td><strong>URL</strong></td>
+          <td><code>?page=3&amp;limit=20</code></td>
+          <td><code>?after=abc123&amp;limit=20</code></td>
+        </tr>
+        <tr>
+          <td><strong>Random access</strong></td>
+          <td>✓ "Jump to page 7"</td>
+          <td>✗ Forward-only</td>
+        </tr>
+        <tr>
+          <td><strong>Stable on insert</strong></td>
+          <td>✗ New rows shift pages</td>
+          <td>✓ Consistent</td>
+        </tr>
+        <tr>
+          <td><strong>Performance at scale</strong></td>
+          <td>Slow at high offsets (full scan)</td>
+          <td>Fast at any depth (index seek)</td>
+        </tr>
+        <tr>
+          <td><strong>Complexity</strong></td>
+          <td>Low — easy to implement</td>
+          <td>Medium — cursor encoding needed</td>
+        </tr>
+        <tr>
+          <td><strong>Use when</strong></td>
+          <td>Admin tables, &lt; 100k rows, page numbers needed</td>
+          <td>Feeds, chat, millions of rows</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-blue" style="margin-top:14px; font-size:13px;">
+    <strong>We'll use offset pagination</strong> — it's the right fit for a reading list. If your dataset grows past ~500k rows, revisit cursor pagination.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 6 — THE PAGINATION PROMPT
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 6 — Giving the AI Enough Context -->
+<div class="slide">
+  
+<div class="slide-label">Pagination — AI Prompt</div>
+  <h2>Giving the AI Enough Context</h2>
+  <div class="cols cols-50-50" style="margin-top:16px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="prompt-block">
+        <div class="label">Prompt to AI</div>
+        I have a Reading List API (Node.js, Express, PostgreSQL).
+        The <code>GET /api/books</code> route currently returns all books as an array.
+
+        Add offset pagination using query parameters <code>?page</code> and <code>?limit</code>.
+
+        Requirements:
+        - Default: page=1, limit=20
+        - Validate: page must be &gt;= 1; limit between 1 and 100
+        - Return a JSON envelope: { data, total, page, limit, pages }
+        - Use a single SQL query with a window function to get the total count without a second round-trip
+        - Keep the existing <code>authenticate</code> middleware in place
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue">
+        <strong>Why this prompt works</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Names the stack (no guessing)</li>
+          <li>Describes the current state</li>
+          <li>Specifies validation rules explicitly</li>
+          <li>Defines the exact response shape</li>
+          <li>Mentions the window function — otherwise AI often suggests two queries</li>
+          <li>Reminds it not to break auth</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow">
+        <strong>Window function?</strong>
+        <code>COUNT(*) OVER()</code> runs alongside the SELECT and returns the total row count in every row — so one query gives you both the page of data and the total.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 7 — UPDATED ROUTE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 7 — The Updated GET /api/books Route -->
+<div class="slide">
+  
+<div class="slide-label">Pagination — Generated Code</div>
+  <h2>The Updated GET /api/books Route</h2>
+  <div class="cols cols-60-40" style="margin-top:14px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">server.js — GET /api/books</span></div>
+      <div class="terminal-body"><span class="hi">app</span>.<span class="fn">get</span>(<span class="str">'/api/books'</span>, authenticate, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="cmt">// 1. Parse and validate inputs</span>
+  <span class="kw">const</span> page  = Math.<span class="fn">max</span>(<span class="num">1</span>,   parseInt(req.query.page)  || <span class="num">1</span>);
+  <span class="kw">const</span> limit = Math.<span class="fn">min</span>(<span class="num">100</span>, Math.<span class="fn">max</span>(<span class="num">1</span>, parseInt(req.query.limit) || <span class="num">20</span>));
+  <span class="kw">const</span> offset = (page - <span class="num">1</span>) * limit;
+
+  <span class="cmt">// 2. One query: data + total via window function</span>
+  <span class="kw">const</span> { rows } = <span class="kw">await</span> <span class="fn">query</span>(`
+    SELECT *, <span class="gr">COUNT(*) OVER()</span> AS total_count
+    FROM books
+    ORDER BY created_at DESC
+    LIMIT $<span class="num">1</span> OFFSET $<span class="num">2</span>
+  `, [limit, offset]);
+
+  <span class="cmt">// 3. Extract total from first row (0 if empty)</span>
+  <span class="kw">const</span> total = rows[<span class="num">0</span>] ? parseInt(rows[<span class="num">0</span>].total_count) : <span class="num">0</span>;
+
+  <span class="cmt">// 4. Strip total_count from each book object</span>
+  res.<span class="fn">json</span>({
+    data:  rows.<span class="fn">map</span>(({ total_count, ...book }) =&gt; book),
+    total,
+    page,
+    limit,
+    pages: Math.<span class="fn">ceil</span>(total / limit)
+  });
+});</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue">
+        <strong>Math.max / Math.min</strong>
+        Clamps the input to valid range. <code>page=0</code> becomes 1. <code>limit=9999</code> becomes 100. No error thrown — silent correction.
+      </div>
+      <div class="callout callout-purple icon-key">
+        <strong>COUNT(*) OVER()</strong>
+        A window function — runs across all matching rows before LIMIT is applied. Each row gets the total count. One round-trip to the DB instead of two.
+      </div>
+      <div class="callout callout-green">
+        <strong>Destructuring strip</strong>
+        <code>({ total_count, ...book })</code> removes the internal <code>total_count</code> column before sending — clients never see it.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 8 — RESPONSE ENVELOPE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 8 — The Response Envelope Pattern -->
+<div class="slide">
+  
+<div class="slide-label">Pagination</div>
+  <h2>The Response Envelope Pattern</h2>
+  <div class="cols cols-50-50" style="margin-top:16px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-orange">
+        <strong>Plain array — avoid this</strong>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">response — no envelope</span></div>
+        <div class="terminal-body">[
+  { <span class="key">"id"</span>: <span class="num">1</span>, <span class="key">"title"</span>: <span class="str">"Clean Code"</span> },
+  { <span class="key">"id"</span>: <span class="num">2</span>, <span class="key">"title"</span>: <span class="str">"The Pragmatic Programmer"</span> }
+]
+
+<span class="or">Problem: no way to know if there are more pages.
+Client must guess or fetch until empty.</span></div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-green">
+        <strong>Envelope — the right shape</strong>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">response — with envelope</span></div>
+        <div class="terminal-body">{
+  <span class="key">"data"</span>: [
+    { <span class="key">"id"</span>: <span class="num">1</span>, <span class="key">"title"</span>: <span class="str">"Clean Code"</span> },
+    { <span class="key">"id"</span>: <span class="num">2</span>, <span class="key">"title"</span>: <span class="str">"The Pragmatic Programmer"</span> }
+  ],
+  <span class="gr">"total"</span>: <span class="num">47</span>,
+  <span class="gr">"page"</span>:  <span class="num">1</span>,
+  <span class="gr">"limit"</span>: <span class="num">20</span>,
+  <span class="gr">"pages"</span>: <span class="num">3</span>
+}
+
+<span class="gr">Client knows: 47 books, currently on page 1 of 3.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-blue icon-key" style="margin-top:14px; font-size:13px;">
+    The envelope adds metadata without changing the shape of individual book objects. Clients can render "Showing 1–20 of 47" or build page-number controls with no extra requests.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 9 — TESTING PAGINATION
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 9 — Testing Pagination with curl -->
+<div class="slide">
+  
+<div class="slide-label">Pagination — Testing</div>
+  <h2>Testing Pagination with curl</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">terminal</span></div>
+      <div class="terminal-body"><span class="cmt"># Set credentials — in real scripts, source these from your .env file</span>
+<span class="prompt">$ </span><span class="kw">export</span> EMAIL=alice@example.com PASS=correct-horse-battery
+<span class="prompt">$ </span>TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+  -H <span class="str">'Content-Type: application/json'</span> \
+  -d <span class="str">"{\"email\":\"$EMAIL\",\"password\":\"$PASS\"}"</span> \
+  | jq -r <span class="str">'.token'</span>)
+
+<span class="cmt"># First page (default: page=1, limit=20)</span>
+<span class="prompt">$ </span>curl -s http://localhost:3001/api/books \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> | jq <span class="str">'{total,page,limit,pages}'</span>
+
+<span class="cmt"># Second page, 5 per page</span>
+<span class="prompt">$ </span>curl -s <span class="str">"http://localhost:3001/api/books?page=2&amp;limit=5"</span> \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> | jq <span class="str">'.data | length'</span>
+
+<span class="cmt"># Verify input clamping — limit=999 should be treated as 100</span>
+<span class="prompt">$ </span>curl -s <span class="str">"http://localhost:3001/api/books?limit=999"</span> \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> | jq <span class="str">'.limit'</span>
+<span class="gr">100</span>
+
+<span class="cmt"># Last page — data may have fewer than limit items</span>
+<span class="prompt">$ </span>curl -s <span class="str">"http://localhost:3001/api/books?page=999"</span> \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> | jq <span class="str">'{page,pages,data_length: (.data|length)}'</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue">
+        <strong>What to verify</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li><code>total</code> matches your actual row count</li>
+          <li><code>pages</code> = ⌈total / limit⌉</li>
+          <li><code>data.length</code> ≤ limit always</li>
+          <li>Last page: <code>data.length</code> may be less than limit</li>
+          <li>Beyond last page: <code>data: []</code>, not an error</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow icon-gotcha">
+        <strong>Credentials in scripts</strong>
+        Never hardcode email/password. Export variables from your <code>.env</code> file:<br>
+        <code style="display:block; margin-top:6px;">export $(grep -v '^#' .env | xargs)</code>
+        Then use <code>$EMAIL</code> and <code>$PASS</code> in your curl commands.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 10 — PITFALLS
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 10 — Common Pitfalls to Check -->
+<div class="slide">
+  
+<div class="slide-label">Pagination — What AI Gets Wrong</div>
+  <h2>Common Pitfalls to Check</h2>
+  <div style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
+    <table>
+      <thead>
+        <tr><th>Issue</th><th>What happens</th><th>Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>No input validation</strong></td>
+          <td><code>page=-5</code> or <code>page=abc</code> causes a SQL error or NaN offset</td>
+          <td><code>Math.max(1, parseInt(...) || 1)</code></td>
+        </tr>
+        <tr>
+          <td><strong>No limit cap</strong></td>
+          <td><code>?limit=1000000</code> fetches the whole table — denial of service</td>
+          <td><code>Math.min(100, limit)</code></td>
+        </tr>
+        <tr>
+          <td><strong>No total count</strong></td>
+          <td>Client cannot compute number of pages</td>
+          <td>Include <code>total</code> in envelope; use window function or second query</td>
+        </tr>
+        <tr>
+          <td><strong>OFFSET at scale</strong></td>
+          <td><code>OFFSET 50000</code> forces PostgreSQL to scan and discard 50,000 rows first</td>
+          <td>Acceptable for &lt;100k rows; switch to cursor pagination beyond that</td>
+        </tr>
+        <tr>
+          <td><strong>Sorting inconsistency</strong></td>
+          <td>Without <code>ORDER BY</code>, page contents are non-deterministic</td>
+          <td>Always add <code>ORDER BY</code> — e.g., <code>ORDER BY created_at DESC</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout callout-blue" style="font-size:13px;">
+      <strong>Always ask the AI</strong> "What happens if page is 0, negative, or non-numeric?" — the answer reveals whether validation was included.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 11 — PART 2 MARKER
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 11 — A Second Table -->
+<div class="slide part-slide">
+  <div class="part-num">02</div>
+  <h2>A Second Table</h2>
+  <p>Real apps have multiple related tables. We'll add <code>reading_sessions</code> — a one-to-many relationship with <code>books</code> — and learn to JOIN, migrate safely, and build nested routes.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 12 — RELATIONSHIP TYPES
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 12 — Three Relationship Types -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data</div>
+  <h2>Three Relationship Types</h2>
+  <div class="cols cols-50-50" style="margin-top:14px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <table>
+        <thead>
+          <tr><th>Type</th><th>Example</th><th>Implementation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>One-to-one</strong></td>
+            <td>User → profile</td>
+            <td>FK in one table, UNIQUE constraint</td>
+          </tr>
+          <tr>
+            <td><strong>One-to-many</strong></td>
+            <td>Book → sessions</td>
+            <td>FK in the "many" table pointing to the "one"</td>
+          </tr>
+          <tr>
+            <td><strong>Many-to-many</strong></td>
+            <td>Books ↔ tags</td>
+            <td>Junction table with two FKs</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-blue">
+        <strong>We're building one-to-many</strong>
+        One book can have many reading sessions. Each session belongs to exactly one book.
+      </div>
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 200" style="width:100%;height:auto;display:block;border:1px solid #30363d;border-radius:8px;background:#010409;">
+      <defs>
+        <marker id="er-arrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+          <polygon points="0,0 10,4 0,8" fill="#ffa657"/>
+        </marker>
+      </defs>
+      <!-- books table -->
+      <rect x="8" y="8" width="168" height="152" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+      <rect x="8" y="8" width="168" height="30" rx="6" fill="#0d2044"/>
+      <rect x="8" y="30" width="168" height="8" fill="#0d2044"/>
+      <line x1="8" y1="38" x2="176" y2="38" stroke="#58a6ff" stroke-width="1"/>
+      <text x="92" y="28" text-anchor="middle" font-family="'SF Mono',monospace" font-size="13" font-weight="bold" fill="#58a6ff">books</text>
+      <text x="16" y="53" font-family="'SF Mono',monospace" font-size="12" fill="#d29922">id  SERIAL  PRIMARY KEY</text>
+      <line x1="8" y1="58" x2="176" y2="58" stroke="#21262d" stroke-width="1"/>
+      <text x="16" y="73" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">title      TEXT NOT NULL</text>
+      <text x="16" y="89" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">author     TEXT NOT NULL</text>
+      <text x="16" y="105" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">genre      TEXT</text>
+      <text x="16" y="121" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">status     VARCHAR(15)</text>
+      <text x="16" y="137" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">rating     SMALLINT</text>
+      <text x="16" y="153" font-family="'SF Mono',monospace" font-size="11" fill="#8b949e">…</text>
+      <!-- reading_sessions table -->
+      <rect x="264" y="8" width="168" height="183" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+      <rect x="264" y="8" width="168" height="30" rx="6" fill="#0d2416"/>
+      <rect x="264" y="30" width="168" height="8" fill="#0d2416"/>
+      <line x1="264" y1="38" x2="432" y2="38" stroke="#3fb950" stroke-width="1"/>
+      <text x="348" y="28" text-anchor="middle" font-family="'SF Mono',monospace" font-size="12" font-weight="bold" fill="#3fb950">reading_sessions</text>
+      <text x="272" y="53" font-family="'SF Mono',monospace" font-size="12" fill="#d29922">id  SERIAL  PRIMARY KEY</text>
+      <line x1="264" y1="58" x2="432" y2="58" stroke="#21262d" stroke-width="1"/>
+      <text x="272" y="73" font-family="'SF Mono',monospace" font-size="12" fill="#ffa657">book_id  INTEGER  FK</text>
+      <text x="272" y="89" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">started_at   DATE</text>
+      <text x="272" y="105" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">finished_at  DATE</text>
+      <text x="272" y="121" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">pages_read   INTEGER</text>
+      <text x="272" y="137" font-family="'SF Mono',monospace" font-size="11" fill="#c9d1d9">notes        TEXT</text>
+      <line x1="264" y1="146" x2="432" y2="146" stroke="#21262d" stroke-width="1"/>
+      <text x="272" y="161" font-family="'SF Mono',monospace" font-size="11" fill="#ffa657">ON DELETE CASCADE</text>
+      <text x="272" y="177" font-family="'SF Mono',monospace" font-size="11" fill="#8b949e">sessions deleted with book</text>
+      <!-- Relationship arrow: reading_sessions.book_id → books.id -->
+      <polyline points="264,68 220,68 220,48 176,48" stroke="#ffa657" stroke-width="1.5" fill="none" marker-end="url(#er-arrow)"/>
+      <text x="184" y="44" font-family="'SF Mono',monospace" font-size="11" fill="#ffa657">1</text>
+      <text x="250" y="64" font-family="'SF Mono',monospace" font-size="11" fill="#ffa657">N</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 13 — THE SCHEMA PROMPT
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 13 — Prompting for Schema Design -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data — AI Prompt</div>
+  <h2>Prompting for Schema Design</h2>
+  <div class="cols cols-50-50" style="margin-top:16px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="prompt-block">
+        <div class="label">Prompt to AI</div>
+        I'm extending my Reading List API (PostgreSQL).
+        The existing <code>books</code> table has: id SERIAL PK, title, author, genre, status, rating, notes, created_at.
+
+        Add a <code>reading_sessions</code> table so users can record when they read a book.
+
+        Requirements:
+        - <code>id</code> SERIAL PRIMARY KEY
+        - <code>book_id</code> INTEGER, FK → books(id), delete sessions when book is deleted
+        - <code>started_at</code> DATE, NOT NULL, default today
+        - <code>finished_at</code> DATE, nullable
+        - <code>pages_read</code> INTEGER, must be positive
+        - <code>notes</code> TEXT, optional
+        - <code>created_at</code> TIMESTAMPTZ default now
+        - CHECK: finished_at must be on or after started_at (or null)
+        - Add an index on book_id
+
+        Write only the SQL. Do NOT modify the books table.
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue">
+        <strong>Key phrases in the prompt</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>"delete sessions when book is deleted" → AI adds <code>ON DELETE CASCADE</code></li>
+          <li>"must be positive" → AI adds <code>CHECK (pages_read &gt; 0)</code></li>
+          <li>"or null" → AI keeps <code>finished_at</code> nullable in the CHECK</li>
+          <li>"Do NOT modify the books table" → prevents accidental ALTER statements</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow">
+        <strong>Describe intent, not SQL</strong>
+        "delete sessions when book is deleted" is clearer than asking for <code>ON DELETE CASCADE</code> by name. Let the AI translate intent to SQL — then verify it did so correctly.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 14 — GENERATED SCHEMA
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 14 — The reading_sessions Table -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data — Generated SQL</div>
+  <h2>The reading_sessions Table</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">schema.sql — new table</span></div>
+      <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="kw">CREATE TABLE IF NOT EXISTS</span> reading_sessions (
+  id          <span class="hi">SERIAL PRIMARY KEY</span>,
+
+  book_id     <span class="hi">INTEGER NOT NULL</span>
+              <span class="gr">REFERENCES books(id) ON DELETE CASCADE</span>,
+
+  started_at  <span class="hi">DATE NOT NULL</span> <span class="kw">DEFAULT</span> CURRENT_DATE,
+  finished_at <span class="hi">DATE</span>,               <span class="cmt">-- nullable: in-progress sessions</span>
+
+  pages_read  <span class="hi">INTEGER</span> <span class="kw">CHECK</span> (pages_read <span class="gr">&gt;</span> 0),
+  notes       <span class="hi">TEXT</span>,
+
+  created_at  <span class="hi">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> NOW(),
+
+  <span class="kw">CHECK</span> (finished_at <span class="kw">IS NULL</span>
+         <span class="kw">OR</span> finished_at <span class="gr">&gt;=</span> started_at)
+);
+
+<span class="kw">CREATE INDEX IF NOT EXISTS</span> idx_sessions_book
+  <span class="kw">ON</span> reading_sessions(book_id);</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-purple icon-key">
+        <strong>ON DELETE CASCADE</strong>
+        When a book is deleted, PostgreSQL automatically deletes all its sessions. Without this, deleting a book would fail with a FK violation (orphaned sessions).
+      </div>
+      <div class="callout callout-blue">
+        <strong>Two CHECK constraints</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li><code>pages_read &gt; 0</code> — no zero or negative page counts</li>
+          <li><code>finished_at &gt;= started_at</code> — can't finish before starting</li>
+          <li>Both enforced at the DB level — can't be bypassed by application code</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow">
+        <strong>Index on book_id</strong>
+        Queries like "give me all sessions for book #42" scan only that book's sessions. Without it, PostgreSQL reads the whole table.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 15 — SAFE MIGRATIONS
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 15 — Adding Tables Safely in Production -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data — Migrations</div>
+  <h2>Adding Tables Safely in Production</h2>
+  <div class="cols cols-50-50" style="margin-top:14px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-orange icon-gotcha">
+        <strong>Never do this in production</strong>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">dangerous</span></div>
+        <div class="terminal-body"><span class="or">DROP TABLE books;           -- deletes all data</span>
+<span class="or">CREATE TABLE books ( ... );  -- recreates from scratch</span>
+
+<span class="or">-- AI sometimes suggests this for "a clean rebuild"</span>
+<span class="or">-- Every real book record is gone forever</span></div>
+      </div>
+      <div class="prompt-block" style="margin-top:4px;">
+        <div class="label">Safer prompt</div>
+        I need to add a reading_sessions table to my production database that already has data. Write ONLY a <code>CREATE TABLE IF NOT EXISTS</code> statement. Do NOT drop, modify, or recreate any existing table.
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-green">
+        <strong>Safe migration — only add</strong>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">safe</span></div>
+        <div class="terminal-body"><span class="cmt">-- Run once against the live DB</span>
+<span class="gr">CREATE TABLE IF NOT EXISTS</span> reading_sessions (
+  ...
+);
+
+<span class="cmt">-- IF NOT EXISTS = safe to run multiple times</span>
+<span class="cmt">-- Existing data is never touched</span>
+
+<span class="cmt">-- To add a column to an existing table:</span>
+<span class="gr">ALTER TABLE</span> books
+  <span class="gr">ADD COLUMN IF NOT EXISTS</span>
+  page_count INTEGER;</div>
+      </div>
+      <div class="callout callout-blue icon-tip" style="margin-top:4px;">
+        <strong>Three safe primitives</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li><code>CREATE TABLE IF NOT EXISTS</code> — new table, idempotent</li>
+          <li><code>ALTER TABLE ... ADD COLUMN IF NOT EXISTS</code> — new column</li>
+          <li><code>CREATE INDEX IF NOT EXISTS</code> — new index</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 16 — NEW ROUTES
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 16 — Nested Routes for Sub-Resources -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data — Routes</div>
+  <h2>Nested Routes for Sub-Resources</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">server.js — session routes</span></div>
+      <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="cmt">// POST /api/books/:id/sessions — record a new session</span>
+<span class="hi">app</span>.<span class="fn">post</span>(<span class="str">'/api/books/:id/sessions'</span>, authenticate, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { started_at, finished_at, pages_read, notes } = req.body;
+  <span class="kw">const</span> { rows } = <span class="kw">await</span> <span class="fn">query</span>(
+    `<span class="kw">INSERT INTO</span> reading_sessions
+       (book_id, started_at, finished_at, pages_read, notes)
+     <span class="kw">VALUES</span> ($<span class="num">1</span>, $<span class="num">2</span>, $<span class="num">3</span>, $<span class="num">4</span>, $<span class="num">5</span>) <span class="kw">RETURNING</span> *`,
+    [req.params.id, started_at, finished_at, pages_read, notes]
+  );
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>(rows[<span class="num">0</span>]);
+});
+
+<span class="cmt">// GET /api/books/:id/sessions — list sessions for one book</span>
+<span class="hi">app</span>.<span class="fn">get</span>(<span class="str">'/api/books/:id/sessions'</span>, authenticate, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { rows } = <span class="kw">await</span> <span class="fn">query</span>(
+    `<span class="kw">SELECT</span> * <span class="kw">FROM</span> reading_sessions
+     <span class="kw">WHERE</span> book_id = $<span class="num">1</span>
+     <span class="kw">ORDER BY</span> started_at <span class="kw">DESC</span>`,
+    [req.params.id]
+  );
+  res.<span class="fn">json</span>(rows);
+});</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="callout callout-blue">
+        <strong>Nested route pattern</strong>
+        <code>/api/books/:id/sessions</code> makes the relationship explicit in the URL. The book ID comes from <code>req.params.id</code> and is passed as <code>$1</code> in the SQL — never from the request body where it could be spoofed.
+      </div>
+      <div class="callout callout-green">
+        <strong>RETURNING *</strong>
+        Returns the newly created session (with its generated <code>id</code> and <code>created_at</code>) in the same query — no need for a second SELECT.
+      </div>
+      <div class="callout callout-yellow">
+        <strong>Route ordering matters</strong>
+        These two routes must come <em>after</em> <code>GET /api/books/stats</code> and <em>before</em> no other routes that would conflict with <code>:id</code>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 17 — JOIN QUERIES
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 17 — Combining Tables with JOIN -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data — JOIN</div>
+  <h2>Combining Tables with JOIN</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="terminal" style="flex:1;">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">Enrich GET /api/books with session stats</span></div>
+        <div class="terminal-body"><span class="cmt">-- Upgrade the paginated books query to include session data</span>
+<span class="kw">SELECT</span>
+  b.*,
+  <span class="gr">COUNT</span>(rs.id)            <span class="kw">AS</span> session_count,
+  <span class="gr">MAX</span>(rs.finished_at)      <span class="kw">AS</span> last_read,
+  <span class="gr">SUM</span>(rs.pages_read)       <span class="kw">AS</span> total_pages_read,
+  <span class="gr">COUNT(*) OVER()</span>          <span class="kw">AS</span> total_count
+<span class="kw">FROM</span>   books b
+<span class="pu">LEFT JOIN</span> reading_sessions rs <span class="kw">ON</span> rs.book_id = b.id
+<span class="kw">GROUP BY</span> b.id
+<span class="kw">ORDER BY</span> b.created_at <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> $<span class="num">1</span> <span class="kw">OFFSET</span> $<span class="num">2</span>;</div>
+      </div>
+      <div class="terminal" style="flex:0 0 auto;">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">example enriched book object</span></div>
+        <div class="terminal-body">{
+  <span class="key">"id"</span>: <span class="num">1</span>, <span class="key">"title"</span>: <span class="str">"Clean Code"</span>, <span class="key">"status"</span>: <span class="str">"done"</span>,
+  <span class="gr">"session_count"</span>:    <span class="num">3</span>,
+  <span class="gr">"last_read"</span>:        <span class="str">"2026-02-14"</span>,
+  <span class="gr">"total_pages_read"</span>: <span class="num">464</span>
+}</div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-purple">
+        <strong>LEFT JOIN vs INNER JOIN</strong>
+        <code>LEFT JOIN</code> returns every book, even those with no sessions yet (<code>session_count = 0</code>). <code>INNER JOIN</code> would silently drop books with no sessions.
+      </div>
+      <div class="callout callout-blue">
+        <strong>GROUP BY b.id</strong>
+        Required when mixing aggregate functions (<code>COUNT</code>, <code>MAX</code>, <code>SUM</code>) with non-aggregate columns. PostgreSQL needs to know how to group the session rows per book.
+      </div>
+      <div class="callout callout-orange icon-gotcha">
+        <strong>Avoid the N+1 pattern</strong>
+        Don't fetch books, then loop and fetch sessions per book. That's N+1 queries. One JOIN does it in a single round-trip.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 18 — TESTING THE NEW ROUTES
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 18 — Testing Sessions with curl -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data — Testing</div>
+  <h2>Testing Sessions with curl</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">terminal</span></div>
+      <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="cmt"># 1. Add a book (if you don't have one)</span>
+<span class="prompt">$ </span>curl -s -X POST http://localhost:3001/api/books \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> \
+  -H <span class="str">'Content-Type: application/json'</span> \
+  -d <span class="str">'{"title":"Clean Code","author":"Robert Martin"}'</span> \
+  | jq <span class="str">'.id'</span>
+<span class="gr">1</span>
+
+<span class="cmt"># 2. Record a completed reading session for book 1</span>
+<span class="prompt">$ </span>curl -s -X POST http://localhost:3001/api/books/1/sessions \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> \
+  -H <span class="str">'Content-Type: application/json'</span> \
+  -d <span class="str">'{"started_at":"2026-01-10","finished_at":"2026-02-14","pages_read":464}'</span> \
+  | jq <span class="str">'{id, started_at, finished_at, pages_read}'</span>
+
+<span class="cmt"># 3. List all sessions for book 1</span>
+<span class="prompt">$ </span>curl -s http://localhost:3001/api/books/1/sessions \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> | jq <span class="str">'length'</span>
+
+<span class="cmt"># 4. Verify CHECK constraint — should return 400 or 500</span>
+<span class="prompt">$ </span>curl -s -X POST http://localhost:3001/api/books/1/sessions \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> \
+  -H <span class="str">'Content-Type: application/json'</span> \
+  -d <span class="str">'{"started_at":"2026-03-01","finished_at":"2026-02-01","pages_read":10}'</span> \
+  | jq <span class="str">'.error // .detail'</span>
+
+<span class="cmt"># 5. Delete book 1 — verify sessions are gone too (CASCADE)</span>
+<span class="prompt">$ </span>curl -s -X DELETE http://localhost:3001/api/books/1 \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span>
+<span class="prompt">$ </span>curl -s http://localhost:3001/api/books/1/sessions \
+  -H <span class="str">"Authorization: Bearer $TOKEN"</span> | jq <span class="str">'length'</span>
+<span class="gr">0</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue icon-hands-on">
+        <strong>Test the constraints</strong>
+        Don't just test the happy path. Verify:
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Finish before start → rejected</li>
+          <li>Negative pages → rejected</li>
+          <li>Session for non-existent book → FK error</li>
+          <li>Delete book → sessions gone</li>
+        </ul>
+      </div>
+      <div class="callout callout-green">
+        <strong>Test #5 is important</strong>
+        Confirms <code>ON DELETE CASCADE</code> is working. Without it, step 5 would either error on the DELETE or leave orphaned session rows.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 19 — MANY-TO-MANY PREVIEW
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 19 — Many-to-Many: Tags -->
+<div class="slide">
+  
+<div class="slide-label">Relational Data — Going Further</div>
+  <h2>Many-to-Many: Tags</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="terminal">
+        <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">schema — many-to-many</span></div>
+        <div class="terminal-body" style="max-height:min(72vh,560px);"><span class="cmt">-- Tag vocabulary</span>
+<span class="kw">CREATE TABLE</span> tags (
+  id   <span class="hi">SERIAL PRIMARY KEY</span>,
+  name <span class="hi">VARCHAR(50) UNIQUE NOT NULL</span>
+);
+
+<span class="cmt">-- Junction table: one row per book-tag pair</span>
+<span class="kw">CREATE TABLE</span> book_tags (
+  book_id <span class="hi">INTEGER REFERENCES</span> books(id) <span class="gr">ON DELETE CASCADE</span>,
+  tag_id  <span class="hi">INTEGER REFERENCES</span> tags(id)  <span class="gr">ON DELETE CASCADE</span>,
+  <span class="kw">PRIMARY KEY</span> (book_id, tag_id)   <span class="cmt">-- no duplicate pairs</span>
+);
+
+<span class="cmt">-- Get every book with its tags as an array</span>
+<span class="kw">SELECT</span> b.title,
+       <span class="gr">ARRAY_AGG</span>(t.name) <span class="kw">AS</span> tags
+<span class="kw">FROM</span>   books b
+<span class="pu">LEFT JOIN</span> book_tags bt <span class="kw">ON</span> bt.book_id = b.id
+<span class="pu">LEFT JOIN</span> tags t      <span class="kw">ON</span> t.id = bt.tag_id
+<span class="kw">GROUP BY</span> b.id;</div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue">
+        <strong>Why a junction table?</strong>
+        A book can have many tags ("fiction", "classic", "CS"). A tag can belong to many books. You can't store that in either table directly — you need a third table that holds pairs.
+      </div>
+      <div class="callout callout-purple">
+        <strong>ARRAY_AGG</strong>
+        PostgreSQL-specific aggregate that collects values into an array. Returns <code>["fiction","classic"]</code> as a JSON array — no post-processing needed.
+      </div>
+      <div class="callout callout-blue">
+        <strong>Composite primary key</strong>
+        <code>PRIMARY KEY (book_id, tag_id)</code> ensures each book-tag pair appears only once. No separate <code>id</code> column needed.
+      </div>
+      <div class="callout callout-yellow icon-hands-on">
+        <strong>Extend this yourself</strong>
+        Try prompting: "Add a tags system so each book can have multiple tags. Include routes to add and remove tags, and return tags in the book listing."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 20 — WHAT AI GETS WRONG + KEY TAKEAWAYS
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 20 — What AI Gets Wrong & Key Takeaways -->
+<div class="slide">
+  
+<div class="slide-label">Summary</div>
+  <h2>What AI Gets Wrong &amp; Key Takeaways</h2>
+  <div class="cols cols-50-50" style="margin-top:14px; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-orange">
+        <strong>What AI commonly gets wrong</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>No input validation on <code>page</code> / <code>limit</code></li>
+          <li>Omitting <code>ORDER BY</code> (non-deterministic pages)</li>
+          <li>Missing <code>ON DELETE CASCADE</code> → FK violations on delete</li>
+          <li>Suggesting <code>DROP TABLE</code> for migrations</li>
+          <li>N+1 queries (JS loop + per-row SELECT) instead of JOIN</li>
+          <li>No index on FK columns</li>
+          <li>INNER JOIN instead of LEFT JOIN (silently drops rows)</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-green">
+        <strong>Key takeaways</strong>
+        <ul style="padding-left:14px; margin-top:6px; line-height:2; color:var(--muted);">
+          <li>Paginate every list endpoint from the start</li>
+          <li>Validate and cap <code>page</code> and <code>limit</code> inputs</li>
+          <li>Always include <code>ORDER BY</code> with <code>LIMIT</code></li>
+          <li>Foreign keys enforce data integrity at the DB layer</li>
+          <li>Think carefully about CASCADE: right for sessions, maybe not for billing records</li>
+          <li>Index every FK column</li>
+          <li>JOIN at the DB layer — never loop in JavaScript</li>
+          <li>Migrate with <code>CREATE IF NOT EXISTS</code> — never DROP</li>
+          <li>Test constraints deliberately, not just the happy path</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="filetree" style="margin-top:14px; font-size:12px; line-height:1.7;"><span class="dir">reading-list-api/</span>  <span class="cmt" style="color:#5c6370; font-style:italic;">← updated after this workshop</span>
+├── <span class="file">server.js</span>           <span class="cmt" style="color:#5c6370; font-style:italic;">← paginated GET /api/books + session routes</span>
+└── <span class="new">schema.sql</span>          <span class="cmt" style="color:#5c6370; font-style:italic;">← reading_sessions table added</span></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════════════════════════ -->
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <button class="nav-btn" id="prev">&#8249;</button>
+  <span id="counter">1 / 20</span>
+  <button class="nav-btn" id="next">&#8250;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function show(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+  }
+  window.deckShow = show;
+
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') show(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                     show(current - 1);
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+</script>
+<script>
+window.DECK_NAME = 'extending-api-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'b5-1', type: 'practical', title: 'Add pagination',
+    desc: 'Add ?page= and ?limit= parameters to GET /api/books. Use LIMIT and OFFSET in SQL. Return total count alongside results so the client knows how many pages exist. Test with curl.',
+    criteria: [
+      'GET /api/books?page=2&limit=3 returns the correct subset of rows',
+      'The response includes a total count so the client can calculate page count',
+      'You tested the edge case: a page beyond the last row returns an empty array, not an error'
+    ] },
+  { id: 'b5-2', type: 'practical', title: 'Add a related table',
+    desc: 'Add a reviews table (book_id FK, rating 1-5, body text, created_at). Write a route that returns a book with its reviews joined. Handle the case where a book has no reviews.',
+    criteria: [
+      'The reviews table has a FK constraint referencing books with appropriate CASCADE rules',
+      'The JOIN route handles books with no reviews (empty array, not null or an error)',
+      'You tested with curl: create a book, add reviews, fetch the joined result'
+    ] },
+  { id: 'b5-3', type: 'reflect', title: 'Safe production migrations',
+    desc: 'If the demo app had 50,000 live rows, what migration strategy would you use to add a NOT NULL column safely? What could go wrong with ALTER TABLE on a live database, and how would you avoid downtime?',
+    criteria: [
+      'You mentioned adding the column as nullable first, backfilling, then adding NOT NULL',
+      'You identified a real risk: long-running ALTER TABLE can lock the table in PostgreSQL',
+      'You noted at least one tool or technique for zero-downtime migrations (pg_repack, pt-online-schema-change, or a deploy-in-phases approach)'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Add offset pagination to an existing API endpoint using SQL LIMIT and OFFSET with a JSON envelope',
+  'Construct window function queries to include total count without a second database round-trip',
+  'Add a foreign-key relationship between two database tables with appropriate CASCADE rules',
+  'Write JOIN queries to fetch related data across tables in a single database call',
+  'Apply safe migration discipline: add tables and columns without modifying or dropping existing data'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'ext-1a',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'A <code>GET /api/books</code> request with <code>?limit=999</code> returns <code>{"limit": 100, ...}</code>. Why?',
+    options: [
+      'PostgreSQL automatically caps query results at 100 rows',
+      'The route validates and silently clamps the limit to a maximum of 100',
+      'Express rejects requests with limit > 100 as a 400 error',
+      'The database has exactly 100 books'
+    ],
+    correct: 1,
+    explanation: 'The route uses Math.min(100, limit) to silently cap inputs at 100. This prevents a client from accidentally or maliciously triggering a full-table scan with ?limit=1000000. The server corrects the value rather than rejecting the request.',
+    reviewSlide: 'The Updated GET /api/books Route'
+  },
+  {
+    id: 'ext-1b',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What is the purpose of the response envelope pattern (returning <code>{ data, total, page, limit, pages }</code> instead of a plain array)?',
+    options: [
+      'It makes the JSON response smaller',
+      'It allows the client to know total count and page position without extra requests',
+      'It is required by the HTTP specification',
+      'It prevents SQL injection'
+    ],
+    correct: 1,
+    explanation: 'A plain array gives the client no context — it cannot know if there are more pages. The envelope wraps the data with metadata (total, pages) so the client can render "Page 2 of 12" or know when to stop fetching.',
+    reviewSlide: 'The Response Envelope Pattern'
+  },
+  {
+    id: 'ext-1c',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Which SQL construct allows you to get both the page of results and the total row count in a single query?',
+    options: [
+      'A subquery with SELECT COUNT(*)',
+      'UNION ALL with a COUNT query',
+      'COUNT(*) OVER() — a window function',
+      'A second query run in parallel'
+    ],
+    correct: 2,
+    explanation: 'COUNT(*) OVER() is a window function that runs across all matching rows before LIMIT is applied, adding the total count to every row returned. This avoids a second round-trip to the database.',
+    reviewSlide: 'The Updated GET /api/books Route'
+  },
+  {
+    id: 'ext-1d',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What happens if you send <code>GET /api/books?page=999</code> when only 3 pages of data exist?',
+    options: [
+      'The server returns a 404 Not Found error',
+      'The server returns a 400 Bad Request error',
+      'The response has <code>data: []</code> with the correct total — not an error',
+      'The server returns the last page of data'
+    ],
+    correct: 2,
+    explanation: 'Requesting a page beyond the last returns an empty data array, but the same envelope with the real total and pages values. This is the correct behaviour — the client can detect it is past the end without an error code.',
+    reviewSlide: 'Testing Pagination with curl'
+  },
+  {
+    id: 'ext-1e',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Why does offset pagination slow down at high page numbers (e.g. page 500 of a 10,000-row table), and what alternative pagination strategy avoids this?',
+    model: 'With OFFSET 10000, PostgreSQL must read and discard the first 10,000 rows before returning the requested page — even though those rows are never used. At high page numbers this becomes a full-table scan. Cursor-based (keyset) pagination avoids this by using WHERE id > last_seen_id LIMIT 20, which uses an index seek to jump directly to the right position, making performance consistent regardless of depth. The trade-off is that cursor pagination does not support random page access.',
+    reviewSlide: 'Two Patterns — Which Should You Use?'
+  },
+  {
+    id: 'ext-2a',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'You have a <code>books</code> table and a <code>reading_sessions</code> table. What does <code>ON DELETE CASCADE</code> on the <code>book_id</code> foreign key do?',
+    options: [
+      'It prevents books from being deleted if they have sessions',
+      'It sets book_id to NULL in sessions when a book is deleted',
+      'It automatically deletes all related sessions when a book is deleted',
+      'It creates a backup of sessions before deletion'
+    ],
+    correct: 2,
+    explanation: 'ON DELETE CASCADE tells PostgreSQL to automatically delete all reading_sessions rows whose book_id matches the deleted book. Without it, attempting to delete a book that has sessions would fail with a foreign key constraint violation.',
+    reviewSlide: 'The reading_sessions Table'
+  },
+  {
+    id: 'ext-2b',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Why should you use <code>CREATE TABLE IF NOT EXISTS</code> instead of <code>DROP TABLE; CREATE TABLE</code> for production migrations?',
+    options: [
+      'DROP TABLE is slower than IF NOT EXISTS',
+      'DROP TABLE deletes all existing data permanently; IF NOT EXISTS is safe to run multiple times without touching data',
+      'PostgreSQL does not support DROP TABLE',
+      'IF NOT EXISTS uses less memory'
+    ],
+    correct: 1,
+    explanation: 'DROP TABLE destroys all data in that table immediately and irreversibly. In production, this would delete real user data. CREATE TABLE IF NOT EXISTS creates the table only if it does not exist, leaving any existing table and its data completely untouched.',
+    reviewSlide: 'Adding Tables Safely in Production'
+  },
+  {
+    id: 'ext-2c',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'In the JOIN query enriching book data with session stats, why is <code>LEFT JOIN</code> used instead of <code>INNER JOIN</code>?',
+    options: [
+      'LEFT JOIN is faster than INNER JOIN',
+      'INNER JOIN does not support aggregate functions',
+      'LEFT JOIN returns books even if they have no sessions; INNER JOIN would silently drop them',
+      'The reading_sessions table requires LEFT JOIN due to its schema'
+    ],
+    correct: 2,
+    explanation: 'INNER JOIN only returns rows that have matching records in both tables. A book with no reading sessions would have no matching session row and would disappear from the results. LEFT JOIN returns all books and fills in NULL for session columns when there are no sessions.',
+    reviewSlide: 'Combining Tables with JOIN'
+  },
+  {
+    id: 'ext-2d',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'The nested route <code>POST /api/books/:id/sessions</code> takes the book id from <code>req.params.id</code> rather than <code>req.body</code>. Why is this important?',
+    options: [
+      'req.body is not available on POST requests',
+      'Taking the id from the URL prevents clients from spoofing a different book_id in the request body',
+      'PostgreSQL requires parameterised queries to use URL parameters',
+      'Express does not parse JSON bodies on nested routes'
+    ],
+    correct: 1,
+    explanation: 'If book_id were read from req.body, a malicious client could supply any id they chose, potentially creating sessions for books they do not own. Taking it from the URL parameter — which is part of the authenticated request path — keeps the association trustworthy.',
+    reviewSlide: 'Nested Routes for Sub-Resources'
+  },
+  {
+    id: 'ext-2e',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Describe the N+1 query problem and explain how a JOIN solves it. Give an example using the books and reading_sessions tables.',
+    model: 'The N+1 problem occurs when you fetch a list of N items and then make one additional query per item to fetch related data — totalling N+1 database queries. Example: fetch 20 books (1 query), then for each book fetch its sessions (20 more queries) = 21 queries total. As N grows the performance degrades proportionally. A JOIN solves this by combining books and reading_sessions in a single SQL query: SELECT b.*, COUNT(rs.id) AS session_count FROM books b LEFT JOIN reading_sessions rs ON rs.book_id = b.id GROUP BY b.id. This is always 1 query regardless of how many books or sessions exist.',
+    reviewSlide: 'Combining Tables with JOIN'
+  }
+];
+</script>
+</body>
+</html>

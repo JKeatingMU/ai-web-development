@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building a CRUD API with AI — Node.js + PostgreSQL Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --slide-bg: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --orange: #ffa657;
+    --term-bg: #010409;
+    --term-text: #c9d1d9;
+    --highlight: #1f6feb;
+    --prompt-bg: #0d1117;
+    --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0; display: none;
+    padding: 52px 72px; flex-direction: column;
+    justify-content: center; gap: 0;
+    background: var(--slide-bg); border: 1px solid var(--border);
+    margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px);
+    border-radius: 12px; overflow: hidden;
+  }
+  .slide.active { display: flex; }
+
+  /* ── Type ── */
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 30px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 28px; max-width: 700px; }
+  p { font-size: 16px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 13px; background: rgba(110,118,129,.1); padding: 2px 6px; border-radius: 4px; color: var(--orange); }
+
+  /* ── Section header ── */
+  .section-header { background: linear-gradient(135deg,#0d1525 0%,#090f1c 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  /* ── Terminal ── */
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 14px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 16px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .val    { color: var(--yellow); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+
+  /* ── AI Prompt block ── */
+  .prompt-block {
+    background: var(--prompt-bg); border: 1px solid var(--prompt-border);
+    border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0;
+  }
+  .prompt-bar {
+    background: rgba(56,139,253,.1); padding: 8px 16px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid rgba(56,139,253,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px;
+  }
+  .prompt-bar .ai-icon { font-size: 14px; }
+  .prompt-body { padding: 16px 20px; font-size: 14px; line-height: 1.75; color: var(--text); font-family: -apple-system, system-ui, sans-serif; }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 8px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 3px; }
+
+  /* ── Layout ── */
+  .cols { display: grid; gap: 20px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-60-40 { grid-template-columns: 60fr 40fr; }
+  .cols-40-60 { grid-template-columns: 40fr 60fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+
+  /* ── Callouts ── */
+  .callout { border-radius: 8px; padding: 14px 18px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue  { background: rgba(88,166,255,.07); border-color: var(--accent); color: var(--text); }
+  .callout-green { background: rgba(63,185,80,.07);  border-color: var(--green);  color: var(--text); }
+  .callout-yellow{ background: rgba(210,153,34,.07); border-color: var(--yellow); color: var(--text); }
+  .callout-red   { background: rgba(248,81,73,.07);  border-color: var(--red);    color: var(--text); }
+  .callout-purple{ background: rgba(188,140,255,.07);border-color: var(--purple); color: var(--text); }
+  .callout-orange{ background: rgba(255,166,87,.07); border-color: var(--orange); color: var(--text); }
+
+  /* ── Annotation list ── */
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-flag   { background: rgba(255,166,87,.15); color: var(--orange); }
+  .badge-method { background: rgba(88,166,255,.15);  color: var(--accent); }
+  .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); }
+  .badge-yellow { background: rgba(210,153,34,.15);  color: var(--yellow); }
+  .badge-num    { background: rgba(88,166,255,.2);   color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+
+  /* ── HTTP chips ── */
+  .method { display: inline-block; border-radius: 4px; font-size: 12px; font-weight: 700; padding: 2px 8px; font-family: monospace; }
+  .GET    { background: rgba(63,185,80,.2);  color: var(--green); }
+  .POST   { background: rgba(88,166,255,.2); color: var(--accent); }
+  .PATCH  { background: rgba(210,153,34,.2); color: var(--yellow); }
+  .DELETE { background: rgba(248,81,73,.2);  color: var(--red); }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 7px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.5; }
+  td code { font-size: 12px; }
+  td strong { color: var(--text); }
+
+  /* ── File tree ── */
+  .filetree { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .filetree .dir  { color: var(--accent); font-weight: 600; }
+  .filetree .file { color: var(--term-text); }
+  .filetree .note { color: #5c6370; font-style: italic; }
+
+  /* ── Title slide ── */
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 28px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  /* ── Diagram ── */
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .re { color: var(--red); }
+
+  /* ── Nav ── */
+  #nav { position: fixed; bottom: 28px; right: 38px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 38px; font-size: 11px; color: var(--muted); font-family: monospace; }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .filetree       { overflow: auto; max-height: min(45vh, 320px); }
+  .terminal-body, .diagram, .filetree { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar, .filetree::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track, .filetree::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb, .filetree::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover, .filetree::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 1 — TITLE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 1 — Building a CRUD API with AI Assistance -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">Node.js</span>
+    <span class="tag">Express</span>
+    <span class="tag">PostgreSQL</span>
+    <span class="tag">AI-Assisted Development</span>
+  </div>
+  
+<div class="slide-label">Workshop · Full-Stack API Development</div>
+  <h1>Building a CRUD API<br>with <span class="accent">AI Assistance</span></h1>
+  <p class="subtitle">
+    How to use an AI coding assistant to scaffold a real REST API —
+    understanding every line it generates, testing it with curl, and deploying it live.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Companion to: Testing Web APIs with curl</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 2 — WHAT WE'RE BUILDING
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 2 — What We're Building -->
+<div class="slide">
+  
+<div class="slide-label">The Goal</div>
+  <h2>What We're Building</h2>
+  <p>A <strong>Reading List API</strong> — a minimal REST API that stores books and lets you track your reading progress. One database table. Five routes. Fully working.</p>
+  <div class="cols cols-2" style="margin-top:14px; gap:20px;">
+    <div>
+      <table>
+        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+        <tr><td><code>id</code></td><td>integer</td><td><strong>Auto-assigned</strong> by the database</td></tr>
+        <tr><td><code>title</code></td><td>text</td><td>Required</td></tr>
+        <tr><td><code>author</code></td><td>text</td><td>Required</td></tr>
+        <tr><td><code>genre</code></td><td>text</td><td>Optional</td></tr>
+        <tr><td><code>status</code></td><td>varchar</td><td><code>want-to-read</code> / <code>reading</code> / <code>done</code></td></tr>
+        <tr><td><code>rating</code></td><td>integer</td><td>1–5, optional, set when done</td></tr>
+        <tr><td><code>notes</code></td><td>text</td><td>Optional free text</td></tr>
+        <tr><td><code>created_at</code></td><td>timestamp</td><td><strong>Auto-set</strong> by the database</td></tr>
+      </table>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue">
+        <strong>Why a reading list?</strong><br>
+        Simple enough to understand completely. Rich enough to show all CRUD operations, query filtering, and validation. The same patterns apply to any domain.
+      </div>
+      <div class="callout callout-green">
+        <strong>The full route set:</strong><br>
+        <code>GET /api/health</code> &nbsp;·&nbsp; <code>GET /api/books</code> &nbsp;·&nbsp;
+        <code>GET /api/books/:id</code> &nbsp;·&nbsp; <code>POST /api/books</code> &nbsp;·&nbsp;
+        <code>PATCH /api/books/:id</code> &nbsp;·&nbsp; <code>DELETE /api/books/:id</code> &nbsp;·&nbsp;
+        <code>GET /api/books/stats</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 3 — WHY THIS STACK
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 3 — Why Node.js + Express + PostgreSQL? -->
+<div class="slide">
+  
+<div class="slide-label">Technology Choices</div>
+  <h2>Why Node.js + Express + PostgreSQL?</h2>
+  <div class="cols cols-3" style="margin-top:16px; gap:16px;">
+    <div>
+      <div class="callout callout-green" style="height:100%;">
+        <strong style="font-size:16px;">Node.js</strong><br>
+        <span style="font-size:13px; color:var(--muted); display:block; margin-top:8px; line-height:1.7;">
+          JavaScript on the server. One language for front and back end. Huge ecosystem (npm). Excellent for I/O-heavy APIs — reading from a database, calling external APIs. Non-blocking I/O means it handles many simultaneous requests while waiting for database responses. The same V8 engine as Chrome — familiar if you already know browser JS. Not ideal for CPU-heavy computation.
+        </span>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="height:100%;">
+        <strong style="font-size:16px;">Express</strong><br>
+        <span style="font-size:13px; color:var(--muted); display:block; margin-top:8px; line-height:1.7;">
+          Minimal web framework — routes, middleware, request/response handling. Does almost nothing by default, which means you see exactly what is happening. A complete working API is a single file of ~50 lines. Middleware chains let you add logging, auth, or validation before any route handler. The most-used Node.js web framework in production worldwide.
+        </span>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-purple" style="height:100%;">
+        <strong style="font-size:16px;">PostgreSQL</strong><br>
+        <span style="font-size:13px; color:var(--muted); display:block; margin-top:8px; line-height:1.7;">
+          Production-grade relational database. Free, open source, battle-tested. Runs on every cloud platform. Full SQL — joins, aggregates, constraints, transactions. Enforces data types and constraints at the database level, so bad data cannot enter even if your application has a bug. The right default choice for nearly every new project.
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:14px;">
+    <strong>The alternative path:</strong> SQLite (file-based, zero setup) is great for prototyping and learning — no database server to install. But PostgreSQL is what you'll encounter in industry and research infrastructure. We use it here.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 4 — SECTION: PROMPTING STRATEGY
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 4 — Prompting an AI to Build This -->
+<div class="slide section-header">
+  <div class="pill">Part 1</div>
+  <h1>Prompting an AI to <span class="accent">Build This</span></h1>
+  <p class="subtitle">The quality of what an AI generates depends almost entirely on the quality of what you ask for. Prompt engineering is a learnable skill.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 5 — THE PROMPTING MINDSET
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 5 — What Makes a Good Scaffold Prompt? -->
+<div class="slide">
+  
+<div class="slide-label">Prompting Strategy</div>
+  <h2>What Makes a Good Scaffold Prompt?</h2>
+  <p>A vague prompt produces vague code. A precise prompt produces code you can actually use. The difference is specificity.</p>
+  <div class="cols cols-2" style="margin-top:14px; gap:18px;">
+    <div>
+      <div class="callout callout-red" style="margin-bottom:12px;">
+        <strong>Weak prompt:</strong><br>
+        <em style="color:var(--muted); font-style:italic; font-size:13px;">"Write me a Node.js REST API for a reading list."</em><br><br>
+        <span style="font-size:13px; color:var(--muted);">What you get: generic boilerplate, likely outdated patterns, probably uses CommonJS not ES modules, no validation, no error handling, fields you didn't want, fields you needed missing.</span>
+      </div>
+      <div class="callout callout-green">
+        <strong>Strong prompt includes:</strong>
+        <ul class="annot-list" style="margin-top:8px;">
+          <li><span class="badge badge-green">✓</span> <span>Exact stack + versions (Node, Express, pg)</span></li>
+          <li><span class="badge badge-green">✓</span> <span>Module system (ES modules — <code>type: module</code>)</span></li>
+          <li><span class="badge badge-green">✓</span> <span>Every field with type and constraints</span></li>
+          <li><span class="badge badge-green">✓</span> <span>Every route with its exact behaviour</span></li>
+          <li><span class="badge badge-green">✓</span> <span>What files to produce</span></li>
+          <li><span class="badge badge-green">✓</span> <span>What to <em>exclude</em> (no auth, no ORM, etc.)</span></li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-blue icon-tip">
+        <strong>The rule of thumb:</strong><br><br>
+        Imagine you are handing the specification to a junior developer. Would they know exactly what to build? If not, your prompt is not specific enough.<br><br>
+        An AI coding assistant is not a mind reader. It is a very fast, very capable developer who needs clear requirements.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 6 — THE SCAFFOLD PROMPT
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 6 — The Opening Prompt -->
+<div class="slide">
+  
+<div class="slide-label">Prompt 1 — Initial Scaffold</div>
+  <h2>The Opening Prompt</h2>
+  <div class="prompt-block" style="margin-top:12px;">
+    <div class="prompt-bar"><span class="ai-icon">✦</span> Prompt sent to Claude / ChatGPT / Gemini</div>
+    <div class="prompt-body">
+      I want to build a simple REST API using <em>Node.js, Express, and PostgreSQL (pg package)</em>.<br>
+      The app is a personal reading list tracker. A book has these fields:
+      <ul>
+        <li><em>title</em> (text, required) and <em>author</em> (text, required)</li>
+        <li><em>genre</em> (text, optional), <em>status</em> ('want-to-read' / 'reading' / 'done', default 'want-to-read')</li>
+        <li><em>rating</em> (integer 1–5, optional), <em>notes</em> (text, optional), <em>created_at</em> (auto-set)</li>
+      </ul>
+      Please generate these files: <em>package.json</em> (with dependencies), <em>db.js</em> (pg Pool),
+      <em>schema.sql</em> (CREATE TABLE with CHECK constraints), <em>server.js</em> (Express routes), <em>.env.example</em>.<br><br>
+      Routes needed: GET /api/health · GET /api/books (with optional ?status= filter) · GET /api/books/:id ·
+      POST /api/books · PATCH /api/books/:id (partial update with COALESCE) · DELETE /api/books/:id.<br><br>
+      Use <em>ES modules</em> (type: module). Keep it <em>minimal</em> — no auth, no ORM, no extra middleware.
+      Use <em>parameterised queries</em> ($1, $2…) throughout. PATCH should return the updated row (<em>RETURNING *</em>).
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:10px; font-size:13px;">
+    Notice: stack, module system, schema, every route, every file, explicit patterns (COALESCE, RETURNING *), and what to exclude — all specified upfront.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 7 — ITERATING
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 7 — Follow-up Prompts — Iterating on What You Got -->
+<div class="slide">
+  
+<div class="slide-label">Prompt 2 & 3 — Iteration</div>
+  <h2>Follow-up Prompts — Iterating on What You Got</h2>
+  <p>The first prompt gets you 80% of the way. Follow-up prompts refine and extend.</p>
+  <div class="cols cols-2" style="gap:16px; margin-top:10px;">
+    <div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span class="ai-icon">✦</span> Prompt 2 — Understanding</div>
+        <div class="prompt-body" style="font-size:13px;">
+          Can you explain the <em>COALESCE pattern</em> in the PATCH route?<br>
+          Why use <code>COALESCE($2, title)</code> instead of just <code>$2</code>?<br>
+          And why do we need <em>RETURNING *</em> at the end?
+        </div>
+      </div>
+      <div class="callout callout-blue icon-tip" style="margin-top:10px; font-size:13px;">
+        <strong>Always ask why.</strong> If you don't understand a pattern the AI generated, ask it to explain. This is how you learn — not just what to write, but why it works.
+      </div>
+    </div>
+    <div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span class="ai-icon">✦</span> Prompt 3 — Adding a Feature</div>
+        <div class="prompt-body" style="font-size:13px;">
+          Add a <em>GET /api/books/stats</em> route that returns in a single query:<br>
+          <ul>
+            <li>total book count</li>
+            <li>count by each status value</li>
+            <li>average rating for 'done' books</li>
+          </ul>
+          Use <em>COUNT(*) FILTER (WHERE ...)</em> rather than multiple queries.
+        </div>
+      </div>
+      <div class="callout callout-green" style="margin-top:10px; font-size:13px;">
+        <strong>Iterative development:</strong> Start with the skeleton, verify it works, then add features one by one. Never ask for everything at once.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 8 — SECTION: THE GENERATED CODE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 8 — Reading the Generated Code -->
+<div class="slide section-header">
+  <div class="pill">Part 2</div>
+  <h1>Reading the <span class="accent">Generated Code</span></h1>
+  <p class="subtitle">Understanding every file and every pattern — so you own the code, not just the output.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 9 — FILE STRUCTURE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 9 — What the AI Produces — Five Files -->
+<div class="slide">
+  
+<div class="slide-label">The Generated Output</div>
+  <h2>What the AI Produces — Five Files</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:20px;">
+    <div class="filetree">
+<span class="dir">reading-list-api/</span>
+├── <span class="file">package.json</span>     <span class="note">← project config + dependencies</span>
+├── <span class="file">.env.example</span>    <span class="note">← environment variable template</span>
+├── <span class="file">schema.sql</span>      <span class="note">← database table definition</span>
+├── <span class="file">db.js</span>           <span class="note">← PostgreSQL connection pool</span>
+└── <span class="file">server.js</span>       <span class="note">← Express app + all routes</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>Separation of concerns:</strong> database config lives in <code>db.js</code>, schema lives in <code>schema.sql</code>, routes live in <code>server.js</code>. Each file has one job.<br><br>
+        <strong>Key terms:</strong> A <strong>table</strong> stores rows of data with named, typed columns — like a spreadsheet with rules. A <strong>schema</strong> describes the table structure (columns, types, constraints). <strong>SQL</strong> (Structured Query Language) is the language for creating and querying databases. <strong>psql</strong> is PostgreSQL's command-line client for running SQL files.
+      </div>
+      <div class="callout callout-yellow" style="font-size:13px;">
+        <strong>Note:</strong> <code>.env</code> (your actual secrets) is never committed. <code>.env.example</code> (the template) is committed so other developers know what variables they need.
+      </div>
+      <div class="callout callout-green icon-hands-on" style="font-size:13px;">
+        Install and run:<br>
+        <code>npm install</code> → creates <code>node_modules/</code><br>
+        <code>cp .env.example .env</code> → fill in DATABASE_URL<br>
+        <code>psql $DATABASE_URL &lt; schema.sql</code> → create table<br>
+        <code>npm run dev</code> → start server<br>
+        <a class="breakout-link" href="http://localhost:3001/api/health" target="_blank">http://localhost:3001/api/health ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 10 — package.json
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 10 — package.json — Project Manifest -->
+<div class="slide">
+  
+<div class="slide-label">File: package.json</div>
+  <h2>package.json — Project Manifest</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">package.json</span></div>
+      <div class="terminal-body">{
+  <span class="key">"name"</span>: <span class="str">"reading-list-api"</span>,
+  <span class="key">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="key">"type"</span>: <span class="hi">"module"</span>,
+  <span class="key">"scripts"</span>: {
+    <span class="key">"start"</span>: <span class="str">"node server.js"</span>,
+    <span class="key">"dev"</span>:   <span class="str">"node --watch server.js"</span>
+  },
+  <span class="key">"dependencies"</span>: {
+    <span class="key">"dotenv"</span>:  <span class="str">"^16.4.5"</span>,
+    <span class="key">"express"</span>: <span class="str">"^4.18.2"</span>,
+    <span class="key">"pg"</span>:      <span class="str">"^8.11.3"</span>
+  }
+}</div>
+    </div>
+    <ul class="annot-list" style="margin-top:4px;">
+      <li class="icon-key"><span class="badge badge-yellow">"type": "module"</span> <span><strong>ES modules</strong> — enables <code>import</code>/<code>export</code> syntax. Without this, Node.js uses CommonJS (<code>require()</code>/<code>module.exports</code>). You'll see both in tutorials — always check which style a project uses before mixing them.</span></li>
+      <li><span class="badge badge-flag">--watch</span> <span><strong>Auto-restart</strong> — built into Node.js since v18. No need for nodemon. Every file save restarts the server.</span></li>
+      <li><span class="badge badge-green">dotenv</span> <span>Loads <code>.env</code> file into <code>process.env</code>. Keeps secrets out of your code.</span></li>
+      <li><span class="badge badge-green">pg</span> <span>The official PostgreSQL client for Node.js. Gives us a connection pool and parameterised queries.</span></li>
+    </ul>
+    <div class="callout callout-yellow" style="margin-top:10px; font-size:12px;">
+      <strong>ES modules vs CommonJS — the syntax difference:</strong>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;">
+        <div><code style="display:block; font-size:11px; line-height:1.8;">// ES modules ("type":"module")<br>import express from 'express';<br>export default app;</code></div>
+        <div><code style="display:block; font-size:11px; line-height:1.8;">// CommonJS (Node default)<br>const express = require('express');<br>module.exports = app;</code></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 11 — schema.sql
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 11 — schema.sql — The Database Table -->
+<div class="slide">
+  
+<div class="slide-label">File: schema.sql</div>
+  <h2>schema.sql — The Database Table</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">schema.sql</span></div>
+      <div class="terminal-body"><span class="kw">CREATE TABLE IF NOT EXISTS</span> books (
+  id         <span class="hi">SERIAL PRIMARY KEY</span>,
+  title      TEXT         <span class="hi">NOT NULL</span>,
+  author     TEXT         <span class="hi">NOT NULL</span>,
+  genre      TEXT,
+  status     VARCHAR(15)  <span class="hi">NOT NULL DEFAULT</span> <span class="str">'want-to-read'</span>
+               <span class="hi">CHECK</span> (status <span class="hi">IN</span> (<span class="str">'want-to-read'</span>,<span class="str">'reading'</span>,<span class="str">'done'</span>)),
+  rating     SMALLINT     <span class="hi">CHECK</span> (rating <span class="hi">BETWEEN</span> 1 <span class="hi">AND</span> 5),
+  notes      TEXT,
+  created_at TIMESTAMPTZ  <span class="hi">NOT NULL DEFAULT NOW()</span>
+);
+
+<span class="kw">CREATE INDEX IF NOT EXISTS</span> idx_books_status <span class="kw">ON</span> books(status);</div>
+    </div>
+    <ul class="annot-list" style="margin-top:4px;">
+      <li><span class="badge badge-yellow">SERIAL</span> <span><strong>Auto-increment</strong> integer. Database assigns the id — your app never needs to calculate one.</span></li>
+      <li><span class="badge badge-yellow">NOT NULL</span> <span>Database-level enforcement. Even if your app has a bug and tries to insert a null title, the database rejects it.</span></li>
+      <li><span class="badge badge-yellow">CHECK</span> <span><strong>Constraint</strong> — the database will reject any row with an invalid status or a rating outside 1–5. Defence in depth.</span></li>
+      <li><span class="badge badge-yellow">DEFAULT NOW()</span> <span><code>created_at</code> is set automatically. Your app never passes it — the database handles it.</span></li>
+      <li><span class="badge badge-yellow">INDEX</span> <span>Speeds up <code>WHERE status = ...</code> queries. Critical for filtered list endpoints on large tables.</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 12 — db.js
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 12 — db.js — The Database Connection -->
+<div class="slide">
+  
+<div class="slide-label">File: db.js</div>
+  <h2>db.js — The Database Connection</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:20px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">db.js</span></div>
+      <div class="terminal-body"><span class="kw">import</span> <span class="str">'dotenv/config'</span>;
+<span class="kw">import</span> pg <span class="kw">from</span> <span class="str">'pg'</span>;
+
+<span class="kw">const</span> { <span class="hi">Pool</span> } = pg;
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({
+  connectionString: process.env.<span class="hi">DATABASE_URL</span>
+});
+
+<span class="kw">export const</span> <span class="fn">query</span> = (text, params) => pool.<span class="fn">query</span>(text, params);</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>Connection Pool:</strong> a Pool maintains multiple open database connections and reuses them. Opening a new connection for every request is slow — a pool of 10 connections handles hundreds of concurrent requests efficiently.
+      </div>
+      <div class="callout callout-green" style="font-size:13px;">
+        <strong>The query helper:</strong> <code>export const query = ...</code> means every route file imports this one function. One place to change if you ever need to swap the database driver.
+      </div>
+      <div class="callout callout-yellow" style="font-size:13px;">
+        <strong>process.env.DATABASE_URL</strong> — the connection string is read from the environment, never hardcoded. On your laptop: from <code>.env</code>. In production: from Railway's environment variables.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 13 — server.js STRUCTURE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 13 — server.js — Structure Overview -->
+<div class="slide">
+  
+<div class="slide-label">File: server.js</div>
+  <h2>server.js — Structure Overview</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">server.js — skeleton</span></div>
+    <div class="terminal-body"><span class="kw">import</span> <span class="str">'dotenv/config'</span>;          <span class="comment">// load .env file</span>
+<span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>;     <span class="comment">// web framework</span>
+<span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">'./db.js'</span>;  <span class="comment">// our db helper</span>
+
+<span class="kw">const</span> app = <span class="fn">express</span>();
+<span class="kw">const</span> PORT = process.env.PORT || <span class="val">3001</span>;
+
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());  <span class="comment">// parse JSON request bodies automatically</span>
+
+app.<span class="fn">get</span>(<span class="str">'/api/health'</span>, ...);    <span class="comment">// health check</span>
+app.<span class="fn">get</span>(<span class="str">'/api/books'</span>, ...);     <span class="comment">// list all</span>
+app.<span class="fn">get</span>(<span class="str">'/api/books/stats'</span>, ...); <span class="comment">// aggregate stats  ← must come before /:id</span>
+app.<span class="fn">get</span>(<span class="str">'/api/books/:id'</span>, ...);  <span class="comment">// get one</span>
+app.<span class="fn">post</span>(<span class="str">'/api/books'</span>, ...);    <span class="comment">// create</span>
+app.<span class="fn">patch</span>(<span class="str">'/api/books/:id'</span>, ...);<span class="comment">// update</span>
+app.<span class="fn">delete</span>(<span class="str">'/api/books/:id'</span>, ...); <span class="comment">// delete</span>
+
+app.<span class="fn">listen</span>(PORT, () => console.<span class="fn">log</span>(<span class="str">`API running on port ${PORT}`</span>));</div>
+  </div>
+  <div class="callout callout-red icon-gotcha" style="margin-top:10px; font-size:13px;">
+    <strong>Route order matters:</strong> <code>/api/books/stats</code> must be defined <em>before</em> <code>/api/books/:id</code>. Express matches routes top-to-bottom — if <code>/:id</code> comes first, the string <code>"stats"</code> would be treated as an id, giving a database error.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 14 — THE ROUTES
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 14 — The Routes — GET and POST -->
+<div class="slide">
+  
+<div class="slide-label">File: server.js</div>
+  <h2>The Routes — GET and POST</h2>
+  <div class="cols cols-2" style="margin-top:10px; gap:16px;">
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">GET /api/books — list with optional filter</span></div>
+      <div class="terminal-body" style="max-height:min(45vh,320px);">app.<span class="fn">get</span>(<span class="str">'/api/books'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { status } = req.<span class="hi">query</span>;
+  <span class="kw">const</span> result = status
+    ? <span class="kw">await</span> <span class="fn">query</span>(
+        <span class="str">'SELECT * FROM books WHERE status = $1
+         ORDER BY created_at DESC'</span>,
+        [status]
+      )
+    : <span class="kw">await</span> <span class="fn">query</span>(
+        <span class="str">'SELECT * FROM books ORDER BY created_at DESC'</span>
+      );
+  res.<span class="fn">json</span>(result.rows);
+});</div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">POST /api/books — create</span></div>
+      <div class="terminal-body" style="max-height:min(45vh,320px);">app.<span class="fn">post</span>(<span class="str">'/api/books'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { title, author, genre,
+          status, notes } = req.<span class="hi">body</span>;
+  <span class="kw">if</span> (!title || !author) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">400</span>).<span class="fn">json</span>(
+      { error: <span class="str">'title and author required'</span> }
+    );
+  }
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(
+    <span class="str">`INSERT INTO books (title,author,genre,status,notes)
+     VALUES ($1,$2,$3,$4,$5) RETURNING *`</span>,
+    [title, author, genre ?? <span class="val">null</span>,
+     status ?? <span class="str">'want-to-read'</span>, notes ?? <span class="val">null</span>]
+  );
+  res.<span class="fn">status</span>(<span class="val">201</span>).<span class="fn">json</span>(result.rows[<span class="val">0</span>]);
+});</div>
+    </div>
+  </div>
+  <div class="cols cols-2" style="gap:10px; margin-top:6px;">
+    <div class="callout callout-blue" style="font-size:12px; padding:8px 14px;"><strong>req.query</strong> — URL query string params (<code>?status=reading</code>). <strong>req.body</strong> — parsed JSON body from the request.</div>
+    <div class="callout callout-green" style="font-size:12px; padding:8px 14px;"><strong>201 Created</strong> — correct status for a successful POST that creates a new resource. <code>200 OK</code> is for reads and updates.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 15 — COALESCE (PATCH)
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 15 — COALESCE — The Partial Update Pattern -->
+<div class="slide">
+  
+<div class="slide-label">Key Pattern — PATCH route</div>
+  <h2>COALESCE — The Partial Update Pattern</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">PATCH /api/books/:id — partial update</span></div>
+    <div class="terminal-body">app.<span class="fn">patch</span>(<span class="str">'/api/books/:id'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { title, author, genre, status, rating, notes } = req.<span class="hi">body</span>;
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(
+    `<span class="str">UPDATE books SET
+       title  = <span class="hi">COALESCE($2, title)</span>,
+       rating = <span class="hi">COALESCE($6, rating)</span>,  ... (all fields)
+     WHERE id = $1 RETURNING *</span>`,
+    [req.params.id, title, author, genre, status, rating, notes]
+  );
+  <span class="kw">if</span> (result.rows.length === <span class="val">0</span>) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="val">404</span>).<span class="fn">json</span>({ error: <span class="str">'Not found'</span> });
+  res.<span class="fn">json</span>(result.rows[<span class="val">0</span>]);
+});</div>
+  </div>
+  <div class="cols cols-2" style="gap:16px; margin-top:12px;">
+    <div class="callout callout-yellow icon-key">
+      <strong>COALESCE(A, B)</strong> returns A if A is not null, otherwise B.<br><br>
+      So <code>COALESCE($2, title)</code> means: <em>"use the new value if one was provided, otherwise keep the existing value."</em><br><br>
+      This is how partial updates work — the client only sends the fields it wants to change.
+    </div>
+    <div class="callout callout-blue icon-key">
+      <strong>RETURNING *</strong> tells PostgreSQL to send back the updated row after the UPDATE. Without it you'd have to make a second SELECT query to see the result.<br><br>
+      <strong>404 on empty result</strong> — if the id doesn't exist, <code>result.rows</code> is empty and we return 404 rather than silently succeeding.
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 16 — PARAMETERISED QUERIES
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 16 — Parameterised Queries — Why They Matter -->
+<div class="slide">
+  
+<div class="slide-label">Key Pattern — Security</div>
+  <h2>Parameterised Queries — Why They Matter</h2>
+  <p>Every query in this app uses <code>$1, $2, ...</code> placeholders. This is not just style — it is the difference between a secure app and one that can be destroyed.</p>
+  <div class="cols cols-2" style="margin-top:12px; gap:16px;">
+    <div>
+      <div class="callout callout-orange icon-gotcha" style="margin-bottom:12px;">
+        <strong>SQL Injection — the wrong way:</strong>
+        <div class="terminal" style="margin-top:10px;">
+          <div class="terminal-body" style="font-size:12px; padding:10px 14px;"><span class="comment">// NEVER DO THIS</span>
+<span class="kw">const</span> id = req.params.id;
+<span class="fn">query</span>(<span class="str">`SELECT * FROM books
+  WHERE id = <span class="hi">${id}</span>`</span>);</div>
+        </div>
+        <div style="font-size:13px; color:var(--muted); margin-top:8px;">If a user sends <code>id = "1 OR 1=1"</code> or <code>"1; DROP TABLE books"</code>, the injected SQL runs. Your entire database can be read or destroyed.</div>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-green">
+        <strong>Parameterised query — the right way:</strong>
+        <div class="terminal" style="margin-top:10px;">
+          <div class="terminal-body" style="font-size:12px; padding:10px 14px;"><span class="comment">// Always do this</span>
+<span class="kw">const</span> id = req.params.id;
+<span class="fn">query</span>(
+  <span class="str">'SELECT * FROM books WHERE id = <span class="hi">$1</span>'</span>,
+  [id]  <span class="comment">// passed separately</span>
+);</div>
+        </div>
+        <div style="font-size:13px; color:var(--muted); margin-top:8px;">The pg driver sends the query and the value separately to PostgreSQL. The value is <em>never interpreted as SQL</em>. Injection is impossible.</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-yellow icon-gotcha" style="margin-top:12px; font-size:14px;">
+    SQL injection is the #1 web application vulnerability worldwide (OWASP Top 10). Parameterised queries prevent it completely. <strong>Every single database query you ever write should use them.</strong>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 17 — STATS ROUTE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 17 — The Stats Route — Aggregation in SQL -->
+<div class="slide">
+  
+<div class="slide-label">Bonus Route</div>
+  <h2>The Stats Route — Aggregation in SQL</h2>
+  <p>One query, multiple aggregates. No post-processing in JavaScript needed — let the database do the work.</p>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">GET /api/books/stats</span></div>
+    <div class="terminal-body">app.<span class="fn">get</span>(<span class="str">'/api/books/stats'</span>, <span class="kw">async</span> (_req, res) => {
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(`
+    <span class="kw">SELECT</span>
+      <span class="fn">COUNT</span>(*)                                                <span class="kw">AS</span> total,
+      <span class="fn">COUNT</span>(*) <span class="hi">FILTER</span> (<span class="kw">WHERE</span> status = <span class="str">'want-to-read'</span>)  <span class="kw">AS</span> want_to_read,
+      <span class="fn">COUNT</span>(*) <span class="hi">FILTER</span> (<span class="kw">WHERE</span> status = <span class="str">'reading'</span>)        <span class="kw">AS</span> reading,
+      <span class="fn">COUNT</span>(*) <span class="hi">FILTER</span> (<span class="kw">WHERE</span> status = <span class="str">'done'</span>)           <span class="kw">AS</span> done,
+      <span class="fn">ROUND</span>(<span class="fn">AVG</span>(rating) <span class="hi">FILTER</span> (<span class="kw">WHERE</span> status = <span class="str">'done'</span>), 1) <span class="kw">AS</span> avg_rating
+    <span class="kw">FROM</span> books
+  `);
+  res.<span class="fn">json</span>(result.rows[<span class="val">0</span>]);
+});</div>
+  </div>
+  <div class="callout callout-blue" style="margin-top:12px; font-size:14px;">
+    <strong>FILTER (WHERE ...)</strong> — PostgreSQL extension to SQL that applies a condition to an aggregate. Counts only the rows matching the filter, without needing a GROUP BY or a subquery. One round-trip to the database, one result object.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 18 — SECTION: TESTING
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 18 — Testing Every Route with curl -->
+<div class="slide section-header">
+  <div class="pill">Part 3</div>
+  <h1>Testing Every Route<br>with <span class="accent">curl</span></h1>
+  <p class="subtitle">From health check to full CRUD cycle — verify the API works exactly as specified before deploying anything.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 19 — SETUP AND CREATE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 19 — Health Check + Creating Books -->
+<div class="slide">
+  
+<div class="slide-label">Testing — Create</div>
+  <h2>Health Check + Creating Books</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — health + POST</span></div>
+    <div class="terminal-body"><span class="comment"># 1. Confirm the server is running</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/health</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "status": "ok", "ts": "2026-03-04T10:00:00.000Z" }</span>
+
+<span class="comment"># 2. Add a book</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"title":"The Pragmatic Programmer","author":"Hunt & Thomas","genre":"CS"}'</span> \
+  | <span class="cmd">jq</span> <span class="str">.</span>
+
+<span class="out">{
+  "id": 1,
+  "title": "The Pragmatic Programmer",
+  "author": "Hunt &amp; Thomas",
+  "genre": "CS",
+  "status": "want-to-read",
+  "rating": null,
+  "notes": null,
+  "created_at": "2026-03-04T10:01:22.400Z"
+}</span>
+
+<span class="comment"># 3. Test required-field validation</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X POST</span> <span class="url">http://localhost:3001/api/books</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"title":"Incomplete"}'</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "title and author are required" }</span>   <span class="comment">← 400 Bad Request</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 20 — READ AND FILTER
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 20 — Reading Books — List, Filter, Single -->
+<div class="slide">
+  
+<div class="slide-label">Testing — Read</div>
+  <h2>Reading Books — List, Filter, Single</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — GET routes</span></div>
+    <div class="terminal-body"><span class="comment"># List all books</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books</span> | <span class="cmd">jq</span> <span class="str">'.[].title'</span>
+<span class="out">"The Pragmatic Programmer"
+"Clean Code"
+"Designing Data-Intensive Applications"</span>
+
+<span class="comment"># Filter by status — note the ?status= query parameter</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">"http://localhost:3001/api/books?status=reading"</span> | <span class="cmd">jq</span> <span class="str">'.[].title'</span>
+<span class="out">"Clean Code"</span>
+
+<span class="comment"># Get one book by id</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/1</span> | <span class="cmd">jq</span> <span class="str">{id,title,status}'</span>
+<span class="out">{ "id": 1, "title": "The Pragmatic Programmer", "status": "want-to-read" }</span>
+
+<span class="comment"># Test 404 — id that doesn't exist</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/999</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "Not found" }</span>   <span class="comment">← 404 Not Found</span>
+
+<span class="comment"># Stats aggregate</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/stats</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "total": "3", "want_to_read": "1", "reading": "1", "done": "1", "avg_rating": "4.0" }</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 21 — UPDATE AND DELETE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 21 — Updating and Deleting Books -->
+<div class="slide">
+  
+<div class="slide-label">Testing — Update and Delete</div>
+  <h2>Updating and Deleting Books</h2>
+  <div class="terminal" style="margin-top:12px;">
+    <div class="terminal-bar"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div><span class="terminal-label">bash — PATCH + DELETE</span></div>
+    <div class="terminal-body"><span class="comment"># Mark a book as done and give it a rating — only send the fields that change</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X PATCH</span> <span class="url">http://localhost:3001/api/books/1</span> \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"status":"done","rating":5,"notes":"Essential reading for every developer."}'</span> \
+  | <span class="cmd">jq</span> <span class="str">'{id,title,status,rating,notes}'</span>
+
+<span class="out">{
+  "id": 1,
+  "title": "The Pragmatic Programmer",
+  "status": "done",
+  "rating": 5,
+  "notes": "Essential reading for every developer."
+}</span>   <span class="comment">← title, author, genre unchanged (COALESCE at work)</span>
+
+<span class="comment"># Delete a book</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="flag">-X DELETE</span> <span class="url">http://localhost:3001/api/books/3</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "deleted": 3 }</span>
+
+<span class="comment"># Confirm it's gone</span>
+<span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-s</span> <span class="url">http://localhost:3001/api/books/3</span> | <span class="cmd">jq</span> <span class="str">.</span>
+<span class="out">{ "error": "Not found" }</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 22 — SECTION: DEPLOYMENT
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 22 — Deployment — Live in 10 Minutes -->
+<div class="slide section-header">
+  <div class="pill">Part 4</div>
+  <h1>Deployment — <span class="accent">Live in 10 Minutes</span></h1>
+  <p class="subtitle">From a working local API to a public URL. Railway makes this as frictionless as it gets.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 23 — RAILWAY SETUP
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 23 — Deploying to Railway — Step by Step -->
+<div class="slide">
+  
+<div class="slide-label">Deployment — Railway</div>
+  <h2>Deploying to Railway — Step by Step</h2>
+  <div class="cols cols-2" style="margin-top:14px; gap:18px;">
+    <ul class="annot-list" style="gap:14px;">
+      <li><span class="badge badge-num">1</span> <span><strong>Push to GitHub</strong> — <code>git init</code>, <code>git add .</code>, <code>git commit -m "initial"</code>, push to a new repo. Railway deploys from git.</span></li>
+      <li><span class="badge badge-num">2</span> <span><strong>Create a Railway project</strong> — railway.app → New Project → Deploy from GitHub repo. Select your repository.</span></li>
+      <li><span class="badge badge-num">3</span> <span><strong>Add a PostgreSQL plugin</strong> — in Railway, click + Add Plugin → PostgreSQL. Railway creates a database and sets <code>DATABASE_URL</code> automatically.</span></li>
+      <li><span class="badge badge-num">4</span> <span><strong>Run the schema</strong> — in Railway's PostgreSQL panel, open the query console and run the contents of <code>schema.sql</code>.</span></li>
+      <li><span class="badge badge-num">5</span> <span><strong>Set the start command</strong> — Railway auto-detects Node.js and runs <code>npm start</code>. Your <code>package.json</code> already defines this.</span></li>
+      <li><span class="badge badge-num">6</span> <span><strong>Generate a public domain</strong> — in Railway, Settings → Domains → Generate Domain. Your API is now live at <code>https://your-app.railway.app</code>.</span></li>
+    </ul>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>Why Railway?</strong><br>
+        Free tier for small projects. No Docker required. Automatic deploys on every git push. Built-in PostgreSQL plugin. Environment variables injected automatically.
+      </div>
+      <div class="callout callout-yellow" style="font-size:13px;">
+        <strong>What Railway injects automatically:</strong><br>
+        <code>DATABASE_URL</code> — full PostgreSQL connection string<br>
+        <code>PORT</code> — the port your app must listen on<br><br>
+        This is why <code>process.env.PORT || 3001</code> is important — on Railway the port is assigned by the platform, not fixed at 3001.
+      </div>
+      <div class="callout callout-green icon-hands-on" style="font-size:13px;">
+        <strong>After deploy — test immediately:</strong><br>
+        <code>curl -s https://your-app.railway.app/api/health | jq .</code><br>
+        <a class="breakout-link" href="http://localhost:3001/api/health" target="_blank">http://localhost:3001/api/health ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 24 — ENV VARS IN PRODUCTION
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 24 — The .env Pattern — Local vs Production -->
+<div class="slide">
+  
+<div class="slide-label">Deployment — Environment Variables</div>
+  <h2>The .env Pattern — Local vs Production</h2>
+  <div class="diagram" style="margin-top:16px; font-size:13px;">
+<span class="hi">Development (your laptop)</span>            <span class="hi">Production (Railway)</span>
+
+  <span class="gr">.env</span> file on disk                  Environment variables
+  (never committed to git)            set in Railway dashboard
+
+  DATABASE_URL=postgresql://...       DATABASE_URL=  ← injected by PostgreSQL plugin
+  PORT=3001                           PORT=          ← injected by Railway platform
+
+  <span class="pu">process.env.DATABASE_URL</span>            <span class="pu">process.env.DATABASE_URL</span>
+       ↑                                    ↑
+  <span class="ye">Same code reads from process.env in both environments.</span>
+  <span class="ye">The source of the value changes — the code does not.</span>
+  </div>
+  <div class="cols cols-2" style="gap:14px; margin-top:14px;">
+    <div class="callout callout-blue icon-gotcha" style="font-size:13px;">
+      <strong>The .gitignore rule:</strong><br>
+      Always add <code>.env</code> to <code>.gitignore</code>. Committing <code>.env</code> to GitHub exposes your database credentials publicly — a serious security incident.
+    </div>
+    <div class="callout callout-green icon-tip" style="font-size:13px;">
+      <strong>The .env.example rule:</strong><br>
+      Always commit <code>.env.example</code> — a template showing which variables are needed, with placeholder values. This tells the next developer (or your future self) what to fill in.
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 25 — SECTION: THE BIGGER PICTURE
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 25 — The Bigger Picture -->
+<div class="slide section-header">
+  <div class="pill">Part 5</div>
+  <h1>The <span class="accent">Bigger Picture</span></h1>
+  <p class="subtitle">What AI-assisted development actually looks like — and what it means to be a developer in this era.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 26 — THE ACTUAL WORKFLOW
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 26 — What AI-Assisted Development Actually Looks Like -->
+<div class="slide">
+  
+<div class="slide-label">The Bigger Picture</div>
+  <h2>What AI-Assisted Development Actually Looks Like</h2>
+  <div class="diagram" style="margin-top:10px; font-size:13px; line-height:1.65; max-height:none; overflow:visible;">
+ <span class="hi">You define requirements</span>               Clear, specific prompt
+         ↓
+ <span class="pu">AI generates scaffold</span>                package.json, db.js, schema.sql, server.js
+         ↓
+ <span class="hi">You read and understand it</span>            Every line. Ask AI to explain what you don't get.
+         ↓
+ <span class="gr">You test it</span>                          curl: health → POST → GET → PATCH → DELETE
+         ↓
+ <span class="hi">You verify behaviour</span>                 Does the 400 fire? Does COALESCE work? Does 404 return?
+         ↓
+ <span class="ye">You iterate</span>                          "Add stats route." "Add pagination." "Add input sanitisation."
+         ↓
+ <span class="gr">You deploy</span>                           Railway. Test again on the live URL.
+  </div>
+  <div class="callout callout-yellow icon-tip" style="margin-top:8px; font-size:13px;">
+    Notice where the AI sits: it handles the <em>typing</em>. You handle the <em>thinking</em> — requirements, verification, understanding, judgement. The developer who understands the code is the one who can fix it when something goes wrong.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 27 — WHAT AI IS GOOD AND BAD AT
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 27 — What AI Does Well — and Where It Falls Short -->
+<div class="slide">
+  
+<div class="slide-label">The Bigger Picture</div>
+  <h2>What AI Does Well — and Where It Falls Short</h2>
+  <div class="cols cols-2" style="margin-top:16px; gap:18px;">
+    <div>
+      <div class="callout callout-green">
+        <strong>AI is excellent at:</strong>
+        <ul class="annot-list" style="margin-top:10px; gap:8px;">
+          <li><span class="badge badge-green">✓</span> <span>Boilerplate and scaffold — the skeleton you'd write the same way every time</span></li>
+          <li><span class="badge badge-green">✓</span> <span>Known patterns — parameterised queries, COALESCE, RETURNING *, connection pools</span></li>
+          <li><span class="badge badge-green">✓</span> <span>Explaining code it generated — often clearer than documentation</span></li>
+          <li><span class="badge badge-green">✓</span> <span>Translating requirements into SQL</span></li>
+          <li><span class="badge badge-green">✓</span> <span>Adding features incrementally when the structure is already clear</span></li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-orange icon-gotcha">
+        <strong>AI struggles with:</strong>
+        <ul class="annot-list" style="margin-top:10px; gap:8px;">
+          <li><span class="badge badge-flag">!</span> <span>Your specific business logic — it doesn't know what your app is <em>for</em></span></li>
+          <li><span class="badge badge-flag">!</span> <span>Edge cases in your data — only you know what weird inputs are possible</span></li>
+          <li><span class="badge badge-flag">!</span> <span>Security decisions — it generates technically correct but sometimes naive auth</span></li>
+          <li><span class="badge badge-flag">!</span> <span>Performance at scale — a pattern that works for 100 rows can destroy a database at 10 million</span></li>
+          <li><span class="badge badge-flag">!</span> <span>Knowing when it's wrong — it will confidently generate incorrect code</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 28 — KEY TAKEAWAYS
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 28 — Key Takeaways -->
+<div class="slide">
+  
+<div class="slide-label">Summary</div>
+  <h2>Key Takeaways</h2>
+  <ul class="annot-list" style="margin-top:20px; gap:16px;">
+    <li><span class="badge badge-num">1</span> <span><strong>Specificity in prompts is everything.</strong> Stack, module system, every field, every route, what to exclude — spell it all out. Vague prompts produce vague code.</span></li>
+    <li><span class="badge badge-num">2</span> <span><strong>Read every line the AI generates.</strong> Ask it to explain patterns you don't recognise. You are responsible for the code you deploy — "AI wrote it" is not a defence when it breaks.</span></li>
+    <li><span class="badge badge-num">3</span> <span><strong>Always use parameterised queries.</strong> <code>$1, $2, ...</code> — no exceptions. SQL injection is still the most common critical web vulnerability.</span></li>
+    <li><span class="badge badge-num">4</span> <span><strong>Test every route before deploying.</strong> Health → POST → GET → PATCH → DELETE → validate 400/404 cases. curl is your fastest feedback loop.</span></li>
+    <li><span class="badge badge-num">5</span> <span><strong>Secrets stay out of git.</strong> <code>.env</code> in <code>.gitignore</code>. <code>.env.example</code> committed. <code>process.env</code> everywhere. This pattern is non-negotiable in production.</span></li>
+    <li><span class="badge badge-num">6</span> <span><strong>The database enforces your invariants.</strong> <code>NOT NULL</code>, <code>CHECK</code>, <code>DEFAULT</code> — database constraints are the last line of defence. Always add them.</span></li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SLIDE 29 — WHAT'S NEXT
+═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 29 — Where to Go From Here -->
+<div class="slide">
+  
+<div class="slide-label">Going Further</div>
+  <h2>Where to Go From Here</h2>
+  <div class="cols cols-3" style="margin-top:16px; gap:14px;">
+    <div class="callout callout-blue" style="height:100%;">
+      <strong>Add Authentication</strong><br>
+      <span style="font-size:13px; color:var(--muted); line-height:1.7; display:block; margin-top:8px;">
+        Add a <code>users</code> table. POST <code>/auth/register</code> and <code>/auth/login</code>. Return a JWT or session token. Protect routes with a middleware function. Prompt: "Add token-based auth to this API using the <code>jsonwebtoken</code> package."
+      </span>
+    </div>
+    <div class="callout callout-green" style="height:100%;">
+      <strong>Add Pagination</strong><br>
+      <span style="font-size:13px; color:var(--muted); line-height:1.7; display:block; margin-top:8px;">
+        <code>GET /api/books?page=2&limit=10</code>. <code>LIMIT</code> and <code>OFFSET</code> in SQL. Return total count alongside results. Prompt: "Add cursor-based pagination to the books list endpoint."
+      </span>
+    </div>
+    <div class="callout callout-purple" style="height:100%;">
+      <strong>Add a Second Table</strong><br>
+      <span style="font-size:13px; color:var(--muted); line-height:1.7; display:block; margin-top:8px;">
+        Add <code>authors</code> with a foreign key from <code>books</code>. Learn <code>JOIN</code>, cascading deletes, and the <code>ON CONFLICT</code> upsert pattern. Prompt: "Normalise the author field into a separate authors table with a foreign key."
+      </span>
+    </div>
+  </div>
+  <div class="callout callout-yellow" style="margin-top:14px; font-size:14px;">
+    <strong>The demo app is at:</strong> <code>docs/crud-demo/</code> in the course repository — fully working, five files, ready to clone, extend, and deploy.
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 29</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+window.DECK_NAME = 'ai-crud-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'b2-1', type: 'practical', title: 'Add a new route with AI',
+    desc: 'Prompt an AI to add a GET /api/books/stats route that returns count and average rating. Read every line before running it. What did you have to change or understand?',
+    criteria: [
+      'The route returns the correct data when called with curl',
+      'You read every line of the generated code before running it',
+      'You can explain what each function and variable in the route does'
+    ] },
+  { id: 'b2-2', type: 'practical', title: 'SQL injection audit',
+    desc: 'Review 3 of the generated routes in the demo app. For each query, confirm it uses parameterised queries ($1, $2). If you find string concatenation, fix it and explain why it was unsafe.',
+    criteria: [
+      'You checked every database-touching route, not just one',
+      'You can explain why string concatenation in a query creates an injection risk',
+      'You confirmed $1, $2 placeholders are used for all user-supplied values'
+    ] },
+  { id: 'b2-3', type: 'reflect', title: 'AI as co-pilot',
+    desc: "What was the most useful thing the AI did in your CRUD build? What did you have to correct, add, or understand yourself? Where is the line between 'AI did it' and 'I built it with AI help'?",
+    criteria: [
+      'You gave a specific example of something the AI did well',
+      'You gave a specific example of something you had to correct or add yourself',
+      'Your answer draws a clear line: what the AI contributed vs what you contributed'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Use a scaffold prompt to generate a working Node.js / Express / PostgreSQL CRUD API',
+  'Read and explain the purpose of every generated file, including package.json and db.js',
+  'Apply parameterised queries to prevent SQL injection in AI-generated database code',
+  'Identify and correct common AI mistakes: ES module paths, route ordering, dynamic PORT handling',
+  'Deploy a Node.js API to Railway and configure environment variables for production'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'crud-1-coalesce',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In the PATCH route, what does COALESCE($2, title) return when the client does NOT send a new title?',
+    options: [
+      'null',
+      'An error from PostgreSQL',
+      'The existing value of title from the database',
+      'An empty string'
+    ],
+    correct: 2,
+    explanation: 'COALESCE returns the first non-null argument. When the client omits a field, $2 is null, so COALESCE falls through to the existing column value — leaving it unchanged.',
+    reviewSlide: 'COALESCE — The Partial Update Pattern'
+  },
+  {
+    id: 'crud-1-returning',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Why does the PATCH route include RETURNING * in the SQL query?',
+    options: [
+      'It is required syntax for UPDATE statements in PostgreSQL',
+      'It returns the updated row so the app can send it back without a second SELECT',
+      'It makes the update faster by caching the result',
+      'It validates that the update succeeded'
+    ],
+    correct: 1,
+    explanation: 'RETURNING * instructs PostgreSQL to send back the modified row as part of the UPDATE response. Without it, the app would need a separate SELECT query to fetch the updated data.',
+    reviewSlide: 'COALESCE — The Partial Update Pattern'
+  },
+  {
+    id: 'crud-1-esmodules',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'What does "type": "module" in package.json enable?',
+    options: [
+      'TypeScript support',
+      'ES module syntax (import/export) instead of CommonJS (require/module.exports)',
+      'Automatic module caching',
+      'Access to all npm packages without installing them'
+    ],
+    correct: 1,
+    explanation: 'Setting "type": "module" switches Node.js from the default CommonJS module system to ES modules, enabling import/export syntax throughout the project.',
+    reviewSlide: 'package.json — Project Manifest'
+  },
+  {
+    id: 'crud-1-route-order',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Why must GET /api/books/stats be defined before GET /api/books/:id in server.js?',
+    options: [
+      'Stats queries are slower and must be registered first for caching',
+      'Express matches routes top-to-bottom; without the ordering, "stats" would be captured as an :id parameter',
+      'PostgreSQL requires aggregation routes to precede parameterised routes',
+      'It is a convention, but the order does not actually matter'
+    ],
+    correct: 1,
+    explanation: 'Express evaluates routes in the order they are registered. If /:id comes first, the literal string "stats" matches as an id value, causing a database type error when PostgreSQL tries to cast it to an integer.',
+    reviewSlide: 'server.js — Structure Overview'
+  },
+  {
+    id: 'crud-1-reflection',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Look at the PATCH /api/books/:id route. Without running it, explain in your own words what happens when a client sends PATCH /api/books/5 with body {"status":"done"} — trace through what each part of the code does.',
+    model: 'Express extracts id=5 from req.params and {status:"done"} from req.body. All other destructured fields (title, author, etc.) are undefined. The COALESCE pattern passes undefined ($2=null) for those fields, so PostgreSQL keeps the existing column values. Only the status column gets updated to "done". RETURNING * sends back the complete updated row. The route responds with 200 and the full book object.',
+    reviewSlide: 'COALESCE — The Partial Update Pattern'
+  },
+  {
+    id: 'crud-2-sql-injection',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'What makes parameterised queries (using $1, $2) safe against SQL injection?',
+    options: [
+      'They escape special characters automatically using string replacement',
+      'The query and the values are sent separately to PostgreSQL, so the value is never interpreted as SQL',
+      'PostgreSQL validates that values are the correct type before executing',
+      'They limit the length of the input to prevent long injection strings'
+    ],
+    correct: 1,
+    explanation: 'Parameterised queries send the SQL template and the values as separate protocol messages. PostgreSQL treats the value as data, not as SQL — so even a value like "1 OR 1=1" is never parsed as a SQL expression.',
+    reviewSlide: 'Parameterised Queries — Why They Matter'
+  },
+  {
+    id: 'crud-2-railway-port',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Why does the app use process.env.PORT || 3001 instead of hardcoding port 3001?',
+    options: [
+      '3001 is a reserved port that cannot be used in production',
+      'Railway assigns the port dynamically and injects it via the PORT environment variable',
+      'Node.js does not allow hardcoded port numbers',
+      'It allows multiple instances to run simultaneously on different ports'
+    ],
+    correct: 1,
+    explanation: 'Railway injects a PORT environment variable at runtime. The app must listen on that assigned port. Hardcoding 3001 would cause the app to listen on the wrong port and Railway would not be able to route traffic to it.',
+    reviewSlide: 'Deploying to Railway — Step by Step'
+  },
+  {
+    id: 'crud-2-env-pattern',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'A developer commits .env to GitHub by mistake. What is the immediate risk?',
+    options: [
+      'The build will fail on Railway',
+      'Database credentials and other secrets are now publicly visible in the git history',
+      'Node.js will refuse to read the .env file',
+      'The .env file will be overwritten by Railway\'s environment variables'
+    ],
+    correct: 1,
+    explanation: 'GitHub repositories (even private ones if access is misconfigured, or public ones) expose the .env contents to anyone with access. Secrets in git history cannot simply be deleted — the history must be rewritten and all credentials must be rotated immediately.',
+    reviewSlide: 'The .env Pattern — Local vs Production'
+  },
+  {
+    id: 'crud-2-ai-limits',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Which of the following is something AI coding assistants consistently struggle with?',
+    options: [
+      'Writing boilerplate Express route handlers',
+      'Generating parameterised SQL queries',
+      'Knowing when the generated code is wrong',
+      'Translating schema definitions into CREATE TABLE SQL'
+    ],
+    correct: 2,
+    explanation: 'AI assistants generate code confidently even when it is incorrect. They have no awareness of correctness — they produce statistically plausible output. The developer must verify every piece of generated code through testing and review.',
+    reviewSlide: 'What AI Does Well — and Where It Falls Short'
+  },
+  {
+    id: 'crud-2-reflection',
+    checkpoint: 2,
+    type: 'self',
+    q: 'In the AI-assisted development workflow shown in this deck, at which steps does the AI do work, and at which steps does the developer do work? What does this tell you about the role of AI in software development?',
+    model: 'The AI generates the scaffold (typing). The developer does everything else: defining requirements precisely (before the prompt), reading and understanding the generated code, testing every route, verifying correct behaviour, and making judgement calls about what to deploy. AI accelerates the mechanical parts of coding but does not replace the intellectual work of software engineering — understanding, verification, and judgement remain human responsibilities.',
+    reviewSlide: 'What AI-Assisted Development Actually Looks Like'
+  }
+];
+</script>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+</body>
+</html>

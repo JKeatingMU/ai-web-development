@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompting AI for Web Infrastructure — Workshop</title>
+<style>
+  :root {
+    --bg: #0f1117; --slide-bg: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #ffa657;
+    --term-bg: #010409; --term-text: #c9d1d9;
+    --highlight: #1f6feb; --prompt-border: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #deck { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; padding: 52px 72px; flex-direction: column; justify-content: center; gap: 0; background: var(--slide-bg); border: 1px solid var(--border); margin: 20px; width: calc(100% - 40px); height: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .slide-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  h1 { font-size: 40px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  h1 .accent { color: var(--accent); }
+  h2 { font-size: 29px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 26px; max-width: 700px; }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: rgba(110,118,129,.1); padding: 2px 5px; border-radius: 4px; color: var(--orange); }
+
+  .section-header { background: linear-gradient(135deg,#0d1525 0%,#090f1c 100%); justify-content: center; align-items: center; text-align: center; gap: 14px; }
+  .section-header .pill { display: inline-block; background: var(--highlight); color: white; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .section-header h1, .section-header .subtitle { text-align: center; }
+
+  .terminal { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 12px 0; flex-shrink: 0; }
+  .terminal-bar { background: #21262d; padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #28ca42; }
+  .terminal-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-family: 'SF Mono',monospace; }
+  .terminal-body { padding: 15px 20px; font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace; font-size: 13px; line-height: 1.7; color: var(--term-text); overflow-x: auto; white-space: pre; }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd    { color: var(--text); }
+  .terminal-body .flag   { color: var(--orange); }
+  .terminal-body .str    { color: var(--green); }
+  .terminal-body .url    { color: var(--accent); }
+  .terminal-body .comment{ color: #5c6370; font-style: italic; }
+  .terminal-body .key    { color: var(--purple); }
+  .terminal-body .kw     { color: var(--purple); }
+  .terminal-body .fn     { color: var(--accent); }
+  .terminal-body .out    { color: var(--muted); }
+  .terminal-body .hi     { color: var(--yellow); font-weight: bold; }
+
+  .prompt-block { background: #0d1117; border: 1px solid var(--prompt-border); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .prompt-bar { background: rgba(56,139,253,.1); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(56,139,253,.2); font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .prompt-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .prompt-body em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .prompt-body ul { padding-left: 20px; margin: 6px 0; }
+  .prompt-body li { color: var(--muted); margin-bottom: 4px; }
+
+  .response-block { background: #0d1117; border: 1px solid rgba(63,185,80,.3); border-radius: 8px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+  .response-bar { background: rgba(63,185,80,.08); padding: 7px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(63,185,80,.2); font-size: 12px; color: var(--green); font-weight: 600; }
+  .response-body { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--muted); }
+  .response-body strong { color: var(--text); }
+
+  .cols { display: grid; gap: 18px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-55-45 { grid-template-columns: 55fr 45fr; }
+  .cols-40-60 { grid-template-columns: 40fr 60fr; }
+
+  .callout { border-radius: 8px; padding: 13px 16px; font-size: 14px; line-height: 1.65; border-left: 4px solid; }
+  .callout-blue   { background: rgba(88,166,255,.07);  border-color: var(--accent);  color: var(--text); }
+  .callout-green  { background: rgba(63,185,80,.07);   border-color: var(--green);   color: var(--text); }
+  .callout-yellow { background: rgba(210,153,34,.07);  border-color: var(--yellow);  color: var(--text); }
+  .callout-orange { background: rgba(255,166,87,.07);  border-color: var(--orange);  color: var(--text); }
+  .callout-purple { background: rgba(188,140,255,.07); border-color: var(--purple);  color: var(--text); }
+
+  .annot-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+  .annot-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .annot-list li strong { color: var(--text); }
+  .badge { display: inline-block; flex-shrink: 0; font-family: 'SF Mono',monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .badge-green  { background: rgba(63,185,80,.15);    color: var(--green);  }
+  .badge-yellow { background: rgba(210,153,34,.15);   color: var(--yellow); }
+  .badge-orange { background: rgba(255,166,87,.15);   color: var(--orange); }
+  .badge-blue   { background: rgba(88,166,255,.15);   color: var(--accent); }
+  .badge-purple { background: rgba(188,140,255,.15);  color: var(--purple); }
+  .badge-num    { background: rgba(88,166,255,.2); color: white; min-width: 22px; text-align: center; border-radius: 50%; font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,.5); color: var(--muted); vertical-align: top; line-height: 1.6; }
+  td strong { color: var(--text); }
+
+  .diagram { background: var(--term-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: 'SF Mono',monospace; font-size: 13px; line-height: 1.9; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .hi { color: var(--accent); }
+  .diagram .gr { color: var(--green); }
+  .diagram .ye { color: var(--yellow); }
+  .diagram .pu { color: var(--purple); }
+  .diagram .or { color: var(--orange); }
+
+  .title-slide { background: linear-gradient(160deg,#0d1117 0%,#161b22 60%,#0d1117 100%); justify-content: center; gap: 0; }
+  .title-slide .meta { font-size: 13px; color: var(--muted); margin-top: 26px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .title-slide .meta span::before { content: '— '; }
+  .tag-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tag { display: inline-block; background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  #nav { position: fixed; bottom: 26px; right: 36px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+  #counter { font-size: 12px; color: var(--muted); font-family: monospace; }
+  .nav-btn { background: var(--slide-bg); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .nav-btn:hover { background: #21262d; border-color: var(--accent); }
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 100; border-radius: 0 2px 0 0; }
+  #hint { position: fixed; top: 18px; right: 36px; font-size: 11px; color: var(--muted); font-family: monospace; }
+
+  /* ── Scrollable code blocks ── */
+  .terminal-body { overflow: auto; max-height: min(55vh, 400px); }
+  .diagram        { overflow: auto; max-height: min(50vh, 380px); }
+  .filetree       { overflow: auto; max-height: min(45vh, 320px); }
+  .terminal-body, .diagram, .filetree { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+  .terminal-body::-webkit-scrollbar, .diagram::-webkit-scrollbar, .filetree::-webkit-scrollbar { width: 6px; height: 6px; }
+  .terminal-body::-webkit-scrollbar-track, .diagram::-webkit-scrollbar-track, .filetree::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb, .diagram::-webkit-scrollbar-thumb, .filetree::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb:hover, .diagram::-webkit-scrollbar-thumb:hover, .filetree::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ── App link ── */
+  #app-link { position: fixed; bottom: 28px; left: 38px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #app-link:hover { color: var(--accent); border-color: var(--accent); }
+  #index-link { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); text-decoration: none; background: rgba(22,27,34,.9); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; z-index: 200; transition: color .15s, border-color .15s; }
+  #index-link:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="deck-extras.css">
+</head>
+<body>
+<div id="deck">
+
+<!-- ══ SLIDE 1 — TITLE ═════════════════════════════════════════════════════ -->
+
+
+<!-- Slide 1 — Prompting AI for Web Infrastructure -->
+<div class="slide title-slide active">
+  <div class="tag-row">
+    <span class="tag">Prompt Engineering</span>
+    <span class="tag">Database Setup</span>
+    <span class="tag">JWT</span>
+    <span class="tag">Deployment</span>
+    <span class="tag">Standalone Workshop</span>
+  </div>
+  
+<div class="slide-label">Workshop · AI-Assisted Development</div>
+  <h1>Prompting AI for<br><span class="accent">Web Infrastructure</span></h1>
+  <p class="subtitle">
+    How to use an AI coding assistant to set up databases, configure authentication,
+    manage environment variables, and debug infrastructure — with the prompts that actually work.
+  </p>
+  <div class="meta">
+    <span>Maynooth University — CS Workshop</span>
+    <span>Prof. John Keating</span>
+    <span>Standalone — complements the CRUD + Auth + curl trilogy</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2 — THE FOUR PROMPT TYPES ════════════════════════════════════ -->
+
+
+<!-- Slide 2 — Four Types of Infrastructure Prompt -->
+<div class="slide">
+  
+<div class="slide-label">The Framework</div>
+  <h2>Four Types of Infrastructure Prompt</h2>
+  <p>Every interaction with an AI coding assistant falls into one of four categories. Recognising which type you need makes your prompts sharper.</p>
+  <table style="margin-top:14px;">
+    <tr><th>Type</th><th>Intent</th><th>Trigger phrase</th><th>Example</th></tr>
+    <tr>
+      <td><strong style="color:var(--accent);">Scaffold</strong></td>
+      <td>Generate something from scratch</td>
+      <td>"Generate / Create / Give me..."</td>
+      <td>"Generate a PostgreSQL schema for a reading list with these fields..."</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--green);">Explain</strong></td>
+      <td>Understand what was generated</td>
+      <td>"Explain / Why does / What does..."</td>
+      <td>"Why use COALESCE here instead of just passing the value?"</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--orange);">Debug</strong></td>
+      <td>Fix something that isn't working</td>
+      <td>"I'm getting an error / This isn't working..."</td>
+      <td>"I'm getting 'could not determine data type of parameter $8' — here is my query..."</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--purple);">Extend</strong></td>
+      <td>Add a feature to working code</td>
+      <td>"Add / Now also / Update this to..."</td>
+      <td>"Add rate limiting to the login route — max 5 attempts per IP per 15 minutes."</td>
+    </tr>
+  </table>
+  <div class="callout callout-blue icon-key" style="margin-top:14px; font-size:14px;">
+    <strong>The workflow:</strong> Scaffold → Explain → (run it) → Debug if needed → Extend. Never ask for everything at once. Complete each step before moving to the next.
+  </div>
+</div>
+
+<!-- ══ SLIDE 3 — SECTION: DATABASE ════════════════════════════════════════ -->
+
+
+<!-- Slide 3 — Database Schema Design -->
+<div class="slide section-header">
+  <div class="pill">Part 1</div>
+  <h1>Database <span class="accent">Schema Design</span></h1>
+  <p class="subtitle">Prompting for SQL — and understanding every constraint, type, and index the AI gives you.</p>
+</div>
+
+<!-- ══ SLIDE 4 — SCHEMA SCAFFOLD PROMPT ═══════════════════════════════════ -->
+
+
+<!-- Slide 4 — Prompting for a Database Schema -->
+<div class="slide">
+  
+<div class="slide-label">Prompt Type: Scaffold</div>
+  <h2>Prompting for a Database Schema</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:18px;">
+    <div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Prompt — schema scaffold</div>
+        <div class="prompt-body">
+          Write a <em>PostgreSQL CREATE TABLE statement</em> for a reading list app.
+          A book has:
+          <ul>
+            <li><em>title</em> (text, required) and <em>author</em> (text, required)</li>
+            <li><em>status</em>: one of <em>'want-to-read', 'reading', 'done'</em> — enforced by the database</li>
+            <li><em>rating</em>: integer 1–5, optional — enforced by the database</li>
+            <li><em>notes</em>: free text, optional</li>
+            <li><em>created_at</em>: set automatically by the database</li>
+          </ul>
+          Use <em>IF NOT EXISTS</em>. Add a <em>CHECK constraint</em> for status and rating.
+          Add an <em>index</em> on status. Explain each constraint in a comment.
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>What makes this prompt work:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:2; color:var(--muted);">
+          <li>Lists every field with type and constraints</li>
+          <li>Specifies which constraints live in the DB (not just the app)</li>
+          <li>Asks for <code>IF NOT EXISTS</code> — safe to run repeatedly</li>
+          <li>Asks for an index — the AI won't add one unless prompted</li>
+          <li>Asks for explanatory comments — forces explanation</li>
+        </ul>
+      </div>
+      <div class="callout callout-yellow icon-gotcha" style="font-size:13px;">
+        <strong>Rule:</strong> Always specify which constraints should be database-level. Left to defaults, an AI will often only validate in application code — which means constraints are bypassed if you ever use a migration tool, import script, or admin query directly.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5 — READING THE SCHEMA ══════════════════════════════════════ -->
+
+
+<!-- Slide 5 — Understanding What Was Generated — Follow-up Prompts -->
+<div class="slide">
+  
+<div class="slide-label">Prompt Type: Explain</div>
+  <h2>Understanding What Was Generated — Follow-up Prompts</h2>
+  <div class="cols cols-2" style="margin-top:12px; gap:16px;">
+    <div>
+      <div class="prompt-block" style="margin-bottom:10px;">
+        <div class="prompt-bar"><span>✦</span> Explain: SERIAL vs INTEGER</div>
+        <div class="prompt-body" style="font-size:13px;">
+          Why use <em>SERIAL</em> for the id column? What's the difference between
+          SERIAL, INTEGER, and BIGSERIAL? When would I need BIGSERIAL?
+        </div>
+      </div>
+      <div class="response-block">
+        <div class="response-bar"><span>◎</span> AI response (summary)</div>
+        <div class="response-body" style="font-size:12px;">
+          <strong>SERIAL</strong> = auto-incrementing integer (1, 2, 3…). Shorthand for creating a sequence + default.<br>
+          <strong>INTEGER</strong> = plain integer — you'd supply the id yourself.<br>
+          <strong>BIGSERIAL</strong> = 64-bit — use when you might exceed ~2 billion rows. For most apps, SERIAL (32-bit, ~2B rows) is fine.
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="prompt-block" style="margin-bottom:10px;">
+        <div class="prompt-bar"><span>✦</span> Explain: indexes</div>
+        <div class="prompt-body" style="font-size:13px;">
+          When should I add an index to a column?
+          What's the cost? Why did you add one on <em>status</em> but not <em>title</em>?
+        </div>
+      </div>
+      <div class="response-block">
+        <div class="response-bar"><span>◎</span> AI response (summary)</div>
+        <div class="response-body" style="font-size:12px;">
+          Add an index on columns you <strong>filter or sort by frequently</strong>.<br>
+          Cost: extra disk space + slower writes (index must update on INSERT/UPDATE).<br>
+          <code>status</code> — likely used in WHERE clauses (<code>?status=reading</code>).<br>
+          <code>title</code> — full-text search needs a different index type (GIN); a B-tree index on title rarely helps.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-green icon-tip" style="margin-top:12px; font-size:14px;">
+    <strong>Always ask "why" for every generated constraint, type, and index.</strong> This is not just good practice — it is how you learn database design. An AI that cannot explain its own output is a warning sign.
+  </div>
+</div>
+
+<!-- ══ SLIDE 6 — SECTION: ENVIRONMENT SETUP ═══════════════════════════════ -->
+
+
+<!-- Slide 6 — Environment Configuration -->
+<div class="slide section-header">
+  <div class="pill">Part 2</div>
+  <h1>Environment <span class="accent">Configuration</span></h1>
+  <p class="subtitle">Prompting for .env files, package.json, .gitignore — the scaffolding that surrounds every project.</p>
+</div>
+
+<!-- ══ SLIDE 7 — ENV + GITIGNORE PROMPT ══════════════════════════════════ -->
+
+
+<!-- Slide 7 — Prompting for Project Configuration Files -->
+<div class="slide">
+  
+<div class="slide-label">Prompt Type: Scaffold</div>
+  <h2>Prompting for Project Configuration Files</h2>
+  <div class="cols cols-55-45" style="margin-top:12px; gap:18px;">
+    <div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Prompt — project config</div>
+        <div class="prompt-body">
+          For a <em>Node.js + Express + PostgreSQL</em> API project using <em>ES modules</em>,
+          generate:
+          <ul>
+            <li><em>package.json</em> with scripts: <code>start</code> (node server.js) and <code>dev</code> (node --watch server.js)</li>
+            <li>Dependencies: <em>express, pg, dotenv, bcrypt, jsonwebtoken</em></li>
+            <li><em>.env.example</em> with DATABASE_URL, PORT, and JWT_SECRET — with a comment explaining each</li>
+            <li><em>.gitignore</em> that ignores node_modules, .env, and any OS junk files</li>
+          </ul>
+          Explain why <em>.env</em> must never be committed but <em>.env.example</em> should be.
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-orange icon-gotcha" style="font-size:13px;">
+        <strong>The .env / .env.example split is critical:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:2; color:var(--muted);">
+          <li><code>.env</code> — real secrets, never committed</li>
+          <li><code>.env.example</code> — template, always committed</li>
+          <li>One accidental <code>git add .env</code> exposes your database to the world</li>
+        </ul>
+      </div>
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>The "explain why" instruction:</strong><br>
+        Adding "explain why" to a scaffold prompt forces the AI to justify its choices. If it cannot explain why <code>.env</code> should be gitignored, it should not be generating your security configuration.
+      </div>
+      <div class="callout callout-green" style="font-size:13px;">
+        <strong>Generate a strong JWT_SECRET:</strong><br>
+        <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code><br>
+        Ask the AI to include this command in its output.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 8 — SECTION: JWT SETUP ══════════════════════════════════════ -->
+
+
+<!-- Slide 8 — JWT Authentication Setup -->
+<div class="slide section-header">
+  <div class="pill">Part 3</div>
+  <h1>JWT Authentication <span class="accent">Setup</span></h1>
+  <p class="subtitle">Prompting for auth step-by-step — registration, login, middleware. Getting the security details right.</p>
+</div>
+
+<!-- ══ SLIDE 9 — JWT PROMPT STRATEGY ════════════════════════════════════ -->
+
+
+<!-- Slide 9 — Prompting for JWT Auth — Don't Ask for Everything at Once -->
+<div class="slide">
+  
+<div class="slide-label">Prompt Type: Scaffold — in stages</div>
+  <h2>Prompting for JWT Auth — Don't Ask for Everything at Once</h2>
+  <div class="cols cols-3" style="margin-top:14px; gap:14px;">
+    <div>
+      <div class="prompt-block" style="height:100%;">
+        <div class="prompt-bar"><span>✦</span> Prompt 1 — Schema</div>
+        <div class="prompt-body" style="font-size:12px;">
+          Add a <em>users table</em> to my PostgreSQL schema.<br><br>
+          Fields: id (serial), email (unique, not null), password_hash (not null), created_at (auto).<br><br>
+          Explain why we store <em>password_hash</em> and not <em>password</em>.
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="prompt-block" style="height:100%;">
+        <div class="prompt-bar"><span>✦</span> Prompt 2 — Routes</div>
+        <div class="prompt-body" style="font-size:12px;">
+          Add <em>POST /auth/register</em> and <em>POST /auth/login</em> routes to my Express app.<br><br>
+          Use <em>bcrypt</em> (12 salt rounds) to hash passwords. On login, sign a <em>JWT</em> with <code>{sub, email}</code>, expiring in <em>24h</em>.<br><br>
+          Handle duplicate email with <em>409</em>. Use <em>the same error message</em> for wrong email and wrong password.
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="prompt-block" style="height:100%;">
+        <div class="prompt-bar"><span>✦</span> Prompt 3 — Middleware</div>
+        <div class="prompt-body" style="font-size:12px;">
+          Create an <em>authenticate middleware</em> function that:<br><br>
+          Reads <code>Authorization: Bearer &lt;token&gt;</code> from the request header.<br>
+          Calls <em>jwt.verify()</em> and attaches the decoded payload to <em>req.user</em>.<br>
+          Returns <em>401</em> if missing or invalid.<br><br>
+          Show me how to add it to a route.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-blue icon-tip" style="margin-top:14px; font-size:14px;">
+    <strong>Why three prompts, not one?</strong> Each step builds on a working foundation. Testing after each prompt means if something breaks, you know exactly which step caused it. One giant prompt often produces subtly wrong code that is hard to diagnose.
+  </div>
+</div>
+
+<!-- ══ SLIDE 10 — CRITICAL SECURITY DETAILS ══════════════════════════════ -->
+
+
+<!-- Slide 10 — Prompting to Verify the Security Details -->
+<div class="slide">
+  
+<div class="slide-label">Prompt Type: Explain — security details</div>
+  <h2>Prompting to Verify the Security Details</h2>
+  <p>AI-generated auth code is usually correct at the surface. These follow-up prompts verify the details that matter most.</p>
+  <div class="cols cols-2" style="margin-top:12px; gap:16px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Verify: same error message</div>
+        <div class="prompt-body" style="font-size:12px;">
+          In the login route, why should "user not found" and "wrong password" return the <em>same error message</em>? What attack does this prevent?
+        </div>
+      </div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Verify: jwt.verify vs jwt.decode</div>
+        <div class="prompt-body" style="font-size:12px;">
+          What is the difference between <em>jwt.verify()</em> and <em>jwt.decode()</em>? Why would using jwt.decode() for authentication be a critical security mistake?
+        </div>
+      </div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Verify: bcrypt salt rounds</div>
+        <div class="prompt-body" style="font-size:12px;">
+          Why does bcrypt take a <em>salt rounds</em> parameter? What are the tradeoffs between 10, 12, and 14 rounds?
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-yellow" style="font-size:13px;">
+        <strong>User enumeration attack:</strong><br>
+        If "email not found" returns a different message to "wrong password", an attacker can confirm which emails are registered — before even trying to crack passwords.
+      </div>
+      <div class="callout callout-orange icon-gotcha" style="font-size:13px;">
+        <strong>jwt.decode() skips signature verification.</strong><br>
+        It simply base64-decodes the payload. Passing it a forged token would succeed. <code>jwt.verify()</code> checks the HMAC signature — a token signed with a different secret throws immediately.
+      </div>
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>Salt rounds tradeoff:</strong><br>
+        Higher rounds = slower hashing = harder brute-force.<br>
+        12 rounds ≈ 250ms per hash. 14 rounds ≈ 1 second.<br>
+        For login, 250ms is acceptable. For a script trying millions of passwords, it is not.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 1 -->
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3">
+</div>
+
+<!-- ══ SLIDE 11 — SECTION: DEBUGGING ════════════════════════════════════ -->
+
+
+<!-- Slide 11 — Debugging with AI Assistance -->
+<div class="slide section-header">
+  <div class="pill">Part 4</div>
+  <h1>Debugging with <span class="accent">AI Assistance</span></h1>
+  <p class="subtitle">The error message is your prompt. Paste it in full. Add context. Ask for a diagnosis before a fix.</p>
+</div>
+
+<!-- ══ SLIDE 12 — THE DEBUG PROMPT PATTERN ══════════════════════════════ -->
+
+
+<!-- Slide 12 — How to Write a Good Debug Prompt -->
+<div class="slide">
+  
+<div class="slide-label">Prompt Type: Debug</div>
+  <h2>How to Write a Good Debug Prompt</h2>
+  <div class="cols cols-55-45" style="margin-top:14px; gap:18px;">
+    <div>
+      <div class="callout callout-orange" style="margin-bottom:12px;">
+        <strong>Weak debug prompt:</strong><br>
+        <em style="color:var(--muted); font-style:italic; font-size:13px;">"My login isn't working."</em><br><br>
+        <span style="font-size:13px; color:var(--muted);">The AI has no information to work with. It will ask clarifying questions or guess. You get generic advice that may not apply to your code.</span>
+      </div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Strong debug prompt</div>
+        <div class="prompt-body" style="font-size:12px;">
+          My <em>POST /auth/login</em> route is returning <em>401</em> even when I provide the correct password. Here is the error from the server console:<br><br>
+          <code>error: could not determine data type of parameter $8</code><br><br>
+          Here is the relevant SQL query: [paste query]<br><br>
+          What is causing this and how do I fix it?
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="callout callout-blue" style="font-size:13px; margin-bottom:10px;">
+        <strong>A good debug prompt contains:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:2; color:var(--muted);">
+          <li>The exact error message — copy it verbatim</li>
+          <li>Which route/function is failing</li>
+          <li>The relevant code section</li>
+          <li>What you expected vs what happened</li>
+          <li>What you have already tried</li>
+        </ul>
+      </div>
+      <div class="callout callout-green icon-tip" style="font-size:13px;">
+        <strong>Ask for diagnosis before fix:</strong><br>
+        "What is causing this?" before "How do I fix it?" forces the AI to reason through the problem rather than jumping to a solution. Understanding the cause means you will recognise the same error next time.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 13 — REAL ERRORS ════════════════════════════════════════════ -->
+
+
+<!-- Slide 13 — Common Infrastructure Errors and How to Prompt Around Them -->
+<div class="slide">
+  
+<div class="slide-label">Debug — Real Examples</div>
+  <h2>Common Infrastructure Errors and How to Prompt Around Them</h2>
+  <table style="margin-top:14px;">
+    <tr><th>Error</th><th>Cause</th><th>Prompt pattern</th></tr>
+    <tr>
+      <td><code>could not determine data type of parameter $8</code></td>
+      <td>PostgreSQL cannot infer the type of a NULL parameter in a CASE expression</td>
+      <td>"I have a CASE WHEN $8 IS NOT NULL... in my INSERT. PostgreSQL throws this error. Explain why and how to fix it without a CASE."</td>
+    </tr>
+    <tr>
+      <td><code>ECONNREFUSED 127.0.0.1:5432</code></td>
+      <td>PostgreSQL server not running, or wrong host/port in DATABASE_URL</td>
+      <td>"My Node app can't connect to PostgreSQL locally. Here is my DATABASE_URL format. What should I check first?"</td>
+    </tr>
+    <tr>
+      <td><code>JsonWebTokenError: invalid signature</code></td>
+      <td>Token was signed with a different JWT_SECRET than what is used to verify</td>
+      <td>"jwt.verify() throws 'invalid signature' even on a freshly issued token. What are the possible causes?"</td>
+    </tr>
+    <tr>
+      <td><code>duplicate key value violates unique constraint</code></td>
+      <td>Trying to INSERT a value that already exists in a UNIQUE column</td>
+      <td>"I get this PostgreSQL error on email registration. How do I catch it and return a 409 instead of a 500?"</td>
+    </tr>
+    <tr>
+      <td><code>Cannot find module './auth.js'</code></td>
+      <td>Missing file extension in ES module import — Node requires <code>.js</code></td>
+      <td>"Node ES modules require explicit .js extensions. Here is my import — what am I missing?"</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ══ SLIDE 14 — SECTION: DEPLOYMENT ══════════════════════════════════ -->
+
+
+<!-- Slide 14 — Prompting for Deployment -->
+<div class="slide section-header">
+  <div class="pill">Part 5</div>
+  <h1>Prompting for <span class="accent">Deployment</span></h1>
+  <p class="subtitle">From working locally to live on Railway — what to ask, what to check, what AI commonly misses.</p>
+</div>
+
+<!-- ══ SLIDE 15 — DEPLOYMENT PROMPTS ════════════════════════════════════ -->
+
+
+<!-- Slide 15 — Useful Prompts for Railway Deployment -->
+<div class="slide">
+  
+<div class="slide-label">Prompt Type: Scaffold + Explain</div>
+  <h2>Useful Prompts for Railway Deployment</h2>
+  <div class="cols cols-2" style="margin-top:12px; gap:16px;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> What to run first</div>
+        <div class="prompt-body" style="font-size:12px;">
+          I have a Node.js + Express + PostgreSQL app ready to deploy to <em>Railway</em>.
+          Give me a <em>step-by-step checklist</em> of everything I need to do — from pushing to GitHub through to testing the live URL.
+        </div>
+      </div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Database migration</div>
+        <div class="prompt-body" style="font-size:12px;">
+          I have a <em>schema.sql</em> file with my table definitions.
+          What is the command to run it against my Railway PostgreSQL database?
+          The DATABASE_URL is in my environment.
+        </div>
+      </div>
+      <div class="prompt-block">
+        <div class="prompt-bar"><span>✦</span> Environment variables</div>
+        <div class="prompt-body" style="font-size:12px;">
+          What environment variables does my app need in Railway?
+          I use <em>DATABASE_URL</em>, <em>PORT</em>, and <em>JWT_SECRET</em>.
+          Does Railway inject DATABASE_URL automatically for a PostgreSQL plugin?
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="callout callout-blue" style="font-size:13px;">
+        <strong>What Railway injects automatically:</strong>
+        <ul style="padding-left:16px; margin-top:8px; line-height:2; color:var(--muted);">
+          <li><code>DATABASE_URL</code> — PostgreSQL plugin connection string</li>
+          <li><code>PORT</code> — the port your app must listen on</li>
+        </ul>
+        You must set <code>JWT_SECRET</code> yourself in Railway's Variables panel.
+      </div>
+      <div class="callout callout-yellow icon-gotcha" style="font-size:13px;">
+        <strong>Common deployment failure:</strong><br>
+        App listens on hardcoded port 3001 instead of <code>process.env.PORT</code>. Railway assigns a dynamic port — the hardcoded one is never bound. Always: <code>const PORT = process.env.PORT || 3001</code>
+      </div>
+      <div class="callout callout-orange icon-gotcha" style="font-size:13px;">
+        <strong>What AI commonly misses:</strong><br>
+        Symlinks — if your project uses a symlink (e.g., to a shared library), Railway can't resolve it. Ask: "Are there any symlinks in my project that would prevent Railway deployment?"
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Checkpoint 2 -->
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3">
+</div>
+
+<!-- ══ SLIDE 16 — THE FEEDBACK LOOP ══════════════════════════════════════ -->
+
+
+<!-- Slide 16 — The Prompt → Test → Iterate Loop -->
+<div class="slide">
+  
+<div class="slide-label">The Bigger Picture</div>
+  <h2>The Prompt → Test → Iterate Loop</h2>
+  <div class="diagram" style="margin-top:14px; font-size:13px;">
+  <span class="hi">You write a scaffold prompt</span>
+  (stack, fields, constraints, files, what to exclude)
+              ↓
+  <span class="gr">AI generates code</span>
+              ↓
+  <span class="hi">You read every line</span>
+  Ask "explain" for anything you don't understand
+              ↓
+  <span class="gr">You run it</span>
+  npm install → psql schema.sql → npm run dev → curl /api/health
+              ↓
+         ┌────┴─────────────┐
+         ↓                  ↓
+  <span class="gr">It works</span>             <span class="or">Error message</span>
+         ↓                  ↓
+  <span class="hi">Ask an extend prompt</span>   <span class="hi">Paste the error into a debug prompt</span>
+  "Now add..."            "I'm getting X — what's causing it?"
+         ↓                  ↓
+  <span class="gr">Repeat</span>               <span class="gr">Fix → test again</span>
+  </div>
+  <div class="callout callout-blue" style="margin-top:14px; font-size:14px;">
+    <strong>The loop is the method.</strong> The AI generates faster than you can type. Your value is the reading, the running, the testing, and the judgement about whether what came back is actually correct.
+  </div>
+</div>
+
+<!-- ══ SLIDE 17 — WHAT AI GETS WRONG IN INFRASTRUCTURE ══════════════════ -->
+
+
+<!-- Slide 17 — Where AI Infrastructure Code Needs Extra Scrutiny -->
+<div class="slide">
+  
+<div class="slide-label">Critical Awareness</div>
+  <h2>Where AI Infrastructure Code Needs Extra Scrutiny</h2>
+  <ul class="annot-list" style="margin-top:18px; gap:14px;">
+    <li><span class="badge badge-orange">!</span> <span><strong>Security defaults are often too permissive.</strong> An AI may generate CORS with <code>origin: '*'</code>, no rate limiting on auth routes, no input length limits, and overly broad JWT payloads. Always ask: "What security hardening should I add to this?"</span></li>
+    <li><span class="badge badge-orange">!</span> <span><strong>Error handling is often shallow.</strong> Generated code frequently propagates unhandled promise rejections or exposes raw error messages (<code>err.message</code>) to clients. Ask: "Does this code expose any internal errors to the client?"</span></li>
+    <li><span class="badge badge-orange">!</span> <span><strong>SQL injection via string interpolation.</strong> AI sometimes generates template literal queries (<code>`WHERE id = ${id}`</code>) alongside parameterised ones. Review every single query for <code>$</code> placeholders.</span></li>
+    <li><span class="badge badge-yellow">~</span> <span><strong>Outdated package versions.</strong> An AI's training data has a cutoff. Always run <code>npm outdated</code> after installing generated dependencies and check for breaking changes.</span></li>
+    <li><span class="badge badge-blue">i</span> <span><strong>Missing indexes on foreign keys.</strong> AI reliably adds primary key indexes but often forgets indexes on foreign key columns, status/enum columns, and columns used in ORDER BY.</span></li>
+  </ul>
+</div>
+
+<!-- ══ SLIDE 18 — KEY TAKEAWAYS ══════════════════════════════════════════ -->
+
+
+<!-- Slide 18 — Key Takeaways -->
+<div class="slide">
+  
+<div class="slide-label">Summary</div>
+  <h2>Key Takeaways</h2>
+  <ul class="annot-list" style="margin-top:20px; gap:14px;">
+    <li><span class="badge badge-num">1</span> <span><strong>Know your prompt type.</strong> Scaffold, Explain, Debug, or Extend. Use the right one. Don't ask for a scaffold when you need a debug.</span></li>
+    <li><span class="badge badge-num">2</span> <span><strong>Specify database constraints explicitly.</strong> NOT NULL, CHECK, UNIQUE, DEFAULT — tell the AI which constraints belong in the database, not just the app. The database is the last line of defence.</span></li>
+    <li><span class="badge badge-num">3</span> <span><strong>Stage your auth prompts.</strong> Schema first. Routes second. Middleware third. Test each step before adding the next.</span></li>
+    <li><span class="badge badge-num">4</span> <span><strong>Paste the full error message.</strong> "It doesn't work" tells the AI nothing. The exact error text, the file, and the relevant code gives it everything it needs.</span></li>
+    <li><span class="badge badge-num">5</span> <span><strong>Ask "diagnose before fix."</strong> Understanding the cause means you will recognise the same error in future, with or without AI assistance.</span></li>
+    <li><span class="badge badge-num">6</span> <span><strong>Audit every security boundary the AI generates.</strong> Auth, CORS, error messages, SQL queries. These are the places where a subtle mistake has outsized consequences.</span></li>
+  </ul>
+</div>
+
+</div><!-- /deck -->
+
+<a href="http://localhost:3001/api/health" target="_blank" id="app-link">localhost:3001 ↗</a>
+<a href="index.html" id="index-link">⌂ Course</a>
+<div id="nav">
+  <span id="counter">1 / 18</span>
+  <button class="nav-btn" id="prev">‹</button>
+  <button class="nav-btn" id="next">›</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);
+</script>
+<script>
+window.DECK_NAME = 'prompt-engineering-workshop';
+</script>
+<script>
+window.DECK_ASSESSMENTS = [
+  { id: 'b1-1', type: 'practical', title: 'Write a scaffold prompt',
+    desc: 'Write a scaffold prompt for a feature you want to build. Include: tech stack, existing schema or context, specific requirements, and output format. Run it and note what you had to correct or add.',
+    criteria: [
+      'Your prompt specifies tech stack, schema or context, and expected output format',
+      'You noted at least one thing the AI got wrong or left incomplete',
+      'You made at least one deliberate change to the generated code before using it'
+    ] },
+  { id: 'b1-2', type: 'practical', title: 'Explain-prompt AI-generated code',
+    desc: 'Take a piece of AI-generated code (from this course or elsewhere). Write a prompt asking the AI to explain it line by line. What gaps did the explanation reveal? What did you learn?',
+    criteria: [
+      'You wrote a specific prompt (not just "explain this") with targeted questions',
+      'The AI\'s explanation revealed at least one thing you had not understood before',
+      'You can now explain that thing yourself without re-reading the AI\'s answer'
+    ] },
+  { id: 'b1-3', type: 'reflect', title: 'When the AI was wrong',
+    desc: 'Describe a moment when the AI gave you something incorrect or unhelpful. What prompt change or approach fixed it? What does this tell you about how to work with AI effectively?',
+    criteria: [
+      'You described a specific moment, not a general tendency',
+      'You identified the prompt change or approach that actually fixed the problem',
+      'Your conclusion is actionable: something concrete you will do differently next time'
+    ] }
+];
+</script>
+<script>
+window.DECK_OBJECTIVES = [
+  'Apply the four prompt types — Scaffold, Explain, Debug, Extend — to appropriate coding tasks',
+  'Construct scaffold prompts that specify schema, environment, and security constraints',
+  'Use explain prompts to interrogate AI-generated code and understand each design decision',
+  'Apply debug prompts to diagnose errors systematically before requesting a fix',
+  'Evaluate AI-generated security choices and identify decisions that require human scrutiny'
+];
+</script>
+<script src="deck-extras.js"></script>
+<script>
+window.DECK_QUESTIONS = [
+  {
+    id: 'pe-1-1',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'You want the AI to generate a PostgreSQL CREATE TABLE statement for a new feature. Which prompt type is this?',
+    options: ['Explain', 'Debug', 'Scaffold', 'Extend'],
+    correct: 2,
+    explanation: 'Scaffold prompts generate something from scratch — "Generate / Create / Give me...". Creating a CREATE TABLE statement for a new feature is a scaffold prompt. Extend would be used if you already had a working schema and were adding to it.',
+    reviewSlide: 'Four Types of Infrastructure Prompt'
+  },
+  {
+    id: 'pe-1-2',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'Why does the schema scaffold prompt ask for "IF NOT EXISTS" in the CREATE TABLE statement?',
+    options: [
+      'It prevents the AI from generating primary keys',
+      'It makes the SQL compatible with MySQL',
+      'It means the statement can be run repeatedly without error if the table already exists',
+      'It skips the CHECK constraints if the table has data'
+    ],
+    correct: 2,
+    explanation: 'IF NOT EXISTS makes schema setup scripts idempotent — running them multiple times (e.g. during development resets or CI pipelines) does not cause an error if the table already exists. This is a safe default for all schema migrations.',
+    reviewSlide: 'Prompting for a Database Schema'
+  },
+  {
+    id: 'pe-1-3',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'The JWT staged prompting approach uses three separate prompts: Schema, then Routes, then Middleware. Why not send one prompt asking for all three?',
+    options: [
+      'AI models have a token limit and cannot handle long prompts',
+      'Each step builds on a tested foundation, so if something breaks you know exactly which step caused it',
+      'JWT cannot be implemented without a separate schema step',
+      'Express routes and middleware must be written in separate files'
+    ],
+    correct: 1,
+    explanation: 'Staged prompting lets you test each piece before building on it. If the routes break, you know the schema was fine. One giant prompt often produces subtly wrong code that is hard to locate and diagnose — you have no checkpoint to roll back to.',
+    reviewSlide: 'Prompting for JWT Auth — Don\'t Ask for Everything at Once'
+  },
+  {
+    id: 'pe-1-4',
+    checkpoint: 1,
+    type: 'mcq',
+    q: 'In a login route, why should "user not found" and "wrong password" return the exact same error message?',
+    options: [
+      'To simplify the code — one message is easier to maintain',
+      'To prevent user enumeration attacks that confirm which emails are registered',
+      'Because PostgreSQL returns the same error code for both',
+      'JWT requires a single error format for auth failures'
+    ],
+    correct: 1,
+    explanation: 'If the two cases return different messages, an attacker can probe the system with known email addresses to confirm which ones are registered — before even attempting to crack passwords. Returning the same message prevents this user enumeration attack.',
+    reviewSlide: 'Prompting to Verify the Security Details'
+  },
+  {
+    id: 'pe-1-5',
+    checkpoint: 1,
+    type: 'self',
+    q: 'Explain the difference between jwt.verify() and jwt.decode(). Why would using jwt.decode() for authentication be a critical mistake?',
+    model: 'jwt.verify() checks the token\'s HMAC signature against the secret — a token signed with a different secret throws immediately. jwt.decode() simply base64-decodes the payload without checking the signature at all. Using jwt.decode() for authentication would mean any attacker could forge a token with arbitrary claims (e.g. a different user id or admin role) and the server would accept it, because no signature check is performed.',
+    reviewSlide: 'Prompting to Verify the Security Details'
+  },
+  {
+    id: 'pe-2-1',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'A strong debug prompt should include which of the following?',
+    options: [
+      '"My login isn\'t working." — concise and to the point',
+      'The exact error message, the failing route, the relevant code, and what you expected vs what happened',
+      'Only the error message — additional context confuses the AI',
+      'A description of the feature you are trying to build'
+    ],
+    correct: 1,
+    explanation: 'A strong debug prompt gives the AI everything it needs: the exact error text (verbatim), which route or function is failing, the relevant code section, what you expected, what actually happened, and what you have already tried. "My login isn\'t working" provides nothing actionable.',
+    reviewSlide: 'How to Write a Good Debug Prompt'
+  },
+  {
+    id: 'pe-2-2',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'The error "Cannot find module \'./auth.js\'" appears in a Node.js project using ES modules. What is the most likely cause?',
+    options: [
+      'The auth.js file does not exist in the project',
+      'ES modules require explicit .js extensions in import paths, which is missing',
+      'The package.json is missing the "main" field',
+      'Node.js does not support ES modules'
+    ],
+    correct: 1,
+    explanation: 'Node.js ES modules (when "type": "module" is in package.json) require explicit file extensions in import statements. import \'./auth\' fails; import \'./auth.js\' works. This is a common gotcha when migrating from CommonJS (require()) to ES modules.',
+    reviewSlide: 'Common Infrastructure Errors and How to Prompt Around Them'
+  },
+  {
+    id: 'pe-2-3',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'When deploying to Railway, your app fails to start. Logs show it is listening on port 3001 but Railway cannot reach it. What is the most likely cause?',
+    options: [
+      'Railway does not support Node.js applications',
+      'The JWT_SECRET environment variable is missing',
+      'The app is not reading process.env.PORT — Railway assigns a dynamic port',
+      'The schema.sql has not been run against the Railway database'
+    ],
+    correct: 2,
+    explanation: 'Railway injects a PORT environment variable with the dynamically assigned port. If the app hardcodes port 3001, it listens on the wrong port and Railway\'s router cannot reach it. Always use: const PORT = process.env.PORT || 3001.',
+    reviewSlide: 'Useful Prompts for Railway Deployment'
+  },
+  {
+    id: 'pe-2-4',
+    checkpoint: 2,
+    type: 'mcq',
+    q: 'Which of the following is a genuine risk when using AI-generated security code without review?',
+    options: [
+      'AI always uses deprecated bcrypt versions',
+      'AI may generate CORS with origin: \'*\', no rate limiting on auth routes, and overly broad JWT payloads',
+      'AI cannot generate JWT middleware correctly',
+      'AI-generated SQL always uses string interpolation'
+    ],
+    correct: 1,
+    explanation: 'AI security defaults are often too permissive. Common issues include CORS set to \'*\' (any origin), no rate limiting on login endpoints, no input length validation, and JWT payloads containing more claims than necessary. Always audit every security boundary the AI generates.',
+    reviewSlide: 'Where AI Infrastructure Code Needs Extra Scrutiny'
+  },
+  {
+    id: 'pe-2-5',
+    checkpoint: 2,
+    type: 'self',
+    q: 'Describe the Prompt → Test → Iterate loop in your own words. What is the human\'s role in this loop, and what does the AI contribute?',
+    model: 'The loop: write a specific scaffold prompt → AI generates code → read every line and ask explain prompts for anything unclear → run it (install, migrate, start, curl) → if it works, write an extend prompt for the next feature; if it fails, paste the exact error into a debug prompt → fix and test again. The AI contributes speed — generating boilerplate, structured code, and explanations faster than typing. The human contributes judgement — deciding if the output is correct, secure, and appropriate; running and testing it; and knowing when the AI has made a subtle mistake.',
+    reviewSlide: 'The Prompt → Test → Iterate Loop'
+  }
+];
+</script>
+</body>
+</html>
