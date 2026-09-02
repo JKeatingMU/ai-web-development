@@ -38,6 +38,7 @@
   .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
   .badge-avail { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.35); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
   .badge-planned { background: rgba(139,148,158,.1); color: var(--muted); border: 1px solid var(--border); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+  .lg-key { font-family: 'SF Mono','Fira Code',monospace; font-size: 11px; color: #6e7681; border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; }
 
   /* ── Track section ── */
   .track { margin-bottom: 52px; }
@@ -346,6 +347,8 @@
   <div class="legend">
     <span class="legend-item"><span class="badge-avail">&#10003;</span> Deck available</span>
     <span class="legend-item"><span class="badge-planned">&#9675;</span> Planned</span>
+    <span class="legend-item"><span class="lg-key">&#9733;&#8239;0/3</span> Practical tasks completed</span>
+    <span class="legend-item"><span class="lg-key">&#9432;</span> Learning objectives</span>
   </div>
 
   <!-- ══════════════════════════════════════════════════════
@@ -974,13 +977,16 @@ document.addEventListener('DOMContentLoaded', function() {
     var lbl = document.createElement('span');
     lbl.className = 'card-progress-label';
     lbl.textContent = label;
+    lbl.title = total > 0 ? 'Progress: slide ' + (max + 1) + ' of ' + total : 'Not started yet';
 
-    // Assessment chip
+    // Practical-tasks chip: \u2605 done/total, from the deck's Assessments panel
     var assessDone  = parseInt(localStorage.getItem(key + '_assess_done')  || '0', 10);
     var assessTotal = parseInt(localStorage.getItem(key + '_assess_total') || '3', 10);
     var assessChip = document.createElement('span');
     assessChip.className = 'card-assess-chip' + (assessDone > 0 ? ' has-done' : '');
-    assessChip.title = assessDone + ' of ' + assessTotal + ' tasks completed';
+    assessChip.title = 'Practical tasks completed: ' + assessDone + ' of ' + assessTotal
+      + ' \u2014 tick them off in this deck\u2019s Assessments panel';
+    assessChip.setAttribute('aria-label', assessChip.title);
     assessChip.textContent = '\u2605\u202f' + assessDone + '/' + assessTotal;
 
     // ⓘ button
