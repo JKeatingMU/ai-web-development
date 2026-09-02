@@ -26,7 +26,10 @@ Assistance · Maynooth University" credit line. **The deck HTML contains none of
    (~50% and ~82% through), an "AI assumes / verify" slide, a Key Terms slide, and
    a prompt-reflection slide — and confirm before writing.
 3. Write `<slug>-workshop.html` in the repo root from the skeleton below.
-4. Add the card + `MODULE_LOS` entry to `index.html`.
+4. Add the module to **`outline.md`** (a `### <CODE> — <Title> {file=<slug>-workshop}`
+   entry under the right `## Track` heading, with the card description and LO
+   bullets), then `npm run build:outline` — this writes the card + `MODULE_LOS`
+   into `index.html`. Do NOT hand-edit those regions of `index.html`.
 5. Run the verification checklist.
 6. Follow-ups:
    - `npm run build:accessible` — regenerates `accessible/<slug>-workshop.html`
@@ -228,34 +231,26 @@ window.DECK_QUESTIONS = [
 </html>
 ```
 
-## index.html wiring
+## index.html wiring — via `outline.md`
 
-**Card** — inside the right `<section class="track track-X">` card row, change the
-planned placeholder to:
+Do NOT hand-edit the card rows or `var MODULE_LOS` in `index.html` — they are
+generated. Add the module to `outline.md` under the right `## Track` heading:
 
-```html
-<a class="card available card-x" href="SLUG-workshop.html">
-  <div class="card-code">X3</div>
-  <div class="card-title">Deck Title</div>
-  <div class="card-desc">Short description</div>
-  <div class="card-reflect">Includes prompt reflection</div>
-</a>
+```markdown
+### X3 — Deck Title   {file=SLUG-workshop}
+
+Short card description.
+
+- Learning objective 1 — action verb + measurable outcome
+- Learning objective 2
+- Learning objective 3
+- Learning objective 4
+- Learning objective 5
 ```
 
-**MODULE_LOS** — in the `<script>` block near the bottom of `index.html`:
-
-```js
-'X3': { title: 'Deck Title', color: '#bc8cff', file: 'SLUG-workshop', los: [
-  'Learning objective 1 — action verb + measurable outcome',
-  'Learning objective 2',
-  'Learning objective 3',
-  'Learning objective 4',
-  'Learning objective 5',
-]},
-```
-
-`file:` must equal `window.DECK_NAME` exactly (both without `.html`).
-Keep the `los:` array here identical to `window.DECK_OBJECTIVES` in the deck.
+Then `npm run build:outline`. The `{file=…}` slug must equal `window.DECK_NAME`
+(without `.html`); keep the LO bullets identical to `window.DECK_OBJECTIVES` in
+the deck. For a not-yet-built deck use `{planned}` and omit `{file=…}`.
 
 ## Track accent
 
@@ -290,13 +285,12 @@ Card class is `card-a` / `card-b` / … matching the track.
 
 ## Verification checklist
 
-- [ ] `window.DECK_NAME` matches the `file:` key in `MODULE_LOS`
-- [ ] `window.DECK_OBJECTIVES` matches the `los:` array in `MODULE_LOS`
-- [ ] Card `href` matches the filename; card is `available` (not `planned`)
+- [ ] `outline.md` has the `### <CODE> — <Title> {file=<slug>}` entry + description + LO bullets
+- [ ] `{file=…}` slug equals `window.DECK_NAME`; LO bullets match `window.DECK_OBJECTIVES`
 - [ ] `#counter` start value matches slide count
 - [ ] Exactly 2 `quiz-slide` divs; each `data-checkpoint` has questions in `DECK_QUESTIONS`
 - [ ] `DECK_ASSESSMENTS` has at least one `practical` and one `reflect`
 - [ ] `--accent` + `card-x` class match the track
 - [ ] Prompt-reflection slide present, second from last
 - [ ] Opens with no console errors when served over http; quizzes render
-- [ ] Ran `npm run build:accessible` (adds the accessible version + manifest entry)
+- [ ] Ran `npm run build` (outline → index.html wiring, then the accessible version + manifest)

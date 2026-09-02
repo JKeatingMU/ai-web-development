@@ -8,8 +8,59 @@ npm install          # one-time: pulls node-html-parser (+ optional AI SDKs)
 
 | Script | What it does | Needs |
 |--------|--------------|-------|
+| `build-outline.mjs` | `outline.md` → the generated regions of `index.html` (header, About, Outcomes, the track sections, Dependencies, `var MODULE_LOS`). | — |
 | `build-accessible.mjs` | Generates the accessible text version of every deck (`accessible/<deck>.html`) and the accessible course-home page, and rewrites the `ACCESSIBLE_VERSIONS` manifest in `index.html`. | node-html-parser |
 | `generate-deck-scripts.mjs` | Generates per-slide narration scripts, and optionally TTS audio, for a deck. | `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`; `--audio` needs `OPENAI_API_KEY` |
+
+`npm run build` runs `build:outline` then `build:accessible` — the usual one command after any change to `outline.md` or a deck.
+
+## build-outline.mjs
+
+```bash
+npm run build:outline            # regenerate index.html from outline.md
+npm run build:outline:check      # report drift, write nothing (exit 1 if stale)
+```
+
+`outline.md` is the single source for the course structure — course title/tagline,
+the philosophy blurb, the 8 course outcomes, track dependencies, and per module:
+code, title, one-line card description, status, and learning objectives.
+
+Format (see `outline.md` itself for the full example):
+
+```markdown
+---
+title: Learning Web Development
+title_accent: by Building with AI
+subtitle: ...
+tagline: ...
+---
+
+## About
+Free prose — becomes the philosophy block.
+
+## Outcomes
+1. First course outcome ...
+
+## Dependencies
+- **A — Foundations** → **B — Backend API** and **C — Frontend** → **D — Fullstack**
+
+## Track A — Foundations   {color=#3fb950}
+One-line track description.
+> An optional track note.
+
+### A1 — How the Web Works   {file=web-fundamentals-workshop}
+One-line card description.
+
+- Learning objective 1
+- Learning objective 2
+
+### B7 — Deployment   {planned}
+Description of a not-yet-built deck (no `{file=…}`).
+```
+
+`index.html` carries `<!-- BUILD:… -->` / `<!-- /BUILD:… -->` markers; the script
+replaces only what is between them. Everything else in `index.html` (styles, the
+"how these decks work" section, the legend, all the JS) is hand-maintained.
 
 ## build-accessible.mjs
 

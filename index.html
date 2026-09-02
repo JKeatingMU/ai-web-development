@@ -276,9 +276,11 @@
 <div class="page">
 
   <header class="site-header">
+    <!-- BUILD:header (from outline.md — run `npm run build:outline`) -->
     <h1>Learning Web Development <span>by Building with AI</span></h1>
     <p class="subtitle">A practical course in full-stack web development</p>
     <p class="tagline">Build real things. Read what the AI wrote. Understand every line.</p>
+  <!-- /BUILD:header -->
   </header>
 
   <nav class="quick-links" aria-label="Course pages">
@@ -288,10 +290,19 @@
     <a href="certificate.html" id="cert-link">My Certificate &#8594;</a>
   </nav>
 
+  <!-- BUILD:about (from outline.md ## About) -->
+
   <div class="philosophy">
-    <p>This course pairs hands-on building with deliberate reflection. At every step you use AI to generate code — then you read it, question it, and understand it. The goal is not to produce software faster. It is to become the developer who can evaluate, fix, and extend what AI produces.</p>
-    <p style="margin-top:10px;font-size:13px;color:var(--muted);">Every module ends with a <strong style="color:var(--text);">prompt reflection exercise</strong> — a structured pause to consider what the AI did, why, and what you would change next time.</p>
+    <p>This course pairs hands-on building with deliberate reflection. At every step you use
+AI to generate code — then you read it, question it, and understand it. The goal is
+not to produce software faster. It is to become the developer who can evaluate, fix,
+and extend what AI produces.</p>
+    <p style="margin-top:10px;font-size:13px;color:var(--muted);">Every module ends with a <strong style="color:var(--text);">prompt reflection exercise</strong> — a structured pause to
+consider what the AI did, why, and what you would change next time.</p>
   </div>
+  <!-- /BUILD:about -->
+
+  <!-- BUILD:outcomes (from outline.md ## Outcomes) -->
 
   <div class="course-los" id="course-los">
     <button class="course-los-toggle" onclick="document.getElementById('course-los').classList.toggle('open')">
@@ -312,6 +323,7 @@
       </ol>
     </div>
   </div>
+  <!-- /BUILD:outcomes -->
 
   <section class="deck-guide" aria-labelledby="deck-guide-h">
     <h2 id="deck-guide-h">How these decks work</h2>
@@ -351,9 +363,9 @@
     <span class="legend-item"><span class="lg-key">&#9432;</span> Learning objectives</span>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════
-       START HERE — ORIENTATION
-  ═══════════════════════════════════════════════════════ -->
+  <!-- BUILD:tracks (from outline.md — every "## Track" and "### module" — run `npm run build:outline`) -->
+
+
   <section class="track track-start" style="margin-bottom:32px;">
     <div class="track-header" style="background:rgba(86,212,228,.08);border-color:rgba(86,212,228,.3);">
       <span class="track-id" style="color:#56d4e4;">Start Here</span>
@@ -370,9 +382,6 @@
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════════════
-       TRACK A — FOUNDATIONS
-  ═══════════════════════════════════════════════════════ -->
   <section class="track track-a">
     <div class="track-header">
       <span class="track-id">Track A</span>
@@ -381,42 +390,36 @@
     </div>
     <div class="card-row">
       <a href="web-fundamentals-workshop.html" class="card available card-a">
-        <span class="card-badge badge-avail">&#10003; Deck ready</span>
         <div class="card-code">A1</div>
         <div class="card-title">How the Web Works</div>
         <div class="card-desc">HTTP request/response, status codes, DNS, browsers, JSON</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="shell-workshop.html" class="card available card-a">
-        <span class="card-badge badge-avail">&#10003; Deck ready</span>
         <div class="card-code">A2</div>
         <div class="card-title">Terminal &amp; Shell</div>
         <div class="card-desc">Navigation, pipes, environment variables, aliases, scripting</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="git-workshop.html" class="card available card-a">
-        <span class="card-badge badge-avail">&#10003; Deck ready</span>
         <div class="card-code">A3</div>
         <div class="card-title">Git &amp; GitHub</div>
         <div class="card-desc">Version control, commit, push, branches, PRs, GitHub Pages</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="database-workshop.html" class="card available card-a">
-        <span class="card-badge badge-avail">&#10003; Deck ready</span>
         <div class="card-code">A4</div>
         <div class="card-title">Database Concepts</div>
         <div class="card-desc">Tables, SQL, psql, primary keys, constraints, transactions</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="mongodb-workshop.html" class="card available card-a">
-        <span class="card-badge badge-avail">&#10003; Deck ready</span>
         <div class="card-code">A5</div>
         <div class="card-title">Document Databases &amp; MongoDB</div>
         <div class="card-desc">Collections, documents, Mongoose, embed vs reference, aggregation pipelines</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="rest-workshop.html" class="card available card-a">
-        <span class="card-badge badge-avail">&#10003; Deck ready</span>
         <div class="card-code">A6</div>
         <div class="card-title">REST &amp; HTTP APIs</div>
         <div class="card-desc">Methods, URI design, status codes, statelessness, error design</div>
@@ -425,56 +428,45 @@
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════════════
-       TRACK B — BACKEND API
-  ═══════════════════════════════════════════════════════ -->
   <section class="track track-b">
     <div class="track-header">
       <span class="track-id">Track B</span>
       <span class="track-title">Backend API</span>
       <span class="track-desc">Build a production-quality REST API from scratch using AI as your coding partner</span>
     </div>
-    <div class="track-note">
-      <strong>Note:</strong> The Backend track forms the core of Part 1–4 series (B2–B5). Start with B1 (Prompt Engineering) before B2.
-    </div>
+    <div class="track-note">Note: The Backend track forms the core of Part 1–4 series (B2–B5). Start with B1 (Prompt Engineering) before B2.</div>
     <div class="card-row">
-      <a class="card available card-b" href="prompt-engineering-workshop.html">
-        <span class="card-badge">&#10003; Available</span>
+      <a href="prompt-engineering-workshop.html" class="card available card-b">
         <div class="card-code">B1</div>
         <div class="card-title">Prompt Engineering</div>
         <div class="card-desc">Four prompt types: Scaffold, Explain, Debug, Extend</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
-      <a class="card available card-b" href="ai-crud-workshop.html">
-        <span class="card-badge">&#10003; Available</span>
+      <a href="ai-crud-workshop.html" class="card available card-b">
         <div class="card-code">B2</div>
         <div class="card-title">CRUD API with AI</div>
         <div class="card-desc">Node.js, Express, PostgreSQL, generated code walkthrough</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
-      <a class="card available card-b" href="auth-workshop.html">
-        <span class="card-badge">&#10003; Available</span>
+      <a href="auth-workshop.html" class="card available card-b">
         <div class="card-code">B3</div>
         <div class="card-title">Authentication</div>
         <div class="card-desc">JWT, bcrypt, middleware, protected routes</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
-      <a class="card available card-b" href="curl-testing-workshop.html">
-        <span class="card-badge">&#10003; Available</span>
+      <a href="curl-testing-workshop.html" class="card available card-b">
         <div class="card-code">B4</div>
         <div class="card-title">Testing with curl</div>
         <div class="card-desc">curl, jq, scripted API test workflow</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
-      <a class="card available card-b" href="extending-api-workshop.html">
-        <span class="card-badge">&#10003; Available</span>
+      <a href="extending-api-workshop.html" class="card available card-b">
         <div class="card-code">B5</div>
         <div class="card-title">Extending APIs</div>
         <div class="card-desc">Pagination, relational data, JOIN queries</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
-      <a class="card available card-b" href="validation-workshop.html">
-        <span class="card-badge">&#10003; Available</span>
+      <a href="validation-workshop.html" class="card available card-b">
         <div class="card-code">B6</div>
         <div class="card-title">Validation &amp; Errors</div>
         <div class="card-desc">Input validation, error middleware, Zod, asyncHandler</div>
@@ -489,9 +481,6 @@
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════════════
-       TRACK C — FRONTEND
-  ═══════════════════════════════════════════════════════ -->
   <section class="track track-c">
     <div class="track-header">
       <span class="track-id">Track C</span>
@@ -500,35 +489,30 @@
     </div>
     <div class="card-row">
       <a href="react-fundamentals-workshop.html" class="card available card-c">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">C1</div>
         <div class="card-title">React Fundamentals</div>
         <div class="card-desc">Components, JSX, props, useState, events, forms, lists</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="state-effects-workshop.html" class="card available card-c">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">C2</div>
         <div class="card-title">State &amp; Effects</div>
         <div class="card-desc">useEffect, async fetch, cleanup, custom hooks, useMemo</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="api-integration-workshop.html" class="card available card-c">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">C3</div>
         <div class="card-title">API Integration</div>
         <div class="card-desc">CORS, env vars, Vite proxy, centralised api.ts, token storage</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="forms-validation-workshop.html" class="card available card-c">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">C4</div>
         <div class="card-title">Forms &amp; Validation</div>
         <div class="card-desc">Controlled inputs, generic onChange, validation, aria-describedby</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="routing-workshop.html" class="card available card-c">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">C5</div>
         <div class="card-title">Routing</div>
         <div class="card-desc">React Router v6, Link, useParams, useNavigate, ProtectedRoute</div>
@@ -537,9 +521,6 @@
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════════════
-       TRACK D — FULLSTACK
-  ═══════════════════════════════════════════════════════ -->
   <section class="track track-d">
     <div class="track-header">
       <span class="track-id">Track D</span>
@@ -548,21 +529,18 @@
     </div>
     <div class="card-row">
       <a href="fullstack-contracts-workshop.html" class="card available card-d">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">D1</div>
         <div class="card-title">Connecting the Stack</div>
         <div class="card-desc">Architecture, shared types, API contracts, production CORS, Express serving React</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="auth-end-to-end-workshop.html" class="card available card-d">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">D2</div>
         <div class="card-title">Auth End-to-End</div>
         <div class="card-desc">Register, login, useAuth hook, token lifecycle, logout</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="deploy-workshop.html" class="card available card-d">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">D3</div>
         <div class="card-title">Build &amp; Deploy</div>
         <div class="card-desc">npm run build, Railway, schema setup, env vars, live testing</div>
@@ -571,9 +549,6 @@
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════════════
-       TRACK E — AI AGENTS & AUTOMATION
-  ═══════════════════════════════════════════════════════ -->
   <section class="track track-e">
     <div class="track-header">
       <span class="track-id">Track E</span>
@@ -582,42 +557,36 @@
     </div>
     <div class="card-row">
       <a href="ai-agents-workshop.html" class="card available card-e">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">E1</div>
         <div class="card-title">What is an Agent?</div>
         <div class="card-desc">LLMs + tools + loops, ReAct pattern, agent vs chatbot</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="n8n-fundamentals-workshop.html" class="card available card-e">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">E2</div>
         <div class="card-title">n8n Fundamentals</div>
         <div class="card-desc">Nodes, expressions, credentials, the item model</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="n8n-api-workshop.html" class="card available card-e">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">E3</div>
         <div class="card-title">Calling APIs in n8n</div>
         <div class="card-desc">Login for JWT, full CRUD, data mapping, debugging errors</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="n8n-agent-node-workshop.html" class="card available card-e">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">E4</div>
         <div class="card-title">AI Agent Node</div>
         <div class="card-desc">Tool nodes, system prompts, memory, testing</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="n8n-building-agents-workshop.html" class="card available card-e">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">E5</div>
         <div class="card-title">Building Agents</div>
         <div class="card-desc">Research, summarise &amp; tag, monitor &amp; notify</div>
         <div class="card-reflect">Includes prompt reflection</div>
       </a>
       <a href="n8n-production-workshop.html" class="card available card-e">
-        <span class="card-badge">&#10003; Deck ready</span>
         <div class="card-code">E6</div>
         <div class="card-title">Production Patterns</div>
         <div class="card-desc">Error workflows, approval gates, monitoring, cost</div>
@@ -625,10 +594,10 @@
       </a>
     </div>
   </section>
+  <!-- /BUILD:tracks -->
 
-  <!-- ══════════════════════════════════════════════════════
-       DEPENDENCIES
-  ═══════════════════════════════════════════════════════ -->
+  <!-- BUILD:dependencies (from outline.md ## Dependencies) -->
+
   <div class="dep-note">
     <strong>Track dependencies</strong>
     <div class="dep-chain">
@@ -643,9 +612,10 @@
     <div class="dep-chain">
       <span class="dep-pill dep-a">A &mdash; Foundations</span>
       <span class="dep-arrow">&#8594;</span>
-      <span class="dep-pill dep-e">E &mdash; AI Agents</span>
+      <span class="dep-pill dep-e">E &mdash; AI Agents &amp; Automation</span>
     </div>
   </div>
+  <!-- /BUILD:dependencies -->
 
   </main>
 
@@ -707,209 +677,212 @@ var ACCESSIBLE_VERSIONS = {
   'web-fundamentals-workshop': 'accessible/web-fundamentals-workshop.html'
 };
 
+/* BUILD:module-los (from outline.md — run `npm run build:outline`) */
+
 var MODULE_LOS = {
-  'S0': { title: 'Start Here', color: '#56d4e4', file: 'start-here', los: [
-    'Describe the AI-assisted development loop and identify where reading and understanding fit within it',
-    'Distinguish between surface-level and directed AI use and explain why the distinction matters for long-term maintainability',
-    'Write a scaffold prompt that includes stack context, state shape, API contract, error handling requirements, and constraints',
-    'Identify the four prompt move types — Scaffold, Explain, Debug, Extend — and the appropriate situation for each',
-    'List at least four failure modes of AI code generation and the corresponding strategy for catching each',
-    'Apply the five-point reading checklist to evaluate any piece of AI-generated code'
+  "S0": { title: "Start Here", color: "#56d4e4", file: "start-here", los: [
+    "Describe the AI-assisted development loop and identify where reading and understanding fit within it",
+    "Distinguish between surface-level and directed AI use and explain why the distinction matters for long-term maintainability",
+    "Write a scaffold prompt that includes stack context, state shape, API contract, error handling requirements, and constraints",
+    "Identify the four prompt move types — Scaffold, Explain, Debug, Extend — and the appropriate situation for each",
+    "List at least four failure modes of AI code generation and the corresponding strategy for catching each",
+    "Apply the five-point reading checklist to evaluate any piece of AI-generated code"
   ]},
-  'A1': { title: 'How the Web Works', color: '#3fb950', file: 'web-fundamentals-workshop', los: [
-    'Trace what happens when a browser makes an HTTP request and receives a response',
-    'Interpret HTTP status codes, methods, and headers in the context of real API calls',
-    'Explain the role of DNS in resolving domain names to IP addresses',
-    'Parse and construct JSON data structures used in API communication',
-    'Distinguish between REST and non-REST API design approaches'
+  "A1": { title: "How the Web Works", color: "#3fb950", file: "web-fundamentals-workshop", los: [
+    "Trace what happens when a browser makes an HTTP request and receives a response",
+    "Interpret HTTP status codes, methods, and headers in the context of real API calls",
+    "Explain the role of DNS in resolving domain names to IP addresses",
+    "Parse and construct JSON data structures used in API communication",
+    "Distinguish between REST and non-REST API design approaches"
   ]},
-  'A2': { title: 'Terminal & Shell', color: '#3fb950', file: 'shell-workshop', los: [
-    'Navigate the filesystem and manage files and directories from the command line',
-    'Compose shell pipelines using pipes, redirection, and chaining operators (&&, ||)',
-    'Configure environment variables and apply the .env / .env.example pattern',
-    'Write basic shell scripts with variables and exit codes',
-    'Use curl and jq to make HTTP requests and process JSON responses from the terminal'
+  "A2": { title: "Terminal & Shell", color: "#3fb950", file: "shell-workshop", los: [
+    "Navigate the filesystem and manage files and directories from the command line",
+    "Compose shell pipelines using pipes, redirection, and chaining operators (&&, ||)",
+    "Configure environment variables and apply the .env / .env.example pattern",
+    "Write basic shell scripts with variables and exit codes",
+    "Use curl and jq to make HTTP requests and process JSON responses from the terminal"
   ]},
-  'A3': { title: 'Git & GitHub', color: '#3fb950', file: 'git-workshop', los: [
-    'Explain the three-zone Git model: working tree, staging area, and commit history',
-    'Apply the daily commit workflow: stage, commit, push to a remote repository',
-    'Create and merge branches safely, resolving conflicts when they arise',
-    'Collaborate using GitHub: open pull requests and review changes',
-    'Configure .gitignore to protect sensitive and generated files from version control'
+  "A3": { title: "Git & GitHub", color: "#3fb950", file: "git-workshop", los: [
+    "Explain the three-zone Git model: working tree, staging area, and commit history",
+    "Apply the daily commit workflow: stage, commit, push to a remote repository",
+    "Create and merge branches safely, resolving conflicts when they arise",
+    "Collaborate using GitHub: open pull requests and review changes",
+    "Configure .gitignore to protect sensitive and generated files from version control"
   ]},
-  'A4': { title: 'Database Concepts', color: '#3fb950', file: 'database-workshop', los: [
-    'Explain the relational model: tables, rows, columns, primary keys, and foreign keys',
-    'Write SQL queries to create, read, update, and delete records',
-    'Apply database constraints (NOT NULL, UNIQUE, CHECK, FK) to enforce data integrity',
-    'Construct JOIN queries to retrieve related data from multiple tables',
-    'Apply safe migration discipline: extend schemas without dropping existing data'
+  "A4": { title: "Database Concepts", color: "#3fb950", file: "database-workshop", los: [
+    "Explain the relational model: tables, rows, columns, primary keys, and foreign keys",
+    "Write SQL queries to create, read, update, and delete records",
+    "Apply database constraints (NOT NULL, UNIQUE, CHECK, FK) to enforce data integrity",
+    "Construct JOIN queries to retrieve related data from multiple tables",
+    "Apply safe migration discipline: extend schemas without dropping existing data"
   ]},
-  'A5': { title: 'Document Databases & MongoDB', color: '#3fb950', file: 'mongodb-workshop', los: [
-    'Explain the document model and contrast it with the relational model',
-    'Design MongoDB schemas using Mongoose with appropriate field types and validation',
-    'Perform CRUD operations on a MongoDB collection using Mongoose methods',
-    'Choose between embedding and referencing related data in document schemas',
-    'Construct basic aggregation pipelines to filter, group, and transform documents'
+  "A5": { title: "Document Databases & MongoDB", color: "#3fb950", file: "mongodb-workshop", los: [
+    "Explain the document model and contrast it with the relational model",
+    "Design MongoDB schemas using Mongoose with appropriate field types and validation",
+    "Perform CRUD operations on a MongoDB collection using Mongoose methods",
+    "Choose between embedding and referencing related data in document schemas",
+    "Construct basic aggregation pipelines to filter, group, and transform documents"
   ]},
-  'A6': { title: 'REST & HTTP APIs', color: '#3fb950', file: 'rest-workshop', los: [
-    'Explain the six REST constraints and their practical implications for API design',
-    'Design clean, resource-oriented URI structures following REST conventions',
-    'Select appropriate HTTP methods and status codes for each API operation',
-    'Explain statelessness and its implications for session management and scalability',
-    'Design consistent, informative error responses that distinguish client from server errors'
+  "A6": { title: "REST & HTTP APIs", color: "#3fb950", file: "rest-workshop", los: [
+    "Explain the six REST constraints and their practical implications for API design",
+    "Design clean, resource-oriented URI structures following REST conventions",
+    "Select appropriate HTTP methods and status codes for each API operation",
+    "Explain statelessness and its implications for session management and scalability",
+    "Design consistent, informative error responses that distinguish client from server errors"
   ]},
-  'B1': { title: 'Prompt Engineering', color: '#58a6ff', file: 'prompt-engineering-workshop', los: [
-    'Apply the four prompt types — Scaffold, Explain, Debug, Extend — to appropriate coding tasks',
-    'Construct scaffold prompts that specify schema, environment, and security constraints',
-    'Use explain prompts to interrogate AI-generated code and understand each design decision',
-    'Apply debug prompts to diagnose errors systematically before requesting a fix',
-    'Evaluate AI-generated security choices and identify decisions that require human scrutiny'
+  "B1": { title: "Prompt Engineering", color: "#58a6ff", file: "prompt-engineering-workshop", los: [
+    "Apply the four prompt types — Scaffold, Explain, Debug, Extend — to appropriate coding tasks",
+    "Construct scaffold prompts that specify schema, environment, and security constraints",
+    "Use explain prompts to interrogate AI-generated code and understand each design decision",
+    "Apply debug prompts to diagnose errors systematically before requesting a fix",
+    "Evaluate AI-generated security choices and identify decisions that require human scrutiny"
   ]},
-  'B2': { title: 'CRUD API with AI', color: '#58a6ff', file: 'ai-crud-workshop', los: [
-    'Use a scaffold prompt to generate a working Node.js / Express / PostgreSQL CRUD API',
-    'Read and explain the purpose of every generated file, including package.json and db.js',
-    'Apply parameterised queries to prevent SQL injection in AI-generated database code',
-    'Identify and correct common AI mistakes: ES module paths, route ordering, dynamic PORT handling',
-    'Deploy a Node.js API to Railway and configure environment variables for production'
+  "B2": { title: "CRUD API with AI", color: "#58a6ff", file: "ai-crud-workshop", los: [
+    "Use a scaffold prompt to generate a working Node.js / Express / PostgreSQL CRUD API",
+    "Read and explain the purpose of every generated file, including package.json and db.js",
+    "Apply parameterised queries to prevent SQL injection in AI-generated database code",
+    "Identify and correct common AI mistakes: ES module paths, route ordering, dynamic PORT handling",
+    "Deploy a Node.js API to Railway and configure environment variables for production"
   ]},
-  'B3': { title: 'Authentication', color: '#58a6ff', file: 'auth-workshop', los: [
-    'Explain how JWT works: structure (header, payload, signature), signing, and verification',
-    'Implement user registration with bcrypt password hashing and safe, uniform error messages',
-    'Build an Express authentication middleware that verifies JWTs and attaches the payload to req.user',
-    'Protect routes by composing middleware and trace the full auth flow from request to response',
-    'Apply JWT security best practices: secret management, token expiry, payload content, and revocation limitations'
+  "B3": { title: "Authentication", color: "#58a6ff", file: "auth-workshop", los: [
+    "Explain how JWT works: structure (header, payload, signature), signing, and verification",
+    "Implement user registration with bcrypt password hashing and safe, uniform error messages",
+    "Build an Express authentication middleware that verifies JWTs and attaches the payload to req.user",
+    "Protect routes by composing middleware and trace the full auth flow from request to response",
+    "Apply JWT security best practices: secret management, token expiry, payload content, and revocation limitations"
   ]},
-  'B4': { title: 'Testing with curl', color: '#58a6ff', file: 'curl-testing-workshop', los: [
-    'Use curl to send HTTP requests and interpret response bodies, headers, and status codes',
-    'Capture a JWT from a login response and use it in subsequent authenticated requests',
-    'Write a shell script that runs a complete CRUD test sequence automatically',
-    'Use jq to filter and extract data from JSON API responses in the terminal',
-    'Diagnose common API failures — connection refused, 401, 404, 422 — using curl output alone'
+  "B4": { title: "Testing with curl", color: "#58a6ff", file: "curl-testing-workshop", los: [
+    "Use curl to send HTTP requests and interpret response bodies, headers, and status codes",
+    "Capture a JWT from a login response and use it in subsequent authenticated requests",
+    "Write a shell script that runs a complete CRUD test sequence automatically",
+    "Use jq to filter and extract data from JSON API responses in the terminal",
+    "Diagnose common API failures — connection refused, 401, 404, 422 — using curl output alone"
   ]},
-  'C2': { title: 'State & Effects', color: '#bc8cff', file: 'state-effects-workshop', los: [
-    'Explain what triggers a React re-render and why side effects must not run during render',
-    'Use useEffect with the correct dependency array to control when effects run',
-    'Write async fetch logic inside useEffect using the define-then-call async pattern',
-    'Implement AbortController cleanup to prevent memory leaks on unmount',
-    'Extract reusable stateful logic into a custom hook and explain the naming convention',
-    'Recognise when useCallback and useMemo are and are not appropriate optimisations'
+  "B5": { title: "Extending APIs", color: "#58a6ff", file: "extending-api-workshop", los: [
+    "Add offset pagination to an existing API endpoint using SQL LIMIT and OFFSET with a JSON envelope",
+    "Construct window function queries to include total count without a second database round-trip",
+    "Add a foreign-key relationship between two database tables with appropriate CASCADE rules",
+    "Write JOIN queries to fetch related data across tables in a single database call",
+    "Apply safe migration discipline: add tables and columns without modifying or dropping existing data"
   ]},
-  'C1': { title: 'React Fundamentals', color: '#bc8cff', file: 'react-fundamentals-workshop', los: [
-    'Set up a Vite + React + TypeScript project and explain the purpose of each generated file',
-    'Write function components with typed props using TypeScript interfaces',
-    'Manage local component state with useState and explain why direct mutation does not work',
-    'Build controlled form inputs using the value and onChange pattern',
-    'Render lists using .map() with stable key props and explain why keys are required',
-    'Apply conditional rendering using &&, ternary, and early return patterns',
-    'Read and critically evaluate AI-generated React components'
+  "B6": { title: "Validation & Errors", color: "#58a6ff", file: "validation-workshop", los: [
+    "Identify the four validation layers in a web application and explain why route-handler validation is essential",
+    "Write manual validation checks for required fields, type, length, and allowed values in an Express route",
+    "Create a centralised error-handling middleware and an AppError class that carries an HTTP status code",
+    "Wrap async route handlers with asyncHandler to eliminate try/catch boilerplate",
+    "Apply Zod schema validation with safeParse to parse and type-check request bodies in Express routes"
   ]},
-  'D1': { title: 'Connecting the Stack', color: '#d29922', file: 'fullstack-contracts-workshop', los: [
-    'Explain the development vs production fullstack architecture and why same-origin production eliminates client-side CORS',
-    'Identify API contract mismatches between frontend and backend by comparing field names, wrapper objects, and error keys',
-    'Create a shared/types.ts file as a single source of truth for request and response shapes',
-    'Configure environment-based CORS using CLIENT_ORIGIN rather than a hardcoded origin string',
-    'Add express.static and a catch-all GET * route in the correct order to serve a React production build from Express',
-    'Run a local integration test to verify API and SPA routing both work on one port after building React'
+  "C1": { title: "React Fundamentals", color: "#bc8cff", file: "react-fundamentals-workshop", los: [
+    "Set up a Vite + React + TypeScript project and explain the purpose of each generated file",
+    "Write function components with typed props using TypeScript interfaces",
+    "Manage local component state with useState and explain why direct mutation does not work",
+    "Build controlled form inputs using the value and onChange pattern",
+    "Render lists using .map() with stable key props and explain why keys are required",
+    "Apply conditional rendering using &&, ternary, and early return patterns",
+    "Read and critically evaluate AI-generated React components"
   ]},
-  'D2': { title: 'Auth End-to-End', color: '#d29922', file: 'auth-end-to-end-workshop', los: [
-    'Trace the complete auth flow across register, login, protected request, and logout, identifying what each operation stores and returns',
-    'Implement a useAuth hook that updates both localStorage and React state atomically on login and logout',
-    'Write a LoginPage that stores the token before navigating and shows a uniform error message that does not reveal which credential was wrong',
-    'Diagnose the six common auth bugs: token key mismatch, wrong Bearer prefix, stale NavBar state, Back-button loop, registration token storage, and email enumeration',
-    'Explain JWT expiry handling and why window.location.href is used instead of navigate in api.ts'
+  "C2": { title: "State & Effects", color: "#bc8cff", file: "state-effects-workshop", los: [
+    "Explain what triggers a React re-render and why side effects must not run during render",
+    "Use useEffect with the correct dependency array to control when effects run",
+    "Write async fetch logic inside useEffect using the define-then-call async pattern",
+    "Implement AbortController cleanup to prevent memory leaks on unmount",
+    "Extract reusable stateful logic into a custom hook and explain the naming convention",
+    "Recognise when useCallback and useMemo are and are not appropriate optimisations"
   ]},
-  'D3': { title: 'Build & Deploy', color: '#d29922', file: 'deploy-workshop', los: [
-    'Explain what npm run build produces and why VITE_ variables are baked in at build time rather than read at runtime',
-    'Apply the six-point pre-deploy checklist to identify common issues before pushing to Railway',
-    'Set up a Railway project with a PostgreSQL plugin, configure environment variables, and trigger a deploy via GitHub push',
-    'Run schema.sql against a Railway PostgreSQL database using the Railway CLI',
-    'Test a live deployment in layers using curl before testing in the browser',
-    'Diagnose the six most common Railway deploy failures from logs and error responses'
+  "C3": { title: "API Integration", color: "#bc8cff", file: "api-integration-workshop", los: [
+    "Explain the same-origin policy and why a Vite dev server and an Express server require CORS configuration",
+    "Configure the cors() middleware in Express with explicit origin, methods, and headers options",
+    "Use VITE_ prefixed environment variables to configure the API base URL for development and production",
+    "Set up a Vite proxy to forward /api requests to Express, eliminating CORS in development",
+    "Build a centralised api.ts module with a generic request<T> function, Bearer token header, and global 401 handling",
+    "Apply the token storage trade-offs between localStorage, sessionStorage, and httpOnly cookies",
+    "Diagnose CORS and authentication errors using browser DevTools Network and Console panels"
   ]},
-  'C5': { title: 'Routing', color: '#bc8cff', file: 'routing-workshop', los: [
-    'Explain client-side routing and how React Router intercepts navigation without a server round-trip',
-    'Set up React Router v6 with BrowserRouter, Routes, and Route, and identify differences from v5 syntax',
-    'Use Link for internal navigation and NavLink with active styling for nav bars',
-    'Read URL parameters with useParams and include them correctly in useEffect dependency arrays',
-    'Navigate programmatically with useNavigate after login, logout, and form submissions, using replace to prevent Back-button loops',
-    'Structure shared UI with layout routes and Outlet, keeping shared components mounted across route transitions',
-    'Build a ProtectedRoute component that redirects unauthenticated users before any API call is made, and explain why it is a UX guard rather than a security boundary'
+  "C4": { title: "Forms & Validation", color: "#bc8cff", file: "forms-validation-workshop", los: [
+    "Use controlled inputs with value and onChange to manage form field values in React state",
+    "Manage multiple form fields with a single state object and a generic onChange handler that reads e.target.name",
+    "Write async submit handlers with loading and error state, and a finally block that always re-enables the button",
+    "Implement client-side validation and display per-field errors accessibly using aria-describedby and role=\"alert\"",
+    "Apply the correct TypeScript generics for FormEvent and ChangeEvent handlers",
+    "Choose between submit-time and blur-time validation strategies and explain the trade-offs of each",
+    "Use a useDebounce custom hook to rate-limit async validation effects and prevent redundant network calls"
   ]},
-  'C4': { title: 'Forms & Validation', color: '#bc8cff', file: 'forms-validation-workshop', los: [
-    'Use controlled inputs with value and onChange to manage form field values in React state',
-    'Manage multiple form fields with a single state object and a generic onChange handler that reads e.target.name',
-    'Write async submit handlers with loading and error state, and a finally block that always re-enables the button',
-    'Implement client-side validation and display per-field errors accessibly using aria-describedby and role="alert"',
-    'Apply the correct TypeScript generics for FormEvent and ChangeEvent handlers',
-    'Choose between submit-time and blur-time validation strategies and explain the trade-offs of each',
-    'Use a useDebounce custom hook to rate-limit async validation effects and prevent redundant network calls'
+  "C5": { title: "Routing", color: "#bc8cff", file: "routing-workshop", los: [
+    "Explain client-side routing and how React Router intercepts navigation without a server round-trip",
+    "Set up React Router v6 with BrowserRouter, Routes, and Route, and identify differences from v5 syntax",
+    "Use Link for internal navigation and NavLink with active styling for nav bars",
+    "Read URL parameters with useParams and include them correctly in useEffect dependency arrays",
+    "Navigate programmatically with useNavigate after login, logout, and form submissions, using replace to prevent Back-button loops",
+    "Structure shared UI with layout routes and Outlet, keeping shared components mounted across route transitions",
+    "Build a ProtectedRoute component that redirects unauthenticated users before any API call is made, and explain why it is a UX guard rather than a security boundary"
   ]},
-  'C3': { title: 'API Integration', color: '#bc8cff', file: 'api-integration-workshop', los: [
-    'Explain the same-origin policy and why a Vite dev server and an Express server require CORS configuration',
-    'Configure the cors() middleware in Express with explicit origin, methods, and headers options',
-    'Use VITE_ prefixed environment variables to configure the API base URL for development and production',
-    'Set up a Vite proxy to forward /api requests to Express, eliminating CORS in development',
-    'Build a centralised api.ts module with a generic request<T> function, Bearer token header, and global 401 handling',
-    'Apply the token storage trade-offs between localStorage, sessionStorage, and httpOnly cookies',
-    'Diagnose CORS and authentication errors using browser DevTools Network and Console panels'
+  "D1": { title: "Connecting the Stack", color: "#d29922", file: "fullstack-contracts-workshop", los: [
+    "Explain the development vs production fullstack architecture and why same-origin production eliminates client-side CORS",
+    "Identify API contract mismatches between frontend and backend by comparing field names, wrapper objects, and error keys",
+    "Create a shared/types.ts file as a single source of truth for request and response shapes",
+    "Configure environment-based CORS using CLIENT_ORIGIN rather than a hardcoded origin string",
+    "Add express.static and a catch-all GET * route in the correct order to serve a React production build from Express",
+    "Run a local integration test to verify API and SPA routing both work on one port after building React"
   ]},
-  'B5': { title: 'Extending APIs', color: '#58a6ff', file: 'extending-api-workshop', los: [
-    'Add offset pagination to an existing API endpoint using SQL LIMIT and OFFSET with a JSON envelope',
-    'Construct window function queries to include total count without a second database round-trip',
-    'Add a foreign-key relationship between two database tables with appropriate CASCADE rules',
-    'Write JOIN queries to fetch related data across tables in a single database call',
-    'Apply safe migration discipline: add tables and columns without modifying or dropping existing data'
+  "D2": { title: "Auth End-to-End", color: "#d29922", file: "auth-end-to-end-workshop", los: [
+    "Trace the complete auth flow across register, login, protected request, and logout, identifying what each operation stores and returns",
+    "Implement a useAuth hook that updates both localStorage and React state atomically on login and logout",
+    "Write a LoginPage that stores the token before navigating and shows a uniform error message that does not reveal which credential was wrong",
+    "Diagnose the six common auth bugs: token key mismatch, wrong Bearer prefix, stale NavBar state, Back-button loop, registration token storage, and email enumeration",
+    "Explain JWT expiry handling and why window.location.href is used instead of navigate in api.ts"
   ]},
-  'B6': { title: 'Validation & Errors', color: '#58a6ff', file: 'validation-workshop', los: [
-    'Identify the four validation layers in a web application and explain why route-handler validation is essential',
-    'Write manual validation checks for required fields, type, length, and allowed values in an Express route',
-    'Create a centralised error-handling middleware and an AppError class that carries an HTTP status code',
-    'Wrap async route handlers with asyncHandler to eliminate try/catch boilerplate',
-    'Apply Zod schema validation with safeParse to parse and type-check request bodies in Express routes'
+  "D3": { title: "Build & Deploy", color: "#d29922", file: "deploy-workshop", los: [
+    "Explain what npm run build produces and why VITE_ variables are baked in at build time rather than read at runtime",
+    "Apply the six-point pre-deploy checklist to identify common issues before pushing to Railway",
+    "Set up a Railway project with a PostgreSQL plugin, configure environment variables, and trigger a deploy via GitHub push",
+    "Run schema.sql against a Railway PostgreSQL database using the Railway CLI",
+    "Test a live deployment in layers using curl before testing in the browser",
+    "Diagnose the six most common Railway deploy failures from logs and error responses"
   ]},
-  'E1': { title: 'What is an Agent?', color: '#ffa657', file: 'ai-agents-workshop', los: [
-    'Explain the four components of an AI agent: LLM, tools, memory, and objective',
-    'Trace the ReAct loop (Reason → Act → Observe) through a concrete agent interaction',
-    'Read function-calling code and identify the tool definition, call, and observation pattern',
-    'Distinguish single-agent, multi-agent, and human-in-the-loop architectures and their trade-offs',
-    'Identify the four common agent failure modes and describe how to mitigate each'
+  "E1": { title: "What is an Agent?", color: "#ffa657", file: "ai-agents-workshop", los: [
+    "Explain the four components of an AI agent: LLM, tools, memory, and objective",
+    "Trace the ReAct loop (Reason → Act → Observe) through a concrete agent interaction",
+    "Read function-calling code and identify the tool definition, call, and observation pattern",
+    "Distinguish single-agent, multi-agent, and human-in-the-loop architectures and their trade-offs",
+    "Identify the four common agent failure modes and describe how to mitigate each"
   ]},
-  'E2': { title: 'n8n Fundamentals', color: '#ffa657', file: 'n8n-fundamentals-workshop', los: [
-    'Explain the node-and-connection model of n8n and describe what a trigger, action, logic, and AI node each do',
-    'Describe the item model and explain why Split Out is needed when an API returns an array',
-    'Write n8n expressions to reference data from the current item and from named nodes',
-    'Configure HTTP Request nodes with Header Auth credentials to call a JWT-protected REST API',
-    'Set up an AI Agent node with a model, system prompt, and tool nodes'
+  "E2": { title: "n8n Fundamentals", color: "#ffa657", file: "n8n-fundamentals-workshop", los: [
+    "Explain the node-and-connection model of n8n and describe what a trigger, action, logic, and AI node each do",
+    "Describe the item model and explain why Split Out is needed when an API returns an array",
+    "Write n8n expressions to reference data from the current item and from named nodes",
+    "Configure HTTP Request nodes with Header Auth credentials to call a JWT-protected REST API",
+    "Set up an AI Agent node with a model, system prompt, and tool nodes"
   ]},
-  'E3': { title: 'Calling APIs in n8n', color: '#ffa657', file: 'n8n-api-workshop', los: [
-    'Build an n8n workflow that authenticates against a JWT-protected REST API at runtime',
-    'Carry a JWT through a multi-node workflow using named-node expressions',
-    'Perform all four CRUD operations via HTTP Request nodes with expressions',
-    'Use Set, Code, and Aggregate nodes to reshape and summarise item data between nodes',
-    'Diagnose and fix the four most common n8n API errors: 401, 404, ECONNREFUSED, and expression errors'
+  "E3": { title: "Calling APIs in n8n", color: "#ffa657", file: "n8n-api-workshop", los: [
+    "Build an n8n workflow that authenticates against a JWT-protected REST API at runtime",
+    "Carry a JWT through a multi-node workflow using named-node expressions",
+    "Perform all four CRUD operations via HTTP Request nodes with expressions",
+    "Use Set, Code, and Aggregate nodes to reshape and summarise item data between nodes",
+    "Diagnose and fix the four most common n8n API errors: 401, 404, ECONNREFUSED, and expression errors"
   ]},
-  'E4': { title: 'AI Agent Node', color: '#ffa657', file: 'n8n-agent-node-workshop', los: [
-    'Explain what the AI Agent node does internally and how it implements the ReAct loop',
-    'Configure tool nodes with names, descriptions, and schemas that enable accurate LLM tool routing',
-    'Write a system prompt with explicit constraints that prevent common agent errors',
-    'Connect Window Buffer Memory and Postgres Chat Memory and explain when to use each',
-    'Use the n8n execution log to diagnose incorrect tool routing and hallucinated arguments'
+  "E4": { title: "AI Agent Node", color: "#ffa657", file: "n8n-agent-node-workshop", los: [
+    "Explain what the AI Agent node does internally and how it implements the ReAct loop",
+    "Configure tool nodes with names, descriptions, and schemas that enable accurate LLM tool routing",
+    "Write a system prompt with explicit constraints that prevent common agent errors",
+    "Connect Window Buffer Memory and Postgres Chat Memory and explain when to use each",
+    "Use the n8n execution log to diagnose incorrect tool routing and hallucinated arguments"
   ]},
-  'E5': { title: 'Building Agents', color: '#ffa657', file: 'n8n-building-agents-workshop', los: [
-    'Build a research agent that uses LLM knowledge to generate recommendations and deduplicates against a live API',
-    'Build an idempotent batch-processing pipeline using IF node filtering and Basic LLM Chain',
-    'Build a monitor-and-notify workflow using scheduled polling, Code node date arithmetic, and conditional alerting',
-    'Chain two agents using a Set node to translate the first agent\'s output into the second agent\'s input',
-    'Apply a reversibility framework to classify agent actions and determine appropriate human gate placement'
+  "E5": { title: "Building Agents", color: "#ffa657", file: "n8n-building-agents-workshop", los: [
+    "Build a research agent that uses LLM knowledge to generate recommendations and deduplicates against a live API",
+    "Build an idempotent batch-processing pipeline using IF node filtering and Basic LLM Chain",
+    "Build a monitor-and-notify workflow using scheduled polling, Code node date arithmetic, and conditional alerting",
+    "Chain two agents using a Set node to translate the first agent's output into the second agent's input",
+    "Apply a reversibility framework to classify agent actions and determine appropriate human gate placement"
   ]},
-  'E6': { title: 'Production Patterns', color: '#ffa657', file: 'n8n-production-workshop', los: [
-    'Set up an n8n Error Workflow that alerts on any execution failure with structured error context',
-    'Configure retry logic appropriately for transient failures while avoiding retries on permanent errors',
-    'Implement the Wait node approval pattern to pause a workflow pending human review',
-    'Use the execution history panel to audit workflow runs and diagnose silent or partial failures',
-    'Apply at least two cost management strategies to reduce LLM token consumption in a production workflow'
+  "E6": { title: "Production Patterns", color: "#ffa657", file: "n8n-production-workshop", los: [
+    "Set up an n8n Error Workflow that alerts on any execution failure with structured error context",
+    "Configure retry logic appropriately for transient failures while avoiding retries on permanent errors",
+    "Implement the Wait node approval pattern to pause a workflow pending human review",
+    "Use the execution history panel to audit workflow runs and diagnose silent or partial failures",
+    "Apply at least two cost management strategies to reduce LLM token consumption in a production workflow"
   ]}
 };
+/* /BUILD:module-los */
 
 var _loTrigger = null;
 

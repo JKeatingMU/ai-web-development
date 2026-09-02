@@ -22,6 +22,8 @@ throughout.
 index.html            course home (learning tree, course LOs, "how these decks work")
 resources.html        tools / docs / supplements
 setup-guide.html · certificate.html · study-questions.html
+outline.md            SOURCE for the course structure → generates the index.html
+                      learning tree, MODULE_LOS, header, About, Outcomes, Dependencies
 deck-extras.js / .css shared engine (see "Deck engine" below)
 *-workshop.html        26 course decks   ·   start-here.html   (S0 orientation deck)
 accessible/            accessible text version of every deck + the course home (index.html)
@@ -63,9 +65,11 @@ Narrated-slides detail: `~/.claude/projects/-/memory/narrated-slides.md`.
 ## Tooling (`npm install` first)
 | Command | Does |
 |---------|------|
-| `npm run build:accessible` | regenerates `accessible/<deck>.html` for all 27 decks + `accessible/index.html` + the `ACCESSIBLE_VERSIONS` manifest in index.html. **Run after any deck change.** |
+| `npm run build` | `build:outline` then `build:accessible` — the one command after editing `outline.md` or a deck |
+| `npm run build:outline` | `outline.md` → the generated regions of `index.html` (learning tree, `MODULE_LOS`, header, About, Outcomes, Dependencies) |
+| `npm run build:accessible` | regenerates `accessible/<deck>.html` for all 27 decks + `accessible/index.html` + the `ACCESSIBLE_VERSIONS` manifest |
 | `node server/tools/generate-deck-scripts.mjs <deck>.html --audio` | narration + TTS audio (needs `OPENAI_API_KEY`) |
-| `/course-deck` skill | scaffold a new course deck wired to the engine + index.html |
+| `/course-deck` skill | scaffold a new course deck wired to the engine; adds it to `outline.md` |
 
 ## Conventions
 - No red/green adjacency — use `callout-orange` where red would signal danger; never colour-only meaning.

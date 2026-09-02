@@ -5,6 +5,9 @@
   "description": "Learning Web Development by Building with AI — course build tooling",
   "type": "module",
   "scripts": {
+    "build": "npm run build:outline && npm run build:accessible",
+    "build:outline": "node server/tools/build-outline.mjs",
+    "build:outline:check": "node server/tools/build-outline.mjs --check",
     "build:accessible": "node server/tools/build-accessible.mjs --all",
     "build:accessible:one": "node server/tools/build-accessible.mjs",
     "gen:scripts": "node server/tools/generate-deck-scripts.mjs"
