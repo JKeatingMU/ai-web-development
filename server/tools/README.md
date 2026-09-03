@@ -1,6 +1,10 @@
 # Course build tooling
 
-Scripts that generate derived artefacts for the course. Run from the repo root.
+*A formatted version of this page: [`README.html`](README.html).*
+
+This repository holds two things: **(1) the course** — the interactive decks and
+their runtime — and **(2) this toolkit** that authors and builds it. The scripts
+below are (2). Run them from the repo root.
 
 ```bash
 npm install          # one-time: pulls node-html-parser (+ optional AI SDKs)
