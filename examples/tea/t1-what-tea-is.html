@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Tea Is — Tea — A Field Guide</title>
+<style>
+  :root {
+    --bg:#0f1117; --slide-bg:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e;
+    --accent:#3fb950; --green:#3fb950; --yellow:#d29922; --red:#f85149; --purple:#bc8cff; --orange:#ffa657;
+    --term-bg:#010409; --term-text:#c9d1d9; --highlight:#1f6feb; --prompt-border:#388bfd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .slide{position:absolute;inset:0;display:none;padding:50px 70px;flex-direction:column;justify-content:center;background:var(--slide-bg);border:1px solid var(--border);margin:20px;width:calc(100% - 40px);height:calc(100% - 40px);border-radius:12px;overflow:hidden;}
+  .slide.active{display:flex;}
+  .slide-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px;font-weight:600;}
+  h1{font-size:40px;font-weight:700;line-height:1.15;margin-bottom:14px;}
+  h1 .accent{color:var(--accent);}
+  h2{font-size:29px;font-weight:700;margin-bottom:8px;line-height:1.2;}
+  h3{font-size:18px;font-weight:700;margin:8px 0 4px;}
+  .subtitle{font-size:19px;color:var(--muted);line-height:1.5;margin-bottom:26px;max-width:700px;}
+  p{font-size:15px;color:var(--muted);line-height:1.7;margin:10px 0;}
+  li{font-size:15px;color:var(--muted);line-height:1.7;margin:4px 0;}
+  ul,ol{margin:8px 0 8px 22px;}
+  strong{color:var(--text);font-weight:600;}
+  em{color:var(--text);font-style:italic;}
+  a{color:var(--accent);}
+  code{font-family:'SF Mono','Fira Code',monospace;font-size:12px;background:rgba(110,118,129,.12);padding:2px 5px;border-radius:4px;color:var(--orange);}
+  .part-slide{justify-content:center;align-items:flex-start;}
+  .part-num{font-size:64px;font-weight:800;color:var(--accent);opacity:.5;line-height:1;margin-bottom:6px;}
+  .section-header{justify-content:center;align-items:center;text-align:center;}
+  .terminal{background:var(--term-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0;flex-shrink:0;}
+  .terminal-bar{background:#21262d;padding:7px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+  .dot{width:11px;height:11px;border-radius:50%;} .dot-red{background:#f85149;} .dot-yellow{background:#d29922;} .dot-green{background:#3fb950;}
+  .terminal-label{font-size:12px;color:var(--muted);margin-left:8px;font-family:'SF Mono',monospace;}
+  .terminal-body{padding:15px 20px;font-family:'SF Mono','Fira Code',monospace;font-size:13px;line-height:1.7;color:var(--term-text);overflow:auto;max-height:min(55vh,400px);white-space:pre-wrap;}
+  .callout{border-radius:8px;padding:14px 18px;font-size:14px;line-height:1.7;border-left-width:3px;border-left-style:solid;margin:6px 0;}
+  .callout p{color:var(--text);margin:4px 0;} .callout p:first-child{margin-top:0;} .callout p:last-child{margin-bottom:0;}
+  .callout ul,.callout ol{margin:4px 0 4px 20px;} .callout li{color:var(--text);}
+  .callout-blue{background:rgba(88,166,255,.07);border-color:var(--accent);}
+  .callout-green{background:rgba(63,185,80,.07);border-color:var(--green);}
+  .callout-yellow{background:rgba(210,153,34,.07);border-color:var(--yellow);}
+  .callout-orange{background:rgba(255,166,87,.07);border-color:var(--orange);}
+  .callout-purple{background:rgba(188,140,255,.07);border-color:var(--purple);}
+  .cols{display:flex;gap:20px;align-items:stretch;margin:8px 0;} .cols>div{flex:1;min-width:0;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;}
+  th{text-align:left;padding:8px 12px;background:rgba(255,255,255,.04);color:var(--text);font-weight:600;border-bottom:1px solid var(--border);}
+  td{padding:8px 12px;color:var(--muted);border-bottom:1px solid rgba(48,54,61,.6);vertical-align:top;}
+  .prompt-block{background:rgba(56,139,253,.06);border:1px solid var(--prompt-border);border-radius:8px;overflow:hidden;margin:10px 0;flex-shrink:0;}
+  .prompt-bar{background:rgba(88,166,255,.1);padding:7px 16px;font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px;}
+  .prompt-body{padding:14px 18px;font-size:13px;line-height:1.8;color:var(--text);} .prompt-body p{color:var(--text);}
+  #nav{position:fixed;bottom:28px;right:38px;display:flex;align-items:center;gap:10px;z-index:100;}
+  #counter{font-size:12px;color:var(--muted);font-family:monospace;}
+  .nav-btn{background:var(--slide-bg);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+  #progress{position:fixed;bottom:0;left:0;height:3px;background:var(--accent);transition:width .3s ease;z-index:100;}
+  #hint{position:fixed;top:18px;right:38px;font-size:11px;color:var(--muted);font-family:monospace;}
+  #app-link{position:fixed;bottom:28px;left:38px;font-size:11px;font-family:'SF Mono',monospace;color:var(--muted);text-decoration:none;background:rgba(22,27,34,.9);border:1px solid var(--border);padding:4px 10px;border-radius:6px;z-index:200;}
+  #index-link{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);font-size:11px;font-family:'SF Mono',monospace;color:var(--muted);text-decoration:none;background:rgba(22,27,34,.9);border:1px solid var(--border);padding:4px 10px;border-radius:6px;z-index:200;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;font-family:'SF Mono',monospace;}
+  .badge-blue{background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.3);}
+</style>
+<link rel="stylesheet" href="../../deck-extras.css">
+</head>
+<body>
+
+<div class="slide active">
+  <div class="slide-label">Tea · Field Guide · Module 1</div>
+  <h1>What Tea Is</h1>
+  <div class="subtitle">One plant, six teas, and why your water matters more than your leaves</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;"><span class="badge badge-blue">Camellia sinensis</span> <span class="badge badge-blue">Oxidation</span> <span class="badge badge-blue">Water</span></div>
+  <div class="callout callout-blue">This module fills the vocabulary gap. “Herbal tea” is a contradiction in terms, “black tea” is a translation error, and the thing that makes a green tea green is not the plant — it is a decision made minutes after the leaf was picked.
+</div>
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 1</div>
+<h2>What "tea" actually means</h2>
+<p>Green, black, oolong, white, yellow, pu-erh — every one of them comes from <strong>a single
+plant</strong>, <em>Camellia sinensis</em>. A tea garden in Japan and a tea garden in Assam are
+growing the same species.</p>
+<p>Everything else on the tea shelf — peppermint, chamomile, rooibos, ginger — is a
+<strong>herbal infusion</strong>. Perfectly nice. Not tea.</p>
+<div class="callout callout-blue icon-key">
+<p>the six tea types are not six plants. They are six ways of
+handling the same leaf, and the biggest decision is how far to let it oxidise.</p>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 1</div>
+<h2>Oxidation, the master variable</h2>
+<p>Tear or bruise a tea leaf and its enzymes start reacting with oxygen. The leaf
+darkens and the flavour deepens — the same browning you see in a cut apple. The
+tea maker’s craft is deciding <strong>when to stop it</strong>, usually by heating the leaf.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Oxidation</th>
+<th>Liquor</th>
+<th>Character</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Green</td>
+<td>Stopped early</td>
+<td>Pale gold to jade</td>
+<td>Fresh, grassy, marine</td>
+</tr>
+<tr>
+<td>White</td>
+<td>Barely handled</td>
+<td>Very pale</td>
+<td>Soft, hay, honey</td>
+</tr>
+<tr>
+<td>Oolong</td>
+<td>Partial, 10–80%</td>
+<td>Amber</td>
+<td>Floral through to roasted</td>
+</tr>
+<tr>
+<td>Black</td>
+<td>Taken as far as it goes</td>
+<td>Deep copper to red</td>
+<td>Malty, brisk, full</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-orange icon-gotcha">
+<p>what the West calls “black tea” is <em>red tea</em> (红茶) in China, named
+for the colour of the liquor. Confusingly, Western “red tea” usually means
+rooibos, which is a South African shrub and not tea at all.</p>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 1</div>
+<h2>Water is 98% of the cup</h2>
+<div class="cols">
+<div><p><strong>Too hard</strong> — water full of calcium and magnesium mutes delicate flavours and
+leaves an oily-looking film (that “tea scum”) on the surface.</p>
+<p><strong>Too soft</strong> — distilled or heavily softened water has nothing for the tea
+compounds to bind to, so the cup tastes thin and hollow.</p>
+</div><div>
+<p><strong>The sweet spot</strong> is moderately soft, fresh, well-aerated water. Filtered tap
+water is usually all you need.</p>
+<p>Fill the kettle fresh each time and heat it once. Re-boiled water has lost the
+dissolved oxygen that makes aroma leap out of the cup.</p>
+</div>
+</div>
+<div class="prompt-block">
+  <div class="prompt-bar"><span>✦</span> Ask an AI to check your intuition</div>
+  <div class="prompt-body">
+<p>Green tea turns bitter and spinachy when the water is too hot, but black tea
+wants a full rolling boil. Explain what is happening chemically in each case,
+and what temperature you would use for a delicate Japanese sencha.</p>
+  </div>
+</div>
+
+</div>
+
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 1</div>
+<h2>A very short history</h2>
+<p>Tea was a Chinese medicine, then a Chinese drink, for centuries before it went
+anywhere. It reached Japan with Buddhist monks, Europe with Dutch and Portuguese
+traders in the 1600s, and Britain via a royal wedding — Catherine of Braganza
+brought the habit to court in 1662.</p>
+<p>The British then spent two centuries trying not to pay China for it: smuggling
+silver, pushing opium, and finally stealing tea plants and expertise to start
+plantations in India. Assam and Darjeeling are that story’s inheritance.</p>
+<div class="callout callout-blue icon-tip">
+<p>“orange pekoe” is not a flavour or a type. It is a <strong>leaf-grade</strong>: a
+whole-leaf black tea with no orange in it whatsoever.</p>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 1</div>
+<h2>Reading a tea label</h2>
+<div class="cols">
+<div><p><strong>Origin</strong> tells you the growing conditions — altitude, climate, soil. Darjeeling
+sits high and cool; Assam is low, hot and wet.</p>
+<p><strong>Flush</strong> (for some regions) is the harvest round. First flush is the year’s
+youngest, brightest leaves; later flushes are deeper and stronger.</p>
+</div><div>
+<p><strong>Grade</strong> describes the leaf, not the quality: whole leaf, broken, fannings, or
+dust. Tea bags are usually fannings or dust — more surface area, faster and
+stronger brew, less nuance.</p>
+<p><strong>“Blend”</strong> means leaves from several gardens combined for a consistent taste
+year to year. Your everyday builder’s brew is a blend by design.</p>
+</div>
+</div>
+
+</div>
+
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
+
+<div class="slide">
+<div class="slide-label">Prompt Reflection</div>
+<h2>What did you actually taste?</h2>
+<div class="callout callout-purple"><p>Think back through the three cups from your practical.</p>
+<ul>
+<li>Which tea type surprised you most, and what did you expect instead?</li>
+<li>If a friend insisted “all tea tastes the same”, what single experiment would
+you set up to change their mind?</li>
+<li>What is one thing about how you make tea that you will change tomorrow?</li>
+</ul>
+</div>
+</div>
+
+<a href="#" id="app-link">Field Guide</a>
+<a href="../index.html" id="index-link">⌂ Tea — A Field Guide</a>
+<div id="nav">
+  <span id="counter">1 / 9</span>
+  <button class="nav-btn" id="prev">&#8249;</button>
+  <button class="nav-btn" id="next">&#8250;</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);</script>
+<script>window.DECK_NAME = "t1-what-tea-is";</script>
+<script>window.DECK_OBJECTIVES = [
+  "Name the plant all true tea comes from and explain what separates the six types",
+  "Describe how oxidation changes a leaf's colour and flavour",
+  "Explain why water chemistry is the largest single lever in the cup"
+];</script>
+<script>window.DECK_ASSESSMENTS = [
+  {
+    "type": "practical",
+    "title": "Three cups, one kettle",
+    "desc": "Brew a green, an oolong and a black tea using the same water, the same temperature and the same steep time. Line them up. Note the colour of the liquor, the aroma, and how drying each one feels on your tongue.\n",
+    "criteria": [
+      "You held water temperature and steep time constant across all three",
+      "You can name one clear flavour difference between the green and the black",
+      "You noticed the liquor colour tracks the oxidation level"
+    ]
+  },
+  {
+    "type": "reflect",
+    "title": "What you thought you knew",
+    "desc": "In 100 words: what did you believe about tea before this module that turned out to be wrong, or only half-true?\n"
+  }
+];</script>
+<script>window.DECK_QUESTIONS = [
+  {
+    "checkpoint": 1,
+    "type": "mcq",
+    "q": "Where does all true tea come from?",
+    "options": [
+      "Six different plants, one per type",
+      "One plant, Camellia sinensis",
+      "A blend of dried herbs and flowers",
+      "The tea tree, Melaleuca alternifolia"
+    ],
+    "correct": 1,
+    "explanation": "Green, black, oolong, white, yellow and pu-erh are all Camellia sinensis, processed differently. Peppermint and chamomile are infusions, not tea."
+  },
+  {
+    "checkpoint": 1,
+    "type": "mcq",
+    "q": "What is the single biggest lever that separates the tea types?",
+    "options": [
+      "Country of origin",
+      "Oxidation",
+      "Leaf size",
+      "Whether milk is added"
+    ],
+    "correct": 1,
+    "explanation": "Oxidation — how far the bruised leaf is allowed to brown before heat stops the reaction."
+  },
+  {
+    "checkpoint": 1,
+    "type": "self",
+    "q": "In your own words: why does a bruised tea leaf turn brown, and what is the tea maker doing when they 'fix' a leaf with heat?",
+    "model": "A cut apple browns because enzymes in the fruit react with oxygen in the air. A bruised tea leaf does exactly the same thing — enzymatic oxidation. Heating the leaf denatures those enzymes, freezing the tea at whatever oxidation level the maker wants: minutes in for a green, all the way for a black."
+  },
+  {
+    "checkpoint": 2,
+    "type": "mcq",
+    "q": "Roughly what proportion of a cup of tea, by weight, is water?",
+    "options": [
+      "About 50%",
+      "About 80%",
+      "About 98%",
+      "About 100% — the leaves add no mass"
+    ],
+    "correct": 2,
+    "explanation": "A few grams of leaf to a few hundred grams of water. If the water tastes bad, the tea tastes bad."
+  },
+  {
+    "checkpoint": 2,
+    "type": "mcq",
+    "q": "Why should you not re-boil the water in your kettle?",
+    "options": [
+      "It gets too hot and scalds the leaves",
+      "Repeated boiling drives off dissolved oxygen, which carries aroma",
+      "It concentrates the minerals and makes tea bitter",
+      "It is a myth — re-boiling makes no difference"
+    ],
+    "correct": 1,
+    "explanation": "Fresh, well-aerated water tastes livelier. Re-boiled water tastes flat because the dissolved gases have been driven off."
+  }
+];</script>
+<script src="../../deck-extras.js"></script>
+</body>
+</html>

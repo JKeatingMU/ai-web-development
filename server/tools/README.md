@@ -12,9 +12,13 @@ npm install          # one-time: pulls node-html-parser (+ optional AI SDKs)
 
 | Script | What it does | Needs |
 |--------|--------------|-------|
+| `build-deck.mjs` | Compiles a deck from Markdown (`decks/<slug>.md` → `<slug>.html`). Format: [`docs/authoring.md`](../../docs/authoring.md). | markdown-it, js-yaml |
 | `build-outline.mjs` | `outline.md` → the generated regions of `index.html` (header, About, Outcomes, the track sections, Dependencies, `var MODULE_LOS`). | — |
 | `build-accessible.mjs` | Generates the accessible text version of every deck (`accessible/<deck>.html`) and the accessible course-home page, and rewrites the `ACCESSIBLE_VERSIONS` manifest in `index.html`. | node-html-parser |
 | `generate-deck-scripts.mjs` | Generates per-slide narration scripts, and optionally TTS audio, for a deck. | `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`; `--audio` needs `OPENAI_API_KEY` |
+
+A worked example of the Markdown format: [`examples/tea/`](../../examples/tea/) —
+a two-deck field guide to tea, built with `npm run build:deck examples/tea/decks/*.md`.
 
 `npm run build` runs `build:outline` then `build:accessible` — the usual one command after any change to `outline.md` or a deck.
 
@@ -65,6 +69,22 @@ Description of a not-yet-built deck (no `{file=…}`).
 `index.html` carries `<!-- BUILD:… -->` / `<!-- /BUILD:… -->` markers; the script
 replaces only what is between them. Everything else in `index.html` (styles, the
 "how these decks work" section, the legend, all the JS) is hand-maintained.
+
+## build-deck.mjs
+
+```bash
+npm run build:deck decks/c6-testing.md          # -> c6-testing.html at repo root
+npm run build:deck examples/tea/decks/*.md       # a whole example course
+```
+
+A deck is YAML frontmatter (title, code, slug, objectives, assessments, quiz)
+plus a body where every `## Heading` is a slide. Callouts, code blocks, tables,
+two-column layouts, AI-prompt blocks and quiz placeholders all have Markdown
+syntax — see [`docs/authoring.md`](../../docs/authoring.md). The compiled deck
+loads the shared `deck-extras.js` engine, so it gets quizzes, panels,
+accessibility and mobile support with no per-deck code.
+
+For a main-course deck, then add it to `outline.md` and run `npm run build`.
 
 ## build-accessible.mjs
 

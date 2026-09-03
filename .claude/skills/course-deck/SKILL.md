@@ -9,6 +9,11 @@ Creates one course deck: a standalone `<deck-name>-workshop.html` file in the re
 root that loads `deck-extras.js` / `deck-extras.css`, plus its `index.html` card and
 `MODULE_LOS` entry.
 
+> **Prefer Markdown for new decks.** Author `decks/<slug>.md` in the format in
+> [`docs/authoring.md`](../../docs/authoring.md) (worked example: `examples/tea/`)
+> and run `npm run build:deck decks/<slug>.md`. The HTML skeleton below is what
+> the compiler emits — reference it, but write Markdown, not HTML, when you can.
+
 This is **not** the general-purpose `/deck` command (blue/teal talk decks). Course
 decks are dark GitHub-style, 15-30 slides, one running example (the Reading List
 API), exactly 2 checkpoint quizzes, and a prompt-reflection slide.

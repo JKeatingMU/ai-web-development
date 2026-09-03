@@ -24,6 +24,10 @@ resources.html        tools / docs / supplements
 setup-guide.html · certificate.html · study-questions.html
 outline.md            SOURCE for the course structure → generates the index.html
                       learning tree, MODULE_LOS, header, About, Outcomes, Dependencies
+decks/<slug>.md       NEW deck sources (Markdown) → compiled by build-deck.mjs
+                      (existing 27 decks are still hand-authored HTML)
+docs/authoring.md     the deck Markdown format spec
+examples/tea/         worked example: a 2-deck course built from Markdown
 deck-extras.js / .css shared engine (see "Deck engine" below)
 *-workshop.html        26 course decks   ·   start-here.html   (S0 orientation deck)
 accessible/            accessible text version of every deck + the course home (index.html)
@@ -65,6 +69,7 @@ Narrated-slides detail: `~/.claude/projects/-/memory/narrated-slides.md`.
 ## Tooling (`npm install` first)
 | Command | Does |
 |---------|------|
+| `npm run build:deck <deck.md>` | compile a deck from Markdown (`docs/authoring.md`; example in `examples/tea/`) |
 | `npm run build` | `build:outline` then `build:accessible` — the one command after editing `outline.md` or a deck |
 | `npm run build:outline` | `outline.md` → the generated regions of `index.html` (learning tree, `MODULE_LOS`, header, About, Outcomes, Dependencies) |
 | `npm run build:accessible` | regenerates `accessible/<deck>.html` for all 27 decks + `accessible/index.html` + the `ACCESSIBLE_VERSIONS` manifest |

@@ -10,9 +10,13 @@
     "build:outline:check": "node server/tools/build-outline.mjs --check",
     "build:accessible": "node server/tools/build-accessible.mjs --all",
     "build:accessible:one": "node server/tools/build-accessible.mjs",
-    "gen:scripts": "node server/tools/generate-deck-scripts.mjs"
+    "gen:scripts": "node server/tools/generate-deck-scripts.mjs",
+    "build:deck": "node server/tools/build-deck.mjs"
   },
   "dependencies": {
+    "js-yaml": "^5.4.1",
+    "markdown-it": "^15.0.1",
+    "markdown-it-container": "^4.0.0",
     "node-html-parser": "^6.1.13"
   },
   "optionalDependencies": {

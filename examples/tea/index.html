@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tea — A Field Guide</title>
+<style>
+  :root { --bg:#0f1117; --surface:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#3fb950; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f5f0e8; --surface:#faf8f4; --border:#d8cfc0; --text:#2d2520; --muted:#6e6660; --accent:#1a7f37; }
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; }
+  .page { max-width:52rem; margin:0 auto; padding:3rem 1.5rem 6rem; }
+  header { text-align:center; border-bottom:1px solid var(--border); padding-bottom:2rem; margin-bottom:2rem; }
+  h1 { font-size:2.4rem; letter-spacing:-.5px; }
+  h1 .a { color:var(--accent); }
+  .sub { color:var(--muted); margin-top:.5rem; }
+  .example-note { background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:8px; padding:1rem 1.25rem; margin:1.5rem 0 2.5rem; font-size:.95rem; }
+  .example-note code { font-family:'SF Mono','Fira Code',monospace; font-size:.85em; background:rgba(127,127,127,.15); padding:.1em .4em; border-radius:4px; }
+  .card { display:block; text-decoration:none; color:inherit; border:1px solid var(--border);
+    background:var(--surface); border-radius:10px; padding:1.4rem 1.6rem; margin:1rem 0; transition:border-color .15s; }
+  .card:hover { border-color:var(--accent); }
+  .card .code { font-family:'SF Mono','Fira Code',monospace; font-size:.75rem; font-weight:700; letter-spacing:1px; color:var(--accent); }
+  .card h2 { font-size:1.3rem; margin:.2rem 0 .4rem; }
+  .card p { color:var(--muted); font-size:.95rem; }
+  .card ul { margin:.7rem 0 0 1.2rem; font-size:.9rem; color:var(--muted); }
+  .card li { margin:.2rem 0; }
+  footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); color:var(--muted); font-size:.85rem; text-align:center; }
+  a.plain { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <h1>Tea <span class="a">— A Field Guide</span></h1>
+  <p class="sub">One plant, six teas, four dials, and one argument nobody wins.</p>
+</header>
+
+<div class="example-note">
+  <strong>This is an example course.</strong> It exists to demonstrate the deck
+  Markdown format and the <code>build-deck.mjs</code> compiler — see
+  <a class="plain" href="../../server/tools/README.html">the build tooling docs</a>
+  and the source in <code>examples/tea/decks/</code>. It uses the same runtime
+  engine (<code>deck-extras.js</code>) as the real course, so every deck has
+  quizzes, notes, adjustable text, keyboard control, and an accessible mindset —
+  from about 160 lines of Markdown per deck.
+</div>
+
+<a class="card" href="t1-what-tea-is.html">
+  <span class="code">T1</span>
+  <h2>What Tea Is</h2>
+  <p>One plant, six teas, and why your water matters more than your leaves.</p>
+  <ul>
+    <li>Name the plant all true tea comes from and what separates the six types</li>
+    <li>Describe how oxidation changes a leaf's colour and flavour</li>
+    <li>Explain why water chemistry is the largest single lever in the cup</li>
+  </ul>
+</a>
+
+<a class="card" href="t2-brewing.html">
+  <span class="code">T2</span>
+  <h2>Brewing a Proper Cup</h2>
+  <p>Four dials — leaf, water, temperature, time — and the milk debate.</p>
+  <ul>
+    <li>Set a sensible ratio and adjust strength without over-steeping</li>
+    <li>Match water temperature to the tea type</li>
+    <li>Diagnose a bitter, weak or stewed cup and name the fix</li>
+    <li>Summarise the milk-in-first argument, etiquette and chemistry</li>
+  </ul>
+</a>
+
+<footer>
+  Example course · <a class="plain" href="../../index.html">back to the real course</a>
+  · Built with AI Assistance · Maynooth University · CC BY 4.0
+</footer>
+
+</div>
+</body>
+</html>

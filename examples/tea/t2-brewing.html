@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brewing a Proper Cup — Tea — A Field Guide</title>
+<style>
+  :root {
+    --bg:#0f1117; --slide-bg:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e;
+    --accent:#3fb950; --green:#3fb950; --yellow:#d29922; --red:#f85149; --purple:#bc8cff; --orange:#ffa657;
+    --term-bg:#010409; --term-text:#c9d1d9; --highlight:#1f6feb; --prompt-border:#388bfd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .slide{position:absolute;inset:0;display:none;padding:50px 70px;flex-direction:column;justify-content:center;background:var(--slide-bg);border:1px solid var(--border);margin:20px;width:calc(100% - 40px);height:calc(100% - 40px);border-radius:12px;overflow:hidden;}
+  .slide.active{display:flex;}
+  .slide-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px;font-weight:600;}
+  h1{font-size:40px;font-weight:700;line-height:1.15;margin-bottom:14px;}
+  h1 .accent{color:var(--accent);}
+  h2{font-size:29px;font-weight:700;margin-bottom:8px;line-height:1.2;}
+  h3{font-size:18px;font-weight:700;margin:8px 0 4px;}
+  .subtitle{font-size:19px;color:var(--muted);line-height:1.5;margin-bottom:26px;max-width:700px;}
+  p{font-size:15px;color:var(--muted);line-height:1.7;margin:10px 0;}
+  li{font-size:15px;color:var(--muted);line-height:1.7;margin:4px 0;}
+  ul,ol{margin:8px 0 8px 22px;}
+  strong{color:var(--text);font-weight:600;}
+  em{color:var(--text);font-style:italic;}
+  a{color:var(--accent);}
+  code{font-family:'SF Mono','Fira Code',monospace;font-size:12px;background:rgba(110,118,129,.12);padding:2px 5px;border-radius:4px;color:var(--orange);}
+  .part-slide{justify-content:center;align-items:flex-start;}
+  .part-num{font-size:64px;font-weight:800;color:var(--accent);opacity:.5;line-height:1;margin-bottom:6px;}
+  .section-header{justify-content:center;align-items:center;text-align:center;}
+  .terminal{background:var(--term-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0;flex-shrink:0;}
+  .terminal-bar{background:#21262d;padding:7px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+  .dot{width:11px;height:11px;border-radius:50%;} .dot-red{background:#f85149;} .dot-yellow{background:#d29922;} .dot-green{background:#3fb950;}
+  .terminal-label{font-size:12px;color:var(--muted);margin-left:8px;font-family:'SF Mono',monospace;}
+  .terminal-body{padding:15px 20px;font-family:'SF Mono','Fira Code',monospace;font-size:13px;line-height:1.7;color:var(--term-text);overflow:auto;max-height:min(55vh,400px);white-space:pre-wrap;}
+  .callout{border-radius:8px;padding:14px 18px;font-size:14px;line-height:1.7;border-left-width:3px;border-left-style:solid;margin:6px 0;}
+  .callout p{color:var(--text);margin:4px 0;} .callout p:first-child{margin-top:0;} .callout p:last-child{margin-bottom:0;}
+  .callout ul,.callout ol{margin:4px 0 4px 20px;} .callout li{color:var(--text);}
+  .callout-blue{background:rgba(88,166,255,.07);border-color:var(--accent);}
+  .callout-green{background:rgba(63,185,80,.07);border-color:var(--green);}
+  .callout-yellow{background:rgba(210,153,34,.07);border-color:var(--yellow);}
+  .callout-orange{background:rgba(255,166,87,.07);border-color:var(--orange);}
+  .callout-purple{background:rgba(188,140,255,.07);border-color:var(--purple);}
+  .cols{display:flex;gap:20px;align-items:stretch;margin:8px 0;} .cols>div{flex:1;min-width:0;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;}
+  th{text-align:left;padding:8px 12px;background:rgba(255,255,255,.04);color:var(--text);font-weight:600;border-bottom:1px solid var(--border);}
+  td{padding:8px 12px;color:var(--muted);border-bottom:1px solid rgba(48,54,61,.6);vertical-align:top;}
+  .prompt-block{background:rgba(56,139,253,.06);border:1px solid var(--prompt-border);border-radius:8px;overflow:hidden;margin:10px 0;flex-shrink:0;}
+  .prompt-bar{background:rgba(88,166,255,.1);padding:7px 16px;font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px;}
+  .prompt-body{padding:14px 18px;font-size:13px;line-height:1.8;color:var(--text);} .prompt-body p{color:var(--text);}
+  #nav{position:fixed;bottom:28px;right:38px;display:flex;align-items:center;gap:10px;z-index:100;}
+  #counter{font-size:12px;color:var(--muted);font-family:monospace;}
+  .nav-btn{background:var(--slide-bg);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+  #progress{position:fixed;bottom:0;left:0;height:3px;background:var(--accent);transition:width .3s ease;z-index:100;}
+  #hint{position:fixed;top:18px;right:38px;font-size:11px;color:var(--muted);font-family:monospace;}
+  #app-link{position:fixed;bottom:28px;left:38px;font-size:11px;font-family:'SF Mono',monospace;color:var(--muted);text-decoration:none;background:rgba(22,27,34,.9);border:1px solid var(--border);padding:4px 10px;border-radius:6px;z-index:200;}
+  #index-link{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);font-size:11px;font-family:'SF Mono',monospace;color:var(--muted);text-decoration:none;background:rgba(22,27,34,.9);border:1px solid var(--border);padding:4px 10px;border-radius:6px;z-index:200;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;font-family:'SF Mono',monospace;}
+  .badge-blue{background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.3);}
+</style>
+<link rel="stylesheet" href="../../deck-extras.css">
+</head>
+<body>
+
+<div class="slide active">
+  <div class="slide-label">Tea · Field Guide · Module 2</div>
+  <h1>Brewing a Proper Cup</h1>
+  <div class="subtitle">Four dials — leaf, water, temperature, time — and the one argument nobody wins</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;"><span class="badge badge-blue">Ratio</span> <span class="badge badge-blue">Temperature</span> <span class="badge badge-blue">The milk question</span></div>
+  <div class="callout callout-blue">There is no single “right” way to make tea, but there are four dials, and once you know what each one does you can fix any cup. The milk-first debate is at the end, and it is more interesting than you think.
+</div>
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 2</div>
+<h2>The four dials</h2>
+<p>Every cup of tea is the same four decisions:</p>
+<ul>
+<li><strong>Leaf</strong> — how much tea per how much water (the <em>ratio</em>)</li>
+<li><strong>Water</strong> — what is in it (covered in Module 1)</li>
+<li><strong>Temperature</strong> — how hot the water is when it meets the leaf</li>
+<li><strong>Time</strong> — how long they stay together</li>
+</ul>
+<p>Change one, taste, change again. That is the whole method.</p>
+<div class="callout callout-blue icon-key">
+<p>strength and bitterness are not the same thing. Strength comes
+from <em>ratio</em>. Bitterness comes from <em>over-extraction</em> — too hot, too long. A
+strong cup can be smooth; a weak cup can be bitter.</p>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 2</div>
+<h2>Ratio: start here</h2>
+<div class="cols">
+<div><p>A sane starting point is <strong>one teaspoon — about 2 to 3 grams — of loose leaf per
+200 ml cup</strong>. One tea bag is portioned for roughly the same.</p>
+<p>Big leaves (whole-leaf oolong, some greens) take up more spoon for the same
+weight, so lean towards a heaped spoon.</p>
+</div><div>
+<p>Want it stronger? <strong>Add leaf, not time.</strong> More leaf gives you more of everything
+in balance. More time past the sweet spot gives you mostly tannin — the drying,
+puckering part.</p>
+</div>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 2</div>
+<h2>Temperature: match it to the type</h2>
+<table>
+<thead>
+<tr>
+<th>Tea</th>
+<th>Water</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Green, white</td>
+<td>70–80 °C</td>
+<td>Boiling water scorches them — bitter, flat, “cooked”</td>
+</tr>
+<tr>
+<td>Oolong</td>
+<td>85–95 °C</td>
+<td>Enough heat to open rolled leaves, not enough to stew</td>
+</tr>
+<tr>
+<td>Black, pu-erh</td>
+<td>95–100 °C</td>
+<td>Robust leaves; a full boil pulls out the malt and body</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-orange icon-gotcha">
+<p>no thermometer? For green tea, boil the kettle, then wait two to
+three minutes, or add a splash of cold water. “Just off the boil” is a real
+instruction, not a fudge.</p>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 2</div>
+<h2>Time: the sweet spot and the cliff</h2>
+<div class="cols">
+<div><p><strong>Black tea</strong> — 3 to 4 minutes. By 5, tannins dominate. By 8, it is stewed:
+bitter, dark, and it will taste that way even with milk.</p>
+<p><strong>Green tea</strong> — 1 to 3 minutes, and it is far less forgiving. A minute long can
+be the difference between sweet and harsh.</p>
+</div><div>
+<p><strong>Oolong</strong> — 2 to 3 minutes for the first steep, and good oolong will happily
+give you three or four more steeps, each a little different.</p>
+<p>Whatever the tea: <strong>take the leaf out</strong>. Tea left sitting in the cup keeps
+extracting and only gets more astringent.</p>
+</div>
+</div>
+
+</div>
+
+<div class="slide quiz-slide" data-checkpoint="1" data-pick="3"></div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 2</div>
+<h2>When it goes wrong</h2>
+<div class="cols">
+<div><p><strong>Bitter, drying, harsh</strong> → over-extracted. Water too hot for the type, or
+steeped too long, or leaf left in. Shorten the steep first.</p>
+<p><strong>Weak, watery, thin</strong> → under-extracted. Not enough leaf, water too soft, or
+(for black tea) water not hot enough. Add leaf first.</p>
+</div><div>
+<p><strong>Stewed, flat, “tastes brown”</strong> → the pot sat too long, or the water was
+re-boiled, or both. Nothing rescues it. Start again.</p>
+<p><strong>Cloudy when it cools</strong> → “tea cream”, a harmless haze of tannins and caffeine
+binding as the cup drops in temperature. Common in strong black tea and iced tea.
+A splash of boiling water clears it.</p>
+</div>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="slide-label">Tea · Field Guide · Module 2</div>
+<h2>The milk question</h2>
+<div class="cols">
+<div><p><strong>The etiquette story.</strong> Milk-in-first (“MIF”) protected cheap cups from
+cracking when hot tea hit them. Fine bone china could take the heat, so
+milk-in-after (“MIA”) quietly became the “posh” way. George Orwell wrote a whole
+essay taking the MIA side.</p>
+</div><div>
+<p><strong>The chemistry story.</strong> When you pour tea onto cold milk, the milk warms
+gradually and its proteins are less likely to denature and clump — arguably a
+smoother result. Pour milk into hot tea and you briefly scald small amounts of
+it. Whether anyone can taste the difference is where the argument lives.</p>
+</div>
+</div>
+<div class="callout callout-blue icon-tip">
+<p>if you are serving several people from one pot, milk-in-first makes
+it very hard to judge strength. Pour the tea, then let people add their own.</p>
+</div>
+
+</div>
+
+<div class="slide quiz-slide" data-checkpoint="2" data-pick="3"></div>
+
+<div class="slide">
+<div class="slide-label">Prompt Reflection</div>
+<h2>Your house rules</h2>
+<div class="callout callout-purple"><p>You now have the four dials and the troubleshooting map.</p>
+<ul>
+<li>Which of the four dials were you getting wrong before this module?</li>
+<li>Write the one-line rule you will use for your everyday tea from now on.</li>
+<li>Milk-in-first or milk-in-after — pick a side and give your actual reason.</li>
+</ul>
+</div>
+</div>
+
+<a href="#" id="app-link">Field Guide</a>
+<a href="../index.html" id="index-link">⌂ Tea — A Field Guide</a>
+<div id="nav">
+  <span id="counter">1 / 10</span>
+  <button class="nav-btn" id="prev">&#8249;</button>
+  <button class="nav-btn" id="next">&#8250;</button>
+</div>
+<div id="progress"></div>
+<div id="hint">← → to navigate · F for fullscreen</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  function show(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+  }
+  window.deckShow = show;
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.addEventListener('keydown', e => {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  show(0);</script>
+<script>window.DECK_NAME = "t2-brewing";</script>
+<script>window.DECK_OBJECTIVES = [
+  "Set a sensible leaf-to-water ratio and adjust it for strength without over-steeping",
+  "Match water temperature to the tea type and explain what goes wrong at the extremes",
+  "Diagnose a bitter, weak or stewed cup from its symptoms and name the fix",
+  "Summarise the milk-in-first argument on both its etiquette and its chemistry"
+];</script>
+<script>window.DECK_ASSESSMENTS = [
+  {
+    "type": "practical",
+    "title": "Brew the same tea three ways",
+    "desc": "Take one black tea. Brew cup A at 2 minutes, cup B at 4 minutes, cup C at 8 minutes, everything else held constant. Taste them in order. Find the point where \"strong\" tips into \"bitter and drying\".\n",
+    "criteria": [
+      "You changed only the steep time between the three cups",
+      "You can describe the flavour shift from cup A to cup C in your own words",
+      "You identified your personal preferred steep time and can say why"
+    ]
+  },
+  {
+    "type": "reflect",
+    "title": "Your house rules",
+    "desc": "Write the tea instructions you would leave for a guest staying in your home — ratio, temperature, time, and what to do about milk. Keep it under 60 words.\n"
+  }
+];</script>
+<script>window.DECK_QUESTIONS = [
+  {
+    "checkpoint": 1,
+    "type": "mcq",
+    "q": "A rough starting ratio for loose-leaf tea is:",
+    "options": [
+      "One teaspoon per litre",
+      "One teaspoon (about 2–3 g) per 200 ml cup",
+      "One tablespoon per cup",
+      "It does not matter — steep time controls strength"
+    ],
+    "correct": 1,
+    "explanation": "About 2–3 g of leaf per 200 ml. Steep time fine-tunes it, but a wildly wrong ratio can't be rescued by timing."
+  },
+  {
+    "checkpoint": 1,
+    "type": "mcq",
+    "q": "You pour water straight off a rolling boil onto a delicate green tea. What is the most likely result?",
+    "options": [
+      "A brighter, more aromatic cup",
+      "A bitter, dull, slightly stewed-vegetable taste",
+      "No difference — green tea is robust",
+      "The leaves fail to open"
+    ],
+    "correct": 1,
+    "explanation": "Too-hot water scorches green tea, pulling out harsh catechins and driving off the delicate top notes. Aim for roughly 70–80 °C."
+  },
+  {
+    "checkpoint": 1,
+    "type": "mcq",
+    "q": "Leaving the bag or leaves in the cup while you drink mostly affects:",
+    "options": [
+      "Temperature",
+      "Astringency and bitterness",
+      "Caffeine only",
+      "Nothing"
+    ],
+    "correct": 1,
+    "explanation": "The longer the leaf sits, the more tannins release, so the cup gets progressively more drying and bitter. Take the leaf out on time."
+  },
+  {
+    "checkpoint": 2,
+    "type": "mcq",
+    "q": "Your tea tastes weak and watery despite a long steep. The most likely cause is:",
+    "options": [
+      "The water was too hot",
+      "Too little leaf, or water that is too soft or not hot enough",
+      "You steeped it for too long",
+      "The milk went in first"
+    ],
+    "correct": 1,
+    "explanation": "Weakness is an input problem: more leaf, hotter water (for black tea), or better water. A longer steep on too little leaf just makes it weak AND bitter."
+  },
+  {
+    "checkpoint": 2,
+    "type": "mcq",
+    "q": "The traditional argument for putting milk in the cup FIRST was originally about:",
+    "options": [
+      "Flavour — it tastes better",
+      "Protecting fine porcelain from thermal shock",
+      "Getting the ratio right by eye",
+      "Cooling the tea faster"
+    ],
+    "correct": 1,
+    "explanation": "Cheaper cups could crack when hot tea hit them; milk first cushioned the shock. It later became a class signal — and, separately, there is a real chemistry argument about how hot milk denatures."
+  },
+  {
+    "checkpoint": 2,
+    "type": "self",
+    "q": "A friend's tea always comes out bitter. You watch them make it. Describe the three things you would check, in order, and the fix for each.",
+    "model": "1. Steep time — are they leaving the bag in? Fix: remove it at 3–4 minutes. 2. Water temperature for the tea type — boiling water on green tea? Fix: let it cool to ~75 °C. 3. Ratio — are they using two bags 'to be safe'? Fix: one bag, and adjust time not quantity. Bitterness is almost always over-extraction, not 'strong tea'."
+  }
+];</script>
+<script src="../../deck-extras.js"></script>
+</body>
+</html>

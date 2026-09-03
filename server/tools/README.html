@@ -89,6 +89,11 @@
     <thead><tr><th scope="col">Script</th><th scope="col">What it does</th><th scope="col">Needs</th></tr></thead>
     <tbody>
       <tr>
+        <th scope="row"><code>build-deck.mjs</code></th>
+        <td>Compiles a deck from Markdown (<code>decks/&lt;slug&gt;.md</code> → <code>&lt;slug&gt;.html</code>). Format: <a href="../../docs/authoring.md"><code>docs/authoring.md</code></a>.</td>
+        <td>markdown-it, js-yaml</td>
+      </tr>
+      <tr>
         <th scope="row"><code>build-outline.mjs</code></th>
         <td><code>outline.md</code> → the generated regions of <code>index.html</code> (header, About, Outcomes, the track sections, Dependencies, <code>var MODULE_LOS</code>).</td>
         <td>—</td>
@@ -107,6 +112,25 @@
   </table>
   </div>
   <p><code>npm run build</code> runs <code>build:outline</code> then <code>build:accessible</code> — the usual one command after any change to <code>outline.md</code> or a deck.</p>
+</section>
+
+<section id="build-deck" aria-labelledby="build-deck-h">
+  <h2 id="build-deck-h">build-deck.mjs</h2>
+  <pre><code>npm run build:deck decks/c6-testing.md          # -> c6-testing.html at repo root
+npm run build:deck examples/tea/decks/*.md       # a whole example course</code></pre>
+  <p>A deck is YAML frontmatter (title, code, slug, objectives, assessments, quiz)
+    plus a body where every <code>## Heading</code> is a slide. Callouts, code
+    blocks, tables, two-column layouts, AI-prompt blocks and quiz placeholders all
+    have Markdown syntax — see <a href="../../docs/authoring.md"><code>docs/authoring.md</code></a>.
+    The compiled deck loads the shared <code>deck-extras.js</code> engine, so it
+    gets quizzes, panels, accessibility and mobile support with no per-deck code.</p>
+  <div class="note">
+    <p>Worked example: <a href="../../examples/tea/"><code>examples/tea/</code></a> —
+      a two-deck field guide to tea, about 160 lines of Markdown per deck. It is
+      not part of the course; it exists to demonstrate the format.</p>
+  </div>
+  <p>For a main-course deck, then add it to <code>outline.md</code> and run
+    <code>npm run build</code>.</p>
 </section>
 
 <section id="build-outline" aria-labelledby="build-outline-h">
