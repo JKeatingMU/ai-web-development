@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course build tooling — Learning Web Development by Building with AI</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#4a4a4a; --rule:#d0d0d0; --accent:#0b5fa5; --code-bg:#f4f4f4; --card-bg:#f7f7f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --text:#e8e8e8; --muted:#b3b3b3; --rule:#3a3f47; --accent:#6fb3ff; --code-bg:#1e222a; --card-bg:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.7; }
+  .wrap { max-width:46rem; margin:0 auto; padding:2rem 1.25rem 5rem; }
+  a { color:var(--accent); }
+  a:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:0 0 6px 0; z-index:10; }
+  .skip:focus { left:0; }
+  header.doc { border-bottom:2px solid var(--rule); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 .4rem; }
+  .kicker { font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .6rem; }
+  .lede { font-size:1.05rem; color:var(--muted); margin:.75rem 0 0; }
+  .two-layers { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.5rem 0 2rem; }
+  .two-layers .layer { border:1px solid var(--rule); background:var(--card-bg); border-radius:6px; padding:1rem 1.15rem; }
+  .two-layers .layer h2 { border:0; margin:0 0 .35rem; padding:0; font-size:1.05rem; }
+  .two-layers .layer p { margin:.3rem 0 0; font-size:.95rem; color:var(--muted); }
+  .two-layers .layer .tag { display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  @media (max-width:620px) { .two-layers { grid-template-columns:1fr; } }
+  section { margin:2.5rem 0; }
+  h2 { font-size:1.35rem; line-height:1.3; margin:0 0 .5rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+  h3 { font-size:1.05rem; margin:1.5rem 0 .4rem; }
+  p { margin:.8rem 0; }
+  ul, ol { padding-left:1.4rem; } li { margin:.3rem 0; }
+  code { font-family:"SF Mono","Fira Code",Consolas,"Courier New",monospace; }
+  p code, li code, td code { background:var(--code-bg); padding:.1em .35em; border-radius:3px; font-size:.9em; }
+  pre { background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:.9rem 1rem;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; font-size:.88rem; line-height:1.55; }
+  pre code { background:none; padding:0; }
+  .table-scroll { overflow-x:auto; margin:1rem 0; }
+  table { border-collapse:collapse; width:100%; min-width:34rem; font-size:.92rem; }
+  th, td { border:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card-bg); }
+  td code { white-space:nowrap; }
+  .note { background:var(--card-bg); border:1px solid var(--rule); border-left:4px solid var(--accent);
+    padding:.8rem 1.05rem; border-radius:4px; margin:1.1rem 0; font-size:.95rem; }
+  .note p { margin:.35rem 0; } .note p:first-child { margin-top:0; } .note p:last-child { margin-bottom:0; }
+  footer.doc { margin-top:3rem; padding-top:1.25rem; border-top:2px solid var(--rule); font-size:.9rem; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="doc">
+  <p class="kicker">Repository documentation</p>
+  <h1>Course build tooling</h1>
+  <p class="lede">This repository holds two things. This page documents the second one.</p>
+</header>
+
+<div class="two-layers">
+  <div class="layer">
+    <span class="tag">1 — The course</span>
+    <h2>Learning Web Development by Building with AI</h2>
+    <p>27 standalone interactive HTML decks, a shared runtime engine
+      (<code>deck-extras.js</code> / <code>.css</code>), a Reading List API demo, and an
+      accessible text version of every deck. Live at
+      <a href="../../index.html">the course home</a>. This is the deliverable.</p>
+  </div>
+  <div class="layer">
+    <span class="tag">2 — The toolkit</span>
+    <h2>How the course is authored and built</h2>
+    <p><code>outline.md</code> as the course-structure source, a <code>/course-deck</code>
+      skill to scaffold decks, and the scripts below that generate <code>index.html</code>'s
+      learning tree, the accessible pages, and (optionally) narration audio. Built
+      <em>with</em> AI, deliberately.</p>
+  </div>
+</div>
+
+<main id="main">
+
+<section id="setup" aria-labelledby="setup-h">
+  <h2 id="setup-h">Setup</h2>
+  <p>All scripts run from the repository root.</p>
+  <pre><code>npm install          # one-time: pulls node-html-parser (+ optional AI SDKs)</code></pre>
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th scope="col">Script</th><th scope="col">What it does</th><th scope="col">Needs</th></tr></thead>
+    <tbody>
+      <tr>
+        <th scope="row"><code>build-outline.mjs</code></th>
+        <td><code>outline.md</code> → the generated regions of <code>index.html</code> (header, About, Outcomes, the track sections, Dependencies, <code>var MODULE_LOS</code>).</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <th scope="row"><code>build-accessible.mjs</code></th>
+        <td>Generates the accessible text version of every deck (<code>accessible/&lt;deck&gt;.html</code>) and the accessible course-home page, and rewrites the <code>ACCESSIBLE_VERSIONS</code> manifest in <code>index.html</code>.</td>
+        <td>node-html-parser</td>
+      </tr>
+      <tr>
+        <th scope="row"><code>generate-deck-scripts.mjs</code></th>
+        <td>Generates per-slide narration scripts, and optionally TTS audio, for a deck.</td>
+        <td><code>ANTHROPIC_API_KEY</code> or <code>OPENAI_API_KEY</code>; <code>--audio</code> needs <code>OPENAI_API_KEY</code></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p><code>npm run build</code> runs <code>build:outline</code> then <code>build:accessible</code> — the usual one command after any change to <code>outline.md</code> or a deck.</p>
+</section>
+
+<section id="build-outline" aria-labelledby="build-outline-h">
+  <h2 id="build-outline-h">build-outline.mjs</h2>
+  <pre><code>npm run build:outline            # regenerate index.html from outline.md
+npm run build:outline:check      # report drift, write nothing (exit 1 if stale)</code></pre>
+  <p><code>outline.md</code> is the single source for the course structure — course
+    title/tagline, the philosophy blurb, the 8 course outcomes, track dependencies,
+    and per module: code, title, one-line card description, status, and learning
+    objectives.</p>
+  <p>Format (see <a href="../../outline.md"><code>outline.md</code></a> itself for the full example):</p>
+  <pre><code>---
+title: Learning Web Development
+title_accent: by Building with AI
+subtitle: ...
+tagline: ...
+---
+
+## About
+Free prose — becomes the philosophy block.
+
+## Outcomes
+1. First course outcome ...
+
+## Dependencies
+- **A — Foundations** → **B — Backend API** and **C — Frontend** → **D — Fullstack**
+
+## Track A — Foundations   {color=#3fb950}
+One-line track description.
+&gt; An optional track note.
+
+### A1 — How the Web Works   {file=web-fundamentals-workshop}
+One-line card description.
+
+- Learning objective 1
+- Learning objective 2
+
+### B7 — Deployment   {planned}
+Description of a not-yet-built deck (no {file=…}).</code></pre>
+  <p><code>index.html</code> carries <code>&lt;!-- BUILD:… --&gt;</code> /
+    <code>&lt;!-- /BUILD:… --&gt;</code> markers; the script replaces only what is
+    between them. Everything else in <code>index.html</code> (styles, the "how these
+    decks work" section, the legend, all the JS) is hand-maintained.</p>
+</section>
+
+<section id="build-accessible" aria-labelledby="build-accessible-h">
+  <h2 id="build-accessible-h">build-accessible.mjs</h2>
+  <pre><code>npm run build:accessible                       # all decks + course home + manifest
+node server/tools/build-accessible.mjs rest-workshop   # one deck
+node server/tools/build-accessible.mjs --home          # just accessible/index.html</code></pre>
+  <p>It parses each <code>*-workshop.html</code> (and <code>start-here.html</code>),
+    walks the <code>.slide</code> elements, and maps the deck's components to
+    semantic HTML:</p>
+  <ul>
+    <li>headings → section <code>&lt;h2&gt;</code> / <code>&lt;h3&gt;</code></li>
+    <li><code>.callout</code> (+ <code>icon-key</code> / <code>icon-gotcha</code> / <code>icon-tip</code> / <code>icon-hands-on</code>) → labelled <code>&lt;aside class="note"&gt;</code></li>
+    <li><code>.terminal</code> / <code>.diagram</code> / <code>.filetree</code> / monospace blocks → <code>&lt;figure&gt;&lt;pre&gt;&lt;code&gt;</code></li>
+    <li><code>.prompt-block</code> → <code>&lt;blockquote class="prompt"&gt;</code></li>
+    <li><code>table</code> → scroll-wrapped table with <code>&lt;th scope&gt;</code></li>
+    <li><code>.annot-list</code> → <code>&lt;ul&gt;</code> (or <code>&lt;ol&gt;</code> when it uses number badges)</li>
+    <li><code>.n8n-flow</code> → one-line workflow description</li>
+    <li><code>&lt;svg&gt;</code> → <code>&lt;figure&gt;</code> describing its text labels</li>
+    <li><code>.slide-label</code>, <code>.badge</code>, <code>.pill</code>, decorative chips → dropped</li>
+    <li>narration from <code>&lt;deck&gt;.scripts.js</code> (when present) → leading <code>&lt;p class="narration"&gt;</code></li>
+    <li><code>window.DECK_OBJECTIVES</code> → "What you'll be able to do" list</li>
+    <li><code>window.DECK_ASSESSMENTS</code> → "Practical work" section</li>
+  </ul>
+  <p>Output is JS-free, honours browser zoom, works with screen readers, and follows
+    <code>prefers-color-scheme</code>.</p>
+  <div class="note">
+    <p><strong>When a deck's content or structure changes, rerun
+      <code>npm run build:accessible</code>.</strong> Publishing a hand-authored
+      accessible page instead is fine — just keep it in <code>accessible/</code> and add
+      it to <code>ACCESSIBLE_VERSIONS</code> in <code>index.html</code>.</p>
+  </div>
+  <h3>Limitations</h3>
+  <ul>
+    <li>A handful of decks still emit a stray one- or two-word <code>&lt;p&gt;</code>
+      from a bold sub-label inside a comparison grid. Cosmetic; the content is complete.</li>
+    <li>Purely visual diagrams with no text labels are dropped. Add a
+      <code>&lt;figcaption&gt;</code> or a describing paragraph in the source deck if
+      the diagram carries meaning.</li>
+  </ul>
+</section>
+
+<section id="generate-deck-scripts" aria-labelledby="gen-h">
+  <h2 id="gen-h">generate-deck-scripts.mjs</h2>
+  <pre><code>export OPENAI_API_KEY=...          # or ANTHROPIC_API_KEY for scripts only
+node server/tools/generate-deck-scripts.mjs web-fundamentals-workshop.html --audio --voice nova</code></pre>
+  <p>Writes <code>&lt;deck&gt;.scripts.js</code> (<code>window.DECK_SCRIPTS</code>) and,
+    with <code>--audio</code>, <code>audio/&lt;deck&gt;/slide-N.mp3</code>. This repo commits
+    the audio so the demo plays out of the box. ~$0.12/deck for <code>tts-1</code>.</p>
+  <p>Currently only <em>A1 — How the Web Works</em> has narration.</p>
+</section>
+
+<section id="skill" aria-labelledby="skill-h">
+  <h2 id="skill-h">The /course-deck skill</h2>
+  <p>Lives in <code>.claude/skills/course-deck/SKILL.md</code>. It scaffolds a new
+    course deck to the shared engine's conventions (2 quiz checkpoints, a
+    prompt-reflection slide, the standard font sizes, no colour-only meaning),
+    adds the module to <code>outline.md</code>, and points you at
+    <code>npm run build</code>. The engine (<code>deck-extras.js</code>) owns all the
+    accessibility, mobile, and credit chrome — a new deck's HTML contains none of it.</p>
+</section>
+
+</main>
+
+<footer class="doc">
+  <p><a href="../../index.html">← Course home</a> &nbsp;·&nbsp; Learning Web Development by Building with AI &nbsp;·&nbsp; Built with AI Assistance · Maynooth University &nbsp;·&nbsp; CC BY 4.0</p>
+</footer>
+
+</div>
+</body>
+</html>
